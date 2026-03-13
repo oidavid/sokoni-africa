@@ -6,6 +6,13 @@ import { supabase } from '@/lib/supabase'
 
 type Method = 'email' | 'whatsapp'
 
+function normalizePhone(number: string) {
+  const digits = number.replace(/\D/g, '')
+  if (digits.startsWith('0')) return '234' + digits.slice(1)
+  if (digits.startsWith('234')) return digits
+  return '234' + digits
+}
+
 export default function LoginPage() {
   const [method, setMethod] = useState<Method>('email')
   const [email, setEmail] = useState('')
@@ -16,48 +23,73 @@ export default function LoginPage() {
 
   async function handleLogin() {
     setError('')
+    setLoading(true)
+
     if (method === 'email') {
-      if (!email.trim()) { setError('Please enter your email'); return }
-      setLoading(true)
+      if (!email.trim()) { setError('Please enter your email'); setLoading(false); return }
       const { error: authError } = await supabase.auth.signInWithOtp({
         email,
         options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
       })
-      if (authError) { setError(authError.message); setLoading(false); return }
-    } else {
-      if (!phone.trim()) { setError('Please enter your WhatsApp number'); return }
-      setLoading(true)
-      // Look up merchant by phone, then send magic link to their email
-      const digits = phone.replace(/\D/g, '')
-      const normalized = digits.startsWith('0') ? '234' + digits.slice(1) : digits.startsWith('234') ? digits : '234' + digits
-      const { data: merchant } = await supabase
-        .from('merchants')
-        .select('email')
-        .eq('whatsapp_number', normalized)
-        .single()
+      if (authError) {
+        if (authError.message.toLowerCase().includes('rate')) {
+          setError('Too many emails sent. Please wait 1 hour or use WhatsApp login instead.')
+        } else {
+          setError(authError.message)
+        }
+        setLoading(false)
+        return
+      }
+      setSent(true)
 
-      if (!merchant?.email) {
-        setError('No store found with that WhatsApp number')
+    } else {
+      if (!phone.trim()) { setError('Please enter your WhatsApp number'); setLoading(false); return }
+
+      const normalized = normalizePhone(phone)
+      // Try multiple formats to find the merchant
+      const { data: merchants } = await supabase
+        .from('merchants')
+        .select('email, business_name, slug, whatsapp_number')
+        .or(`whatsapp_number.eq.${normalized},phone.eq.${normalized}`)
+
+      let merchant = merchants?.[0]
+
+      // If not found, try with leading zero variant
+      if (!merchant) {
+        const alt = '0' + normalized.slice(3) // convert 2348... back to 08...
+        const { data: merchants2 } = await supabase
+          .from('merchants')
+          .select('email, business_name, slug, whatsapp_number')
+          .or(`whatsapp_number.eq.${alt},phone.eq.${alt}`)
+        merchant = merchants2?.[0]
+      }
+
+      if (!merchant) {
+        setError('No store found with that WhatsApp number. Try using your email instead.')
         setLoading(false)
         return
       }
 
-      const loginLink = `${window.location.origin}/auth/callback`
+      // Send magic link to their email
       const { error: authError } = await supabase.auth.signInWithOtp({
         email: merchant.email,
-        options: { emailRedirectTo: loginLink }
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
       })
 
-      // Also send WhatsApp message with the link
-      const waMessage = encodeURIComponent(
-        `Hi! Here is your Sokoni login link:\n\n${loginLink}\n\nClick it to access your store dashboard. It expires in 24 hours.`
-      )
-      window.open(`https://wa.me/${normalized}?text=${waMessage}`, '_blank')
+      // Always send WhatsApp message with login link regardless of email status
+      const loginUrl = `${window.location.origin}/auth/callback`
+      const msg = `Hi! Here is your Sokoni login link for *${merchant.business_name}*:\n\n${window.location.origin}/login\n\nYour store: sokoni.africa/${merchant.slug}\n\nLogin with your email: ${merchant.email}`
+      window.open(`https://wa.me/${normalized}?text=${encodeURIComponent(msg)}`, '_blank')
 
-      if (authError) { setError(authError.message); setLoading(false); return }
+      if (authError && !authError.message.toLowerCase().includes('rate')) {
+        setError(authError.message)
+        setLoading(false)
+        return
+      }
+
+      setSent(true)
     }
 
-    setSent(true)
     setLoading(false)
   }
 
@@ -107,17 +139,24 @@ export default function LoginPage() {
                   className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 
                              text-brand-dark font-semibold outline-none transition-colors mb-3" />
               ) : (
-                <div className="relative mb-3">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">🇳🇬 +234</span>
-                  <input type="tel" placeholder="08012345678" value={phone}
-                    onChange={e => { setPhone(e.target.value); setError('') }}
-                    onKeyDown={e => e.key === 'Enter' && handleLogin()} autoFocus
-                    className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl pl-24 pr-4 py-4 
-                               text-brand-dark font-semibold outline-none transition-colors" />
+                <div className="mb-3">
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">🇳🇬 +234</span>
+                    <input type="tel" placeholder="08012345678" value={phone}
+                      onChange={e => { setPhone(e.target.value); setError('') }}
+                      onKeyDown={e => e.key === 'Enter' && handleLogin()} autoFocus
+                      className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl pl-24 pr-4 py-4 
+                                 text-brand-dark font-semibold outline-none transition-colors" />
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2">Enter the WhatsApp number you used when creating your store</p>
                 </div>
               )}
 
-              {error && <p className="text-red-500 text-xs mb-3">{error}</p>}
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-3">
+                  <p className="text-red-600 text-xs">{error}</p>
+                </div>
+              )}
 
               <button onClick={handleLogin} disabled={loading}
                 className={`w-full text-white font-bold py-4 rounded-2xl transition-colors disabled:opacity-50 
@@ -143,15 +182,16 @@ export default function LoginPage() {
               <h2 className="font-display text-2xl font-bold text-brand-dark mb-2">
                 {method === 'email' ? 'Check your email! 📬' : 'Check your WhatsApp! 💬'}
               </h2>
-              <p className="text-gray-500 text-sm mb-2">We sent your login link to:</p>
+              <p className="text-gray-500 text-sm mb-2">Your login link was sent to:</p>
               <p className="font-bold text-brand-dark mb-6">{method === 'email' ? email : `+234 ${phone}`}</p>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-400 mb-6">
                 {method === 'email'
-                  ? "Click the link in the email to access your dashboard. Check your spam if you don't see it."
-                  : "Click the link in your WhatsApp message to access your dashboard."}
+                  ? "Click the link in the email to open your dashboard. Check spam if you don't see it."
+                  : "A WhatsApp message just opened — send it to yourself to receive your login link."}
               </p>
-              <button onClick={() => setSent(false)} className="mt-6 text-sm text-brand-green font-semibold">
-                ← Try a different {method === 'email' ? 'email' : 'number'}
+              <button onClick={() => { setSent(false); setError('') }}
+                className="text-sm text-brand-green font-semibold">
+                ← Try again
               </button>
             </div>
           )}
