@@ -78,7 +78,7 @@ export default function LoginPage() {
 
       // Always send WhatsApp message with login link regardless of email status
       const loginUrl = `${window.location.origin}/auth/callback`
-      const msg = `Hi! Here is your Sokoni login link for *${merchant.business_name}*:\n\n${window.location.origin}/login\n\nYour store: sokoni.africa/${merchant.slug}\n\nLogin with your email: ${merchant.email}`
+      const msg = `Hi! Here is your Sokoni login link for *${merchant.business_name}*:\n\n${window.location.origin}/login\n\nYour store: sokoni.africa/${merchant.slug}\n\n${merchant.email ? 'Login with your email: ' + merchant.email : 'Use the email you registered with to login'}`
       window.open(`https://wa.me/${normalized}?text=${encodeURIComponent(msg)}`, '_blank')
 
       if (authError && !authError.message.toLowerCase().includes('rate')) {
