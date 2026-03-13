@@ -58,6 +58,7 @@ export default function OnboardingPage() {
   const [storeSlug, setStoreSlug] = useState('')
   const [error, setError] = useState('')
   const [loginSent, setLoginSent] = useState<'email' | 'whatsapp' | null>(null)
+  const [alreadyExists, setAlreadyExists] = useState(false)
 
   const pid = lang === 'pid'
 
@@ -90,19 +91,36 @@ export default function OnboardingPage() {
       setGenStep(i + 1)
     }
 
+    // Check if email or phone already has a store
+    const normalized = normalizeWhatsApp(whatsappNumber)
+    const { data: existing } = await supabase
+      .from('merchants')
+      .select('slug, email, phone')
+      .or(`email.eq.${email},phone.eq.${normalized}`)
+      .single()
+
+    if (existing) {
+      // Already has a store — skip to done with existing slug
+      setStoreSlug(existing.slug)
+      setAlreadyExists(true)
+      setStep('done')
+      return
+    }
+
     try {
-      await supabase.from('merchants').insert({
+      const { error: insertError } = await supabase.from('merchants').insert({
         business_name: businessName,
         slug,
         category,
         location,
-        whatsapp_number: normalizeWhatsApp(whatsappNumber),
+        whatsapp_number: normalized,
         email,
-        phone: normalizeWhatsApp(whatsappNumber),
+        phone: normalized,
         language: lang,
         plan: 'free',
         is_active: true,
       })
+      if (insertError) console.error('Insert error:', insertError)
     } catch (e) {
       console.error('Save error:', e)
     }
@@ -315,11 +333,20 @@ export default function OnboardingPage() {
           {/* Done */}
           {step === 'done' && (
             <div className="animate-fade-in text-center">
-              <div className="w-20 h-20 bg-brand-green rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-brand-green/30">
+              <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg ${alreadyExists ? 'bg-brand-accent shadow-brand-accent/30' : 'bg-brand-green shadow-brand-green/30'}`}>
                 <Check size={36} className="text-white" />
               </div>
+              {alreadyExists && (
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-5 text-left">
+                  <p className="font-semibold text-amber-800 text-sm mb-1">⚠️ {pid ? 'You don already get shop!' : 'You already have a store!'}</p>
+                  <p className="text-amber-700 text-xs">{pid ? 'This email or WhatsApp number don already use to create shop. We go take you to your existing shop.' : 'This email or WhatsApp number is already linked to a store. We're showing your existing store below.'}</p>
+                </div>
+              )}
               <h2 className="font-display text-2xl font-bold text-brand-dark mb-2">
-                {pid ? 'Your shop don go live! 🎉' : 'Your store is live! 🎉'}
+                {alreadyExists
+                  ? (pid ? 'Your shop dey here! 👋' : 'Welcome back! 👋')
+                  : (pid ? 'Your shop don go live! 🎉' : 'Your store is live! 🎉')
+                }
               </h2>
 
               <div className="bg-brand-light border-2 border-brand-green/20 rounded-2xl p-4 mb-6">
