@@ -4,7 +4,7 @@ import { ArrowRight, ArrowLeft, Loader2, Check, ShoppingBag } from 'lucide-react
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
-type Step = 'language' | 'business' | 'whatsapp' | 'category' | 'location' | 'generating' | 'done'
+type Step = 'language' | 'business' | 'whatsapp' | 'email' | 'category' | 'location' | 'generating' | 'done'
 
 const CATEGORIES = [
   { id: 'fashion', label: 'Fashion & Clothing', emoji: '👗', pidgin: 'Cloth & Fashion' },
@@ -27,12 +27,14 @@ const TEXT = {
   en: {
     welcome: "Let's build your store",
     welcomeSub: "Answer a few quick questions. Your store will be live in minutes.",
-    langQ: "What language do you prefer?",
     bizQ: "What is your business name?",
     bizPlaceholder: "e.g. Tropical Market",
-    whatsappQ: "What is your WhatsApp business number?",
+    whatsappQ: "Your WhatsApp business number?",
     whatsappPlaceholder: "e.g. 08012345678",
     whatsappHint: "Customers will send orders to this number",
+    emailQ: "Your email address?",
+    emailPlaceholder: "you@example.com",
+    emailHint: "We'll send your store login link here",
     catQ: "What do you sell?",
     locQ: "Where is your business located?",
     generating: "Building your store...",
@@ -40,27 +42,27 @@ const TEXT = {
       "Creating your store design...",
       "Setting up your product catalogue...",
       "Configuring your WhatsApp order button...",
-      "Adding your business details...",
+      "Sending your login details...",
       "Almost ready...",
     ],
     doneTitle: "Your store is live! 🎉",
-    doneSub: "Share your link and start receiving orders on WhatsApp.",
+    doneSub: "Check your email for your login link.",
     viewStore: "View My Store",
-    addProducts: "Add My Products",
+    addProducts: "Go to Dashboard",
     next: "Continue",
     back: "Back",
-    bizNameError: "Please enter your business name",
-    whatsappError: "Please enter your WhatsApp number",
   },
   pid: {
     welcome: "Make we build your shop",
     welcomeSub: "Answer small questions. Your shop go dey live for minutes.",
-    langQ: "Which language you prefer?",
     bizQ: "Wetin be your business name?",
     bizPlaceholder: "e.g. Tropical Market",
-    whatsappQ: "Wetin be your WhatsApp business number?",
+    whatsappQ: "Your WhatsApp business number?",
     whatsappPlaceholder: "e.g. 08012345678",
     whatsappHint: "Customers go send orders to this number",
+    emailQ: "Your email address?",
+    emailPlaceholder: "you@example.com",
+    emailHint: "We go send your store login link to this email",
     catQ: "Wetin you dey sell?",
     locQ: "Where your business dey?",
     generating: "We dey build your shop...",
@@ -68,17 +70,15 @@ const TEXT = {
       "We dey create your shop design...",
       "We dey set up your product catalogue...",
       "We dey configure your WhatsApp order button...",
-      "We dey add your business details...",
+      "We dey send your login details...",
       "E almost ready...",
     ],
     doneTitle: "Your shop don go live! 🎉",
-    doneSub: "Share your link and start receive orders on WhatsApp.",
+    doneSub: "Check your email for your login link.",
     viewStore: "See My Shop",
-    addProducts: "Add My Products",
+    addProducts: "Go to Dashboard",
     next: "Continue",
     back: "Go Back",
-    bizNameError: "Abeg enter your business name",
-    whatsappError: "Abeg enter your WhatsApp number",
   }
 }
 
@@ -110,6 +110,7 @@ export default function OnboardingPage() {
   const [step, setStep] = useState<Step>('language')
   const [businessName, setBusinessName] = useState('')
   const [whatsappNumber, setWhatsappNumber] = useState('')
+  const [email, setEmail] = useState('')
   const [category, setCategory] = useState('')
   const [location, setLocation] = useState('')
   const [genStep, setGenStep] = useState(0)
@@ -117,8 +118,8 @@ export default function OnboardingPage() {
   const [error, setError] = useState('')
 
   const t = TEXT[lang]
-  const stepMap: Record<Step, number> = { language: 0, business: 1, whatsapp: 2, category: 3, location: 4, generating: 5, done: 5 }
-  const totalSteps = 5
+  const stepMap: Record<Step, number> = { language: 0, business: 1, whatsapp: 2, email: 3, category: 4, location: 5, generating: 6, done: 6 }
+  const totalSteps = 6
 
   async function handleGenerate() {
     setStep('generating')
@@ -127,28 +128,38 @@ export default function OnboardingPage() {
     const slug = slugify(businessName) + '-' + Math.random().toString(36).slice(2, 6)
     setStoreSlug(slug)
 
-    // Animate steps
     for (let i = 0; i < t.generatingSteps.length; i++) {
       await new Promise(r => setTimeout(r, 700))
       setGenStep(i + 1)
     }
 
-    // Save to Supabase
     try {
-      const { error: dbError } = await supabase.from('merchants').insert({
+      // Sign up / send magic link via Supabase Auth
+      await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: { business_name: businessName, slug }
+        }
+      })
+
+      // Save merchant record
+      const { data: { user } } = await supabase.auth.getUser()
+      await supabase.from('merchants').insert({
         business_name: businessName,
         slug,
         category,
         location,
         whatsapp_number: normalizeWhatsApp(whatsappNumber),
-        language: lang,
+        email,
         phone: normalizeWhatsApp(whatsappNumber),
+        language: lang,
         plan: 'free',
         is_active: true,
+        ...(user ? { id: user.id } : {})
       })
-      if (dbError) console.error('Supabase error:', dbError)
     } catch (e) {
-      console.error('Save error:', e)
+      console.error('Setup error:', e)
     }
 
     setStep('done')
@@ -157,10 +168,13 @@ export default function OnboardingPage() {
   function handleNext() {
     setError('')
     if (step === 'business') {
-      if (!businessName.trim()) { setError(t.bizNameError); return }
+      if (!businessName.trim()) { setError(lang === 'pid' ? 'Abeg enter your business name' : 'Please enter your business name'); return }
       setStep('whatsapp')
     } else if (step === 'whatsapp') {
-      if (!whatsappNumber.trim()) { setError(t.whatsappError); return }
+      if (!whatsappNumber.trim()) { setError(lang === 'pid' ? 'Abeg enter your WhatsApp number' : 'Please enter your WhatsApp number'); return }
+      setStep('email')
+    } else if (step === 'email') {
+      if (!email.trim() || !email.includes('@')) { setError(lang === 'pid' ? 'Abeg enter valid email' : 'Please enter a valid email'); return }
       setStep('category')
     } else if (step === 'category') {
       setStep('location')
@@ -169,9 +183,10 @@ export default function OnboardingPage() {
     }
   }
 
+  const prevStep: Record<string, Step> = { business: 'language', whatsapp: 'business', email: 'whatsapp', category: 'email', location: 'category' }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-brand-light to-white flex flex-col">
-      {/* Nav */}
       <nav className="px-4 h-14 flex items-center">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-7 h-7 bg-brand-green rounded-lg flex items-center justify-center">
@@ -187,7 +202,7 @@ export default function OnboardingPage() {
             <StepIndicator current={stepMap[step] - 1} total={totalSteps} />
           )}
 
-          {/* STEP: Language */}
+          {/* Language */}
           {step === 'language' && (
             <div className="text-center animate-fade-in">
               <div className="w-16 h-16 bg-brand-green rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-brand-green/20">
@@ -214,55 +229,54 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* STEP: Business Name */}
+          {/* Business Name */}
           {step === 'business' && (
             <div className="animate-fade-in">
               <h2 className="font-display text-xl font-bold text-brand-dark mb-1">{t.bizQ}</h2>
-              <p className="text-gray-500 text-sm mb-6">
-                {lang === 'pid' ? 'This go be the name wey customers go see.' : 'This is what customers will see on your store.'}
-              </p>
-              <input
-                type="text"
-                placeholder={t.bizPlaceholder}
-                value={businessName}
+              <p className="text-gray-500 text-sm mb-6">{lang === 'pid' ? 'This go be the name wey customers go see.' : 'This is what customers will see on your store.'}</p>
+              <input type="text" placeholder={t.bizPlaceholder} value={businessName}
                 onChange={e => { setBusinessName(e.target.value); setError('') }}
-                onKeyDown={e => e.key === 'Enter' && handleNext()}
-                autoFocus
+                onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
                 className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 
-                           text-brand-dark font-display font-bold text-lg outline-none transition-colors"
-              />
+                           text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
             </div>
           )}
 
-          {/* STEP: WhatsApp Number */}
+          {/* WhatsApp */}
           {step === 'whatsapp' && (
             <div className="animate-fade-in">
               <h2 className="font-display text-xl font-bold text-brand-dark mb-1">{t.whatsappQ}</h2>
               <p className="text-gray-500 text-sm mb-6">{t.whatsappHint}</p>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">🇳🇬 +234</span>
-                <input
-                  type="tel"
-                  placeholder={t.whatsappPlaceholder}
-                  value={whatsappNumber}
+                <input type="tel" placeholder={t.whatsappPlaceholder} value={whatsappNumber}
                   onChange={e => { setWhatsappNumber(e.target.value); setError('') }}
-                  onKeyDown={e => e.key === 'Enter' && handleNext()}
-                  autoFocus
+                  onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
                   className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl pl-24 pr-4 py-4 
-                             text-brand-dark font-display font-bold text-lg outline-none transition-colors"
-                />
+                             text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
               </div>
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
-              <p className="text-xs text-gray-400 mt-3">
-                {lang === 'pid' 
-                  ? '⚠️ Make sure say this number dey active on WhatsApp'
-                  : '⚠️ Make sure this number is active on WhatsApp'}
-              </p>
+              <p className="text-xs text-gray-400 mt-3">⚠️ {lang === 'pid' ? 'Make sure say this number dey active on WhatsApp' : 'Make sure this number is active on WhatsApp'}</p>
             </div>
           )}
 
-          {/* STEP: Category */}
+          {/* Email */}
+          {step === 'email' && (
+            <div className="animate-fade-in">
+              <h2 className="font-display text-xl font-bold text-brand-dark mb-1">{t.emailQ}</h2>
+              <p className="text-gray-500 text-sm mb-6">{t.emailHint}</p>
+              <input type="email" placeholder={t.emailPlaceholder} value={email}
+                onChange={e => { setEmail(e.target.value); setError('') }}
+                onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
+                className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 
+                           text-brand-dark font-semibold text-lg outline-none transition-colors" />
+              {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
+              <p className="text-xs text-gray-400 mt-3">🔒 {lang === 'pid' ? 'We go use this to send you login link — no password needed' : 'We use this to send you a login link — no password needed'}</p>
+            </div>
+          )}
+
+          {/* Category */}
           {step === 'category' && (
             <div className="animate-fade-in">
               <h2 className="font-display text-xl font-bold text-brand-dark mb-6">{t.catQ}</h2>
@@ -270,21 +284,17 @@ export default function OnboardingPage() {
                 {CATEGORIES.map(cat => (
                   <button key={cat.id} onClick={() => setCategory(cat.id)}
                     className={`flex items-center gap-2 p-3 rounded-2xl border-2 text-left transition-all ${
-                      category === cat.id
-                        ? 'border-brand-green bg-brand-light text-brand-green'
-                        : 'border-gray-200 text-gray-600 hover:border-brand-green/50'
+                      category === cat.id ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600 hover:border-brand-green/50'
                     }`}>
                     <span className="text-xl">{cat.emoji}</span>
-                    <span className="text-xs font-semibold leading-tight">
-                      {lang === 'pid' ? cat.pidgin : cat.label}
-                    </span>
+                    <span className="text-xs font-semibold leading-tight">{lang === 'pid' ? cat.pidgin : cat.label}</span>
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* STEP: Location */}
+          {/* Location */}
           {step === 'location' && (
             <div className="animate-fade-in">
               <h2 className="font-display text-xl font-bold text-brand-dark mb-6">{t.locQ}</h2>
@@ -292,9 +302,7 @@ export default function OnboardingPage() {
                 {LOCATIONS.map(loc => (
                   <button key={loc} onClick={() => setLocation(loc)}
                     className={`py-2.5 px-3 rounded-xl border-2 text-xs font-semibold transition-all ${
-                      location === loc
-                        ? 'border-brand-green bg-brand-light text-brand-green'
-                        : 'border-gray-200 text-gray-600 hover:border-brand-green/50'
+                      location === loc ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600 hover:border-brand-green/50'
                     }`}>
                     {loc}
                   </button>
@@ -303,7 +311,7 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* STEP: Generating */}
+          {/* Generating */}
           {step === 'generating' && (
             <div className="animate-fade-in text-center py-8">
               <div className="w-20 h-20 bg-brand-light rounded-full flex items-center justify-center mx-auto mb-6">
@@ -323,53 +331,50 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* STEP: Done */}
+          {/* Done */}
           {step === 'done' && (
             <div className="animate-fade-in text-center">
               <div className="w-20 h-20 bg-brand-green rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-brand-green/30">
                 <Check size={36} className="text-white" />
               </div>
               <h2 className="font-display text-2xl font-bold text-brand-dark mb-2">{t.doneTitle}</h2>
-              <p className="text-gray-500 text-sm mb-6">{t.doneSub}</p>
+              <p className="text-gray-500 text-sm mb-2">{t.doneSub}</p>
+              <p className="font-bold text-brand-dark text-sm mb-6">{email}</p>
+
               <div className="bg-brand-light border-2 border-brand-green/20 rounded-2xl p-4 mb-6">
-                <p className="text-xs text-gray-500 mb-1">
-                  {lang === 'pid' ? "Your shop link:" : "Your store link:"}
-                </p>
+                <p className="text-xs text-gray-500 mb-1">{lang === 'pid' ? "Your shop link:" : "Your store link:"}</p>
                 <p className="font-display font-bold text-brand-green text-sm">sokoni.africa/{storeSlug}</p>
               </div>
+
               <div className="space-y-3">
                 <Link href={`/store/${storeSlug}`}
                   className="block w-full bg-brand-green text-white font-bold py-4 rounded-2xl hover:bg-brand-dark transition-colors">
                   {t.viewStore}
                 </Link>
-                <Link href="/dashboard/products/new"
+                <Link href="/login"
                   className="block w-full bg-white border-2 border-brand-green text-brand-green font-bold py-4 rounded-2xl hover:bg-brand-light transition-colors">
                   {t.addProducts}
                 </Link>
               </div>
+
               <a href={`https://wa.me/?text=Check out my online store: sokoni.africa/${storeSlug}`}
-                target="_blank" rel="noreferrer"
-                className="btn-whatsapp w-full justify-center mt-3">
+                target="_blank" rel="noreferrer" className="btn-whatsapp w-full justify-center mt-3">
                 📲 {lang === 'pid' ? "Share for WhatsApp" : "Share on WhatsApp"}
               </a>
             </div>
           )}
 
-          {/* Navigation buttons */}
+          {/* Nav buttons */}
           {!['language', 'generating', 'done'].includes(step) && (
             <div className="flex gap-3 mt-8">
-              <button onClick={() => {
-                const prev: Record<string, Step> = { business: 'language', whatsapp: 'business', category: 'whatsapp', location: 'category' }
-                setStep(prev[step] as Step)
-              }} className="flex items-center gap-1.5 text-gray-500 hover:text-brand-dark text-sm font-medium px-4 py-3">
+              <button onClick={() => setStep(prevStep[step])}
+                className="flex items-center gap-1.5 text-gray-500 hover:text-brand-dark text-sm font-medium px-4 py-3">
                 <ArrowLeft size={16} /> {t.back}
               </button>
-              <button
-                onClick={handleNext}
+              <button onClick={handleNext}
                 disabled={(step === 'category' && !category) || (step === 'location' && !location)}
-                className="flex-1 bg-brand-green text-white font-bold py-3 rounded-2xl 
-                           hover:bg-brand-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed
-                           flex items-center justify-center gap-2">
+                className="flex-1 bg-brand-green text-white font-bold py-3 rounded-2xl hover:bg-brand-dark 
+                           transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                 {t.next} <ArrowRight size={18} />
               </button>
             </div>
