@@ -1,0 +1,15 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "next build",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
+  "regions": ["lhr1"],
+  "functions": {
+    "src/app/api/whatsapp/webhook/route.ts": {
+      "maxDuration": 10
+    },
+    "src/app/api/ai/describe-product/route.ts": {
+      "maxDuration": 30
+    }
+  }
+}
