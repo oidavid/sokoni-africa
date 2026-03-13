@@ -1,7 +1,8 @@
 'use client'
 import { useState } from 'react'
-import { ArrowRight, ArrowLeft, Loader2, Check, ShoppingBag } from 'lucide-react'
+import { ArrowRight, ArrowLeft, Loader2, Check, ShoppingBag, Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 type Step = 'language' | 'business' | 'whatsapp' | 'email' | 'category' | 'location' | 'generating' | 'done'
@@ -30,25 +31,23 @@ const TEXT = {
     bizQ: "What is your business name?",
     bizPlaceholder: "e.g. Tropical Market",
     whatsappQ: "Your WhatsApp business number?",
-    whatsappPlaceholder: "e.g. 08012345678",
     whatsappHint: "Customers will send orders to this number",
-    emailQ: "Your email address?",
-    emailPlaceholder: "you@example.com",
-    emailHint: "We'll send your store login link here",
+    emailQ: "Your email & password",
+    emailHint: "Use these to log into your dashboard anytime",
     catQ: "What do you sell?",
     locQ: "Where is your business located?",
     generating: "Building your store...",
     generatingSteps: [
       "Creating your store design...",
       "Setting up your product catalogue...",
-      "Configuring your WhatsApp order button...",
-      "Sending your login details...",
+      "Configuring your WhatsApp button...",
+      "Creating your account...",
       "Almost ready...",
     ],
     doneTitle: "Your store is live! 🎉",
-    doneSub: "Check your email for your login link.",
+    doneSub: "Login anytime with your email and password.",
     viewStore: "View My Store",
-    addProducts: "Go to Dashboard",
+    goToDashboard: "Go to Dashboard",
     next: "Continue",
     back: "Back",
   },
@@ -58,25 +57,23 @@ const TEXT = {
     bizQ: "Wetin be your business name?",
     bizPlaceholder: "e.g. Tropical Market",
     whatsappQ: "Your WhatsApp business number?",
-    whatsappPlaceholder: "e.g. 08012345678",
     whatsappHint: "Customers go send orders to this number",
-    emailQ: "Your email address?",
-    emailPlaceholder: "you@example.com",
-    emailHint: "We go send your store login link to this email",
+    emailQ: "Your email & password",
+    emailHint: "Use am to login your dashboard anytime",
     catQ: "Wetin you dey sell?",
     locQ: "Where your business dey?",
     generating: "We dey build your shop...",
     generatingSteps: [
       "We dey create your shop design...",
       "We dey set up your product catalogue...",
-      "We dey configure your WhatsApp order button...",
-      "We dey send your login details...",
+      "We dey configure your WhatsApp button...",
+      "We dey create your account...",
       "E almost ready...",
     ],
     doneTitle: "Your shop don go live! 🎉",
-    doneSub: "Check your email for your login link.",
+    doneSub: "Login anytime with your email and password.",
     viewStore: "See My Shop",
-    addProducts: "Go to Dashboard",
+    goToDashboard: "Go to Dashboard",
     next: "Continue",
     back: "Go Back",
   }
@@ -106,11 +103,14 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
 }
 
 export default function OnboardingPage() {
+  const router = useRouter()
   const [lang, setLang] = useState<'en' | 'pid'>('pid')
   const [step, setStep] = useState<Step>('language')
   const [businessName, setBusinessName] = useState('')
   const [whatsappNumber, setWhatsappNumber] = useState('')
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [category, setCategory] = useState('')
   const [location, setLocation] = useState('')
   const [genStep, setGenStep] = useState(0)
@@ -124,7 +124,6 @@ export default function OnboardingPage() {
   async function handleGenerate() {
     setStep('generating')
     setGenStep(0)
-
     const slug = slugify(businessName) + '-' + Math.random().toString(36).slice(2, 6)
     setStoreSlug(slug)
 
@@ -134,17 +133,19 @@ export default function OnboardingPage() {
     }
 
     try {
-      // Sign up / send magic link via Supabase Auth
-      await supabase.auth.signInWithOtp({
+      // Create Supabase auth account with password
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
+        password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
-          data: { business_name: businessName, slug }
+          data: { business_name: businessName }
         }
       })
 
+      if (authError) { console.error('Auth error:', authError); }
+
       // Save merchant record
-      const { data: { user } } = await supabase.auth.getUser()
       await supabase.from('merchants').insert({
         business_name: businessName,
         slug,
@@ -156,7 +157,6 @@ export default function OnboardingPage() {
         language: lang,
         plan: 'free',
         is_active: true,
-        ...(user ? { id: user.id } : {})
       })
     } catch (e) {
       console.error('Setup error:', e)
@@ -174,7 +174,8 @@ export default function OnboardingPage() {
       if (!whatsappNumber.trim()) { setError(lang === 'pid' ? 'Abeg enter your WhatsApp number' : 'Please enter your WhatsApp number'); return }
       setStep('email')
     } else if (step === 'email') {
-      if (!email.trim() || !email.includes('@')) { setError(lang === 'pid' ? 'Abeg enter valid email' : 'Please enter a valid email'); return }
+      if (!email.includes('@')) { setError(lang === 'pid' ? 'Abeg enter valid email' : 'Please enter a valid email'); return }
+      if (password.length < 6) { setError(lang === 'pid' ? 'Password must be at least 6 characters' : 'Password must be at least 6 characters'); return }
       setStep('category')
     } else if (step === 'category') {
       setStep('location')
@@ -216,8 +217,7 @@ export default function OnboardingPage() {
                   { code: 'en' as const, label: 'English', sub: 'I prefer English' },
                 ].map(l => (
                   <button key={l.code} onClick={() => { setLang(l.code); setStep('business') }}
-                    className="w-full flex items-center justify-between bg-white border-2 border-gray-200 
-                               hover:border-brand-green rounded-2xl p-4 transition-all group">
+                    className="w-full flex items-center justify-between bg-white border-2 border-gray-200 hover:border-brand-green rounded-2xl p-4 transition-all group">
                     <div className="text-left">
                       <div className="font-display font-bold text-brand-dark">{l.label}</div>
                       <div className="text-xs text-gray-400">{l.sub}</div>
@@ -237,8 +237,7 @@ export default function OnboardingPage() {
               <input type="text" placeholder={t.bizPlaceholder} value={businessName}
                 onChange={e => { setBusinessName(e.target.value); setError('') }}
                 onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
-                className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 
-                           text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
+                className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
             </div>
           )}
@@ -250,29 +249,40 @@ export default function OnboardingPage() {
               <p className="text-gray-500 text-sm mb-6">{t.whatsappHint}</p>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">🇳🇬 +234</span>
-                <input type="tel" placeholder={t.whatsappPlaceholder} value={whatsappNumber}
+                <input type="tel" placeholder="e.g. 08012345678" value={whatsappNumber}
                   onChange={e => { setWhatsappNumber(e.target.value); setError('') }}
                   onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
-                  className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl pl-24 pr-4 py-4 
-                             text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
+                  className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl pl-24 pr-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
               </div>
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
               <p className="text-xs text-gray-400 mt-3">⚠️ {lang === 'pid' ? 'Make sure say this number dey active on WhatsApp' : 'Make sure this number is active on WhatsApp'}</p>
             </div>
           )}
 
-          {/* Email */}
+          {/* Email + Password */}
           {step === 'email' && (
             <div className="animate-fade-in">
               <h2 className="font-display text-xl font-bold text-brand-dark mb-1">{t.emailQ}</h2>
               <p className="text-gray-500 text-sm mb-6">{t.emailHint}</p>
-              <input type="email" placeholder={t.emailPlaceholder} value={email}
-                onChange={e => { setEmail(e.target.value); setError('') }}
-                onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
-                className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 
-                           text-brand-dark font-semibold text-lg outline-none transition-colors" />
+              <div className="space-y-3">
+                <input type="email" placeholder="your@email.com" value={email}
+                  onChange={e => { setEmail(e.target.value); setError('') }}
+                  autoFocus
+                  className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-semibold outline-none transition-colors" />
+                <div className="relative">
+                  <input type={showPassword ? 'text' : 'password'} placeholder="Create a password (min. 6 characters)"
+                    value={password}
+                    onChange={e => { setPassword(e.target.value); setError('') }}
+                    onKeyDown={e => e.key === 'Enter' && handleNext()}
+                    className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 pr-12 text-brand-dark font-semibold outline-none transition-colors" />
+                  <button onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
-              <p className="text-xs text-gray-400 mt-3">🔒 {lang === 'pid' ? 'We go use this to send you login link — no password needed' : 'We use this to send you a login link — no password needed'}</p>
+              <p className="text-xs text-gray-400 mt-3">🔒 {lang === 'pid' ? 'Keep your password safe — you go need am to login' : 'Keep your password safe — you\'ll need it to log in'}</p>
             </div>
           )}
 
@@ -338,25 +348,26 @@ export default function OnboardingPage() {
                 <Check size={36} className="text-white" />
               </div>
               <h2 className="font-display text-2xl font-bold text-brand-dark mb-2">{t.doneTitle}</h2>
-              <p className="text-gray-500 text-sm mb-2">{t.doneSub}</p>
-              <p className="font-bold text-brand-dark text-sm mb-6">{email}</p>
+              <p className="text-gray-500 text-sm mb-6">{t.doneSub}</p>
 
-              <div className="bg-brand-light border-2 border-brand-green/20 rounded-2xl p-4 mb-6">
-                <p className="text-xs text-gray-500 mb-1">{lang === 'pid' ? "Your shop link:" : "Your store link:"}</p>
-                <p className="font-display font-bold text-brand-green text-sm">sokoni.africa/{storeSlug}</p>
+              <div className="bg-brand-light border-2 border-brand-green/20 rounded-2xl p-4 mb-6 text-left">
+                <p className="text-xs text-gray-500 mb-3 font-semibold uppercase tracking-wide">Your login details</p>
+                <div className="space-y-1">
+                  <p className="text-sm"><span className="text-gray-400">Email:</span> <span className="font-semibold text-brand-dark">{email}</span></p>
+                  <p className="text-sm"><span className="text-gray-400">Store:</span> <span className="font-semibold text-brand-green">sokoni.africa/{storeSlug}</span></p>
+                </div>
               </div>
 
               <div className="space-y-3">
-                <Link href={`/store/${storeSlug}`}
+                <Link href="/dashboard"
                   className="block w-full bg-brand-green text-white font-bold py-4 rounded-2xl hover:bg-brand-dark transition-colors">
+                  {t.goToDashboard}
+                </Link>
+                <Link href={`/store/${storeSlug}`}
+                  className="block w-full bg-white border-2 border-brand-green text-brand-green font-bold py-4 rounded-2xl hover:bg-brand-light transition-colors">
                   {t.viewStore}
                 </Link>
-                <Link href="/login"
-                  className="block w-full bg-white border-2 border-brand-green text-brand-green font-bold py-4 rounded-2xl hover:bg-brand-light transition-colors">
-                  {t.addProducts}
-                </Link>
               </div>
-
               <a href={`https://wa.me/?text=Check out my online store: sokoni.africa/${storeSlug}`}
                 target="_blank" rel="noreferrer" className="btn-whatsapp w-full justify-center mt-3">
                 📲 {lang === 'pid' ? "Share for WhatsApp" : "Share on WhatsApp"}
@@ -373,8 +384,7 @@ export default function OnboardingPage() {
               </button>
               <button onClick={handleNext}
                 disabled={(step === 'category' && !category) || (step === 'location' && !location)}
-                className="flex-1 bg-brand-green text-white font-bold py-3 rounded-2xl hover:bg-brand-dark 
-                           transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                className="flex-1 bg-brand-green text-white font-bold py-3 rounded-2xl hover:bg-brand-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                 {t.next} <ArrowRight size={18} />
               </button>
             </div>
