@@ -1,8 +1,7 @@
 'use client'
 import { useState } from 'react'
-import { ArrowRight, ArrowLeft, Loader2, Check, ShoppingBag, Eye, EyeOff } from 'lucide-react'
+import { ArrowRight, ArrowLeft, Loader2, Check, ShoppingBag, Mail, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 type Step = 'language' | 'business' | 'whatsapp' | 'email' | 'category' | 'location' | 'generating' | 'done'
@@ -23,61 +22,6 @@ const LOCATIONS = [
   'Benin City', 'Onitsha', 'Aba', 'Enugu', 'Warri',
   'Kaduna', 'Calabar', 'Jos', 'Ilorin', 'Other'
 ]
-
-const TEXT = {
-  en: {
-    welcome: "Let's build your store",
-    welcomeSub: "Answer a few quick questions. Your store will be live in minutes.",
-    bizQ: "What is your business name?",
-    bizPlaceholder: "e.g. Tropical Market",
-    whatsappQ: "Your WhatsApp business number?",
-    whatsappHint: "Customers will send orders to this number",
-    emailQ: "Your email & password",
-    emailHint: "Use these to log into your dashboard anytime",
-    catQ: "What do you sell?",
-    locQ: "Where is your business located?",
-    generating: "Building your store...",
-    generatingSteps: [
-      "Creating your store design...",
-      "Setting up your product catalogue...",
-      "Configuring your WhatsApp button...",
-      "Creating your account...",
-      "Almost ready...",
-    ],
-    doneTitle: "Your store is live! 🎉",
-    doneSub: "Login anytime with your email and password.",
-    viewStore: "View My Store",
-    goToDashboard: "Go to Dashboard",
-    next: "Continue",
-    back: "Back",
-  },
-  pid: {
-    welcome: "Make we build your shop",
-    welcomeSub: "Answer small questions. Your shop go dey live for minutes.",
-    bizQ: "Wetin be your business name?",
-    bizPlaceholder: "e.g. Tropical Market",
-    whatsappQ: "Your WhatsApp business number?",
-    whatsappHint: "Customers go send orders to this number",
-    emailQ: "Your email & password",
-    emailHint: "Use am to login your dashboard anytime",
-    catQ: "Wetin you dey sell?",
-    locQ: "Where your business dey?",
-    generating: "We dey build your shop...",
-    generatingSteps: [
-      "We dey create your shop design...",
-      "We dey set up your product catalogue...",
-      "We dey configure your WhatsApp button...",
-      "We dey create your account...",
-      "E almost ready...",
-    ],
-    doneTitle: "Your shop don go live! 🎉",
-    doneSub: "Login anytime with your email and password.",
-    viewStore: "See My Shop",
-    goToDashboard: "Go to Dashboard",
-    next: "Continue",
-    back: "Go Back",
-  }
-}
 
 function slugify(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
@@ -103,49 +47,50 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
 }
 
 export default function OnboardingPage() {
-  const router = useRouter()
   const [lang, setLang] = useState<'en' | 'pid'>('pid')
   const [step, setStep] = useState<Step>('language')
   const [businessName, setBusinessName] = useState('')
   const [whatsappNumber, setWhatsappNumber] = useState('')
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
   const [category, setCategory] = useState('')
   const [location, setLocation] = useState('')
   const [genStep, setGenStep] = useState(0)
   const [storeSlug, setStoreSlug] = useState('')
   const [error, setError] = useState('')
+  const [loginSent, setLoginSent] = useState<'email' | 'whatsapp' | null>(null)
 
-  const t = TEXT[lang]
+  const pid = lang === 'pid'
+
+  const generatingSteps = pid ? [
+    'We dey create your shop design...',
+    'We dey set up your product catalogue...',
+    'We dey configure your WhatsApp order button...',
+    'We dey save your business details...',
+    'E almost ready...',
+  ] : [
+    'Creating your store design...',
+    'Setting up your product catalogue...',
+    'Configuring your WhatsApp order button...',
+    'Saving your business details...',
+    'Almost ready...',
+  ]
+
   const stepMap: Record<Step, number> = { language: 0, business: 1, whatsapp: 2, email: 3, category: 4, location: 5, generating: 6, done: 6 }
-  const totalSteps = 6
+  const prevStep: Record<string, Step> = { business: 'language', whatsapp: 'business', email: 'whatsapp', category: 'email', location: 'category' }
 
   async function handleGenerate() {
     setStep('generating')
     setGenStep(0)
+
     const slug = slugify(businessName) + '-' + Math.random().toString(36).slice(2, 6)
     setStoreSlug(slug)
 
-    for (let i = 0; i < t.generatingSteps.length; i++) {
+    for (let i = 0; i < generatingSteps.length; i++) {
       await new Promise(r => setTimeout(r, 700))
       setGenStep(i + 1)
     }
 
     try {
-      // Create Supabase auth account with password
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-          data: { business_name: businessName }
-        }
-      })
-
-      if (authError) { console.error('Auth error:', authError); }
-
-      // Save merchant record
       await supabase.from('merchants').insert({
         business_name: businessName,
         slug,
@@ -159,23 +104,40 @@ export default function OnboardingPage() {
         is_active: true,
       })
     } catch (e) {
-      console.error('Setup error:', e)
+      console.error('Save error:', e)
     }
 
     setStep('done')
   }
 
+  async function sendLoginEmail() {
+    await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
+    })
+    setLoginSent('email')
+  }
+
+  function sendLoginWhatsApp() {
+    const waNum = normalizeWhatsApp(whatsappNumber)
+    const loginUrl = `${window.location.origin}/login`
+    const msg = pid
+      ? `Your Sokoni store don ready! 🎉\n\nYour store link: sokoni.africa/${storeSlug}\n\nTo add products and manage your store, login here:\n${loginUrl}\n\nUse your email: ${email}`
+      : `Your Sokoni store is live! 🎉\n\nYour store link: sokoni.africa/${storeSlug}\n\nTo add products and manage your store, login here:\n${loginUrl}\n\nUse your email: ${email}`
+    window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, '_blank')
+    setLoginSent('whatsapp')
+  }
+
   function handleNext() {
     setError('')
     if (step === 'business') {
-      if (!businessName.trim()) { setError(lang === 'pid' ? 'Abeg enter your business name' : 'Please enter your business name'); return }
+      if (!businessName.trim()) { setError(pid ? 'Abeg enter your business name' : 'Please enter your business name'); return }
       setStep('whatsapp')
     } else if (step === 'whatsapp') {
-      if (!whatsappNumber.trim()) { setError(lang === 'pid' ? 'Abeg enter your WhatsApp number' : 'Please enter your WhatsApp number'); return }
+      if (!whatsappNumber.trim()) { setError(pid ? 'Abeg enter your WhatsApp number' : 'Please enter your WhatsApp number'); return }
       setStep('email')
     } else if (step === 'email') {
-      if (!email.includes('@')) { setError(lang === 'pid' ? 'Abeg enter valid email' : 'Please enter a valid email'); return }
-      if (password.length < 6) { setError(lang === 'pid' ? 'Password must be at least 6 characters' : 'Password must be at least 6 characters'); return }
+      if (!email.trim() || !email.includes('@')) { setError(pid ? 'Abeg enter valid email' : 'Please enter a valid email'); return }
       setStep('category')
     } else if (step === 'category') {
       setStep('location')
@@ -183,8 +145,6 @@ export default function OnboardingPage() {
       handleGenerate()
     }
   }
-
-  const prevStep: Record<string, Step> = { business: 'language', whatsapp: 'business', email: 'whatsapp', category: 'email', location: 'category' }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-brand-light to-white flex flex-col">
@@ -200,7 +160,7 @@ export default function OnboardingPage() {
       <div className="flex-1 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-sm">
           {!['generating', 'done', 'language'].includes(step) && (
-            <StepIndicator current={stepMap[step] - 1} total={totalSteps} />
+            <StepIndicator current={stepMap[step] - 1} total={6} />
           )}
 
           {/* Language */}
@@ -209,8 +169,12 @@ export default function OnboardingPage() {
               <div className="w-16 h-16 bg-brand-green rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-brand-green/20">
                 <ShoppingBag size={28} className="text-white" />
               </div>
-              <h1 className="font-display text-2xl font-bold text-brand-dark mb-2">{t.welcome}</h1>
-              <p className="text-gray-500 text-sm mb-8">{t.welcomeSub}</p>
+              <h1 className="font-display text-2xl font-bold text-brand-dark mb-2">
+                {pid ? 'Make we build your shop' : "Let's build your store"}
+              </h1>
+              <p className="text-gray-500 text-sm mb-8">
+                {pid ? 'Answer small questions. Your shop go dey live for minutes.' : 'Answer a few quick questions. Your store will be live in minutes.'}
+              </p>
               <div className="space-y-3">
                 {[
                   { code: 'pid' as const, label: 'Pidgin English', sub: 'I wan use Pidgin' },
@@ -232,9 +196,13 @@ export default function OnboardingPage() {
           {/* Business Name */}
           {step === 'business' && (
             <div className="animate-fade-in">
-              <h2 className="font-display text-xl font-bold text-brand-dark mb-1">{t.bizQ}</h2>
-              <p className="text-gray-500 text-sm mb-6">{lang === 'pid' ? 'This go be the name wey customers go see.' : 'This is what customers will see on your store.'}</p>
-              <input type="text" placeholder={t.bizPlaceholder} value={businessName}
+              <h2 className="font-display text-xl font-bold text-brand-dark mb-1">
+                {pid ? 'Wetin be your business name?' : 'What is your business name?'}
+              </h2>
+              <p className="text-gray-500 text-sm mb-6">
+                {pid ? 'This go be the name wey customers go see.' : 'This is what customers will see on your store.'}
+              </p>
+              <input type="text" placeholder="e.g. Tropical Market" value={businessName}
                 onChange={e => { setBusinessName(e.target.value); setError('') }}
                 onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
                 className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
@@ -245,51 +213,50 @@ export default function OnboardingPage() {
           {/* WhatsApp */}
           {step === 'whatsapp' && (
             <div className="animate-fade-in">
-              <h2 className="font-display text-xl font-bold text-brand-dark mb-1">{t.whatsappQ}</h2>
-              <p className="text-gray-500 text-sm mb-6">{t.whatsappHint}</p>
+              <h2 className="font-display text-xl font-bold text-brand-dark mb-1">
+                {pid ? 'Your WhatsApp business number?' : 'Your WhatsApp business number?'}
+              </h2>
+              <p className="text-gray-500 text-sm mb-6">
+                {pid ? 'Customers go send orders to this number' : 'Customers will send orders to this number'}
+              </p>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">🇳🇬 +234</span>
-                <input type="tel" placeholder="e.g. 08012345678" value={whatsappNumber}
+                <input type="tel" placeholder="08012345678" value={whatsappNumber}
                   onChange={e => { setWhatsappNumber(e.target.value); setError('') }}
                   onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
                   className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl pl-24 pr-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
               </div>
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
-              <p className="text-xs text-gray-400 mt-3">⚠️ {lang === 'pid' ? 'Make sure say this number dey active on WhatsApp' : 'Make sure this number is active on WhatsApp'}</p>
+              <p className="text-xs text-gray-400 mt-3">
+                ⚠️ {pid ? 'Make sure say this number dey active on WhatsApp' : 'Make sure this number is active on WhatsApp'}
+              </p>
             </div>
           )}
 
-          {/* Email + Password */}
+          {/* Email */}
           {step === 'email' && (
             <div className="animate-fade-in">
-              <h2 className="font-display text-xl font-bold text-brand-dark mb-1">{t.emailQ}</h2>
-              <p className="text-gray-500 text-sm mb-6">{t.emailHint}</p>
-              <div className="space-y-3">
-                <input type="email" placeholder="your@email.com" value={email}
-                  onChange={e => { setEmail(e.target.value); setError('') }}
-                  autoFocus
-                  className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-semibold outline-none transition-colors" />
-                <div className="relative">
-                  <input type={showPassword ? 'text' : 'password'} placeholder="Create a password (min. 6 characters)"
-                    value={password}
-                    onChange={e => { setPassword(e.target.value); setError('') }}
-                    onKeyDown={e => e.key === 'Enter' && handleNext()}
-                    className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 pr-12 text-brand-dark font-semibold outline-none transition-colors" />
-                  <button onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-              </div>
+              <h2 className="font-display text-xl font-bold text-brand-dark mb-1">
+                {pid ? 'Your email address?' : 'Your email address?'}
+              </h2>
+              <p className="text-gray-500 text-sm mb-6">
+                {pid ? 'We go use this to send you login link — no password needed' : 'We use this to send your login link — no password needed'}
+              </p>
+              <input type="email" placeholder="you@example.com" value={email}
+                onChange={e => { setEmail(e.target.value); setError('') }}
+                onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
+                className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-semibold text-lg outline-none transition-colors" />
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
-              <p className="text-xs text-gray-400 mt-3">🔒 {lang === 'pid' ? 'Keep your password safe — you go need am to login' : 'Keep your password safe — you\'ll need it to log in'}</p>
+              <p className="text-xs text-gray-400 mt-3">🔒 {pid ? 'No password wahala' : 'No password required'}</p>
             </div>
           )}
 
           {/* Category */}
           {step === 'category' && (
             <div className="animate-fade-in">
-              <h2 className="font-display text-xl font-bold text-brand-dark mb-6">{t.catQ}</h2>
+              <h2 className="font-display text-xl font-bold text-brand-dark mb-6">
+                {pid ? 'Wetin you dey sell?' : 'What do you sell?'}
+              </h2>
               <div className="grid grid-cols-2 gap-2">
                 {CATEGORIES.map(cat => (
                   <button key={cat.id} onClick={() => setCategory(cat.id)}
@@ -297,7 +264,7 @@ export default function OnboardingPage() {
                       category === cat.id ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600 hover:border-brand-green/50'
                     }`}>
                     <span className="text-xl">{cat.emoji}</span>
-                    <span className="text-xs font-semibold leading-tight">{lang === 'pid' ? cat.pidgin : cat.label}</span>
+                    <span className="text-xs font-semibold leading-tight">{pid ? cat.pidgin : cat.label}</span>
                   </button>
                 ))}
               </div>
@@ -307,7 +274,9 @@ export default function OnboardingPage() {
           {/* Location */}
           {step === 'location' && (
             <div className="animate-fade-in">
-              <h2 className="font-display text-xl font-bold text-brand-dark mb-6">{t.locQ}</h2>
+              <h2 className="font-display text-xl font-bold text-brand-dark mb-6">
+                {pid ? 'Where your business dey?' : 'Where is your business located?'}
+              </h2>
               <div className="grid grid-cols-3 gap-2">
                 {LOCATIONS.map(loc => (
                   <button key={loc} onClick={() => setLocation(loc)}
@@ -327,9 +296,11 @@ export default function OnboardingPage() {
               <div className="w-20 h-20 bg-brand-light rounded-full flex items-center justify-center mx-auto mb-6">
                 <Loader2 size={36} className="text-brand-green animate-spin" />
               </div>
-              <h2 className="font-display text-2xl font-bold text-brand-dark mb-3">{t.generating}</h2>
+              <h2 className="font-display text-2xl font-bold text-brand-dark mb-3">
+                {pid ? 'We dey build your shop...' : 'Building your store...'}
+              </h2>
               <div className="space-y-2">
-                {t.generatingSteps.map((s, i) => (
+                {generatingSteps.map((s, i) => (
                   <div key={i} className={`flex items-center justify-center gap-2 text-sm transition-all duration-300 ${
                     i < genStep ? 'text-brand-green' : i === genStep ? 'text-brand-dark font-medium' : 'text-gray-300'
                   }`}>
@@ -347,30 +318,64 @@ export default function OnboardingPage() {
               <div className="w-20 h-20 bg-brand-green rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-brand-green/30">
                 <Check size={36} className="text-white" />
               </div>
-              <h2 className="font-display text-2xl font-bold text-brand-dark mb-2">{t.doneTitle}</h2>
-              <p className="text-gray-500 text-sm mb-6">{t.doneSub}</p>
+              <h2 className="font-display text-2xl font-bold text-brand-dark mb-2">
+                {pid ? 'Your shop don go live! 🎉' : 'Your store is live! 🎉'}
+              </h2>
 
-              <div className="bg-brand-light border-2 border-brand-green/20 rounded-2xl p-4 mb-6 text-left">
-                <p className="text-xs text-gray-500 mb-3 font-semibold uppercase tracking-wide">Your login details</p>
-                <div className="space-y-1">
-                  <p className="text-sm"><span className="text-gray-400">Email:</span> <span className="font-semibold text-brand-dark">{email}</span></p>
-                  <p className="text-sm"><span className="text-gray-400">Store:</span> <span className="font-semibold text-brand-green">sokoni.africa/{storeSlug}</span></p>
+              <div className="bg-brand-light border-2 border-brand-green/20 rounded-2xl p-4 mb-6">
+                <p className="text-xs text-gray-500 mb-1">{pid ? 'Your shop link:' : 'Your store link:'}</p>
+                <p className="font-display font-bold text-brand-green text-sm">sokoni.africa/{storeSlug}</p>
+              </div>
+
+              {/* Login delivery options */}
+              {!loginSent ? (
+                <>
+                  <p className="text-sm font-semibold text-gray-700 mb-3">
+                    {pid ? 'How you want receive your login link?' : 'How would you like to receive your login link?'}
+                  </p>
+                  <div className="space-y-2 mb-5">
+                    <button onClick={sendLoginEmail}
+                      className="w-full flex items-center gap-3 bg-white border-2 border-gray-200 hover:border-brand-green rounded-2xl p-4 transition-all">
+                      <div className="w-10 h-10 bg-brand-light rounded-xl flex items-center justify-center">
+                        <Mail size={20} className="text-brand-green" />
+                      </div>
+                      <div className="text-left">
+                        <div className="font-semibold text-brand-dark text-sm">{pid ? 'Send to my Email' : 'Send to my Email'}</div>
+                        <div className="text-xs text-gray-400 truncate">{email}</div>
+                      </div>
+                    </button>
+
+                    <button onClick={sendLoginWhatsApp}
+                      className="w-full flex items-center gap-3 bg-[#25D366] rounded-2xl p-4 transition-all hover:opacity-90">
+                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                        <MessageCircle size={20} className="text-white" />
+                      </div>
+                      <div className="text-left">
+                        <div className="font-semibold text-white text-sm">{pid ? 'Send to my WhatsApp' : 'Send to my WhatsApp'}</div>
+                        <div className="text-xs text-white/70">+{normalizeWhatsApp(whatsappNumber)}</div>
+                      </div>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="bg-brand-light rounded-2xl p-4 mb-5 flex items-center gap-3">
+                  <Check size={18} className="text-brand-green shrink-0" />
+                  <p className="text-sm text-brand-dark font-semibold">
+                    {loginSent === 'email'
+                      ? (pid ? 'Login link don reach your email!' : 'Login link sent to your email!')
+                      : (pid ? 'Login details don reach your WhatsApp!' : 'Login details sent to your WhatsApp!')}
+                  </p>
                 </div>
-              </div>
+              )}
 
-              <div className="space-y-3">
-                <Link href="/dashboard"
-                  className="block w-full bg-brand-green text-white font-bold py-4 rounded-2xl hover:bg-brand-dark transition-colors">
-                  {t.goToDashboard}
-                </Link>
-                <Link href={`/store/${storeSlug}`}
-                  className="block w-full bg-white border-2 border-brand-green text-brand-green font-bold py-4 rounded-2xl hover:bg-brand-light transition-colors">
-                  {t.viewStore}
-                </Link>
-              </div>
-              <a href={`https://wa.me/?text=Check out my online store: sokoni.africa/${storeSlug}`}
-                target="_blank" rel="noreferrer" className="btn-whatsapp w-full justify-center mt-3">
-                📲 {lang === 'pid' ? "Share for WhatsApp" : "Share on WhatsApp"}
+              <Link href={`/store/${storeSlug}`}
+                className="block w-full bg-brand-green text-white font-bold py-3 rounded-2xl hover:bg-brand-dark transition-colors mb-2 text-sm">
+                {pid ? 'See My Shop' : 'View My Store'}
+              </Link>
+
+              <a href={`https://wa.me/?text=${encodeURIComponent('Check out my online store: sokoni.africa/' + storeSlug)}`}
+                target="_blank" rel="noreferrer" className="btn-whatsapp w-full justify-center">
+                📲 {pid ? 'Share for WhatsApp' : 'Share on WhatsApp'}
               </a>
             </div>
           )}
@@ -380,12 +385,12 @@ export default function OnboardingPage() {
             <div className="flex gap-3 mt-8">
               <button onClick={() => setStep(prevStep[step])}
                 className="flex items-center gap-1.5 text-gray-500 hover:text-brand-dark text-sm font-medium px-4 py-3">
-                <ArrowLeft size={16} /> {t.back}
+                <ArrowLeft size={16} /> {pid ? 'Go Back' : 'Back'}
               </button>
               <button onClick={handleNext}
                 disabled={(step === 'category' && !category) || (step === 'location' && !location)}
                 className="flex-1 bg-brand-green text-white font-bold py-3 rounded-2xl hover:bg-brand-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                {t.next} <ArrowRight size={18} />
+                {pid ? 'Continue' : 'Continue'} <ArrowRight size={18} />
               </button>
             </div>
           )}
