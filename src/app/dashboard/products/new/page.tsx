@@ -1,18 +1,33 @@
 'use client'
-import { useState, useRef } from 'react'
-import { Camera, Wand2, ArrowLeft, Check, Loader2, Upload } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Camera, Wand2, ArrowLeft, Check, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 
 type State = 'idle' | 'uploading' | 'generating' | 'ready' | 'saving' | 'saved'
 
 export default function AddProductPage() {
+  const router = useRouter()
   const [state, setState] = useState<State>('idle')
   const [photo, setPhoto] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
   const [inStock, setInStock] = useState(true)
+  const [merchantId, setMerchantId] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    async function getMerchant() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.push('/login'); return }
+      const { data: m } = await supabase.from('merchants').select('id').eq('email', user.email).single()
+      if (!m) { router.push('/onboarding'); return }
+      setMerchantId(m.id)
+    }
+    getMerchant()
+  }, [router])
 
   async function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -20,29 +35,45 @@ export default function AddProductPage() {
     setState('uploading')
     const reader = new FileReader()
     reader.onload = async () => {
-      setPhoto(reader.result as string)
+      const base64 = reader.result as string
+      setPhoto(base64)
       setState('generating')
-      // In production: POST base64 image to /api/ai/describe-product
-      // AI returns { name, description, suggestedPrice }
-      await new Promise(r => setTimeout(r, 2000))
-      setName("Ankara Print Fabric (6 yards)")
-      setDescription("Beautiful premium Ankara print fabric, 6 yards — perfect for aso-ebi, traditional wear, and everyday styles. Vibrant colours that don't fade. Available for immediate pickup or delivery anywhere in Lagos.")
-      setPrice("8500")
+      try {
+        const res = await fetch('/api/ai/describe-product', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: base64 })
+        })
+        const data = await res.json()
+        if (data.name) setName(data.name)
+        if (data.description) setDescription(data.description)
+        if (data.price) setPrice(data.price)
+      } catch {
+        // If AI fails, just let them fill manually
+      }
       setState('ready')
     }
     reader.readAsDataURL(file)
   }
 
   async function handleSave() {
+    if (!merchantId) return
     setState('saving')
-    // In production: POST to /api/products with { name, description, price, photo, inStock }
-    await new Promise(r => setTimeout(r, 1000))
+    const priceKobo = Math.round(parseFloat(price) * 100)
+    await supabase.from('products').insert({
+      merchant_id: merchantId,
+      name,
+      description,
+      price: priceKobo,
+      price_display: `₦${parseFloat(price).toLocaleString()}`,
+      in_stock: inStock,
+      ai_generated_description: state === 'ready',
+    })
     setState('saved')
   }
 
   return (
     <div className="min-h-screen bg-gray-50 max-w-lg mx-auto">
-      {/* Header */}
       <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
         <Link href="/dashboard" className="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center">
           <ArrowLeft size={16} className="text-gray-600" />
@@ -51,7 +82,6 @@ export default function AddProductPage() {
       </div>
 
       <div className="p-4 space-y-4">
-        {/* Saved state */}
         {state === 'saved' ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-brand-green rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-brand-green/30">
@@ -60,12 +90,11 @@ export default function AddProductPage() {
             <h2 className="font-display font-bold text-xl text-brand-dark mb-2">Product Added! 🎉</h2>
             <p className="text-gray-500 text-sm mb-6">Your product is now live on your store</p>
             <div className="flex gap-3">
-              <Link href="/dashboard/products/new"
-                className="flex-1 bg-brand-green text-white font-bold py-3 rounded-2xl text-center hover:bg-brand-dark transition-colors text-sm">
+              <button onClick={() => { setState('idle'); setPhoto(null); setName(''); setDescription(''); setPrice('') }}
+                className="flex-1 bg-brand-green text-white font-bold py-3 rounded-2xl text-sm">
                 Add Another
-              </Link>
-              <Link href="/dashboard"
-                className="flex-1 bg-white border border-gray-200 text-gray-700 font-bold py-3 rounded-2xl text-center text-sm">
+              </button>
+              <Link href="/dashboard" className="flex-1 bg-white border border-gray-200 text-gray-700 font-bold py-3 rounded-2xl text-center text-sm">
                 Dashboard
               </Link>
             </div>
@@ -76,7 +105,6 @@ export default function AddProductPage() {
             <div>
               <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Product Photo</p>
               <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhoto} />
-
               {!photo ? (
                 <button onClick={() => fileRef.current?.click()}
                   className="w-full h-48 bg-white border-2 border-dashed border-gray-200 rounded-2xl 
@@ -95,13 +123,12 @@ export default function AddProductPage() {
                   <img src={photo} alt="Product" className="w-full h-48 object-cover rounded-2xl" />
                   <button onClick={() => { setPhoto(null); setState('idle'); setName(''); setDescription(''); setPrice('') }}
                     className="absolute top-2 right-2 bg-white/90 rounded-xl px-3 py-1.5 text-xs font-semibold text-gray-600">
-                    Change Photo
+                    Change
                   </button>
                 </div>
               )}
             </div>
 
-            {/* AI generating indicator */}
             {state === 'generating' && (
               <div className="bg-brand-light rounded-2xl p-4 flex items-center gap-3">
                 <Loader2 size={20} className="text-brand-green animate-spin shrink-0" />
@@ -112,7 +139,6 @@ export default function AddProductPage() {
               </div>
             )}
 
-            {/* AI result banner */}
             {state === 'ready' && (
               <div className="bg-brand-light border border-brand-green/20 rounded-2xl p-3 flex items-center gap-2.5">
                 <Wand2 size={16} className="text-brand-green shrink-0" />
@@ -120,56 +146,35 @@ export default function AddProductPage() {
               </div>
             )}
 
-            {/* Product Name */}
             <div>
               <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Product Name</label>
-              <input
-                type="text"
-                value={name}
-                onChange={e => setName(e.target.value)}
+              <input type="text" value={name} onChange={e => setName(e.target.value)}
                 placeholder="e.g. Ankara Print Fabric (6 yards)"
-                className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm 
-                           font-semibold text-gray-800 focus:border-brand-green outline-none"
-              />
+                className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm font-semibold text-gray-800 focus:border-brand-green outline-none" />
             </div>
 
-            {/* Description */}
             <div>
               <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">
-                Description
-                {state === 'ready' && <span className="text-brand-green ml-2">✨ AI-generated</span>}
+                Description {state === 'ready' && <span className="text-brand-green ml-1">✨ AI-generated</span>}
               </label>
-              <textarea
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                placeholder="Describe your product..."
-                rows={4}
-                className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm 
-                           text-gray-700 focus:border-brand-green outline-none resize-none"
-              />
+              <textarea value={description} onChange={e => setDescription(e.target.value)}
+                placeholder="Describe your product..." rows={4}
+                className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 focus:border-brand-green outline-none resize-none" />
             </div>
 
-            {/* Price */}
             <div>
               <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Price (₦)</label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 font-display font-bold text-gray-400">₦</span>
-                <input
-                  type="number"
-                  value={price}
-                  onChange={e => setPrice(e.target.value)}
-                  placeholder="0"
-                  className="w-full bg-white border-2 border-gray-200 rounded-xl pl-8 pr-4 py-3 text-lg 
-                             font-display font-bold text-brand-dark focus:border-brand-green outline-none"
-                />
+                <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="0"
+                  className="w-full bg-white border-2 border-gray-200 rounded-xl pl-8 pr-4 py-3 text-lg font-display font-bold text-brand-dark focus:border-brand-green outline-none" />
               </div>
             </div>
 
-            {/* In stock toggle */}
             <div className="flex items-center justify-between bg-white border border-gray-100 rounded-xl p-4">
               <div>
                 <div className="font-semibold text-gray-800 text-sm">In Stock</div>
-                <div className="text-xs text-gray-500">{inStock ? "Available to order" : "Not available"}</div>
+                <div className="text-xs text-gray-500">{inStock ? 'Available to order' : 'Not available'}</div>
               </div>
               <button onClick={() => setInStock(!inStock)}
                 className={`w-12 h-6 rounded-full transition-colors relative ${inStock ? 'bg-brand-green' : 'bg-gray-200'}`}>
@@ -177,17 +182,11 @@ export default function AddProductPage() {
               </button>
             </div>
 
-            {/* Save button */}
-            <button
-              onClick={handleSave}
-              disabled={!name || !price || state === 'saving' || state === 'generating' || state === 'uploading'}
+            <button onClick={handleSave}
+              disabled={!name || !price || !merchantId || ['saving', 'generating', 'uploading'].includes(state)}
               className="w-full bg-brand-green text-white font-bold py-4 rounded-2xl hover:bg-brand-dark 
                          transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-              {state === 'saving' ? (
-                <><Loader2 size={18} className="animate-spin" /> Saving...</>
-              ) : (
-                <><Check size={18} /> Add to Store</>
-              )}
+              {state === 'saving' ? <><Loader2 size={18} className="animate-spin" /> Saving...</> : <><Check size={18} /> Add to Store</>}
             </button>
           </>
         )}
