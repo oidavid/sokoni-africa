@@ -15,11 +15,11 @@ const dmSans = DM_Sans({
 })
 
 export const metadata: Metadata = {
-  title: 'Sokoni Africa — Your Market, Online',
+  title: 'Earket — Your Market, Online',
   description: 'Build your free online store in 5 minutes. Made for Nigerian traders. Works on any phone, any connection.',
   keywords: ['online store Nigeria', 'free shop Nigeria', 'WhatsApp shop', 'sell online Nigeria', 'Lagos market online'],
   openGraph: {
-    title: 'Sokoni Africa',
+    title: 'Earket',
     description: 'Your market, online. Free forever.',
     type: 'website',
   },

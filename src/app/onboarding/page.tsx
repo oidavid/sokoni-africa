@@ -140,8 +140,8 @@ export default function OnboardingPage() {
     const waNum = normalizeWhatsApp(whatsappNumber)
     const loginUrl = `${window.location.origin}/login`
     const msg = pid
-      ? `Your Sokoni store don ready! 🎉\n\nYour store link: sokoni.africa/${storeSlug}\n\nTo add products and manage your store, login here:\n${loginUrl}\n\nUse your email: ${email}`
-      : `Your Sokoni store is live! 🎉\n\nYour store link: sokoni.africa/${storeSlug}\n\nTo add products and manage your store, login here:\n${loginUrl}\n\nUse your email: ${email}`
+      ? `Your Earket store don ready! 🎉\n\nYour store link: earket.com/${storeSlug}\n\nTo add products and manage your store, login here:\n${loginUrl}\n\nUse your email: ${email}`
+      : `Your Earket store is live! 🎉\n\nYour store link: earket.com/${storeSlug}\n\nTo add products and manage your store, login here:\n${loginUrl}\n\nUse your email: ${email}`
     window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, '_blank')
     setLoginSent('whatsapp')
   }
@@ -171,7 +171,7 @@ export default function OnboardingPage() {
           <div className="w-7 h-7 bg-brand-green rounded-lg flex items-center justify-center">
             <ShoppingBag size={14} className="text-white" />
           </div>
-          <span className="font-display font-bold text-brand-dark text-base">Sokoni Africa</span>
+          <span className="font-display font-bold text-brand-dark text-base">Earket</span>
         </Link>
       </nav>
 
@@ -351,7 +351,7 @@ export default function OnboardingPage() {
 
               <div className="bg-brand-light border-2 border-brand-green/20 rounded-2xl p-4 mb-6">
                 <p className="text-xs text-gray-500 mb-1">{pid ? 'Your shop link:' : 'Your store link:'}</p>
-                <p className="font-display font-bold text-brand-green text-sm">sokoni.africa/{storeSlug}</p>
+                <p className="font-display font-bold text-brand-green text-sm">earket.com/{storeSlug}</p>
               </div>
 
               {/* Login delivery options */}
@@ -400,7 +400,7 @@ export default function OnboardingPage() {
                 {pid ? 'See My Shop' : 'View My Store'}
               </Link>
 
-              <a href={`https://wa.me/?text=${encodeURIComponent('Check out my online store: sokoni.africa/' + storeSlug)}`}
+              <a href={`https://wa.me/?text=${encodeURIComponent('Check out my online store: earket.com/' + storeSlug)}`}
                 target="_blank" rel="noreferrer" className="btn-whatsapp w-full justify-center">
                 📲 {pid ? 'Share for WhatsApp' : 'Share on WhatsApp'}
               </a>

@@ -10,7 +10,7 @@ export default function ContactPage() {
           <div className="w-7 h-7 bg-brand-green rounded-lg flex items-center justify-center">
             <ShoppingBag size={14} className="text-white" />
           </div>
-          <span className="font-display font-bold text-brand-dark text-base">Sokoni Africa</span>
+          <span className="font-display font-bold text-brand-dark text-base">Earket</span>
         </Link>
       </nav>
       <div className="max-w-lg mx-auto px-4 py-12">
@@ -18,7 +18,7 @@ export default function ContactPage() {
         <p className="text-gray-500 mb-10">We're here to help. Reach us on WhatsApp for the fastest response.</p>
 
         <div className="space-y-4">
-          <a href="https://wa.me/2348000000000?text=Hi Sokoni Africa, I need help with my store."
+          <a href="https://wa.me/2348000000000?text=Hi Earket, I need help with my store."
             target="_blank" rel="noreferrer"
             className="flex items-center gap-4 bg-[#25D366] text-white rounded-2xl p-5 hover:opacity-90 transition-opacity">
             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
@@ -30,14 +30,14 @@ export default function ContactPage() {
             </div>
           </a>
 
-          <a href="mailto:hello@sokoni.africa"
+          <a href="mailto:hello@earket.com"
             className="flex items-center gap-4 bg-brand-light border-2 border-brand-green/20 rounded-2xl p-5 hover:border-brand-green/40 transition-colors">
             <div className="w-12 h-12 bg-brand-green/10 rounded-xl flex items-center justify-center">
               <Mail size={24} className="text-brand-green" />
             </div>
             <div>
               <div className="font-display font-bold text-lg text-brand-dark">Email Us</div>
-              <div className="text-sm text-gray-500">hello@sokoni.africa</div>
+              <div className="text-sm text-gray-500">hello@earket.com</div>
             </div>
           </a>
         </div>
@@ -57,7 +57,7 @@ export default function ContactPage() {
               <div className="text-xs text-gray-400">Monthly managed</div>
             </div>
           </div>
-          <a href="https://wa.me/2348000000000?text=Hi, I'm interested in the Premium Setup for my Sokoni store."
+          <a href="https://wa.me/2348000000000?text=Hi, I'm interested in the Premium Setup for my Earket store."
             target="_blank" rel="noreferrer"
             className="btn-whatsapp w-full justify-center mt-4">
             💬 Book a Setup Call

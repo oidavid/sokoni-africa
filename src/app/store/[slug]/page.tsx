@@ -36,7 +36,7 @@ function formatNaira(amount: number) {
 
 function WhatsAppOrderBtn({ product, store }: { product: Product; store: Merchant }) {
   const message = encodeURIComponent(
-    `Hi ${store.business_name}! I saw your Sokoni store and I want to order:\n\n*${product.name}* - ${product.price_display || formatNaira(product.price)}\n\nPlease confirm if available. Thank you!`
+    `Hi ${store.business_name}! I saw your Earket store and I want to order:\n\n*${product.name}* - ${product.price_display || formatNaira(product.price)}\n\nPlease confirm if available. Thank you!`
   )
   const waNumber = store.whatsapp_number?.replace(/\D/g, '')
   return (
@@ -255,8 +255,8 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
       {/* Footer */}
       <div className="text-center py-6 px-4 border-t border-gray-100 mt-4">
         <p className="text-xs text-gray-400 mb-1">Powered by</p>
-        <Link href="/" className="text-brand-green font-display font-bold text-sm">Sokoni Africa 🛒</Link>
-        <p className="text-xs text-gray-400 mt-1">Start your own free store at sokoni.africa</p>
+        <Link href="/" className="text-brand-green font-display font-bold text-sm">Earket 🛒</Link>
+        <p className="text-xs text-gray-400 mt-1">Start your own free store at earket.com</p>
       </div>
     </div>
   )

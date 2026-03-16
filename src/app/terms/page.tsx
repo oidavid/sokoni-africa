@@ -9,7 +9,7 @@ export default function TermsPage() {
           <div className="w-7 h-7 bg-brand-green rounded-lg flex items-center justify-center">
             <ShoppingBag size={14} className="text-white" />
           </div>
-          <span className="font-display font-bold text-brand-dark text-base">Sokoni Africa</span>
+          <span className="font-display font-bold text-brand-dark text-base">Earket</span>
         </Link>
       </nav>
       <div className="max-w-2xl mx-auto px-4 py-12 prose prose-sm">
@@ -17,7 +17,7 @@ export default function TermsPage() {
         <p className="text-gray-400 text-sm mb-8">Last updated: January 2025</p>
 
         <h2>1. Acceptance</h2>
-        <p>By creating a store on Sokoni Africa, you agree to these terms. If you do not agree, please do not use the platform.</p>
+        <p>By creating a store on Earket, you agree to these terms. If you do not agree, please do not use the platform.</p>
 
         <h2>2. Your store</h2>
         <p>You are responsible for the content you publish on your storefront, including product listings, prices, and descriptions. You must not list illegal products or services.</p>
@@ -26,7 +26,7 @@ export default function TermsPage() {
         <p>The free plan is available indefinitely at no cost. We reserve the right to introduce limits on the free plan with 30 days notice.</p>
 
         <h2>4. WhatsApp ordering</h2>
-        <p>Orders placed through your WhatsApp button are transactions between you and your customers. Sokoni Africa is not a party to any transaction and accepts no liability for disputes between merchants and customers.</p>
+        <p>Orders placed through your WhatsApp button are transactions between you and your customers. Earket is not a party to any transaction and accepts no liability for disputes between merchants and customers.</p>
 
         <h2>5. Platform availability</h2>
         <p>We aim for high availability but do not guarantee 100% uptime. We are not liable for any loss arising from platform downtime.</p>

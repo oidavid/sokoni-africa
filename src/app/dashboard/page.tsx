@@ -89,7 +89,7 @@ export default function DashboardPage() {
           <div className="w-7 h-7 bg-brand-green rounded-lg flex items-center justify-center">
             <ShoppingBag size={14} className="text-white" />
           </div>
-          <span className="font-display font-bold text-brand-dark">Sokoni</span>
+          <span className="font-display font-bold text-brand-dark">Earket</span>
         </div>
         <div className="flex items-center gap-2">
           <Link href={`/store/${merchant.slug}`} target="_blank"
@@ -147,9 +147,9 @@ export default function DashboardPage() {
           <div className="text-xs font-semibold text-gray-500 mb-2">YOUR STORE LINK</div>
           <div className="flex items-center gap-2">
             <div className="flex-1 bg-brand-light rounded-xl px-3 py-2.5 text-sm font-medium text-brand-green truncate">
-              sokoni.africa/{merchant.slug}
+              earket.com/{merchant.slug}
             </div>
-            <a href={`https://wa.me/?text=Check out my store: https://sokoni-africa-gamma.vercel.app/store/${merchant.slug}`}
+            <a href={`https://wa.me/?text=Check out my store: https://earket-gamma.vercel.app/store/${merchant.slug}`}
               target="_blank" rel="noreferrer" className="btn-whatsapp shrink-0 py-2.5">
               📲 Share
             </a>

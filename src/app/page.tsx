@@ -35,7 +35,7 @@ const LANG = {
     pricingManage: "₦15,000/mo",
     pricingManageSub: "We manage it for you",
     testimonialTitle: "Traders dey love am",
-    footer: "© 2025 Sokoni Africa. Free for Nigerian traders.",
+    footer: "© 2025 Earket. Free for Nigerian traders.",
   },
   pid: {
     hero: "Carry Your Market Enter Online.",
@@ -65,12 +65,12 @@ const LANG = {
     pricingManage: "₦15,000/month",
     pricingManageSub: "We go manage am for you",
     testimonialTitle: "Traders love am well well",
-    footer: "© 2025 Sokoni Africa. Free for Nigerian traders.",
+    footer: "© 2025 Earket. Free for Nigerian traders.",
   }
 }
 
 const freeFeatures = [
-  "Your own store link (sokoni.africa/yourstore)",
+  "Your own store link (earket.com/yourstore)",
   "Unlimited products",
   "WhatsApp order button on every product",
   "AI writes your product descriptions",
@@ -99,7 +99,7 @@ export default function HomePage() {
             <div className="w-8 h-8 bg-brand-green rounded-lg flex items-center justify-center">
               <ShoppingBag size={16} className="text-white" />
             </div>
-            <span className="font-display font-bold text-brand-dark text-lg">Sokoni Africa</span>
+            <span className="font-display font-bold text-brand-dark text-lg">Earket</span>
           </div>
           <div className="flex items-center gap-3">
             {/* Language toggle */}
@@ -156,7 +156,7 @@ export default function HomePage() {
                 <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-sm">🛍️</div>
                 <div>
                   <div className="text-xs font-bold">Tropical Market</div>
-                  <div className="text-xs opacity-75">sokoni.africa/tropical-market</div>
+                  <div className="text-xs opacity-75">earket.com/tropical-market</div>
                 </div>
               </div>
               <div className="p-3 space-y-2">

@@ -9,7 +9,7 @@ export default function PrivacyPage() {
           <div className="w-7 h-7 bg-brand-green rounded-lg flex items-center justify-center">
             <ShoppingBag size={14} className="text-white" />
           </div>
-          <span className="font-display font-bold text-brand-dark text-base">Sokoni Africa</span>
+          <span className="font-display font-bold text-brand-dark text-base">Earket</span>
         </Link>
       </nav>
       <div className="max-w-2xl mx-auto px-4 py-12 prose prose-sm">
@@ -17,7 +17,7 @@ export default function PrivacyPage() {
         <p className="text-gray-400 text-sm mb-8">Last updated: January 2025</p>
 
         <h2>What we collect</h2>
-        <p>When you create a store on Sokoni Africa, we collect your business name, WhatsApp number, business category, and location. We use this information only to create and operate your storefront.</p>
+        <p>When you create a store on Earket, we collect your business name, WhatsApp number, business category, and location. We use this information only to create and operate your storefront.</p>
 
         <h2>How we use your data</h2>
         <p>Your data is used to generate and display your storefront, connect customers to you via WhatsApp, and improve our platform. We do not sell your data to third parties.</p>
