@@ -149,6 +149,20 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Sample products nudge */}
+        {products.length > 0 && products.some(p => p.name.startsWith('My Product') || ['Indomie Noodles', 'Golden Penny', 'Vegetable Oil', 'Pounded Yam', 'Ankara Print', 'Plain Cotton'].some(s => p.name.startsWith(s))) && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-5 flex items-start gap-3">
+            <div className="text-xl shrink-0">📸</div>
+            <div>
+              <p className="font-semibold text-amber-800 text-sm">Replace sample products with yours</p>
+              <p className="text-amber-700 text-xs mt-0.5">Your store has sample products. Add your real products with your own photos for a better customer experience.</p>
+              <Link href="/dashboard/products/new" className="inline-block mt-2 text-xs font-bold text-amber-800 underline">
+                Add my real products →
+              </Link>
+            </div>
+          </div>
+        )}
+
         {/* Products list */}
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden mb-5">
           <div className="px-4 py-3 border-b border-gray-50 flex items-center justify-between">

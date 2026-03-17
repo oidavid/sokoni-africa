@@ -3,20 +3,16 @@ import { useState } from 'react'
 import { ShoppingBag, Mail, ArrowRight, Check, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { COUNTRIES, normalizeNumber } from '@/lib/countries'
 
 type Method = 'email' | 'whatsapp'
-
-function normalizePhone(number: string) {
-  const digits = number.replace(/\D/g, '')
-  if (digits.startsWith('0')) return '234' + digits.slice(1)
-  if (digits.startsWith('234')) return digits
-  return '234' + digits
-}
 
 export default function LoginPage() {
   const [method, setMethod] = useState<Method>('email')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0])
+  const [showCountryPicker, setShowCountryPicker] = useState(false)
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -32,11 +28,9 @@ export default function LoginPage() {
         options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
       })
       if (authError) {
-        if (authError.message.toLowerCase().includes('rate')) {
-          setError('Too many emails sent. Please wait 1 hour or use WhatsApp login instead.')
-        } else {
-          setError(authError.message)
-        }
+        setError(authError.message.toLowerCase().includes('rate')
+          ? 'Too many emails sent. Please wait 1 hour or use WhatsApp login instead.'
+          : authError.message)
         setLoading(false)
         return
       }
@@ -45,22 +39,24 @@ export default function LoginPage() {
     } else {
       if (!phone.trim()) { setError('Please enter your WhatsApp number'); setLoading(false); return }
 
-      const normalized = normalizePhone(phone)
-      // Try multiple formats to find the merchant
+      const normalized = normalizeNumber(phone, selectedCountry.dial)
+
+      // Try to find merchant by phone
       const { data: merchants } = await supabase
         .from('merchants')
         .select('email, business_name, slug, whatsapp_number')
         .or(`whatsapp_number.eq.${normalized},phone.eq.${normalized}`)
+        .limit(1)
 
       let merchant = merchants?.[0]
 
-      // If not found, try with leading zero variant
+      // Try alternate formats if not found
       if (!merchant) {
-        const alt = '0' + normalized.slice(3) // convert 2348... back to 08...
         const { data: merchants2 } = await supabase
           .from('merchants')
           .select('email, business_name, slug, whatsapp_number')
-          .or(`whatsapp_number.eq.${alt},phone.eq.${alt}`)
+          .ilike('whatsapp_number', `%${phone.replace(/\D/g, '').slice(-8)}%`)
+          .limit(1)
         merchant = merchants2?.[0]
       }
 
@@ -76,9 +72,8 @@ export default function LoginPage() {
         options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
       })
 
-      // Always send WhatsApp message with login link regardless of email status
-      const loginUrl = `${window.location.origin}/auth/callback`
-      const msg = `Hi! Here is your Earket login link for *${merchant.business_name}*:\n\n${window.location.origin}/login\n\nYour store: earket.com/store/${merchant.slug}\n\n${merchant.email ? 'Login with your email: ' + merchant.email : 'Use the email you registered with to login'}`
+      // Always open WhatsApp with login info
+      const msg = `Your Earket login link for *${merchant.business_name}*:\n\n${window.location.origin}/login\n\nUse email: ${merchant.email || 'the email you registered with'}`
       window.open(`https://wa.me/${normalized}?text=${encodeURIComponent(msg)}`, '_blank')
 
       if (authError && !authError.message.toLowerCase().includes('rate')) {
@@ -86,7 +81,6 @@ export default function LoginPage() {
         setLoading(false)
         return
       }
-
       setSent(true)
     }
 
@@ -140,15 +134,33 @@ export default function LoginPage() {
                              text-brand-dark font-semibold outline-none transition-colors mb-3" />
               ) : (
                 <div className="mb-3">
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">🇳🇬 +234</span>
-                    <input type="tel" placeholder="08012345678" value={phone}
+                  <div className="flex gap-2 mb-2">
+                    <button onClick={() => setShowCountryPicker(!showCountryPicker)}
+                      className="flex items-center gap-1.5 bg-white border-2 border-gray-200 rounded-2xl px-3 py-4 text-sm font-semibold hover:border-brand-green transition-colors shrink-0">
+                      <span>{selectedCountry.flag}</span>
+                      <span className="text-gray-600">+{selectedCountry.dial}</span>
+                    </button>
+                    <input type="tel" placeholder="Phone number" value={phone}
                       onChange={e => { setPhone(e.target.value); setError('') }}
                       onKeyDown={e => e.key === 'Enter' && handleLogin()} autoFocus
-                      className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl pl-24 pr-4 py-4 
+                      className="flex-1 border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 
                                  text-brand-dark font-semibold outline-none transition-colors" />
                   </div>
-                  <p className="text-xs text-gray-400 mt-2">Enter the WhatsApp number you used when creating your store</p>
+                  {showCountryPicker && (
+                    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-lg max-h-52 overflow-y-auto mb-2">
+                      {COUNTRIES.map(c => (
+                        <button key={c.code} onClick={() => { setSelectedCountry(c); setShowCountryPicker(false) }}
+                          className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors ${
+                            selectedCountry.code === c.code ? 'bg-brand-light text-brand-green font-semibold' : 'text-gray-700'
+                          }`}>
+                          <span>{c.flag}</span>
+                          <span className="flex-1 text-left">{c.name}</span>
+                          <span className="text-gray-400 text-xs">+{c.dial}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-xs text-gray-400">Enter the WhatsApp number you used when creating your store</p>
                 </div>
               )}
 
@@ -183,7 +195,9 @@ export default function LoginPage() {
                 {method === 'email' ? 'Check your email! 📬' : 'Check your WhatsApp! 💬'}
               </h2>
               <p className="text-gray-500 text-sm mb-2">Your login link was sent to:</p>
-              <p className="font-bold text-brand-dark mb-6">{method === 'email' ? email : `+234 ${phone}`}</p>
+              <p className="font-bold text-brand-dark mb-6">
+                {method === 'email' ? email : `+${selectedCountry.dial} ${phone}`}
+              </p>
               <p className="text-xs text-gray-400 mb-6">
                 {method === 'email'
                   ? "Click the link in the email to open your dashboard. Check spam if you don't see it."
