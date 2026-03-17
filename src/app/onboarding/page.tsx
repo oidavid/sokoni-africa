@@ -8,13 +8,17 @@ import { getSampleProducts } from '@/lib/sample-products'
 type Step = 'language' | 'business' | 'whatsapp' | 'email' | 'category' | 'location' | 'products' | 'generating' | 'done'
 
 const CATEGORIES = [
-  { id: 'fashion', label: 'Fashion & Clothing', emoji: '👗', pidgin: 'Cloth & Fashion' },
   { id: 'food', label: 'Food & Drinks', emoji: '🍱', pidgin: 'Food & Drink' },
-  { id: 'electronics', label: 'Electronics & Phones', emoji: '📱', pidgin: 'Electronics & Phone' },
-  { id: 'beauty', label: 'Beauty & Hair', emoji: '💄', pidgin: 'Beauty & Hair' },
   { id: 'groceries', label: 'Groceries & Provisions', emoji: '🛒', pidgin: 'Provisions & Groceries' },
-  { id: 'furniture', label: 'Furniture & Home', emoji: '🪑', pidgin: 'Furniture & Home' },
+  { id: 'fashion', label: 'Fashion & Clothing', emoji: '👗', pidgin: 'Cloth & Fashion' },
+  { id: 'beauty', label: 'Beauty & Hair', emoji: '💄', pidgin: 'Beauty & Hair' },
   { id: 'shoes', label: 'Shoes & Bags', emoji: '👟', pidgin: 'Shoes & Bags' },
+  { id: 'electronics', label: 'Electronics & Gadgets', emoji: '📱', pidgin: 'Electronics & Gadgets' },
+  { id: 'phones', label: 'Phones & Laptops', emoji: '💻', pidgin: 'Phone & Laptop' },
+  { id: 'furniture', label: 'Furniture & Home', emoji: '🪑', pidgin: 'Furniture & Home' },
+  { id: 'health', label: 'Health & Pharmacy', emoji: '💊', pidgin: 'Health & Pharmacy' },
+  { id: 'stationery', label: 'Stationery & Office', emoji: '📚', pidgin: 'Books & Office' },
+  { id: 'automobile', label: 'Auto Parts & Car', emoji: '🚗', pidgin: 'Car & Auto Parts' },
   { id: 'other', label: 'Other Business', emoji: '🏪', pidgin: 'Other Business' },
 ]
 
