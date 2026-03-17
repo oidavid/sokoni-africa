@@ -83,7 +83,7 @@ export default function OnboardingPage() {
     whatsapp: 'business',
     email: 'whatsapp',
     category: 'email',
-    location: 'category'
+    location: 'category',
   }
 
   async function handleGenerate() {
@@ -98,7 +98,6 @@ export default function OnboardingPage() {
       setGenStep(i + 1)
     }
 
-    // Check if already exists
     const { data: existingList } = await supabase
       .from('merchants')
       .select('slug, email, phone')
@@ -159,8 +158,8 @@ export default function OnboardingPage() {
     const waNum = normalizeWhatsApp(whatsappNumber)
     const loginUrl = `${window.location.origin}/login`
     const msg = pid
-      ? `Your Earket store don ready! 🎉\n\nYour store link: earket.com/store/${storeSlug}\n\nTo add products and manage your store, login here:\n${loginUrl}\n\nUse your email: ${email}`
-      : `Your Earket store is live! 🎉\n\nYour store link: earket.com/store/${storeSlug}\n\nTo add products and manage your store, login here:\n${loginUrl}\n\nUse your email: ${email}`
+      ? `Your Earket store don ready!\n\nYour store: earket.com/store/${storeSlug}\n\nLogin to add products:\n${loginUrl}\n\nUse email: ${email}`
+      : `Your Earket store is live!\n\nYour store: earket.com/store/${storeSlug}\n\nLogin to add products:\n${loginUrl}\n\nUse email: ${email}`
     window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, '_blank')
     setLoginSent('whatsapp')
   }
@@ -222,13 +221,15 @@ export default function OnboardingPage() {
                 {pid ? 'Make we build your shop' : "Let's build your store"}
               </h1>
               <p className="text-gray-500 text-sm mb-8">
-                {pid ? 'Answer small questions. Your shop go dey live for minutes.' : 'Answer a few quick questions. Your store will be live in minutes.'}
+                {pid
+                  ? 'Answer small questions. Your shop go dey live for minutes.'
+                  : 'Answer a few quick questions. Your store will be live in minutes.'}
               </p>
               <div className="space-y-3">
-                {[
+                {([
                   { code: 'pid' as const, label: 'Pidgin English', sub: 'I wan use Pidgin' },
                   { code: 'en' as const, label: 'English', sub: 'I prefer English' },
-                ].map(l => (
+                ]).map(l => (
                   <button key={l.code} onClick={() => { setLang(l.code); setStep('business') }}
                     className="w-full flex items-center justify-between bg-white border-2 border-gray-200 hover:border-brand-green rounded-2xl p-4 transition-all group">
                     <div className="text-left">
@@ -248,12 +249,19 @@ export default function OnboardingPage() {
                 {pid ? 'Wetin be your business name?' : 'What is your business name?'}
               </h2>
               <p className="text-gray-500 text-sm mb-6">
-                {pid ? 'This go be the name wey customers go see.' : 'This is what customers will see on your store.'}
+                {pid
+                  ? 'This go be the name wey customers go see.'
+                  : 'This is what customers will see on your store.'}
               </p>
-              <input type="text" placeholder="e.g. Tropical Market" value={businessName}
+              <input
+                type="text"
+                placeholder="e.g. Tropical Market"
+                value={businessName}
                 onChange={e => { setBusinessName(e.target.value); setError('') }}
-                onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
-                className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
+                onKeyDown={e => e.key === 'Enter' && handleNext()}
+                autoFocus
+                className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors"
+              />
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
             </div>
           )}
@@ -264,18 +272,29 @@ export default function OnboardingPage() {
                 {pid ? 'Your WhatsApp business number?' : 'Your WhatsApp business number?'}
               </h2>
               <p className="text-gray-500 text-sm mb-6">
-                {pid ? 'Customers go send orders to this number' : 'Customers will send orders to this number'}
+                {pid
+                  ? 'Customers go send orders to this number'
+                  : 'Customers will send orders to this number'}
               </p>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">🇳🇬 +234</span>
-                <input type="tel" placeholder="08012345678" value={whatsappNumber}
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">
+                  🇳🇬 +234
+                </span>
+                <input
+                  type="tel"
+                  placeholder="08012345678"
+                  value={whatsappNumber}
                   onChange={e => { setWhatsappNumber(e.target.value); setError('') }}
-                  onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
-                  className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl pl-24 pr-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
+                  onKeyDown={e => e.key === 'Enter' && handleNext()}
+                  autoFocus
+                  className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl pl-24 pr-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors"
+                />
               </div>
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
               <p className="text-xs text-gray-400 mt-3">
-                ⚠️ {pid ? 'Make sure say this number dey active on WhatsApp' : 'Make sure this number is active on WhatsApp'}
+                {pid
+                  ? '⚠️ Make sure say this number dey active on WhatsApp'
+                  : '⚠️ Make sure this number is active on WhatsApp'}
               </p>
             </div>
           )}
@@ -286,15 +305,22 @@ export default function OnboardingPage() {
                 {pid ? 'Your email address?' : 'Your email address?'}
               </h2>
               <p className="text-gray-500 text-sm mb-6">
-                {pid ? 'We go use this to send you login link — no password needed' : 'We use this to send your login link — no password needed'}
+                {pid
+                  ? 'We go use this to send you login link — no password needed'
+                  : 'We use this to send your login link — no password needed'}
               </p>
-              <input type="email" placeholder="you@example.com" value={email}
+              <input
+                type="email"
+                placeholder="you@example.com"
+                value={email}
                 onChange={e => { setEmail(e.target.value); setError('') }}
-                onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
-                className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-semibold text-lg outline-none transition-colors" />
+                onKeyDown={e => e.key === 'Enter' && handleNext()}
+                autoFocus
+                className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-semibold text-lg outline-none transition-colors"
+              />
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
               <p className="text-xs text-gray-400 mt-3">
-                🔒 {pid ? 'No password wahala' : 'No password required'}
+                {pid ? '🔒 No password wahala' : '🔒 No password required'}
               </p>
             </div>
           )}
@@ -308,10 +334,14 @@ export default function OnboardingPage() {
                 {CATEGORIES.map(cat => (
                   <button key={cat.id} onClick={() => setCategory(cat.id)}
                     className={`flex items-center gap-2 p-3 rounded-2xl border-2 text-left transition-all ${
-                      category === cat.id ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600 hover:border-brand-green/50'
+                      category === cat.id
+                        ? 'border-brand-green bg-brand-light text-brand-green'
+                        : 'border-gray-200 text-gray-600 hover:border-brand-green/50'
                     }`}>
                     <span className="text-xl">{cat.emoji}</span>
-                    <span className="text-xs font-semibold leading-tight">{pid ? cat.pidgin : cat.label}</span>
+                    <span className="text-xs font-semibold leading-tight">
+                      {pid ? cat.pidgin : cat.label}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -327,25 +357,35 @@ export default function OnboardingPage() {
                 {LOCATIONS.map(loc => (
                   <button key={loc} onClick={() => setLocation(loc)}
                     className={`py-2.5 px-3 rounded-xl border-2 text-xs font-semibold transition-all ${
-                      location === loc ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600 hover:border-brand-green/50'
+                      location === loc
+                        ? 'border-brand-green bg-brand-light text-brand-green'
+                        : 'border-gray-200 text-gray-600 hover:border-brand-green/50'
                     }`}>
                     {loc}
                   </button>
                 ))}
               </div>
-              <button onClick={() => setPrefillProducts(!prefillProducts)}
-                className="w-full flex items-center gap-3 bg-white border-2 border-gray-200 rounded-2xl p-4 transition-all hover:border-brand-green/50">
+              <button
+                onClick={() => setPrefillProducts(!prefillProducts)}
+                className="w-full flex items-center gap-3 bg-white border-2 border-gray-200 rounded-2xl p-4 hover:border-brand-green/50 transition-all"
+              >
                 <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${
                   prefillProducts ? 'bg-brand-green border-brand-green' : 'border-gray-300'
                 }`}>
-                  {prefillProducts && <svg viewBox="0 0 12 10" className="w-3 h-3 fill-white"><path d="M1 5l3 4L11 1"/></svg>}
+                  {prefillProducts && (
+                    <svg viewBox="0 0 12 10" className="w-3 h-3 fill-white">
+                      <path d="M1 5l3 4L11 1" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round"/>
+                    </svg>
+                  )}
                 </div>
                 <div className="text-left">
                   <div className="font-semibold text-gray-800 text-sm">
                     {pid ? 'Add sample products to my store' : 'Add sample products to my store'}
                   </div>
                   <div className="text-xs text-gray-400">
-                    {pid ? 'We go add example products wey you fit edit later' : 'We'll add example products you can edit or replace'}
+                    {pid
+                      ? 'We go add example products wey you fit edit later'
+                      : "We'll add example products you can edit or replace"}
                   </div>
                 </div>
               </button>
@@ -369,8 +409,7 @@ export default function OnboardingPage() {
                       ? <Check size={14} />
                       : i === genStep
                         ? <Loader2 size={14} className="animate-spin" />
-                        : <div className="w-3.5 h-3.5 rounded-full border border-gray-300" />
-                    }
+                        : <div className="w-3.5 h-3.5 rounded-full border border-gray-300" />}
                     {s}
                   </div>
                 ))}
@@ -389,12 +428,12 @@ export default function OnboardingPage() {
               {alreadyExists && (
                 <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-5 text-left">
                   <p className="font-semibold text-amber-800 text-sm mb-1">
-                    ⚠️ {pid ? 'You don already get shop!' : 'You already have a store!'}
+                    {pid ? '⚠️ You don already get shop!' : '⚠️ You already have a store!'}
                   </p>
                   <p className="text-amber-700 text-xs">
                     {pid
-                      ? 'This email or WhatsApp number don already use. We go show you your existing shop.'
-                      : 'This email or WhatsApp is already linked to a store. Showing your existing store.'}
+                      ? 'This email or WhatsApp don already use. Showing your existing shop.'
+                      : 'This email or WhatsApp is already linked to a store.'}
                   </p>
                 </div>
               )}
@@ -402,19 +441,24 @@ export default function OnboardingPage() {
               <h2 className="font-display text-2xl font-bold text-brand-dark mb-2">
                 {alreadyExists
                   ? (pid ? 'Your shop dey here! 👋' : 'Welcome back! 👋')
-                  : (pid ? 'Your shop don go live! 🎉' : 'Your store is live! 🎉')
-                }
+                  : (pid ? 'Your shop don go live! 🎉' : 'Your store is live! 🎉')}
               </h2>
 
               <div className="bg-brand-light border-2 border-brand-green/20 rounded-2xl p-4 mb-6">
-                <p className="text-xs text-gray-500 mb-1">{pid ? 'Your shop link:' : 'Your store link:'}</p>
-                <p className="font-display font-bold text-brand-green text-sm">earket.com/store/{storeSlug}</p>
+                <p className="text-xs text-gray-500 mb-1">
+                  {pid ? 'Your shop link:' : 'Your store link:'}
+                </p>
+                <p className="font-display font-bold text-brand-green text-sm">
+                  earket.com/store/{storeSlug}
+                </p>
               </div>
 
               {!loginSent ? (
                 <>
                   <p className="text-sm font-semibold text-gray-700 mb-3">
-                    {pid ? 'How you want receive your login link?' : 'How would you like to receive your login link?'}
+                    {pid
+                      ? 'How you want receive your login link?'
+                      : 'How would you like to receive your login link?'}
                   </p>
                   <div className="space-y-2 mb-5">
                     <button onClick={sendLoginEmail}
@@ -429,9 +473,8 @@ export default function OnboardingPage() {
                         <div className="text-xs text-gray-400 truncate">{email}</div>
                       </div>
                     </button>
-
                     <button onClick={sendLoginWhatsApp}
-                      className="w-full flex items-center gap-3 bg-[#25D366] rounded-2xl p-4 transition-all hover:opacity-90">
+                      className="w-full flex items-center gap-3 bg-[#25D366] rounded-2xl p-4 hover:opacity-90 transition-all">
                       <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                         <MessageCircle size={20} className="text-white" />
                       </div>
@@ -459,9 +502,14 @@ export default function OnboardingPage() {
                 className="block w-full bg-brand-green text-white font-bold py-3 rounded-2xl hover:bg-brand-dark transition-colors mb-2 text-sm">
                 {pid ? 'See My Shop' : 'View My Store'}
               </Link>
-
-              <a href={`https://wa.me/?text=${encodeURIComponent('Check out my store: ' + window.location.origin + '/store/' + storeSlug)}`}
-                target="_blank" rel="noreferrer" className="btn-whatsapp w-full justify-center">
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(
+                  'Check out my store: ' + (typeof window !== 'undefined' ? window.location.origin : 'https://earket.com') + '/store/' + storeSlug
+                )}`}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-whatsapp w-full justify-center"
+              >
                 📲 {pid ? 'Share for WhatsApp' : 'Share on WhatsApp'}
               </a>
             </div>
@@ -469,13 +517,17 @@ export default function OnboardingPage() {
 
           {!['language', 'generating', 'done'].includes(step) && (
             <div className="flex gap-3 mt-8">
-              <button onClick={() => setStep(prevStep[step])}
-                className="flex items-center gap-1.5 text-gray-500 hover:text-brand-dark text-sm font-medium px-4 py-3">
+              <button
+                onClick={() => setStep(prevStep[step])}
+                className="flex items-center gap-1.5 text-gray-500 hover:text-brand-dark text-sm font-medium px-4 py-3"
+              >
                 <ArrowLeft size={16} /> {pid ? 'Go Back' : 'Back'}
               </button>
-              <button onClick={handleNext}
+              <button
+                onClick={handleNext}
                 disabled={(step === 'category' && !category) || (step === 'location' && !location)}
-                className="flex-1 bg-brand-green text-white font-bold py-3 rounded-2xl hover:bg-brand-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                className="flex-1 bg-brand-green text-white font-bold py-3 rounded-2xl hover:bg-brand-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
                 {pid ? 'Continue' : 'Continue'} <ArrowRight size={18} />
               </button>
             </div>
