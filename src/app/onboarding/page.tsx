@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { getSampleProducts } from '@/lib/sample-products'
 
-type Step = 'language' | 'business' | 'whatsapp' | 'email' | 'category' | 'location' | 'generating' | 'done'
+type Step = 'language' | 'business' | 'whatsapp' | 'email' | 'category' | 'location' | 'products' | 'generating' | 'done'
 
 const CATEGORIES = [
   { id: 'fashion', label: 'Fashion & Clothing', emoji: '👗', pidgin: 'Cloth & Fashion' },
@@ -60,9 +60,10 @@ export default function OnboardingPage() {
   const [error, setError] = useState('')
   const [loginSent, setLoginSent] = useState<'email' | 'whatsapp' | null>(null)
   const [alreadyExists, setAlreadyExists] = useState(false)
-  const [prefillProducts, setPrefillProducts] = useState(true)
+  const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set())
 
   const pid = lang === 'pid'
+  const sampleProducts = category ? getSampleProducts(category) : []
 
   const generatingSteps = pid ? [
     'We dey create your shop design...',
@@ -84,6 +85,27 @@ export default function OnboardingPage() {
     email: 'whatsapp',
     category: 'email',
     location: 'category',
+    products: 'location',
+  }
+
+  function toggleProduct(index: number) {
+    setSelectedProducts(prev => {
+      const next = new Set(prev)
+      if (next.has(index)) {
+        next.delete(index)
+      } else {
+        next.add(index)
+      }
+      return next
+    })
+  }
+
+  function selectAll() {
+    setSelectedProducts(new Set(sampleProducts.map((_, i) => i)))
+  }
+
+  function selectNone() {
+    setSelectedProducts(new Set())
   }
 
   async function handleGenerate() {
@@ -131,11 +153,11 @@ export default function OnboardingPage() {
         .select('id')
         .single()
 
-      if (!insertError && newMerchant && prefillProducts) {
-        const samples = getSampleProducts(category)
-        await supabase.from('products').insert(
-          samples.map(p => ({ ...p, merchant_id: newMerchant.id }))
-        )
+      if (!insertError && newMerchant && selectedProducts.size > 0) {
+        const chosenProducts = sampleProducts
+          .filter((_, i) => selectedProducts.has(i))
+          .map(p => ({ ...p, merchant_id: newMerchant.id }))
+        await supabase.from('products').insert(chosenProducts)
       }
       setStoreSlug(slug)
     } catch (e) {
@@ -187,9 +209,15 @@ export default function OnboardingPage() {
     } else if (step === 'category') {
       setStep('location')
     } else if (step === 'location') {
+      // Pre-select all sample products by default
+      setSelectedProducts(new Set(getSampleProducts(category).map((_, i) => i)))
+      setStep('products')
+    } else if (step === 'products') {
       handleGenerate()
     }
   }
+
+  const stepsList = ['business', 'whatsapp', 'email', 'category', 'location', 'products']
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-brand-light to-white flex flex-col">
@@ -206,10 +234,7 @@ export default function OnboardingPage() {
         <div className="w-full max-w-sm">
 
           {!['generating', 'done', 'language'].includes(step) && (
-            <StepIndicator
-              current={['business', 'whatsapp', 'email', 'category', 'location'].indexOf(step)}
-              total={5}
-            />
+            <StepIndicator current={stepsList.indexOf(step)} total={stepsList.length} />
           )}
 
           {step === 'language' && (
@@ -249,19 +274,12 @@ export default function OnboardingPage() {
                 {pid ? 'Wetin be your business name?' : 'What is your business name?'}
               </h2>
               <p className="text-gray-500 text-sm mb-6">
-                {pid
-                  ? 'This go be the name wey customers go see.'
-                  : 'This is what customers will see on your store.'}
+                {pid ? 'This go be the name wey customers go see.' : 'This is what customers will see on your store.'}
               </p>
-              <input
-                type="text"
-                placeholder="e.g. Tropical Market"
-                value={businessName}
+              <input type="text" placeholder="e.g. Tropical Market" value={businessName}
                 onChange={e => { setBusinessName(e.target.value); setError('') }}
-                onKeyDown={e => e.key === 'Enter' && handleNext()}
-                autoFocus
-                className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors"
-              />
+                onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
+                className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
             </div>
           )}
@@ -272,29 +290,18 @@ export default function OnboardingPage() {
                 {pid ? 'Your WhatsApp business number?' : 'Your WhatsApp business number?'}
               </h2>
               <p className="text-gray-500 text-sm mb-6">
-                {pid
-                  ? 'Customers go send orders to this number'
-                  : 'Customers will send orders to this number'}
+                {pid ? 'Customers go send orders to this number' : 'Customers will send orders to this number'}
               </p>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">
-                  🇳🇬 +234
-                </span>
-                <input
-                  type="tel"
-                  placeholder="08012345678"
-                  value={whatsappNumber}
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">🇳🇬 +234</span>
+                <input type="tel" placeholder="08012345678" value={whatsappNumber}
                   onChange={e => { setWhatsappNumber(e.target.value); setError('') }}
-                  onKeyDown={e => e.key === 'Enter' && handleNext()}
-                  autoFocus
-                  className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl pl-24 pr-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors"
-                />
+                  onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
+                  className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl pl-24 pr-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
               </div>
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
               <p className="text-xs text-gray-400 mt-3">
-                {pid
-                  ? '⚠️ Make sure say this number dey active on WhatsApp'
-                  : '⚠️ Make sure this number is active on WhatsApp'}
+                {pid ? '⚠️ Make sure say this number dey active on WhatsApp' : '⚠️ Make sure this number is active on WhatsApp'}
               </p>
             </div>
           )}
@@ -305,23 +312,14 @@ export default function OnboardingPage() {
                 {pid ? 'Your email address?' : 'Your email address?'}
               </h2>
               <p className="text-gray-500 text-sm mb-6">
-                {pid
-                  ? 'We go use this to send you login link — no password needed'
-                  : 'We use this to send your login link — no password needed'}
+                {pid ? 'We go use this to send you login link — no password needed' : 'We use this to send your login link — no password needed'}
               </p>
-              <input
-                type="email"
-                placeholder="you@example.com"
-                value={email}
+              <input type="email" placeholder="you@example.com" value={email}
                 onChange={e => { setEmail(e.target.value); setError('') }}
-                onKeyDown={e => e.key === 'Enter' && handleNext()}
-                autoFocus
-                className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-semibold text-lg outline-none transition-colors"
-              />
+                onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
+                className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-semibold text-lg outline-none transition-colors" />
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
-              <p className="text-xs text-gray-400 mt-3">
-                {pid ? '🔒 No password wahala' : '🔒 No password required'}
-              </p>
+              <p className="text-xs text-gray-400 mt-3">{pid ? '🔒 No password wahala' : '🔒 No password required'}</p>
             </div>
           )}
 
@@ -334,14 +332,10 @@ export default function OnboardingPage() {
                 {CATEGORIES.map(cat => (
                   <button key={cat.id} onClick={() => setCategory(cat.id)}
                     className={`flex items-center gap-2 p-3 rounded-2xl border-2 text-left transition-all ${
-                      category === cat.id
-                        ? 'border-brand-green bg-brand-light text-brand-green'
-                        : 'border-gray-200 text-gray-600 hover:border-brand-green/50'
+                      category === cat.id ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600 hover:border-brand-green/50'
                     }`}>
                     <span className="text-xl">{cat.emoji}</span>
-                    <span className="text-xs font-semibold leading-tight">
-                      {pid ? cat.pidgin : cat.label}
-                    </span>
+                    <span className="text-xs font-semibold leading-tight">{pid ? cat.pidgin : cat.label}</span>
                   </button>
                 ))}
               </div>
@@ -353,42 +347,71 @@ export default function OnboardingPage() {
               <h2 className="font-display text-xl font-bold text-brand-dark mb-6">
                 {pid ? 'Where your business dey?' : 'Where is your business located?'}
               </h2>
-              <div className="grid grid-cols-3 gap-2 mb-6">
+              <div className="grid grid-cols-3 gap-2">
                 {LOCATIONS.map(loc => (
                   <button key={loc} onClick={() => setLocation(loc)}
                     className={`py-2.5 px-3 rounded-xl border-2 text-xs font-semibold transition-all ${
-                      location === loc
-                        ? 'border-brand-green bg-brand-light text-brand-green'
-                        : 'border-gray-200 text-gray-600 hover:border-brand-green/50'
+                      location === loc ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600 hover:border-brand-green/50'
                     }`}>
                     {loc}
                   </button>
                 ))}
               </div>
-              <button
-                onClick={() => setPrefillProducts(!prefillProducts)}
-                className="w-full flex items-center gap-3 bg-white border-2 border-gray-200 rounded-2xl p-4 hover:border-brand-green/50 transition-all"
-              >
-                <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${
-                  prefillProducts ? 'bg-brand-green border-brand-green' : 'border-gray-300'
-                }`}>
-                  {prefillProducts && (
-                    <svg viewBox="0 0 12 10" className="w-3 h-3 fill-white">
-                      <path d="M1 5l3 4L11 1" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                    </svg>
-                  )}
-                </div>
-                <div className="text-left">
-                  <div className="font-semibold text-gray-800 text-sm">
-                    {pid ? 'Add sample products to my store' : 'Add sample products to my store'}
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    {pid
-                      ? 'We go add example products wey you fit edit later'
-                      : "We'll add example products you can edit or replace"}
-                  </div>
-                </div>
-              </button>
+            </div>
+          )}
+
+          {step === 'products' && (
+            <div className="animate-fade-in">
+              <h2 className="font-display text-xl font-bold text-brand-dark mb-1">
+                {pid ? 'Pick your starter products' : 'Pick your starter products'}
+              </h2>
+              <p className="text-gray-500 text-sm mb-4">
+                {pid
+                  ? 'Select products wey you want add to your store. You fit edit or remove them later.'
+                  : 'Select products to add to your store. You can edit or remove them later.'}
+              </p>
+              <div className="flex gap-2 mb-3">
+                <button onClick={selectAll}
+                  className="text-xs font-semibold text-brand-green border border-brand-green/30 bg-brand-light px-3 py-1.5 rounded-xl">
+                  {pid ? 'Select All' : 'Select All'}
+                </button>
+                <button onClick={selectNone}
+                  className="text-xs font-semibold text-gray-500 border border-gray-200 px-3 py-1.5 rounded-xl">
+                  {pid ? 'Clear All' : 'Clear All'}
+                </button>
+                <span className="ml-auto text-xs text-gray-400 self-center">
+                  {selectedProducts.size} {pid ? 'selected' : 'selected'}
+                </span>
+              </div>
+              <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+                {sampleProducts.map((product, i) => (
+                  <button key={i} onClick={() => toggleProduct(i)}
+                    className={`w-full flex items-center gap-3 rounded-2xl border-2 p-3 text-left transition-all ${
+                      selectedProducts.has(i)
+                        ? 'border-brand-green bg-brand-light'
+                        : 'border-gray-200 bg-white hover:border-brand-green/40'
+                    }`}>
+                    <img
+                      src={product.image_url}
+                      alt={product.name}
+                      className="w-12 h-12 rounded-xl object-cover shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-gray-800 text-xs leading-tight truncate">{product.name}</div>
+                      <div className="text-brand-green font-bold text-sm mt-0.5">{product.price_display}</div>
+                    </div>
+                    <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${
+                      selectedProducts.has(i) ? 'bg-brand-green border-brand-green' : 'border-gray-300'
+                    }`}>
+                      {selectedProducts.has(i) && (
+                        <svg viewBox="0 0 12 10" className="w-3 h-3">
+                          <path d="M1 5l3 4L11 1" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
@@ -445,20 +468,14 @@ export default function OnboardingPage() {
               </h2>
 
               <div className="bg-brand-light border-2 border-brand-green/20 rounded-2xl p-4 mb-6">
-                <p className="text-xs text-gray-500 mb-1">
-                  {pid ? 'Your shop link:' : 'Your store link:'}
-                </p>
-                <p className="font-display font-bold text-brand-green text-sm">
-                  earket.com/store/{storeSlug}
-                </p>
+                <p className="text-xs text-gray-500 mb-1">{pid ? 'Your shop link:' : 'Your store link:'}</p>
+                <p className="font-display font-bold text-brand-green text-sm">earket.com/store/{storeSlug}</p>
               </div>
 
               {!loginSent ? (
                 <>
                   <p className="text-sm font-semibold text-gray-700 mb-3">
-                    {pid
-                      ? 'How you want receive your login link?'
-                      : 'How would you like to receive your login link?'}
+                    {pid ? 'How you want receive your login link?' : 'How would you like to receive your login link?'}
                   </p>
                   <div className="space-y-2 mb-5">
                     <button onClick={sendLoginEmail}
@@ -467,9 +484,7 @@ export default function OnboardingPage() {
                         <Mail size={20} className="text-brand-green" />
                       </div>
                       <div className="text-left">
-                        <div className="font-semibold text-brand-dark text-sm">
-                          {pid ? 'Send to my Email' : 'Send to my Email'}
-                        </div>
+                        <div className="font-semibold text-brand-dark text-sm">Send to my Email</div>
                         <div className="text-xs text-gray-400 truncate">{email}</div>
                       </div>
                     </button>
@@ -479,9 +494,7 @@ export default function OnboardingPage() {
                         <MessageCircle size={20} className="text-white" />
                       </div>
                       <div className="text-left">
-                        <div className="font-semibold text-white text-sm">
-                          {pid ? 'Send to my WhatsApp' : 'Send to my WhatsApp'}
-                        </div>
+                        <div className="font-semibold text-white text-sm">Send to my WhatsApp</div>
                         <div className="text-xs text-white/70">+{normalizeWhatsApp(whatsappNumber)}</div>
                       </div>
                     </button>
@@ -502,14 +515,8 @@ export default function OnboardingPage() {
                 className="block w-full bg-brand-green text-white font-bold py-3 rounded-2xl hover:bg-brand-dark transition-colors mb-2 text-sm">
                 {pid ? 'See My Shop' : 'View My Store'}
               </Link>
-              <a
-                href={`https://wa.me/?text=${encodeURIComponent(
-                  'Check out my store: ' + (typeof window !== 'undefined' ? window.location.origin : 'https://earket.com') + '/store/' + storeSlug
-                )}`}
-                target="_blank"
-                rel="noreferrer"
-                className="btn-whatsapp w-full justify-center"
-              >
+              <a href={`https://wa.me/?text=${encodeURIComponent('Check out my store: https://earket.com/store/' + storeSlug)}`}
+                target="_blank" rel="noreferrer" className="btn-whatsapp w-full justify-center">
                 📲 {pid ? 'Share for WhatsApp' : 'Share on WhatsApp'}
               </a>
             </div>
@@ -517,17 +524,13 @@ export default function OnboardingPage() {
 
           {!['language', 'generating', 'done'].includes(step) && (
             <div className="flex gap-3 mt-8">
-              <button
-                onClick={() => setStep(prevStep[step])}
-                className="flex items-center gap-1.5 text-gray-500 hover:text-brand-dark text-sm font-medium px-4 py-3"
-              >
+              <button onClick={() => setStep(prevStep[step])}
+                className="flex items-center gap-1.5 text-gray-500 hover:text-brand-dark text-sm font-medium px-4 py-3">
                 <ArrowLeft size={16} /> {pid ? 'Go Back' : 'Back'}
               </button>
-              <button
-                onClick={handleNext}
+              <button onClick={handleNext}
                 disabled={(step === 'category' && !category) || (step === 'location' && !location)}
-                className="flex-1 bg-brand-green text-white font-bold py-3 rounded-2xl hover:bg-brand-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
+                className="flex-1 bg-brand-green text-white font-bold py-3 rounded-2xl hover:bg-brand-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                 {pid ? 'Continue' : 'Continue'} <ArrowRight size={18} />
               </button>
             </div>
