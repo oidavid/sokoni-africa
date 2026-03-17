@@ -76,23 +76,27 @@ export default function OnboardingPage() {
     'Almost ready...',
   ]
 
-  const stepMap: Record<Step, number> = { language: 0, business: 1, whatsapp: 2, email: 3, category: 4, location: 5, generating: 6, done: 6 }
-  const prevStep: Record<string, Step> = { business: 'language', whatsapp: 'business', email: 'whatsapp', category: 'email', location: 'category' }
+  const prevStep: Record<string, Step> = {
+    business: 'language',
+    whatsapp: 'business',
+    email: 'whatsapp',
+    category: 'email',
+    location: 'category'
+  }
 
   async function handleGenerate() {
     setStep('generating')
     setGenStep(0)
 
     const slug = slugify(businessName) + '-' + Math.random().toString(36).slice(2, 6)
-    setStoreSlug(slug)
+    const normalized = normalizeWhatsApp(whatsappNumber)
 
     for (let i = 0; i < generatingSteps.length; i++) {
       await new Promise(r => setTimeout(r, 700))
       setGenStep(i + 1)
     }
 
-    // Check if email or phone already has a store
-    const normalized = normalizeWhatsApp(whatsappNumber)
+    // Check if already exists
     const { data: existingList } = await supabase
       .from('merchants')
       .select('slug, email, phone')
@@ -102,7 +106,6 @@ export default function OnboardingPage() {
     const existing = existingList?.[0]
 
     if (existing) {
-      // Already has a store — skip to done with existing slug
       setStoreSlug(existing.slug)
       setAlreadyExists(true)
       setStep('done')
@@ -110,7 +113,7 @@ export default function OnboardingPage() {
     }
 
     try {
-      const { error: insertError } = await supabase.from('merchants').insert({
+      await supabase.from('merchants').insert({
         business_name: businessName,
         slug,
         category,
@@ -122,9 +125,10 @@ export default function OnboardingPage() {
         plan: 'free',
         is_active: true,
       })
-      if (insertError) console.error('Insert error:', insertError)
+      setStoreSlug(slug)
     } catch (e) {
       console.error('Save error:', e)
+      setStoreSlug(slug)
     }
 
     setStep('done')
@@ -142,8 +146,8 @@ export default function OnboardingPage() {
     const waNum = normalizeWhatsApp(whatsappNumber)
     const loginUrl = `${window.location.origin}/login`
     const msg = pid
-      ? `Your Earket store don ready! 🎉\n\nYour store link: earket.com/${storeSlug}\n\nTo add products and manage your store, login here:\n${loginUrl}\n\nUse your email: ${email}`
-      : `Your Earket store is live! 🎉\n\nYour store link: earket.com/${storeSlug}\n\nTo add products and manage your store, login here:\n${loginUrl}\n\nUse your email: ${email}`
+      ? `Your Earket store don ready! 🎉\n\nYour store link: earket.com/store/${storeSlug}\n\nTo add products and manage your store, login here:\n${loginUrl}\n\nUse your email: ${email}`
+      : `Your Earket store is live! 🎉\n\nYour store link: earket.com/store/${storeSlug}\n\nTo add products and manage your store, login here:\n${loginUrl}\n\nUse your email: ${email}`
     window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, '_blank')
     setLoginSent('whatsapp')
   }
@@ -151,13 +155,22 @@ export default function OnboardingPage() {
   function handleNext() {
     setError('')
     if (step === 'business') {
-      if (!businessName.trim()) { setError(pid ? 'Abeg enter your business name' : 'Please enter your business name'); return }
+      if (!businessName.trim()) {
+        setError(pid ? 'Abeg enter your business name' : 'Please enter your business name')
+        return
+      }
       setStep('whatsapp')
     } else if (step === 'whatsapp') {
-      if (!whatsappNumber.trim()) { setError(pid ? 'Abeg enter your WhatsApp number' : 'Please enter your WhatsApp number'); return }
+      if (!whatsappNumber.trim()) {
+        setError(pid ? 'Abeg enter your WhatsApp number' : 'Please enter your WhatsApp number')
+        return
+      }
       setStep('email')
     } else if (step === 'email') {
-      if (!email.trim() || !email.includes('@')) { setError(pid ? 'Abeg enter valid email' : 'Please enter a valid email'); return }
+      if (!email.trim() || !email.includes('@')) {
+        setError(pid ? 'Abeg enter valid email' : 'Please enter a valid email')
+        return
+      }
       setStep('category')
     } else if (step === 'category') {
       setStep('location')
@@ -179,11 +192,14 @@ export default function OnboardingPage() {
 
       <div className="flex-1 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-sm">
+
           {!['generating', 'done', 'language'].includes(step) && (
-            <StepIndicator current={stepMap[step] - 1} total={6} />
+            <StepIndicator
+              current={['business', 'whatsapp', 'email', 'category', 'location'].indexOf(step)}
+              total={5}
+            />
           )}
 
-          {/* Language */}
           {step === 'language' && (
             <div className="text-center animate-fade-in">
               <div className="w-16 h-16 bg-brand-green rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-brand-green/20">
@@ -213,7 +229,6 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* Business Name */}
           {step === 'business' && (
             <div className="animate-fade-in">
               <h2 className="font-display text-xl font-bold text-brand-dark mb-1">
@@ -230,7 +245,6 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* WhatsApp */}
           {step === 'whatsapp' && (
             <div className="animate-fade-in">
               <h2 className="font-display text-xl font-bold text-brand-dark mb-1">
@@ -253,7 +267,6 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* Email */}
           {step === 'email' && (
             <div className="animate-fade-in">
               <h2 className="font-display text-xl font-bold text-brand-dark mb-1">
@@ -267,11 +280,12 @@ export default function OnboardingPage() {
                 onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
                 className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-semibold text-lg outline-none transition-colors" />
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
-              <p className="text-xs text-gray-400 mt-3">🔒 {pid ? 'No password wahala' : 'No password required'}</p>
+              <p className="text-xs text-gray-400 mt-3">
+                🔒 {pid ? 'No password wahala' : 'No password required'}
+              </p>
             </div>
           )}
 
-          {/* Category */}
           {step === 'category' && (
             <div className="animate-fade-in">
               <h2 className="font-display text-xl font-bold text-brand-dark mb-6">
@@ -291,7 +305,6 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* Location */}
           {step === 'location' && (
             <div className="animate-fade-in">
               <h2 className="font-display text-xl font-bold text-brand-dark mb-6">
@@ -310,7 +323,6 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* Generating */}
           {step === 'generating' && (
             <div className="animate-fade-in text-center py-8">
               <div className="w-20 h-20 bg-brand-light rounded-full flex items-center justify-center mx-auto mb-6">
@@ -324,7 +336,12 @@ export default function OnboardingPage() {
                   <div key={i} className={`flex items-center justify-center gap-2 text-sm transition-all duration-300 ${
                     i < genStep ? 'text-brand-green' : i === genStep ? 'text-brand-dark font-medium' : 'text-gray-300'
                   }`}>
-                    {i < genStep ? <Check size={14} /> : i === genStep ? <Loader2 size={14} className="animate-spin" /> : <div className="w-3.5 h-3.5 rounded-full border border-gray-300" />}
+                    {i < genStep
+                      ? <Check size={14} />
+                      : i === genStep
+                        ? <Loader2 size={14} className="animate-spin" />
+                        : <div className="w-3.5 h-3.5 rounded-full border border-gray-300" />
+                    }
                     {s}
                   </div>
                 ))}
@@ -332,18 +349,27 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* Done */}
           {step === 'done' && (
             <div className="animate-fade-in text-center">
-              <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg ${alreadyExists ? 'bg-brand-accent shadow-brand-accent/30' : 'bg-brand-green shadow-brand-green/30'}`}>
+              <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg ${
+                alreadyExists ? 'bg-brand-accent shadow-brand-accent/30' : 'bg-brand-green shadow-brand-green/30'
+              }`}>
                 <Check size={36} className="text-white" />
               </div>
+
               {alreadyExists && (
                 <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-5 text-left">
-                  <p className="font-semibold text-amber-800 text-sm mb-1">⚠️ {pid ? 'You don already get shop!' : 'You already have a store!'}</p>
-                  <p className="text-amber-700 text-xs">{pid ? 'This email or WhatsApp number don already use to create shop. We go take you to your existing shop.' : 'This email or WhatsApp number is already linked to a store. We're showing your existing store below.'}</p>
+                  <p className="font-semibold text-amber-800 text-sm mb-1">
+                    ⚠️ {pid ? 'You don already get shop!' : 'You already have a store!'}
+                  </p>
+                  <p className="text-amber-700 text-xs">
+                    {pid
+                      ? 'This email or WhatsApp number don already use. We go show you your existing shop.'
+                      : 'This email or WhatsApp is already linked to a store. Showing your existing store.'}
+                  </p>
                 </div>
               )}
+
               <h2 className="font-display text-2xl font-bold text-brand-dark mb-2">
                 {alreadyExists
                   ? (pid ? 'Your shop dey here! 👋' : 'Welcome back! 👋')
@@ -353,10 +379,9 @@ export default function OnboardingPage() {
 
               <div className="bg-brand-light border-2 border-brand-green/20 rounded-2xl p-4 mb-6">
                 <p className="text-xs text-gray-500 mb-1">{pid ? 'Your shop link:' : 'Your store link:'}</p>
-                <p className="font-display font-bold text-brand-green text-sm">earket.com/{storeSlug}</p>
+                <p className="font-display font-bold text-brand-green text-sm">earket.com/store/{storeSlug}</p>
               </div>
 
-              {/* Login delivery options */}
               {!loginSent ? (
                 <>
                   <p className="text-sm font-semibold text-gray-700 mb-3">
@@ -369,7 +394,9 @@ export default function OnboardingPage() {
                         <Mail size={20} className="text-brand-green" />
                       </div>
                       <div className="text-left">
-                        <div className="font-semibold text-brand-dark text-sm">{pid ? 'Send to my Email' : 'Send to my Email'}</div>
+                        <div className="font-semibold text-brand-dark text-sm">
+                          {pid ? 'Send to my Email' : 'Send to my Email'}
+                        </div>
                         <div className="text-xs text-gray-400 truncate">{email}</div>
                       </div>
                     </button>
@@ -380,7 +407,9 @@ export default function OnboardingPage() {
                         <MessageCircle size={20} className="text-white" />
                       </div>
                       <div className="text-left">
-                        <div className="font-semibold text-white text-sm">{pid ? 'Send to my WhatsApp' : 'Send to my WhatsApp'}</div>
+                        <div className="font-semibold text-white text-sm">
+                          {pid ? 'Send to my WhatsApp' : 'Send to my WhatsApp'}
+                        </div>
                         <div className="text-xs text-white/70">+{normalizeWhatsApp(whatsappNumber)}</div>
                       </div>
                     </button>
@@ -402,14 +431,13 @@ export default function OnboardingPage() {
                 {pid ? 'See My Shop' : 'View My Store'}
               </Link>
 
-              <a href={`https://wa.me/?text=${encodeURIComponent('Check out my online store: earket.com/' + storeSlug)}`}
+              <a href={`https://wa.me/?text=${encodeURIComponent('Check out my store: ' + window.location.origin + '/store/' + storeSlug)}`}
                 target="_blank" rel="noreferrer" className="btn-whatsapp w-full justify-center">
                 📲 {pid ? 'Share for WhatsApp' : 'Share on WhatsApp'}
               </a>
             </div>
           )}
 
-          {/* Nav buttons */}
           {!['language', 'generating', 'done'].includes(step) && (
             <div className="flex gap-3 mt-8">
               <button onClick={() => setStep(prevStep[step])}
@@ -423,6 +451,7 @@ export default function OnboardingPage() {
               </button>
             </div>
           )}
+
         </div>
       </div>
     </div>
