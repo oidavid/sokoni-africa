@@ -38,6 +38,8 @@ export default function SettingsPage() {
   const [dialCode, setDialCode] = useState('234')
   const [showCountryPicker, setShowCountryPicker] = useState(false)
   const [orderMode, setOrderMode] = useState('both')
+  const [loginPin, setLoginPin] = useState('')
+  const [pinSaved, setPinSaved] = useState(false)
   const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0])
 
   useEffect(() => {
@@ -57,6 +59,7 @@ export default function SettingsPage() {
       setDialCode(country.dial)
       setWhatsappRaw(wa.startsWith(country.dial) ? wa.slice(country.dial.length) : wa)
       setOrderMode(m.order_mode || 'both')
+      setLoginPin(m.login_pin || '')
       setLoading(false)
     }
     load()
@@ -75,6 +78,7 @@ export default function SettingsPage() {
         location,
         whatsapp_number: normalized,
         order_mode: orderMode,
+        login_pin: loginPin || null,
         phone: normalized,
       })
       .eq('id', merchant.id)
@@ -115,6 +119,24 @@ export default function SettingsPage() {
           <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Business Name</label>
           <input type="text" value={businessName} onChange={e => setBusinessName(e.target.value)}
             className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm font-semibold text-gray-800 focus:border-brand-green outline-none" />
+        </div>
+
+        {/* Login PIN */}
+        <div>
+          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Login PIN</label>
+          <p className="text-xs text-gray-400 mb-3">Set a 4-digit PIN so you can log in without waiting for an email link.</p>
+          <input
+            type="password"
+            inputMode="numeric"
+            maxLength={4}
+            placeholder="Set 4-digit PIN"
+            value={loginPin}
+            onChange={e => setLoginPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+            className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-brand-dark font-display font-bold text-2xl text-center tracking-widest focus:border-brand-green outline-none"
+          />
+          {loginPin.length === 4 && (
+            <p className="text-xs text-brand-green mt-1 text-center">✓ PIN ready — save changes to activate</p>
+          )}
         </div>
 
         {/* Description */}
