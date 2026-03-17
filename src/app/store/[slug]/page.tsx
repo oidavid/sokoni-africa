@@ -252,11 +252,15 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
         </div>
       )}
 
-      {/* Footer */}
-      <div className="text-center py-6 px-4 border-t border-gray-100 mt-4">
-        <p className="text-xs text-gray-400 mb-1">Powered by</p>
-        <Link href="/" className="text-brand-green font-display font-bold text-sm">Earket 🛒</Link>
-        <p className="text-xs text-gray-400 mt-1">Start your own free store at earket.com</p>
+      {/* Viral Footer CTA */}
+      <div className="mx-4 mb-6 mt-4 bg-brand-dark rounded-2xl p-5 text-center">
+        <p className="text-white/60 text-xs mb-1">Powered by</p>
+        <p className="font-display font-bold text-white text-lg mb-1">Earket 🛒</p>
+        <p className="text-white/70 text-xs mb-4">Build your own free online store in 5 minutes</p>
+        <Link href="/onboarding"
+          className="inline-block bg-brand-green text-white font-bold text-sm px-6 py-2.5 rounded-xl hover:bg-brand-accent transition-colors">
+          Start Free — earket.com
+        </Link>
       </div>
     </div>
   )

@@ -4,6 +4,7 @@ import { ArrowRight, ArrowLeft, Loader2, Check, ShoppingBag, Mail, MessageCircle
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { getSampleProducts } from '@/lib/sample-products'
+import { COUNTRIES, normalizeNumber } from '@/lib/countries'
 
 type Step = 'language' | 'business' | 'whatsapp' | 'email' | 'category' | 'location' | 'products' | 'generating' | 'done'
 
@@ -32,13 +33,6 @@ function slugify(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 }
 
-function normalizeWhatsApp(number: string) {
-  const digits = number.replace(/\D/g, '')
-  if (digits.startsWith('0')) return '234' + digits.slice(1)
-  if (digits.startsWith('234')) return digits
-  return '234' + digits
-}
-
 function StepIndicator({ current, total }: { current: number; total: number }) {
   return (
     <div className="flex gap-2 justify-center mb-8">
@@ -55,7 +49,9 @@ export default function OnboardingPage() {
   const [lang, setLang] = useState<'en' | 'pid'>('pid')
   const [step, setStep] = useState<Step>('language')
   const [businessName, setBusinessName] = useState('')
-  const [whatsappNumber, setWhatsappNumber] = useState('')
+  const [whatsappRaw, setWhatsappRaw] = useState('')
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0])
+  const [showCountryPicker, setShowCountryPicker] = useState(false)
   const [email, setEmail] = useState('')
   const [category, setCategory] = useState('')
   const [location, setLocation] = useState('')
@@ -68,6 +64,7 @@ export default function OnboardingPage() {
 
   const pid = lang === 'pid'
   const sampleProducts = category ? getSampleProducts(category) : []
+  const normalizedWa = normalizeNumber(whatsappRaw, selectedCountry.dial)
 
   const generatingSteps = pid ? [
     'We dey create your shop design...',
@@ -84,40 +81,22 @@ export default function OnboardingPage() {
   ]
 
   const prevStep: Record<string, Step> = {
-    business: 'language',
-    whatsapp: 'business',
-    email: 'whatsapp',
-    category: 'email',
-    location: 'category',
-    products: 'location',
+    business: 'language', whatsapp: 'business', email: 'whatsapp',
+    category: 'email', location: 'category', products: 'location',
   }
 
-  function toggleProduct(index: number) {
+  function toggleProduct(i: number) {
     setSelectedProducts(prev => {
       const next = new Set(prev)
-      if (next.has(index)) {
-        next.delete(index)
-      } else {
-        next.add(index)
-      }
+      next.has(i) ? next.delete(i) : next.add(i)
       return next
     })
-  }
-
-  function selectAll() {
-    setSelectedProducts(new Set(sampleProducts.map((_, i) => i)))
-  }
-
-  function selectNone() {
-    setSelectedProducts(new Set())
   }
 
   async function handleGenerate() {
     setStep('generating')
     setGenStep(0)
-
     const slug = slugify(businessName) + '-' + Math.random().toString(36).slice(2, 6)
-    const normalized = normalizeWhatsApp(whatsappNumber)
 
     for (let i = 0; i < generatingSteps.length; i++) {
       await new Promise(r => setTimeout(r, 700))
@@ -127,13 +106,11 @@ export default function OnboardingPage() {
     const { data: existingList } = await supabase
       .from('merchants')
       .select('slug, email, phone')
-      .or(`email.eq.${email},phone.eq.${normalized}`)
+      .or(`email.eq.${email},phone.eq.${normalizedWa}`)
       .limit(1)
 
-    const existing = existingList?.[0]
-
-    if (existing) {
-      setStoreSlug(existing.slug)
+    if (existingList?.[0]) {
+      setStoreSlug(existingList[0].slug)
       setAlreadyExists(true)
       setStep('done')
       return
@@ -147,9 +124,9 @@ export default function OnboardingPage() {
           slug,
           category,
           location,
-          whatsapp_number: normalized,
+          whatsapp_number: normalizedWa,
           email,
-          phone: normalized,
+          phone: normalizedWa,
           language: lang,
           plan: 'free',
           is_active: true,
@@ -158,62 +135,42 @@ export default function OnboardingPage() {
         .single()
 
       if (!insertError && newMerchant && selectedProducts.size > 0) {
-        const chosenProducts = sampleProducts
-          .filter((_, i) => selectedProducts.has(i))
-          .map(p => ({ ...p, merchant_id: newMerchant.id }))
-        await supabase.from('products').insert(chosenProducts)
+        const chosen = sampleProducts.filter((_, i) => selectedProducts.has(i)).map(p => ({ ...p, merchant_id: newMerchant.id }))
+        await supabase.from('products').insert(chosen)
       }
       setStoreSlug(slug)
     } catch (e) {
       console.error('Save error:', e)
       setStoreSlug(slug)
     }
-
     setStep('done')
   }
 
   async function sendLoginEmail() {
-    await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
-    })
+    await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: `${window.location.origin}/auth/callback` } })
     setLoginSent('email')
   }
 
   function sendLoginWhatsApp() {
-    const waNum = normalizeWhatsApp(whatsappNumber)
-    const loginUrl = `${window.location.origin}/login`
-    const msg = pid
-      ? `Your Earket store don ready!\n\nYour store: earket.com/store/${storeSlug}\n\nLogin to add products:\n${loginUrl}\n\nUse email: ${email}`
-      : `Your Earket store is live!\n\nYour store: earket.com/store/${storeSlug}\n\nLogin to add products:\n${loginUrl}\n\nUse email: ${email}`
-    window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, '_blank')
+    const msg = `Your Earket store is live!\n\nStore: earket.com/store/${storeSlug}\n\nLogin to manage: ${window.location.origin}/login\n\nEmail: ${email}`
+    window.open(`https://wa.me/${normalizedWa}?text=${encodeURIComponent(msg)}`, '_blank')
     setLoginSent('whatsapp')
   }
 
   function handleNext() {
     setError('')
     if (step === 'business') {
-      if (!businessName.trim()) {
-        setError(pid ? 'Abeg enter your business name' : 'Please enter your business name')
-        return
-      }
+      if (!businessName.trim()) { setError(pid ? 'Abeg enter your business name' : 'Please enter your business name'); return }
       setStep('whatsapp')
     } else if (step === 'whatsapp') {
-      if (!whatsappNumber.trim()) {
-        setError(pid ? 'Abeg enter your WhatsApp number' : 'Please enter your WhatsApp number')
-        return
-      }
+      if (!whatsappRaw.trim()) { setError(pid ? 'Abeg enter your WhatsApp number' : 'Please enter your WhatsApp number'); return }
       setStep('email')
     } else if (step === 'email') {
-      if (!email.trim() || !email.includes('@')) {
-        setError(pid ? 'Abeg enter valid email' : 'Please enter a valid email')
-        return
-      }
+      if (!email.trim() || !email.includes('@')) { setError(pid ? 'Abeg enter valid email' : 'Please enter a valid email'); return }
       setStep('category')
     } else if (step === 'category') {
       setStep('location')
     } else if (step === 'location') {
-      // Pre-select all sample products by default
       setSelectedProducts(new Set(getSampleProducts(category).map((_, i) => i)))
       setStep('products')
     } else if (step === 'products') {
@@ -250,9 +207,7 @@ export default function OnboardingPage() {
                 {pid ? 'Make we build your shop' : "Let's build your store"}
               </h1>
               <p className="text-gray-500 text-sm mb-8">
-                {pid
-                  ? 'Answer small questions. Your shop go dey live for minutes.'
-                  : 'Answer a few quick questions. Your store will be live in minutes.'}
+                {pid ? 'Answer small questions. Your shop go dey live for minutes.' : 'Answer a few quick questions. Your store will be live in minutes.'}
               </p>
               <div className="space-y-3">
                 {([
@@ -296,16 +251,32 @@ export default function OnboardingPage() {
               <p className="text-gray-500 text-sm mb-6">
                 {pid ? 'Customers go send orders to this number' : 'Customers will send orders to this number'}
               </p>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">🇳🇬 +234</span>
-                <input type="tel" placeholder="08012345678" value={whatsappNumber}
-                  onChange={e => { setWhatsappNumber(e.target.value); setError('') }}
+              <div className="flex gap-2 mb-2">
+                <button onClick={() => setShowCountryPicker(!showCountryPicker)}
+                  className="flex items-center gap-1.5 bg-white border-2 border-gray-200 rounded-2xl px-3 py-4 text-sm font-semibold hover:border-brand-green transition-colors shrink-0">
+                  <span>{selectedCountry.flag}</span>
+                  <span className="text-gray-600">+{selectedCountry.dial}</span>
+                </button>
+                <input type="tel" placeholder="Phone number" value={whatsappRaw}
+                  onChange={e => { setWhatsappRaw(e.target.value); setError('') }}
                   onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
-                  className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl pl-24 pr-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
+                  className="flex-1 border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
               </div>
+              {showCountryPicker && (
+                <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-lg max-h-52 overflow-y-auto mb-2">
+                  {COUNTRIES.map(c => (
+                    <button key={c.code} onClick={() => { setSelectedCountry(c); setShowCountryPicker(false) }}
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 ${selectedCountry.code === c.code ? 'bg-brand-light text-brand-green font-semibold' : 'text-gray-700'}`}>
+                      <span>{c.flag}</span>
+                      <span className="flex-1 text-left">{c.name}</span>
+                      <span className="text-gray-400 text-xs">+{c.dial}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
-              <p className="text-xs text-gray-400 mt-3">
-                {pid ? '⚠️ Make sure say this number dey active on WhatsApp' : '⚠️ Make sure this number is active on WhatsApp'}
+              <p className="text-xs text-gray-400 mt-2">
+                ⚠️ {pid ? 'Make sure say this number dey active on WhatsApp' : 'Make sure this number is active on WhatsApp'}
               </p>
             </div>
           )}
@@ -316,14 +287,14 @@ export default function OnboardingPage() {
                 {pid ? 'Your email address?' : 'Your email address?'}
               </h2>
               <p className="text-gray-500 text-sm mb-6">
-                {pid ? 'We go use this to send you login link — no password needed' : 'We use this to send your login link — no password needed'}
+                {pid ? 'We go use this to send you login link' : 'We use this to send your login link — no password needed'}
               </p>
               <input type="email" placeholder="you@example.com" value={email}
                 onChange={e => { setEmail(e.target.value); setError('') }}
                 onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
                 className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-semibold text-lg outline-none transition-colors" />
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
-              <p className="text-xs text-gray-400 mt-3">{pid ? '🔒 No password wahala' : '🔒 No password required'}</p>
+              <p className="text-xs text-gray-400 mt-3">🔒 {pid ? 'No password wahala' : 'No password required'}</p>
             </div>
           )}
 
@@ -370,36 +341,26 @@ export default function OnboardingPage() {
                 {pid ? 'Pick your starter products' : 'Pick your starter products'}
               </h2>
               <p className="text-gray-500 text-sm mb-4">
-                {pid
-                  ? 'Select products wey you want add to your store. You fit edit or remove them later.'
-                  : 'Select products to add to your store. You can edit or remove them later.'}
+                {pid ? 'Select products wey you want add. You fit edit them later.' : 'Select products to add. You can edit or replace them later.'}
               </p>
               <div className="flex gap-2 mb-3">
-                <button onClick={selectAll}
+                <button onClick={() => setSelectedProducts(new Set(sampleProducts.map((_, i) => i)))}
                   className="text-xs font-semibold text-brand-green border border-brand-green/30 bg-brand-light px-3 py-1.5 rounded-xl">
-                  {pid ? 'Select All' : 'Select All'}
+                  Select All
                 </button>
-                <button onClick={selectNone}
+                <button onClick={() => setSelectedProducts(new Set())}
                   className="text-xs font-semibold text-gray-500 border border-gray-200 px-3 py-1.5 rounded-xl">
-                  {pid ? 'Clear All' : 'Clear All'}
+                  Clear All
                 </button>
-                <span className="ml-auto text-xs text-gray-400 self-center">
-                  {selectedProducts.size} {pid ? 'selected' : 'selected'}
-                </span>
+                <span className="ml-auto text-xs text-gray-400 self-center">{selectedProducts.size} selected</span>
               </div>
               <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
                 {sampleProducts.map((product, i) => (
                   <button key={i} onClick={() => toggleProduct(i)}
                     className={`w-full flex items-center gap-3 rounded-2xl border-2 p-3 text-left transition-all ${
-                      selectedProducts.has(i)
-                        ? 'border-brand-green bg-brand-light'
-                        : 'border-gray-200 bg-white hover:border-brand-green/40'
+                      selectedProducts.has(i) ? 'border-brand-green bg-brand-light' : 'border-gray-200 bg-white hover:border-brand-green/40'
                     }`}>
-                    <img
-                      src={product.image_url}
-                      alt={product.name}
-                      className="w-12 h-12 rounded-xl object-cover shrink-0"
-                    />
+                    <img src={product.image_url} alt={product.name} className="w-12 h-12 rounded-xl object-cover shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="font-semibold text-gray-800 text-xs leading-tight truncate">{product.name}</div>
                       <div className="text-brand-green font-bold text-sm mt-0.5">{product.price_display}</div>
@@ -432,11 +393,7 @@ export default function OnboardingPage() {
                   <div key={i} className={`flex items-center justify-center gap-2 text-sm transition-all duration-300 ${
                     i < genStep ? 'text-brand-green' : i === genStep ? 'text-brand-dark font-medium' : 'text-gray-300'
                   }`}>
-                    {i < genStep
-                      ? <Check size={14} />
-                      : i === genStep
-                        ? <Loader2 size={14} className="animate-spin" />
-                        : <div className="w-3.5 h-3.5 rounded-full border border-gray-300" />}
+                    {i < genStep ? <Check size={14} /> : i === genStep ? <Loader2 size={14} className="animate-spin" /> : <div className="w-3.5 h-3.5 rounded-full border border-gray-300" />}
                     {s}
                   </div>
                 ))}
@@ -446,36 +403,22 @@ export default function OnboardingPage() {
 
           {step === 'done' && (
             <div className="animate-fade-in text-center">
-              <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg ${
-                alreadyExists ? 'bg-brand-accent shadow-brand-accent/30' : 'bg-brand-green shadow-brand-green/30'
-              }`}>
+              <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg ${alreadyExists ? 'bg-brand-accent shadow-brand-accent/30' : 'bg-brand-green shadow-brand-green/30'}`}>
                 <Check size={36} className="text-white" />
               </div>
-
               {alreadyExists && (
                 <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-5 text-left">
-                  <p className="font-semibold text-amber-800 text-sm mb-1">
-                    {pid ? '⚠️ You don already get shop!' : '⚠️ You already have a store!'}
-                  </p>
-                  <p className="text-amber-700 text-xs">
-                    {pid
-                      ? 'This email or WhatsApp don already use. Showing your existing shop.'
-                      : 'This email or WhatsApp is already linked to a store.'}
-                  </p>
+                  <p className="font-semibold text-amber-800 text-sm mb-1">{pid ? '⚠️ You don already get shop!' : '⚠️ You already have a store!'}</p>
+                  <p className="text-amber-700 text-xs">{pid ? 'This email or WhatsApp don already use.' : 'This email or WhatsApp is already linked to a store.'}</p>
                 </div>
               )}
-
               <h2 className="font-display text-2xl font-bold text-brand-dark mb-2">
-                {alreadyExists
-                  ? (pid ? 'Your shop dey here! 👋' : 'Welcome back! 👋')
-                  : (pid ? 'Your shop don go live! 🎉' : 'Your store is live! 🎉')}
+                {alreadyExists ? (pid ? 'Your shop dey here! 👋' : 'Welcome back! 👋') : (pid ? 'Your shop don go live! 🎉' : 'Your store is live! 🎉')}
               </h2>
-
               <div className="bg-brand-light border-2 border-brand-green/20 rounded-2xl p-4 mb-6">
                 <p className="text-xs text-gray-500 mb-1">{pid ? 'Your shop link:' : 'Your store link:'}</p>
                 <p className="font-display font-bold text-brand-green text-sm">earket.com/store/{storeSlug}</p>
               </div>
-
               {!loginSent ? (
                 <>
                   <p className="text-sm font-semibold text-gray-700 mb-3">
@@ -484,9 +427,7 @@ export default function OnboardingPage() {
                   <div className="space-y-2 mb-5">
                     <button onClick={sendLoginEmail}
                       className="w-full flex items-center gap-3 bg-white border-2 border-gray-200 hover:border-brand-green rounded-2xl p-4 transition-all">
-                      <div className="w-10 h-10 bg-brand-light rounded-xl flex items-center justify-center">
-                        <Mail size={20} className="text-brand-green" />
-                      </div>
+                      <div className="w-10 h-10 bg-brand-light rounded-xl flex items-center justify-center"><Mail size={20} className="text-brand-green" /></div>
                       <div className="text-left">
                         <div className="font-semibold text-brand-dark text-sm">Send to my Email</div>
                         <div className="text-xs text-gray-400 truncate">{email}</div>
@@ -494,12 +435,10 @@ export default function OnboardingPage() {
                     </button>
                     <button onClick={sendLoginWhatsApp}
                       className="w-full flex items-center gap-3 bg-[#25D366] rounded-2xl p-4 hover:opacity-90 transition-all">
-                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                        <MessageCircle size={20} className="text-white" />
-                      </div>
+                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><MessageCircle size={20} className="text-white" /></div>
                       <div className="text-left">
                         <div className="font-semibold text-white text-sm">Send to my WhatsApp</div>
-                        <div className="text-xs text-white/70">+{normalizeWhatsApp(whatsappNumber)}</div>
+                        <div className="text-xs text-white/70">+{normalizedWa}</div>
                       </div>
                     </button>
                   </div>
@@ -508,13 +447,10 @@ export default function OnboardingPage() {
                 <div className="bg-brand-light rounded-2xl p-4 mb-5 flex items-center gap-3">
                   <Check size={18} className="text-brand-green shrink-0" />
                   <p className="text-sm text-brand-dark font-semibold">
-                    {loginSent === 'email'
-                      ? (pid ? 'Login link don reach your email!' : 'Login link sent to your email!')
-                      : (pid ? 'Login details don reach your WhatsApp!' : 'Login details sent to your WhatsApp!')}
+                    {loginSent === 'email' ? 'Login link sent to your email!' : 'Login details sent to your WhatsApp!'}
                   </p>
                 </div>
               )}
-
               <Link href={`/store/${storeSlug}`}
                 className="block w-full bg-brand-green text-white font-bold py-3 rounded-2xl hover:bg-brand-dark transition-colors mb-2 text-sm">
                 {pid ? 'See My Shop' : 'View My Store'}
@@ -535,7 +471,7 @@ export default function OnboardingPage() {
               <button onClick={handleNext}
                 disabled={(step === 'category' && !category) || (step === 'location' && !location)}
                 className="flex-1 bg-brand-green text-white font-bold py-3 rounded-2xl hover:bg-brand-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                {pid ? 'Continue' : 'Continue'} <ArrowRight size={18} />
+                Continue <ArrowRight size={18} />
               </button>
             </div>
           )}
