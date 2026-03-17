@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { ArrowRight, ArrowLeft, Loader2, Check, ShoppingBag, Mail, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { getSampleProducts } from '@/lib/sample-products'
 
 type Step = 'language' | 'business' | 'whatsapp' | 'email' | 'category' | 'location' | 'generating' | 'done'
 
@@ -59,6 +60,7 @@ export default function OnboardingPage() {
   const [error, setError] = useState('')
   const [loginSent, setLoginSent] = useState<'email' | 'whatsapp' | null>(null)
   const [alreadyExists, setAlreadyExists] = useState(false)
+  const [prefillProducts, setPrefillProducts] = useState(true)
 
   const pid = lang === 'pid'
 
@@ -113,18 +115,29 @@ export default function OnboardingPage() {
     }
 
     try {
-      await supabase.from('merchants').insert({
-        business_name: businessName,
-        slug,
-        category,
-        location,
-        whatsapp_number: normalized,
-        email,
-        phone: normalized,
-        language: lang,
-        plan: 'free',
-        is_active: true,
-      })
+      const { data: newMerchant, error: insertError } = await supabase
+        .from('merchants')
+        .insert({
+          business_name: businessName,
+          slug,
+          category,
+          location,
+          whatsapp_number: normalized,
+          email,
+          phone: normalized,
+          language: lang,
+          plan: 'free',
+          is_active: true,
+        })
+        .select('id')
+        .single()
+
+      if (!insertError && newMerchant && prefillProducts) {
+        const samples = getSampleProducts(category)
+        await supabase.from('products').insert(
+          samples.map(p => ({ ...p, merchant_id: newMerchant.id }))
+        )
+      }
       setStoreSlug(slug)
     } catch (e) {
       console.error('Save error:', e)
@@ -310,7 +323,7 @@ export default function OnboardingPage() {
               <h2 className="font-display text-xl font-bold text-brand-dark mb-6">
                 {pid ? 'Where your business dey?' : 'Where is your business located?'}
               </h2>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-2 mb-6">
                 {LOCATIONS.map(loc => (
                   <button key={loc} onClick={() => setLocation(loc)}
                     className={`py-2.5 px-3 rounded-xl border-2 text-xs font-semibold transition-all ${
@@ -320,6 +333,22 @@ export default function OnboardingPage() {
                   </button>
                 ))}
               </div>
+              <button onClick={() => setPrefillProducts(!prefillProducts)}
+                className="w-full flex items-center gap-3 bg-white border-2 border-gray-200 rounded-2xl p-4 transition-all hover:border-brand-green/50">
+                <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${
+                  prefillProducts ? 'bg-brand-green border-brand-green' : 'border-gray-300'
+                }`}>
+                  {prefillProducts && <svg viewBox="0 0 12 10" className="w-3 h-3 fill-white"><path d="M1 5l3 4L11 1"/></svg>}
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold text-gray-800 text-sm">
+                    {pid ? 'Add sample products to my store' : 'Add sample products to my store'}
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    {pid ? 'We go add example products wey you fit edit later' : 'We'll add example products you can edit or replace'}
+                  </div>
+                </div>
+              </button>
             </div>
           )}
 
