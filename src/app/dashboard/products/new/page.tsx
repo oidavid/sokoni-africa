@@ -26,6 +26,8 @@ export default function AddProductPage() {
   const [inStock, setInStock] = useState(true)
   const [merchant, setMerchant] = useState<Merchant | null>(null)
   const [aiError, setAiError] = useState('')
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [uploadingImage, setUploadingImage] = useState(false)
   const [saveError, setSaveError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
