@@ -4,6 +4,7 @@ import { Camera, Wand2, ArrowLeft, Check, Loader2, AlertCircle } from 'lucide-re
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { uploadProductImage } from '@/lib/storage'
 
 type State = 'idle' | 'uploading' | 'generating' | 'ready' | 'saving' | 'saved'
 
@@ -54,6 +55,13 @@ export default function AddProductPage() {
       const base64 = reader.result as string
       setPhoto(base64)
       setState('generating')
+      // Upload image to storage in background
+      if (merchant) {
+        setUploadingImage(true)
+        const url = await uploadProductImage(file, merchant.id)
+        if (url) setImageUrl(url)
+        setUploadingImage(false)
+      }
 
       try {
         const res = await fetch('/api/ai/describe-product', {
@@ -100,6 +108,7 @@ export default function AddProductPage() {
       description: description.trim(),
       price: priceKobo,
       price_display: `₦${priceNum.toLocaleString()}`,
+      image_url: imageUrl,
       in_stock: inStock,
       ai_generated_description: state === 'ready',
     })
