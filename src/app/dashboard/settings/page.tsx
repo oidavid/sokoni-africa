@@ -37,6 +37,7 @@ export default function SettingsPage() {
   const [whatsappRaw, setWhatsappRaw] = useState('')
   const [dialCode, setDialCode] = useState('234')
   const [showCountryPicker, setShowCountryPicker] = useState(false)
+  const [orderMode, setOrderMode] = useState('both')
   const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0])
 
   useEffect(() => {
@@ -55,6 +56,7 @@ export default function SettingsPage() {
       setSelectedCountry(country)
       setDialCode(country.dial)
       setWhatsappRaw(wa.startsWith(country.dial) ? wa.slice(country.dial.length) : wa)
+      setOrderMode(m.order_mode || 'both')
       setLoading(false)
     }
     load()
@@ -72,6 +74,7 @@ export default function SettingsPage() {
         description,
         location,
         whatsapp_number: normalized,
+        order_mode: orderMode,
         phone: normalized,
       })
       .eq('id', merchant.id)
@@ -165,6 +168,34 @@ export default function SettingsPage() {
                   location === loc ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600'
                 }`}>
                 {loc}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Order Mode */}
+        <div>
+          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Ordering Mode</label>
+          <p className="text-xs text-gray-400 mb-3">How do you want customers to place orders?</p>
+          <div className="space-y-2">
+            {[
+              { value: 'both', label: 'WhatsApp + Cart', desc: 'Customers can order via WhatsApp or add to cart and checkout on site' },
+              { value: 'whatsapp', label: 'WhatsApp Only', desc: 'Customers tap WhatsApp to order directly with you' },
+              { value: 'cart', label: 'Cart & Checkout Only', desc: 'Customers add to cart and complete orders on site' },
+            ].map(mode => (
+              <button key={mode.value} onClick={() => setOrderMode(mode.value)}
+                className={`w-full flex items-start gap-3 p-3 rounded-2xl border-2 text-left transition-all ${
+                  orderMode === mode.value ? 'border-brand-green bg-brand-light' : 'border-gray-200 hover:border-brand-green/40'
+                }`}>
+                <div className={`w-4 h-4 rounded-full border-2 mt-0.5 shrink-0 flex items-center justify-center ${
+                  orderMode === mode.value ? 'border-brand-green' : 'border-gray-300'
+                }`}>
+                  {orderMode === mode.value && <div className="w-2 h-2 bg-brand-green rounded-full" />}
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-800 text-sm">{mode.label}</div>
+                  <div className="text-xs text-gray-400">{mode.desc}</div>
+                </div>
               </button>
             ))}
           </div>
