@@ -93,11 +93,13 @@ export default function OnboardingPage() {
 
     // Check if email or phone already has a store
     const normalized = normalizeWhatsApp(whatsappNumber)
-    const { data: existing } = await supabase
+    const { data: existingList } = await supabase
       .from('merchants')
       .select('slug, email, phone')
       .or(`email.eq.${email},phone.eq.${normalized}`)
-      .single()
+      .limit(1)
+
+    const existing = existingList?.[0]
 
     if (existing) {
       // Already has a store — skip to done with existing slug
