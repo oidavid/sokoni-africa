@@ -85,6 +85,7 @@ export default function ProductDetailPage() {
   const useWhatsApp = store.order_mode === 'whatsapp' || store.order_mode === 'both' || !store.order_mode
 
   function orderWhatsApp() {
+    if (!store || !product) return
     const msg = `Hi ${store.business_name}! I want to order:\n\n*${product.name}* × ${qty} — ${formatPrice(product)}\n\nPlease confirm availability. Thank you!`
     window.open(`https://wa.me/${store.whatsapp_number?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank')
   }
