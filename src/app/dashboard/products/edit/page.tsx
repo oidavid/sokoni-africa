@@ -73,8 +73,13 @@ function EditProductForm() {
 
   async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!file || !merchant) return
+    if (!file) return
+
+    const mid = merchantIdRef.current || merchant?.id
+    if (!mid) { setError('Please wait for the page to fully load before uploading a photo.'); return }
+
     setUploadingImage(true)
+    setError('')
 
     // Show preview immediately
     const reader = new FileReader()
@@ -82,15 +87,13 @@ function EditProductForm() {
     reader.readAsDataURL(file)
 
     // Upload to Supabase storage
-    const mid = merchantIdRef.current || merchant?.id
-    if (!mid) { setError('Please wait for page to load before uploading'); setUploadingImage(false); return }
     const url = await uploadProductImage(file, mid)
     if (url) {
       setImageUrl(url)
-      // Also try AI description from new image
       await generateDescription(file)
     } else {
-      setError('Image upload failed. Please try again.')
+      setError('Image upload failed. Check your internet and try again.')
+      setImagePreview(null)
     }
     setUploadingImage(false)
   }
