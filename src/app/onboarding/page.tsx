@@ -1,12 +1,12 @@
 'use client'
 import { useState } from 'react'
-import { ArrowRight, ArrowLeft, Loader2, Check, ShoppingBag, Mail, MessageCircle } from 'lucide-react'
+import { ArrowRight, ArrowLeft, Loader2, Check, ShoppingBag, Mail, MessageCircle, Eye, EyeOff, Lock } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { getSampleProducts } from '@/lib/sample-products'
 import { COUNTRIES, normalizeNumber } from '@/lib/countries'
 
-type Step = 'language' | 'business' | 'whatsapp' | 'email' | 'category' | 'location' | 'products' | 'generating' | 'done'
+type Step = 'language' | 'business' | 'whatsapp' | 'email' | 'password' | 'category' | 'location' | 'products' | 'generating' | 'done'
 
 const CATEGORIES = [
   { id: 'food', label: 'Food & Drinks', emoji: '🍱', pidgin: 'Food & Drink' },
@@ -60,6 +60,8 @@ export default function OnboardingPage() {
   const [error, setError] = useState('')
   const [loginSent, setLoginSent] = useState<'email' | 'whatsapp' | null>(null)
   const [alreadyExists, setAlreadyExists] = useState(false)
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set())
 
   const pid = lang === 'pid'
@@ -82,7 +84,7 @@ export default function OnboardingPage() {
 
   const prevStep: Record<string, Step> = {
     business: 'language', whatsapp: 'business', email: 'whatsapp',
-    category: 'email', location: 'category', products: 'location',
+    password: 'email', category: 'password', location: 'category', products: 'location',
   }
 
   function toggleProduct(i: number) {
@@ -117,6 +119,9 @@ export default function OnboardingPage() {
     }
 
     try {
+      // Create auth account with password
+      await supabase.auth.signUp({ email, password })
+
       const { data: newMerchant, error: insertError } = await supabase
         .from('merchants')
         .insert({
@@ -130,6 +135,7 @@ export default function OnboardingPage() {
           language: lang,
           plan: 'free',
           is_active: true,
+          login_pin: password,
         })
         .select('id')
         .single()
@@ -167,6 +173,9 @@ export default function OnboardingPage() {
       setStep('email')
     } else if (step === 'email') {
       if (!email.trim() || !email.includes('@')) { setError(pid ? 'Abeg enter valid email' : 'Please enter a valid email'); return }
+      setStep('password')
+    } else if (step === 'password') {
+      if (password.length < 4) { setError(pid ? 'Abeg enter at least 4 characters' : 'Password must be at least 4 characters'); return }
       setStep('category')
     } else if (step === 'category') {
       setStep('location')
@@ -178,7 +187,7 @@ export default function OnboardingPage() {
     }
   }
 
-  const stepsList = ['business', 'whatsapp', 'email', 'category', 'location', 'products']
+  const stepsList = ['business', 'whatsapp', 'email', 'password', 'category', 'location', 'products']
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-brand-light to-white flex flex-col">
@@ -295,6 +304,37 @@ export default function OnboardingPage() {
                 className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-semibold text-lg outline-none transition-colors" />
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
               <p className="text-xs text-gray-400 mt-3">🔒 {pid ? 'No password wahala' : 'No password required'}</p>
+            </div>
+          )}
+
+          {step === 'password' && (
+            <div className="animate-fade-in">
+              <h2 className="font-display text-xl font-bold text-brand-dark mb-1">
+                {pid ? 'Set your password' : 'Set your password'}
+              </h2>
+              <p className="text-gray-500 text-sm mb-6">
+                {pid ? 'You go use this to login anytime' : 'You will use this to log in to your store anytime'}
+              </p>
+              <div className="relative">
+                <Lock size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder={pid ? 'Enter password' : 'Enter password'}
+                  value={password}
+                  onChange={e => { setPassword(e.target.value); setError('') }}
+                  onKeyDown={e => e.key === 'Enter' && handleNext()}
+                  autoFocus
+                  className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl pl-10 pr-12 py-4 text-brand-dark font-semibold text-lg outline-none transition-colors"
+                />
+                <button onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
+              <p className="text-xs text-gray-400 mt-3">
+                🔒 {pid ? 'Minimum 4 characters. Save am well well.' : 'Minimum 4 characters. Keep it safe.'}
+              </p>
             </div>
           )}
 
