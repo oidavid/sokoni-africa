@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ShoppingBag, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil } from 'lucide-react'
+import { ShoppingBag, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil, ShoppingCart, TrendingUp } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 interface Merchant {
@@ -35,6 +35,8 @@ export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [orderCount, setOrderCount] = useState(0)
+  const [newOrderCount, setNewOrderCount] = useState(0)
 
   const loadData = useCallback(async (showRefresh = false) => {
     if (showRefresh) setRefreshing(true)
@@ -47,6 +49,11 @@ export default function DashboardPage() {
     setMerchant(m)
     const { data: prods } = await supabase.from('products').select('*').eq('merchant_id', m.id).order('created_at', { ascending: false })
     setProducts(prods || [])
+
+    const { count: total } = await supabase.from('orders').select('*', { count: 'exact', head: true }).eq('merchant_id', m.id)
+    const { count: newOrders } = await supabase.from('orders').select('*', { count: 'exact', head: true }).eq('merchant_id', m.id).eq('status', 'new')
+    setOrderCount(total || 0)
+    setNewOrderCount(newOrders || 0)
     setLoading(false)
     setRefreshing(false)
   }, [router])
@@ -124,17 +131,23 @@ export default function DashboardPage() {
         </Link>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 gap-3 mb-5">
-          <div className="bg-white rounded-2xl p-4 border border-gray-100">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3 bg-blue-50 text-blue-600"><Package size={18} /></div>
-            <div className="font-display font-bold text-2xl text-brand-dark">{products.length}</div>
-            <div className="text-xs text-gray-500 mt-0.5">Total Products</div>
+        <div className="grid grid-cols-3 gap-3 mb-5">
+          <div className="bg-white rounded-2xl p-3 border border-gray-100">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 bg-blue-50 text-blue-600"><Package size={16} /></div>
+            <div className="font-display font-bold text-xl text-brand-dark">{products.length}</div>
+            <div className="text-xs text-gray-500">Products</div>
           </div>
-          <div className="bg-white rounded-2xl p-4 border border-gray-100">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3 bg-brand-light text-brand-green"><ShoppingBag size={18} /></div>
-            <div className="font-display font-bold text-2xl text-brand-dark">{inStockCount}</div>
-            <div className="text-xs text-gray-500 mt-0.5">In Stock</div>
+          <div className="bg-white rounded-2xl p-3 border border-gray-100">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 bg-brand-light text-brand-green"><ShoppingBag size={16} /></div>
+            <div className="font-display font-bold text-xl text-brand-dark">{inStockCount}</div>
+            <div className="text-xs text-gray-500">In Stock</div>
           </div>
+          <Link href="/dashboard/orders" className="bg-white rounded-2xl p-3 border border-gray-100 relative hover:border-brand-green transition-colors">
+            {newOrderCount > 0 && <span className="absolute -top-1 -right-1 w-5 h-5 bg-brand-accent rounded-full text-white text-xs font-bold flex items-center justify-center">{newOrderCount}</span>}
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 bg-amber-50 text-amber-600"><ShoppingCart size={16} /></div>
+            <div className="font-display font-bold text-xl text-brand-dark">{orderCount}</div>
+            <div className="text-xs text-gray-500">Orders</div>
+          </Link>
         </div>
 
         {/* Store link */}
@@ -219,8 +232,9 @@ export default function DashboardPage() {
       {/* Bottom nav */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex max-w-lg mx-auto">
         {[
-          { icon: ShoppingBag, label: 'Dashboard', href: '/dashboard', active: true },
-          { icon: Package, label: 'Add Product', href: '/dashboard/products/new', active: false },
+          { icon: TrendingUp, label: 'Dashboard', href: '/dashboard', active: true },
+          { icon: Package, label: 'Products', href: '/dashboard/products/new', active: false },
+          { icon: ShoppingCart, label: 'Orders', href: '/dashboard/orders', active: false },
           { icon: Settings, label: 'Settings', href: '/dashboard/settings', active: false },
         ].map((item, i) => (
           <Link key={i} href={item.href}

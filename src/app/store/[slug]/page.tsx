@@ -342,7 +342,9 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
 
                   {/* Product Info */}
                   <div className="p-3">
-                    <h3 className="font-semibold text-gray-800 text-sm leading-tight mb-1 line-clamp-2">{product.name}</h3>
+                    <Link href={`/store/${store.slug}/product/${product.id}`} className="block">
+                    <h3 className="font-semibold text-gray-800 text-sm leading-tight mb-1 line-clamp-2 hover:text-brand-green transition-colors">{product.name}</h3>
+                  </Link>
                     <p className="text-brand-green font-display font-bold text-base mb-2">{formatPrice(product)}</p>
 
                     {product.in_stock ? (
