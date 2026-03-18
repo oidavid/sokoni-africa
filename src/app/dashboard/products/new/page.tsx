@@ -31,6 +31,7 @@ export default function AddProductPage() {
   const [saveError, setSaveError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
   const merchantRef = useRef<typeof merchant>(null)
+  
 
   useEffect(() => {
     async function getMerchant() {
