@@ -30,6 +30,7 @@ export default function AddProductPage() {
   const [uploadingImage, setUploadingImage] = useState(false)
   const [saveError, setSaveError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
+  const merchantRef = useRef<typeof merchant>(null)
 
   useEffect(() => {
     async function getMerchant() {
@@ -44,6 +45,7 @@ export default function AddProductPage() {
         .single()
       if (!m) { router.push('/onboarding'); return }
       setMerchant(m)
+      merchantRef.current = m
     }
     getMerchant()
   }, [router])
@@ -60,10 +62,15 @@ export default function AddProductPage() {
       setPhoto(base64)
       setState('generating')
       // Upload image to storage in background
-      if (merchant) {
+      const currentMerchant = merchantRef.current || merchant
+      if (currentMerchant) {
         setUploadingImage(true)
-        const url = await uploadProductImage(file, merchant.id)
-        if (url) setImageUrl(url)
+        const url = await uploadProductImage(file, currentMerchant.id)
+        if (url) {
+          setImageUrl(url)
+        } else {
+          setAiError('Image upload failed — product will be saved without image')
+        }
         setUploadingImage(false)
       }
 
