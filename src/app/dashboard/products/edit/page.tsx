@@ -89,13 +89,10 @@ function EditProductForm() {
     reader.readAsDataURL(file)
 
     // Upload to Supabase storage
-    console.log('Uploading with merchantId:', mid)
     const url = await uploadProductImage(file, mid)
-    console.log('Upload result URL:', url)
     if (url) {
       setImageUrl(url)
       imageUrlRef.current = url
-      console.log('imageUrlRef set to:', url)
       await generateDescription(file)
     } else {
       setError('Image upload failed — could not get URL from storage.')
@@ -140,7 +137,6 @@ function EditProductForm() {
       setSaving(false)
       return
     }
-    console.log('Saving with imageUrl:', imageUrl, 'ref:', imageUrlRef.current)
     const { error: updateError } = await supabase
       .from('products')
       .update({
