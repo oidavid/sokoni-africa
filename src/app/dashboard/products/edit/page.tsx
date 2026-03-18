@@ -45,6 +45,7 @@ function EditProductForm() {
   const [imagePreview, setImagePreview] = useState<string | null>(null)
 
   const fileRef = useRef<HTMLInputElement>(null)
+  const merchantIdRef = useRef<string | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -56,6 +57,7 @@ function EditProductForm() {
       const { data: m } = await supabase.from('merchants').select('id, category, language').eq('email', merchantEmail as string).single()
       if (!m) { router.push('/onboarding'); return }
       setMerchant(m)
+      merchantIdRef.current = m.id
       const { data: p } = await supabase.from('products').select('*').eq('id', productId).single()
       if (!p) { router.push('/dashboard'); return }
       setProduct(p)
@@ -80,7 +82,9 @@ function EditProductForm() {
     reader.readAsDataURL(file)
 
     // Upload to Supabase storage
-    const url = await uploadProductImage(file, merchant.id)
+    const mid = merchantIdRef.current || merchant?.id
+    if (!mid) { setError('Please wait for page to load before uploading'); setUploadingImage(false); return }
+    const url = await uploadProductImage(file, mid)
     if (url) {
       setImageUrl(url)
       // Also try AI description from new image
