@@ -46,6 +46,7 @@ function EditProductForm() {
 
   const fileRef = useRef<HTMLInputElement>(null)
   const merchantIdRef = useRef<string | null>(null)
+  const imageUrlRef = useRef<string | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -66,6 +67,7 @@ function EditProductForm() {
       setPrice(String(p.price / 100))
       setInStock(p.in_stock)
       setImageUrl(p.image_url)
+      imageUrlRef.current = p.image_url
       setLoading(false)
     }
     load()
@@ -90,6 +92,7 @@ function EditProductForm() {
     const url = await uploadProductImage(file, mid)
     if (url) {
       setImageUrl(url)
+      imageUrlRef.current = url
       await generateDescription(file)
     } else {
       setError('Image upload failed. Check your internet and try again.')
@@ -142,7 +145,7 @@ function EditProductForm() {
         price: Math.round(priceNum * 100),
         price_display: `₦${priceNum.toLocaleString()}`,
         in_stock: inStock,
-        image_url: imageUrl,
+        image_url: imageUrlRef.current || imageUrl,
       })
       .eq('id', productId!)
     if (updateError) {
