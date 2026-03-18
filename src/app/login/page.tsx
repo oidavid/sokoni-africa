@@ -30,7 +30,7 @@ export default function LoginPage() {
     const { data: merchant } = await supabase
       .from('merchants')
       .select('email, login_pin, business_name')
-      .eq('email', email.trim().toLowerCase())
+      .ilike('email', email.trim())
       .single()
 
     if (!merchant) {
@@ -40,39 +40,23 @@ export default function LoginPage() {
     }
 
     if (!merchant.login_pin) {
-      setError('No password set yet. Please create your store first.')
+      setError('No password set. Go to earket.com/onboarding to create your store.')
       setLoading(false)
       return
     }
 
-    if (merchant.login_pin !== password) {
+    if (merchant.login_pin !== password.trim()) {
       setError('Incorrect password. Please try again.')
       setLoading(false)
       return
     }
 
-    // Password correct — try Supabase auth, fall back to storing session manually
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email: merchant.email,
-      password,
-    })
-
-    if (authError) {
-      // Auth account may not exist or need confirmation — create/update it
-      await supabase.auth.signUp({ email: merchant.email, password })
-      // Try signing in again
-      const { error: retryError } = await supabase.auth.signInWithPassword({
-        email: merchant.email,
-        password,
-      })
-      if (retryError) {
-        // Store merchant email in localStorage as fallback session
-        localStorage.setItem('earket_merchant_email', merchant.email)
-        window.location.href = '/dashboard'
-        return
-      }
+    // Password correct — store email for session
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('earket_merchant_email', merchant.email)
     }
 
+    // Password correct — redirect to dashboard
     window.location.href = '/dashboard'
   }
 

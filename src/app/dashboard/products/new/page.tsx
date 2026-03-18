@@ -34,7 +34,9 @@ export default function AddProductPage() {
   useEffect(() => {
     async function getMerchant() {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
+      const fallbackEmail = typeof window !== 'undefined' ? localStorage.getItem('earket_merchant_email') : null
+      const merchantEmail = user?.email || fallbackEmail
+      if (!merchantEmail) { router.push('/login'); return }
       const { data: m } = await supabase
         .from('merchants')
         .select('id, category, language, business_name, slug')
