@@ -45,8 +45,10 @@ export default function SettingsPage() {
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
-      const { data: m } = await supabase.from('merchants').select('*').eq('email', user.email).single()
+      const fallbackEmail = typeof window !== 'undefined' ? localStorage.getItem('earket_merchant_email') : null
+      const merchantEmail = user?.email || fallbackEmail
+      if (!merchantEmail) { router.push('/login'); return }
+      const { data: m } = await supabase.from('merchants').select('*').eq('email', merchantEmail).single()
       if (!m) { router.push('/onboarding'); return }
       setMerchant(m)
       setBusinessName(m.business_name || '')

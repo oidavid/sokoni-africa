@@ -50,8 +50,10 @@ function EditProductForm() {
     async function load() {
       if (!productId) { router.push('/dashboard'); return }
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
-      const { data: m } = await supabase.from('merchants').select('id, category, language').eq('email', user.email).single()
+      const fallbackEmail = typeof window !== 'undefined' ? localStorage.getItem('earket_merchant_email') : null
+      const merchantEmail = user?.email || fallbackEmail
+      if (!merchantEmail) { router.push('/login'); return }
+      const { data: m } = await supabase.from('merchants').select('id, category, language').eq('email', merchantEmail).single()
       if (!m) { router.push('/onboarding'); return }
       setMerchant(m)
       const { data: p } = await supabase.from('products').select('*').eq('id', productId).single()

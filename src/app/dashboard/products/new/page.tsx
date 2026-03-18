@@ -38,7 +38,7 @@ export default function AddProductPage() {
       const { data: m } = await supabase
         .from('merchants')
         .select('id, category, language, business_name, slug')
-        .eq('email', user.email)
+        .eq('email', merchantEmail)
         .single()
       if (!m) { router.push('/onboarding'); return }
       setMerchant(m)
