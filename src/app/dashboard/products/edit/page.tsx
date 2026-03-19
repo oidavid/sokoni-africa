@@ -15,6 +15,7 @@ interface Product {
   in_stock: boolean
   image_url: string | null
   stock_qty: number | null
+  variants: Array<{name: string; price: number; price_display: string; stock_qty: number | null}> | null
 }
 
 interface Merchant {
@@ -46,6 +47,8 @@ function EditProductForm() {
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [stockQty, setStockQty] = useState<string>('')
   const [trackInventory, setTrackInventory] = useState(false)
+  const [variants, setVariants] = useState<Array<{id: string; name: string; price: string; stock: string}>>([])
+  const [showVariants, setShowVariants] = useState(false)
 
   const fileRef = useRef<HTMLInputElement>(null)
   const merchantIdRef = useRef<string | null>(null)
@@ -73,6 +76,15 @@ function EditProductForm() {
       imageUrlRef.current = p.image_url
       setStockQty(p.stock_qty != null ? String(p.stock_qty) : '')
       setTrackInventory(p.stock_qty != null)
+      if (p.variants && p.variants.length > 0) {
+        setShowVariants(true)
+        setVariants(p.variants.map((v: {name: string; price: number; stock_qty: number | null}) => ({
+          id: Math.random().toString(),
+          name: v.name,
+          price: String(v.price / 100),
+          stock: v.stock_qty != null ? String(v.stock_qty) : '',
+        })))
+      }
       setLoading(false)
     }
     load()
@@ -152,6 +164,12 @@ function EditProductForm() {
         in_stock: inStock,
         image_url: imageUrlRef.current || imageUrl,
         stock_qty: trackInventory && stockQty ? parseInt(stockQty) : null,
+        variants: showVariants && variants.length > 0 ? variants.filter(v => v.name).map(v => ({
+          name: v.name,
+          price: Math.round(parseFloat(v.price || String(parseFloat(price))) * 100),
+          price_display: `₦${parseFloat(v.price || price).toLocaleString()}`,
+          stock_qty: v.stock ? parseInt(v.stock) : null,
+        })) : null,
       })
       .eq('id', productId!)
     if (updateError) {
@@ -286,6 +304,49 @@ function EditProductForm() {
                 onChange={e => setStockQty(e.target.value)}
                 placeholder="0"
                 className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold text-brand-dark focus:border-brand-green outline-none" />
+            </div>
+          )}
+        </div>
+
+        {/* Variants */}
+        <div className="bg-white border border-gray-100 rounded-xl p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-semibold text-gray-800 text-sm">Product Variants</div>
+              <div className="text-xs text-gray-500">Different sizes, weights, colors etc.</div>
+            </div>
+            <button onClick={() => {
+              setShowVariants(!showVariants)
+              if (!showVariants && variants.length === 0) {
+                setVariants([{ id: Date.now().toString(), name: '', price: '', stock: '' }])
+              }
+            }}
+              className={`w-12 h-6 rounded-full transition-colors relative ${showVariants ? 'bg-brand-green' : 'bg-gray-200'}`}>
+              <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all ${showVariants ? 'left-6' : 'left-0.5'}`} />
+            </button>
+          </div>
+          {showVariants && (
+            <div className="space-y-2">
+              <p className="text-xs text-gray-400">e.g. Small / Medium / Large or 500g / 1kg / 2kg</p>
+              {variants.map((v, i) => (
+                <div key={v.id} className="flex gap-2 items-center">
+                  <input type="text" placeholder="e.g. Small" value={v.name}
+                    onChange={e => setVariants(prev => prev.map((x, j) => j === i ? {...x, name: e.target.value} : x))}
+                    className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none focus:border-brand-green" />
+                  <input type="number" placeholder="Price ₦" value={v.price}
+                    onChange={e => setVariants(prev => prev.map((x, j) => j === i ? {...x, price: e.target.value} : x))}
+                    className="w-24 border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none focus:border-brand-green" />
+                  <input type="number" placeholder="Qty" value={v.stock}
+                    onChange={e => setVariants(prev => prev.map((x, j) => j === i ? {...x, stock: e.target.value} : x))}
+                    className="w-16 border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none focus:border-brand-green" />
+                  <button onClick={() => setVariants(prev => prev.filter((_, j) => j !== i))}
+                    className="w-7 h-7 bg-red-50 rounded-xl flex items-center justify-center shrink-0 text-red-400 text-sm">×</button>
+                </div>
+              ))}
+              <button onClick={() => setVariants(prev => [...prev, { id: Date.now().toString(), name: '', price: '', stock: '' }])}
+                className="w-full border border-dashed border-gray-200 rounded-xl py-2 text-xs text-brand-green font-semibold hover:border-brand-green">
+                + Add Variant
+              </button>
             </div>
           )}
         </div>

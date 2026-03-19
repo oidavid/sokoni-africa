@@ -14,6 +14,7 @@ interface Product {
   image_url: string | null
   in_stock: boolean
   category: string
+  variants: Array<{name: string; price: number; price_display: string; stock_qty: number | null}> | null
 }
 
 interface Merchant {
@@ -38,6 +39,7 @@ export default function ProductDetailPage() {
   const [store, setStore] = useState<Merchant | null>(null)
   const [related, setRelated] = useState<Product[]>([])
   const [qty, setQty] = useState(1)
+  const [selectedVariant, setSelectedVariant] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -86,7 +88,11 @@ export default function ProductDetailPage() {
 
   function orderWhatsApp() {
     if (!store || !product) return
-    const msg = `Hi ${store.business_name}! I want to order:\n\n*${product.name}* × ${qty} — ${formatPrice(product)}\n\nPlease confirm availability. Thank you!`
+    const variantText = selectedVariant !== null && product.variants ? ` (${product.variants[selectedVariant].name})` : ''
+    const variantPrice = selectedVariant !== null && product.variants
+      ? (product.variants[selectedVariant].price_display || `₦${(product.variants[selectedVariant].price/100).toLocaleString()}`)
+      : formatPrice(product)
+    const msg = `Hi ${store.business_name}! I want to order:\n\n*${product.name}${variantText}* × ${qty} — ${variantPrice}\n\nPlease confirm availability. Thank you!`
     window.open(`https://wa.me/${store.whatsapp_number?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank')
   }
 
@@ -122,9 +128,35 @@ export default function ProductDetailPage() {
               {product.in_stock ? 'In Stock' : 'Out of Stock'}
             </span>
           </div>
-          <p className="font-display font-bold text-3xl text-brand-green mb-4">{formatPrice(product)}</p>
+          <p className="font-display font-bold text-3xl text-brand-green mb-4">
+            {selectedVariant !== null && product.variants
+              ? (product.variants[selectedVariant].price_display || `₦${(product.variants[selectedVariant].price/100).toLocaleString()}`)
+              : formatPrice(product)}
+          </p>
           {product.description && (
             <p className="text-gray-600 text-sm leading-relaxed">{product.description}</p>
+          )}
+
+          {/* Variants */}
+          {product.variants && product.variants.length > 0 && (
+            <div className="mt-4">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Choose Option</p>
+              <div className="flex flex-wrap gap-2">
+                {product.variants.map((v, i) => (
+                  <button key={i} onClick={() => setSelectedVariant(i === selectedVariant ? null : i)}
+                    className={`px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all ${
+                      selectedVariant === i
+                        ? 'border-brand-green bg-brand-light text-brand-green'
+                        : 'border-gray-200 text-gray-700'
+                    } ${v.stock_qty === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
+                    disabled={v.stock_qty === 0}>
+                    <span>{v.name}</span>
+                    <span className="ml-1.5 text-xs font-bold">{v.price_display || `₦${(v.price/100).toLocaleString()}`}</span>
+                    {v.stock_qty === 0 && <span className="ml-1 text-xs text-red-400">Out</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
         </div>
 
