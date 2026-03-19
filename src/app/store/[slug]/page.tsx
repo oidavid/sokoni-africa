@@ -145,7 +145,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
     setTimeout(() => setAddedId(null), 1500)
   }
 
-  function updateQty(id: string, qty: number, name?: string) {
+  function removeItem(id: string, name?: string) { setCart(prev => prev.filter(i => !(i.product.id === id && (!name || i.product.name === name)))) } function updateQty(id: string, qty: number, name?: string) {
     if (qty <= 0) setCart(prev => prev.filter(i => !(i.product.id === id && (!name || i.product.name === name))))
     else setCart(prev => prev.map(i => i.product.id === id && (!name || i.product.name === name) ? { ...i, qty } : i))
   }
