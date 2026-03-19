@@ -14,6 +14,8 @@ interface Merchant {
   whatsapp_number: string
   category: string
   order_mode: string
+  theme_color: string
+  logo_url: string | null
 }
 
 interface Product {
@@ -276,11 +278,16 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
       )}
 
       {/* Store Header */}
-      <div className="bg-brand-green text-white">
+      <div style={{ backgroundColor: store.theme_color || '#1A7A4A' }} className="text-white">
         <div className="max-w-6xl mx-auto px-4 pt-5 pb-4">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl">{categoryEmoji}</div>
+              <div className="w-14 h-14 bg-white/20 rounded-2xl overflow-hidden flex items-center justify-center text-3xl shrink-0">
+                {store.logo_url
+                  ? <img src={store.logo_url} alt={store.business_name} className="w-full h-full object-cover" />
+                  : <span>{categoryEmoji}</span>
+                }
+              </div>
               <div>
                 <h1 className="font-display font-bold text-xl leading-tight">{store.business_name}</h1>
                 <div className="flex items-center gap-1 mt-0.5">
@@ -322,7 +329,8 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
           )}
           {useCart && (
             <button onClick={() => setCartOpen(true)}
-              className={`flex items-center justify-center gap-2 bg-brand-dark py-3 text-sm font-semibold text-white ${useWhatsApp ? 'flex-1' : 'w-full'}`}>
+              style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
+              className={`flex items-center justify-center gap-2 py-3 text-sm font-semibold text-white ${useWhatsApp ? 'flex-1' : 'w-full'}`}>
               <ShoppingCart size={16} />
               {cartCount > 0 ? `Cart (${cartCount}) · ₦${(cartTotal / 100).toLocaleString()}` : 'View Cart'}
             </button>
