@@ -88,7 +88,10 @@ function CheckoutForm() {
   function validate() {
     const errs: Record<string, string> = {}
     if (!name.trim()) errs.name = 'Please enter your name'
+    const rawPhoneDigits = phone.replace(/\D/g, '')
+    const phoneMinLen = rawPhoneDigits.startsWith('0') ? 11 : 10
     if (!phone.trim()) errs.phone = 'Please enter your phone number'
+    else if (rawPhoneDigits.length < phoneMinLen) errs.phone = 'Please enter a valid phone number (e.g. 08037459899)'
     if (fulfillment === 'delivery' && !address.trim()) errs.address = 'Please enter your delivery address'
     setErrors(errs)
     return Object.keys(errs).length === 0
@@ -134,7 +137,7 @@ function CheckoutForm() {
     }
   }
 
-  function sendWhatsAppOrder(customerName: string, customerPhone: string) {
+  async function sendWhatsAppOrder(customerName: string, customerPhone: string) {
     if (!store) return
     setWaError('')
     if (!customerName.trim()) { setWaError('Please enter your name'); return }
@@ -146,6 +149,20 @@ function CheckoutForm() {
     const waPhone = waCountry.dial + localPhone
     const msg = `Hi ${store.business_name}! I'd like to order:\n\n${itemLines}\n\nTotal: ${formatNaira(subtotal)}\n\nName: ${customerName}\nWhatsApp: ${customerPhone}\n${fulfillment === 'delivery' && address ? `Address: ${address}` : fulfillment === 'pickup' ? 'I will pick up' : ''}\n${notes ? `Notes: ${notes}` : ''}\n\nPlease confirm. Thank you!\n\n📲 Tap to message customer: https://wa.me/${waPhone}`
     window.open(`https://wa.me/${store.whatsapp_number?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank')
+    // Save to database
+    const orderNum = 'ORD-' + Math.floor(1000 + Math.random() * 9000)
+    await supabase.from('orders').insert({
+      merchant_id: store.id,
+      order_number: orderNum,
+      customer_name: customerName,
+      customer_phone: waPhone,
+      customer_address: fulfillment === 'delivery' ? address : 'PICKUP',
+      items: cart.map(i => ({ product_id: i.product.id, name: i.product.name, price: i.product.price, qty: i.qty })),
+      subtotal,
+      status: 'new',
+      source: 'whatsapp',
+      notes: notes || '',
+    })
     setShowWaForm(false)
   }
 
@@ -260,7 +277,7 @@ function CheckoutForm() {
           </div>
           <div className="relative">
             <Phone size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input type="tel" placeholder="Your phone number (WhatsApp)" value={phone}
+            <input type="tel" placeholder="Your WhatsApp number (e.g. 08037459899)" value={phone}
               onChange={e => { setPhone(e.target.value); setErrors(p => ({...p, phone: ''})) }}
               className={`w-full bg-white border-2 rounded-xl pl-10 pr-4 py-3 text-sm outline-none transition-colors ${
                 errors.phone ? 'border-red-300' : 'border-gray-200 focus:border-brand-green'

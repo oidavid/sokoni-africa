@@ -249,7 +249,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                           </div>
                         )}
                         {waError && <p className="text-red-500 text-xs font-medium">{waError}</p>}
-                        <button onClick={() => {
+                        <button onClick={async () => {
                           setWaError('')
                           if (!waName.trim()) { setWaError('Please enter your name'); return }
                           const rawWaPhone = waPhone.replace(/\D/g, '')
