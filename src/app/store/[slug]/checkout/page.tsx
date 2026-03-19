@@ -4,6 +4,7 @@ import { useSearchParams, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Check, Loader2, ShoppingCart, MapPin, Phone, User } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { COUNTRIES } from '@/lib/countries'
 
 interface Product {
   id: string
@@ -51,6 +52,8 @@ function CheckoutForm() {
   const [showWaForm, setShowWaForm] = useState(false)
   const [waName, setWaName] = useState('')
   const [waPhone, setWaPhone] = useState('')
+  const [waCountry, setWaCountry] = useState(COUNTRIES[0])
+  const [showWaCountryPicker, setShowWaCountryPicker] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -134,7 +137,8 @@ function CheckoutForm() {
     if (!store) return
     const itemLines = cart.map(i => `• ${i.product.name} x${i.qty} — ${i.product.price_display || formatNaira(i.product.price)}`).join('\n')
     const rawPhone = customerPhone.replace(/\D/g, '')
-    const waPhone = rawPhone.startsWith('0') ? '234' + rawPhone.slice(1) : rawPhone
+    const localPhone = rawPhone.startsWith('0') ? rawPhone.slice(1) : rawPhone.startsWith(waCountry.dial) ? rawPhone.slice(waCountry.dial.length) : rawPhone
+    const waPhone = waCountry.dial + localPhone
     const msg = `Hi ${store.business_name}! I'd like to order:\n\n${itemLines}\n\nTotal: ${formatNaira(subtotal)}\n\nName: ${customerName}\nWhatsApp: ${customerPhone}\n${fulfillment === 'delivery' && address ? `Address: ${address}` : fulfillment === 'pickup' ? 'I will pick up' : ''}\n${notes ? `Notes: ${notes}` : ''}\n\nPlease confirm. Thank you!\n\n📲 Tap to message customer: https://wa.me/${waPhone}`
     window.open(`https://wa.me/${store.whatsapp_number?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank')
     setShowWaForm(false)
@@ -317,9 +321,28 @@ function CheckoutForm() {
             <input type="text" placeholder="Your full name" value={waName}
               onChange={e => setWaName(e.target.value)}
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-brand-green" />
-            <input type="tel" placeholder="Your WhatsApp number" value={waPhone}
-              onChange={e => setWaPhone(e.target.value)}
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-brand-green" />
+            <div className="flex gap-2">
+              <button onClick={() => setShowWaCountryPicker(!showWaCountryPicker)}
+                className="flex items-center gap-1 bg-white border-2 border-gray-200 rounded-xl px-3 py-3 text-sm font-semibold shrink-0 hover:border-brand-green transition-colors">
+                <span>{waCountry.flag}</span>
+                <span className="text-gray-600">+{waCountry.dial}</span>
+              </button>
+              <input type="tel" placeholder="WhatsApp number" value={waPhone}
+                onChange={e => setWaPhone(e.target.value)}
+                className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-brand-green" />
+            </div>
+            {showWaCountryPicker && (
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-lg max-h-40 overflow-y-auto">
+                {COUNTRIES.map(c => (
+                  <button key={c.code} onClick={() => { setWaCountry(c); setShowWaCountryPicker(false) }}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-gray-50 ${waCountry.code === c.code ? 'bg-brand-light text-brand-green font-semibold' : 'text-gray-700'}`}>
+                    <span>{c.flag}</span>
+                    <span className="flex-1 text-left">{c.name}</span>
+                    <span className="text-gray-400">+{c.dial}</span>
+                  </button>
+                ))}
+              </div>
+            )}
             <button onClick={() => sendWhatsAppOrder(waName, waPhone)}
               disabled={!waName.trim() || !waPhone.trim()}
               className="btn-whatsapp w-full justify-center disabled:opacity-40">
