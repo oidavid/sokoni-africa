@@ -126,8 +126,9 @@ function CheckoutForm() {
 
   function handleWhatsAppOrder() {
     if (!store) return
-    // Use checkout form details if already filled, otherwise show mini form
-    if (name.trim() && phone.trim()) {
+    // Use checkout form details if already filled and valid, otherwise show mini form
+    const rawPhone = phone.replace(/\D/g, '')
+    if (name.trim() && rawPhone.length >= 10) {
       sendWhatsAppOrder(name, phone)
     } else {
       setShowWaForm(true)
