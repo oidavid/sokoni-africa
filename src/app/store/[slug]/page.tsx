@@ -28,7 +28,7 @@ interface Product {
   image_url: string | null
   in_stock: boolean
   category: string
-  variants: Array<{name: string; price: number; price_display: string}> | null
+  variants: Array<{name: string; price: number; price_display: string; stock_qty?: number | null}> | null
 }
 
 interface CartItem {
