@@ -49,6 +49,8 @@ function CheckoutForm() {
   const [fulfillment, setFulfillment] = useState<'delivery' | 'pickup'>('delivery')
   const [notes, setNotes] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [phoneCountry, setPhoneCountry] = useState(COUNTRIES[0])
+  const [showPhoneCountryPicker, setShowPhoneCountryPicker] = useState(false)
   const [showWaForm, setShowWaForm] = useState(false)
   const [waName, setWaName] = useState('')
   const [waPhone, setWaPhone] = useState('')
@@ -91,7 +93,7 @@ function CheckoutForm() {
     const rawPhoneDigits = phone.replace(/\D/g, '')
     const phoneMinLen = rawPhoneDigits.startsWith('0') ? 11 : 10
     if (!phone.trim()) errs.phone = 'Please enter your phone number'
-    else if (rawPhoneDigits.length < phoneMinLen) errs.phone = 'Please enter a valid phone number (e.g. 08037459899)'
+    else if (rawPhoneDigits.length < phoneMinLen) errs.phone = `Please enter a valid phone number for ${phoneCountry.name}`
     if (fulfillment === 'delivery' && !address.trim()) errs.address = 'Please enter your delivery address'
     setErrors(errs)
     return Object.keys(errs).length === 0
@@ -112,7 +114,11 @@ function CheckoutForm() {
       merchant_id: store.id,
       order_number: orderNum,
       customer_name: name,
-      customer_phone: phone,
+      customer_phone: (() => {
+        const raw = phone.replace(/\D/g, '')
+        const local = raw.startsWith('0') ? raw.slice(1) : raw.startsWith(phoneCountry.dial) ? raw.slice(phoneCountry.dial.length) : raw
+        return phoneCountry.dial + local
+      })(),
       customer_address: fulfillment === 'delivery' ? address : 'PICKUP',
       items,
       subtotal,
@@ -121,7 +127,10 @@ function CheckoutForm() {
       notes: `${fulfillment === 'pickup' ? 'PICKUP ORDER. ' : ''}${notes}`,
     })
     const itemLines = cart.map(i => `• ${i.product.name} x${i.qty} — ${i.product.price_display || formatNaira(i.product.price)}`).join('\n')
-    const msg = `🛍️ New Order ${orderNum} — ${store.business_name}!\n\n${itemLines}\n\nTotal: ${formatNaira(subtotal)}\n\nCustomer: ${name}\nPhone: ${phone}\n${fulfillment === 'delivery' ? `Delivery to: ${address}` : '📦 PICKUP — customer will collect'}\n${notes ? `Notes: ${notes}` : ''}\n\nReply to confirm.`
+    const rawP = phone.replace(/\D/g, '')
+    const localP = rawP.startsWith('0') ? rawP.slice(1) : rawP.startsWith(phoneCountry.dial) ? rawP.slice(phoneCountry.dial.length) : rawP
+    const normalizedPhone = phoneCountry.dial + localP
+    const msg = `🛍️ New Order ${orderNum} — ${store.business_name}!\n\n${itemLines}\n\nTotal: ${formatNaira(subtotal)}\n\nCustomer: ${name}\nPhone: +${normalizedPhone}\n${fulfillment === 'delivery' ? `Delivery to: ${address}` : '📦 PICKUP — customer will collect'}\n${notes ? `Notes: ${notes}` : ''}\n\nReply to confirm.\n\n📲 Tap to message customer: https://wa.me/${normalizedPhone}`
     window.open(`https://wa.me/${store.whatsapp_number?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank')
     setSubmitting(false)
     setSubmitted(true)
@@ -275,13 +284,31 @@ function CheckoutForm() {
               }`} />
             {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
           </div>
-          <div className="relative">
-            <Phone size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input type="tel" placeholder="Your WhatsApp number (e.g. 08037459899)" value={phone}
-              onChange={e => { setPhone(e.target.value); setErrors(p => ({...p, phone: ''})) }}
-              className={`w-full bg-white border-2 rounded-xl pl-10 pr-4 py-3 text-sm outline-none transition-colors ${
-                errors.phone ? 'border-red-300' : 'border-gray-200 focus:border-brand-green'
-              }`} />
+          <div>
+            <div className="flex gap-2">
+              <button onClick={() => setShowPhoneCountryPicker(!showPhoneCountryPicker)}
+                className="flex items-center gap-1.5 bg-white border-2 border-gray-200 rounded-xl px-3 py-3 text-sm font-semibold hover:border-brand-green transition-colors shrink-0">
+                <span>{phoneCountry.flag}</span>
+                <span className="text-gray-600">+{phoneCountry.dial}</span>
+              </button>
+              <input type="tel" placeholder="WhatsApp number" value={phone}
+                onChange={e => { setPhone(e.target.value); setErrors(p => ({...p, phone: ''})) }}
+                className={`flex-1 bg-white border-2 rounded-xl px-4 py-3 text-sm outline-none transition-colors ${
+                  errors.phone ? 'border-red-300' : 'border-gray-200 focus:border-brand-green'
+                }`} />
+            </div>
+            {showPhoneCountryPicker && (
+              <div className="mt-1 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-lg max-h-40 overflow-y-auto">
+                {COUNTRIES.map(c => (
+                  <button key={c.code} onClick={() => { setPhoneCountry(c); setShowPhoneCountryPicker(false) }}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-gray-50 ${phoneCountry.code === c.code ? 'bg-brand-light text-brand-green font-semibold' : 'text-gray-700'}`}>
+                    <span>{c.flag}</span>
+                    <span className="flex-1 text-left">{c.name}</span>
+                    <span className="text-gray-400">+{c.dial}</span>
+                  </button>
+                ))}
+              </div>
+            )}
             {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
           </div>
           {fulfillment === 'delivery' && (
