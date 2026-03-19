@@ -109,7 +109,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
           const { data: prods2 } = await supabase.from('products').select('*').in('id', savedCart.map(i => i.productId))
           if (prods2) {
             setCart(savedCart.map(item => ({
-              product: { ...prods2.find(p => p.id === item.productId)!, name: item.variantName ? `${prods2.find(p => p.id === item.productId)?.name} (${item.variantName})` : prods2.find(p => p.id === item.productId)?.name, price: item.price, price_display: item.priceDisplay, image_url: item.imageUrl } as Product,
+              product: { ...prods2.find(p => p.id === item.productId)!, name: item.variantName ? `${prods2.find(p => p.id === item.productId)?.name} (${item.variantName})` : item.productName || prods2.find(p => p.id === item.productId)?.name, price: item.price, price_display: item.priceDisplay, image_url: item.imageUrl } as Product,
               qty: item.qty
             })).filter(i => i.product?.id))
           }
@@ -145,7 +145,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
     setTimeout(() => setAddedId(null), 1500)
   }
 
-  function removeItem(id: string, name?: string) { setCart(prev => prev.filter(i => !(i.product.id === id && (!name || i.product.name === name)))) }; function updateQty(id: string, qty: number, name?: string) {
+  function updateQty(id: string, qty: number, name?: string) {
     if (qty <= 0) setCart(prev => prev.filter(i => !(i.product.id === id && (!name || i.product.name === name))))
     else setCart(prev => prev.map(i => i.product.id === id && (!name || i.product.name === name) ? { ...i, qty } : i))
   }
@@ -290,8 +290,10 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                           setWaError('')
                           if (!waName.trim()) { setWaError('Please enter your name'); return }
                           const rawWaPhone = waPhone.replace(/\D/g, '')
-                          const minWaLen = rawWaPhone.startsWith('0') ? 11 : 10
-                          if (!rawWaPhone || rawWaPhone.length < minWaLen) { setWaError('Please enter a valid WhatsApp number (e.g. 08037459899)'); return }
+                          let localWaDigits = rawWaPhone
+                          if (rawWaPhone.startsWith(waCountry.dial)) localWaDigits = rawWaPhone.slice(waCountry.dial.length)
+                          else if (rawWaPhone.startsWith('0')) localWaDigits = rawWaPhone.slice(1)
+                          if (!rawWaPhone || localWaDigits.length < 10) { setWaError('Please enter a valid 10-digit WhatsApp number'); return }
                           const lines = cart.map(i => `• ${i.product.name} x${i.qty} — ${formatPrice(i.product)}`).join('\n')
                           const merchantMsg = `Hi ${store.business_name}! I'd like to order:\n\n${lines}\n\nTotal: ₦${(cartTotal / 100).toLocaleString()}\n\nName: ${waName}\nWhatsApp: ${waPhone}\n\nPlease confirm. Thank you!`
                           const customerMsg = `Hi ${waName || 'there'}! Here is your order summary from *${store.business_name}*:\n\n${lines}\n\nTotal: ₦${(cartTotal / 100).toLocaleString()}\n\nThe merchant will confirm your order shortly.`
