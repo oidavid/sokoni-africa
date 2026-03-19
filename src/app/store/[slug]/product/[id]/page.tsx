@@ -47,10 +47,8 @@ export default function ProductDetailPage() {
       const { data: merchant } = await supabase.from('merchants').select('*').eq('slug', slug).single()
       if (!merchant) return
       setStore(merchant)
-
       const { data: p } = await supabase.from('products').select('*').eq('id', id).single()
       if (p) setProduct(p)
-
       const { data: rel } = await supabase
         .from('products')
         .select('*')
@@ -86,13 +84,23 @@ export default function ProductDetailPage() {
   const useCart = store.order_mode === 'cart' || store.order_mode === 'both' || !store.order_mode
   const useWhatsApp = store.order_mode === 'whatsapp' || store.order_mode === 'both' || !store.order_mode
 
+  // Get active price — use variant price if selected, otherwise base price
+  const activePrice = selectedVariant !== null && product.variants
+    ? product.variants[selectedVariant].price
+    : product.price
+
+  const activePriceDisplay = selectedVariant !== null && product.variants
+    ? (product.variants[selectedVariant].price_display || `₦${(product.variants[selectedVariant].price / 100).toLocaleString()}`)
+    : formatPrice(product)
+
+  const totalDisplay = `₦${(activePrice * qty / 100).toLocaleString()}`
+
   function orderWhatsApp() {
     if (!store || !product) return
-    const variantText = selectedVariant !== null && product.variants ? ` (${product.variants[selectedVariant].name})` : ''
-    const variantPrice = selectedVariant !== null && product.variants
-      ? (product.variants[selectedVariant].price_display || `₦${(product.variants[selectedVariant].price/100).toLocaleString()}`)
-      : formatPrice(product)
-    const msg = `Hi ${store.business_name}! I want to order:\n\n*${product.name}${variantText}* × ${qty} — ${variantPrice}\n\nPlease confirm availability. Thank you!`
+    const variantText = selectedVariant !== null && product.variants
+      ? ` (${product.variants[selectedVariant].name})`
+      : ''
+    const msg = `Hi ${store.business_name}! I want to order:\n\n*${product.name}${variantText}* × ${qty} — ${activePriceDisplay}\n\nTotal: ${totalDisplay}\n\nPlease confirm availability. Thank you!`
     window.open(`https://wa.me/${store.whatsapp_number?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank')
   }
 
@@ -112,9 +120,7 @@ export default function ProductDetailPage() {
           {product.image_url ? (
             <img src={product.image_url} alt={product.name} className="w-full aspect-square object-cover" />
           ) : (
-            <div className="w-full aspect-square bg-brand-light flex items-center justify-center text-8xl">
-              🛍️
-            </div>
+            <div className="w-full aspect-square bg-brand-light flex items-center justify-center text-8xl">🛍️</div>
           )}
         </div>
 
@@ -128,11 +134,10 @@ export default function ProductDetailPage() {
               {product.in_stock ? 'In Stock' : 'Out of Stock'}
             </span>
           </div>
-          <p className="font-display font-bold text-3xl text-brand-green mb-4">
-            {selectedVariant !== null && product.variants
-              ? (product.variants[selectedVariant].price_display || `₦${(product.variants[selectedVariant].price/100).toLocaleString()}`)
-              : formatPrice(product)}
-          </p>
+
+          {/* Price — updates with variant */}
+          <p className="font-display font-bold text-3xl text-brand-green mb-4">{activePriceDisplay}</p>
+
           {product.description && (
             <p className="text-gray-600 text-sm leading-relaxed">{product.description}</p>
           )}
@@ -143,15 +148,18 @@ export default function ProductDetailPage() {
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Choose Option</p>
               <div className="flex flex-wrap gap-2">
                 {product.variants.map((v, i) => (
-                  <button key={i} onClick={() => setSelectedVariant(i === selectedVariant ? null : i)}
+                  <button key={i}
+                    onClick={() => setSelectedVariant(i === selectedVariant ? null : i)}
+                    disabled={v.stock_qty === 0}
                     className={`px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all ${
                       selectedVariant === i
                         ? 'border-brand-green bg-brand-light text-brand-green'
-                        : 'border-gray-200 text-gray-700'
-                    } ${v.stock_qty === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
-                    disabled={v.stock_qty === 0}>
+                        : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                    } ${v.stock_qty === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}>
                     <span>{v.name}</span>
-                    <span className="ml-1.5 text-xs font-bold">{v.price_display || `₦${(v.price/100).toLocaleString()}`}</span>
+                    <span className="ml-1.5 text-xs font-bold">
+                      {v.price_display || `₦${(v.price / 100).toLocaleString()}`}
+                    </span>
                     {v.stock_qty === 0 && <span className="ml-1 text-xs text-red-400">Out</span>}
                   </button>
                 ))}
@@ -163,7 +171,7 @@ export default function ProductDetailPage() {
         {/* Order section */}
         {product.in_stock && (
           <div className="bg-white mt-2 px-4 py-5 space-y-4">
-            {/* Quantity */}
+            {/* Quantity + Total */}
             <div className="flex items-center gap-4">
               <span className="text-sm font-semibold text-gray-700">Quantity</span>
               <div className="flex items-center gap-3">
@@ -177,15 +185,16 @@ export default function ProductDetailPage() {
                   <Plus size={14} className="text-white" />
                 </button>
               </div>
-              <span className="text-sm text-gray-500 ml-auto font-semibold">
-                Total: {`₦${(product.price * qty / 100).toLocaleString()}`}
+              <span className="text-sm text-gray-600 ml-auto font-semibold">
+                Total: <span className="text-brand-green">{totalDisplay}</span>
               </span>
             </div>
 
             {/* CTA buttons */}
             {useCart && (
-              <Link href={`/store/${slug}/checkout?cart=${encodeURIComponent(JSON.stringify([{ id: product.id, qty }]))}`}
-                className="block w-full bg-brand-green text-white font-bold py-4 rounded-2xl text-center hover:bg-brand-dark transition-colors flex items-center justify-center gap-2">
+              <Link
+                href={`/store/${slug}/checkout?cart=${encodeURIComponent(JSON.stringify([{ id: product.id, qty }]))}`}
+                className="flex w-full bg-brand-green text-white font-bold py-4 rounded-2xl text-center hover:bg-brand-dark transition-colors items-center justify-center gap-2">
                 <ShoppingCart size={18} /> Checkout Now
               </Link>
             )}
@@ -210,8 +219,7 @@ export default function ProductDetailPage() {
                   <div className="aspect-square bg-brand-light overflow-hidden">
                     {p.image_url
                       ? <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" loading="lazy" />
-                      : <div className="w-full h-full flex items-center justify-center text-3xl">🛍️</div>
-                    }
+                      : <div className="w-full h-full flex items-center justify-center text-3xl">🛍️</div>}
                   </div>
                   <div className="p-2.5">
                     <p className="font-semibold text-xs text-gray-800 line-clamp-2 leading-tight">{p.name}</p>
@@ -223,7 +231,6 @@ export default function ProductDetailPage() {
           </div>
         )}
 
-        {/* Back to store */}
         <div className="px-4 py-6 text-center">
           <Link href={`/store/${slug}`} className="text-brand-green font-semibold text-sm">
             ← Back to {store.business_name}
