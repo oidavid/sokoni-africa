@@ -12,7 +12,7 @@ interface Order {
   customer_name: string
   customer_phone: string
   customer_address: string
-  items: Array<{ name: string; price: number; qty: number }>
+  items: Array<{ name: string; price: number; qty: number; product_id?: string }>
   subtotal: number
   status: string
   source: string
@@ -82,6 +82,23 @@ export default function OrdersPage() {
     setUpdatingId(orderId)
     await supabase.from('orders').update({ status }).eq('id', orderId)
     setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o))
+
+    // Reduce stock when delivered
+    if (status === 'delivered') {
+      for (const item of order.items || []) {
+        if (item.product_id) {
+          const { data: product } = await supabase
+            .from('products').select('stock_qty').eq('id', item.product_id).single()
+          if (product?.stock_qty != null) {
+            const newQty = Math.max(0, product.stock_qty - item.qty)
+            await supabase.from('products').update({
+              stock_qty: newQty,
+              in_stock: newQty > 0
+            }).eq('id', item.product_id)
+          }
+        }
+      }
+    }
 
     // Notify customer via WhatsApp
     const statusMessages: Record<string, string> = {
