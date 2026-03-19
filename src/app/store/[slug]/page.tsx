@@ -106,12 +106,23 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
         // Load cart from localStorage
         const savedCart = getCart(params.slug)
         if (savedCart.length > 0) {
-          const { data: prods2 } = await supabase.from('products').select('*').in('id', savedCart.map(i => i.productId))
+          const ids = Array.from(new Set(savedCart.map(i => i.productId)))
+          const { data: prods2 } = await supabase.from('products').select('*').in('id', ids)
           if (prods2) {
-            setCart(savedCart.map(item => ({
-              product: { ...prods2.find(p => p.id === item.productId)!, name: item.variantName ? `${prods2.find(p => p.id === item.productId)?.name} (${item.variantName})` : item.productName || prods2.find(p => p.id === item.productId)?.name, price: item.price, price_display: item.priceDisplay, image_url: item.imageUrl } as Product,
-              qty: item.qty
-            })).filter(i => i.product?.id))
+            setCart(savedCart.map(item => {
+              const baseProduct = prods2.find(p => p.id === item.productId)
+              if (!baseProduct) return null
+              return {
+                product: {
+                  ...baseProduct,
+                  name: item.productName || baseProduct.name,
+                  price: item.price,
+                  price_display: item.priceDisplay,
+                  image_url: item.imageUrl || baseProduct.image_url,
+                } as Product,
+                qty: item.qty
+              }
+            }).filter(Boolean) as CartItem[])
           }
         }
       }
@@ -120,34 +131,42 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
     load()
   }, [params.slug])
 
-  // Sync cart to localStorage
-  useEffect(() => {
+  // Save cart item to localStorage helper
+  function saveCartItem(updatedCart: CartItem[]) {
     if (store) {
-      saveCart(store.slug, cart.map(i => ({
+      saveCart(store.slug, updatedCart.map(i => ({
         productId: i.product.id,
         productName: i.product.name,
         price: i.product.price,
         priceDisplay: i.product.price_display || formatPrice(i.product),
         imageUrl: i.product.image_url,
         qty: i.qty,
+        variantName: null,
       })))
     }
-  }, [cart, store])
+  }
 
   function addToCart(product: Product) {
-    // Use name as key so variants (Goya Medium vs Goya Large) are separate lines
     setCart(prev => {
       const existing = prev.find(i => i.product.id === product.id && i.product.name === product.name)
-      if (existing) return prev.map(i => i.product.id === product.id && i.product.name === product.name ? { ...i, qty: i.qty + 1 } : i)
-      return [...prev, { product, qty: 1 }]
+      const newCart = existing
+        ? prev.map(i => i.product.id === product.id && i.product.name === product.name ? { ...i, qty: i.qty + 1 } : i)
+        : [...prev, { product, qty: 1 }]
+      saveCartItem(newCart)
+      return newCart
     })
     setAddedId(product.id)
     setTimeout(() => setAddedId(null), 1500)
   }
 
-  function removeItem(id: string, name?: string) { setCart(prev => prev.filter(i => !(i.product.id === id && (!name || i.product.name === name)))) } function updateQty(id: string, qty: number, name?: string) {
-    if (qty <= 0) setCart(prev => prev.filter(i => !(i.product.id === id && (!name || i.product.name === name))))
-    else setCart(prev => prev.map(i => i.product.id === id && (!name || i.product.name === name) ? { ...i, qty } : i))
+  function updateQty(id: string, qty: number, name?: string) {
+    setCart(prev => {
+      const newCart = qty <= 0
+        ? prev.filter(i => !(i.product.id === id && (!name || i.product.name === name)))
+        : prev.map(i => i.product.id === id && (!name || i.product.name === name) ? { ...i, qty } : i)
+      saveCartItem(newCart)
+      return newCart
+    })
   }
 
   function shareStore() {
@@ -404,11 +423,13 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                       price: variant.price,
                       price_display: variant.price_display || `₦${(variant.price/100).toLocaleString()}`,
                     }
-                    // Add with correct quantity
                     setCart(prev => {
                       const existing = prev.find(i => i.product.id === productWithVariant.id && i.product.name === productWithVariant.name)
-                      if (existing) return prev.map(i => i.product.id === productWithVariant.id && i.product.name === productWithVariant.name ? { ...i, qty: i.qty + modalQty } : i)
-                      return [...prev, { product: productWithVariant, qty: modalQty }]
+                      const newCart = existing
+                        ? prev.map(i => i.product.id === productWithVariant.id && i.product.name === productWithVariant.name ? { ...i, qty: i.qty + modalQty } : i)
+                        : [...prev, { product: productWithVariant, qty: modalQty }]
+                      saveCartItem(newCart)
+                      return newCart
                     })
                     // Close modal and go back to shopping — cart button shows updated count
                     setVariantModal(null)
