@@ -34,6 +34,23 @@ interface CartItem {
   qty: number
 }
 
+// Generate contrasting text color (white or dark) based on background
+function getContrastColor(hex: string): string {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+  return luminance > 0.5 ? '#111827' : '#ffffff'
+}
+
+// Lighten a hex color for backgrounds
+function lightenColor(hex: string, amount: number): string {
+  const r = Math.min(255, parseInt(hex.slice(1, 3), 16) + amount)
+  const g = Math.min(255, parseInt(hex.slice(3, 5), 16) + amount)
+  const b = Math.min(255, parseInt(hex.slice(5, 7), 16) + amount)
+  return `rgb(${r},${g},${b})`
+}
+
 const CATEGORY_EMOJI: Record<string, string> = {
   fashion: '👗', food: '🍱', electronics: '📱', beauty: '💄',
   groceries: '🛒', furniture: '🪑', shoes: '👟', phones: '💻',
@@ -170,11 +187,11 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-800 text-xs truncate">{item.product.name}</p>
-                    <p className="text-brand-green font-bold text-sm">{formatPrice(item.product)}</p>
+                    <p className="font-bold text-sm" style={{ color: store.theme_color || '#1A7A4A' }}>{formatPrice(item.product)}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <button onClick={() => updateQty(item.product.id, item.qty - 1)} className="w-6 h-6 bg-white border border-gray-200 rounded-lg flex items-center justify-center"><Minus size={10} /></button>
                       <span className="text-xs font-bold w-4 text-center">{item.qty}</span>
-                      <button onClick={() => updateQty(item.product.id, item.qty + 1)} className="w-6 h-6 bg-brand-green rounded-lg flex items-center justify-center"><Plus size={10} className="text-white" /></button>
+                      <button onClick={() => updateQty(item.product.id, item.qty + 1)} style={{ backgroundColor: store.theme_color || '#1A7A4A' }} className="w-6 h-6 rounded-lg flex items-center justify-center"><Plus size={10} style={{ color: getContrastColor(store.theme_color || '#1A7A4A') }} /></button>
                     </div>
                   </div>
                   <button onClick={() => updateQty(item.product.id, 0)} className="w-7 h-7 bg-red-50 rounded-xl flex items-center justify-center">
@@ -187,11 +204,12 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
               <div className="px-4 py-4 border-t border-gray-100 space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-500 text-sm">Total</span>
-                  <span className="font-display font-bold text-brand-dark text-lg">₦{(cartTotal / 100).toLocaleString()}</span>
+                  <span className="font-display font-bold text-lg" style={{ color: store.theme_color || '#1A7A4A' }}>₦{(cartTotal / 100).toLocaleString()}</span>
                 </div>
                 <Link href={`/store/${store.slug}/checkout?cart=${encodeURIComponent(JSON.stringify(cart.map(i => ({ id: i.product.id, qty: i.qty }))))}`}
                   onClick={() => setCartOpen(false)}
-                  className="block w-full bg-brand-green text-white font-bold py-3.5 rounded-2xl text-center hover:bg-brand-dark transition-colors">
+                  style={{ backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') }}
+                  className="block w-full font-bold py-3.5 rounded-2xl text-center transition-colors">
                   Proceed to Checkout
                 </Link>
                 {useWhatsApp && (
@@ -267,7 +285,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
 
       {/* Order Confirmed Banner */}
       {orderConfirmed && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-brand-green text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 max-w-sm mx-4">
+        <div style={{ backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') }} className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 max-w-sm mx-4">
           <span className="text-xl">✅</span>
           <div>
             <p className="font-bold text-sm">Order sent!</p>
@@ -374,7 +392,8 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
           <div className="flex gap-2 items-center">
             {(['all', 'instock'] as const).map(f => (
               <button key={f} onClick={() => { setActiveFilter(f); setPage(1) }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${activeFilter === f ? 'bg-brand-green text-white' : 'bg-gray-100 text-gray-500'}`}>
+                style={activeFilter === f ? { backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') } : {}}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${activeFilter === f ? '' : 'bg-gray-100 text-gray-500'}`}>
                 {f === 'all' ? 'All Products' : '✅ In Stock'}
               </button>
             ))}
@@ -414,8 +433,9 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                     )}
                     {useCart && product.in_stock && (
                       <button onClick={() => addToCart(product)}
+                        style={addedId === product.id ? {} : { backgroundColor: store.theme_color || '#1A7A4A' }}
                         className={`absolute bottom-2 right-2 w-8 h-8 rounded-xl flex items-center justify-center shadow-lg transition-all ${
-                          addedId === product.id ? 'bg-brand-accent scale-110' : 'bg-brand-green hover:bg-brand-dark'
+                          addedId === product.id ? 'bg-green-500 scale-110' : ''
                         }`}>
                         {addedId === product.id ? <span className="text-white text-xs font-bold">✓</span> : <Plus size={16} className="text-white" />}
                       </button>
@@ -427,14 +447,15 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                     <Link href={`/store/${store.slug}/product/${product.id}`} className="block">
                     <h3 className="font-semibold text-gray-800 text-sm leading-tight mb-1 line-clamp-2 hover:text-brand-green transition-colors">{product.name}</h3>
                   </Link>
-                    <p className="text-brand-green font-display font-bold text-base mb-2">{formatPrice(product)}</p>
+                    <p className="font-display font-bold text-base mb-2" style={{ color: store.theme_color || '#1A7A4A' }}>{formatPrice(product)}</p>
 
                     {product.in_stock ? (
                       <div className="space-y-1.5">
                         {useCart && (
                           <button onClick={() => addToCart(product)}
-                            className={`w-full text-white text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-colors ${
-                              addedId === product.id ? 'bg-brand-accent' : 'bg-brand-green hover:bg-brand-dark'
+                            style={addedId === product.id ? {} : { backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') }}
+                            className={`w-full text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
+                              addedId === product.id ? 'bg-green-500 text-white' : ''
                             }`}>
                             {addedId === product.id ? '✓ Added!' : <><ShoppingCart size={12} /> Add to Cart</>}
                           </button>
@@ -470,7 +491,8 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
             {hasMore && (
               <div className="text-center mt-8">
                 <button onClick={() => setPage(p => p + 1)}
-                  className="bg-white border-2 border-brand-green text-brand-green font-bold px-8 py-3 rounded-2xl hover:bg-brand-light transition-colors">
+                  style={{ borderColor: store.theme_color || '#1A7A4A', color: store.theme_color || '#1A7A4A' }}
+                  className="bg-white border-2 font-bold px-8 py-3 rounded-2xl transition-colors">
                   Load More ({filtered.length - paginated.length} remaining)
                 </button>
               </div>
@@ -482,7 +504,8 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
       {/* Floating cart */}
       {useCart && cartCount > 0 && (
         <button onClick={() => setCartOpen(true)}
-          className="fixed bottom-6 right-6 bg-brand-green text-white font-bold px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 hover:bg-brand-dark transition-colors z-40">
+          style={{ backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') }}
+        className="fixed bottom-6 right-6 font-bold px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 transition-colors z-40">
           <ShoppingCart size={18} />
           {cartCount} item{cartCount > 1 ? 's' : ''} · ₦{(cartTotal / 100).toLocaleString()}
         </button>
@@ -494,7 +517,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
           <p className="text-white/60 text-xs mb-1">Powered by</p>
           <p className="font-display font-bold text-white text-lg mb-1">Earket 🛒</p>
           <p className="text-white/70 text-xs mb-4">Build your own free online store in 5 minutes</p>
-          <Link href="/onboarding" className="inline-block bg-brand-green text-white font-bold text-sm px-6 py-2.5 rounded-xl hover:bg-brand-accent transition-colors">
+          <Link href="/onboarding" className="inline-block font-bold text-sm px-6 py-2.5 rounded-xl transition-colors" style={{ backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') }}>
             Start Free — earket.com
           </Link>
         </div>
