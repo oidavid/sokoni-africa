@@ -233,8 +233,13 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                           const customerMsg = `Hi ${waName || 'there'}! Here is your order summary from *${store.business_name}*:\n\n${lines}\n\nTotal: ₦${(cartTotal / 100).toLocaleString()}\n\nThe merchant will confirm your order shortly.`
                           const merchantWa = store.whatsapp_number?.replace(/\D/g, '')
                           const rawPhone = waPhone.replace(/\D/g, '')
-                          // Use selected country dial code, strip leading zero
-                          const localPhone = rawPhone.startsWith('0') ? rawPhone.slice(1) : rawPhone
+                          // Strip leading zero or country code if already included
+                          let localPhone = rawPhone
+                          if (rawPhone.startsWith('0')) {
+                            localPhone = rawPhone.slice(1)
+                          } else if (waCountry.dial && rawPhone.startsWith(waCountry.dial)) {
+                            localPhone = rawPhone.slice(waCountry.dial.length)
+                          }
                           const customerWa = waCountry.dial + localPhone
                           // Include customer WhatsApp link in merchant message for easy follow-up
                           const fullMerchantMsg = merchantMsg + `\n\n📲 Tap to message customer: https://wa.me/${customerWa}`
