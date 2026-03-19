@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Search, MapPin, Share2, ShoppingCart, Plus, Minus, X, ChevronDown, SlidersHorizontal } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { COUNTRIES } from '@/lib/countries'
 
 interface Merchant {
   id: string
@@ -58,6 +59,8 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
   const [showSort, setShowSort] = useState(false)
   const [showWhatsAppForm, setShowWhatsAppForm] = useState(false)
   const [orderConfirmed, setOrderConfirmed] = useState(false)
+  const [waCountry, setWaCountry] = useState(COUNTRIES[0]) // Default Nigeria
+  const [showWaCountryPicker, setShowWaCountryPicker] = useState(false)
   const [waName, setWaName] = useState('')
   const [waPhone, setWaPhone] = useState('')
   const searchRef = useRef<HTMLInputElement>(null)
@@ -202,17 +205,37 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                         <input type="text" placeholder="Your name" value={waName}
                           onChange={e => setWaName(e.target.value)}
                           className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-brand-green" />
-                        <input type="tel" placeholder="Your WhatsApp number" value={waPhone}
-                          onChange={e => setWaPhone(e.target.value)}
-                          className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-brand-green" />
+                        <div className="flex gap-2">
+                          <button onClick={() => setShowWaCountryPicker(!showWaCountryPicker)}
+                            className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl px-2 py-2 text-xs font-semibold shrink-0 hover:border-brand-green">
+                            <span>{waCountry.flag}</span>
+                            <span className="text-gray-600">+{waCountry.dial}</span>
+                          </button>
+                          <input type="tel" placeholder="WhatsApp number" value={waPhone}
+                            onChange={e => setWaPhone(e.target.value)}
+                            className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-brand-green" />
+                        </div>
+                        {showWaCountryPicker && (
+                          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-lg max-h-40 overflow-y-auto">
+                            {COUNTRIES.map(c => (
+                              <button key={c.code} onClick={() => { setWaCountry(c); setShowWaCountryPicker(false) }}
+                                className={`w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-gray-50 ${waCountry.code === c.code ? 'bg-brand-light text-brand-green font-semibold' : 'text-gray-700'}`}>
+                                <span>{c.flag}</span>
+                                <span className="flex-1 text-left">{c.name}</span>
+                                <span className="text-gray-400">+{c.dial}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
                         <button onClick={() => {
                           const lines = cart.map(i => `• ${i.product.name} x${i.qty} — ${formatPrice(i.product)}`).join('\n')
                           const merchantMsg = `Hi ${store.business_name}! I'd like to order:\n\n${lines}\n\nTotal: ₦${(cartTotal / 100).toLocaleString()}\n\nName: ${waName || 'Not provided'}\nWhatsApp: ${waPhone || 'Not provided'}\n\nPlease confirm. Thank you!`
                           const customerMsg = `Hi ${waName || 'there'}! Here is your order summary from *${store.business_name}*:\n\n${lines}\n\nTotal: ₦${(cartTotal / 100).toLocaleString()}\n\nThe merchant will confirm your order shortly.`
                           const merchantWa = store.whatsapp_number?.replace(/\D/g, '')
                           const rawPhone = waPhone.replace(/\D/g, '')
-                          // Only add 234 prefix for Nigerian local numbers starting with 0
-                          const customerWa = rawPhone.startsWith('0') ? '234' + rawPhone.slice(1) : rawPhone
+                          // Use selected country dial code, strip leading zero
+                          const localPhone = rawPhone.startsWith('0') ? rawPhone.slice(1) : rawPhone
+                          const customerWa = waCountry.dial + localPhone
                           // Include customer WhatsApp link in merchant message for easy follow-up
                           const fullMerchantMsg = merchantMsg + `\n\n📲 Tap to message customer: https://wa.me/${customerWa}`
                           window.open(`https://wa.me/${merchantWa}?text=${encodeURIComponent(fullMerchantMsg)}`, '_blank')
