@@ -232,7 +232,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                       <button onClick={() => updateQty(item.product.id, item.qty + 1)} style={{ backgroundColor: store.theme_color || '#1A7A4A' }} className="w-6 h-6 rounded-lg flex items-center justify-center"><Plus size={10} style={{ color: getContrastColor(store.theme_color || '#1A7A4A') }} /></button>
                     </div>
                   </div>
-                  <button onClick={() => removeFromCart(item.product.id, item.product.name)} className="w-7 h-7 bg-red-50 rounded-xl flex items-center justify-center">
+                  <button onClick={() => removeItem(item.product.id, item.product.name)} className="w-7 h-7 bg-red-50 rounded-xl flex items-center justify-center">
                     <X size={12} className="text-red-400" />
                   </button>
                 </div>
