@@ -41,7 +41,7 @@ Respond ONLY with valid JSON, no markdown, no explanation:
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5',
+        model: 'claude-3-5-haiku-20241022',
         max_tokens: 500,
         system: systemPrompt,
         messages: [{
@@ -60,7 +60,11 @@ Respond ONLY with valid JSON, no markdown, no explanation:
     if (!response.ok) {
       const errText = await response.text()
       console.error('Anthropic API error:', response.status, errText)
-      throw new Error(`API error: ${response.status}`)
+      return NextResponse.json({
+        name: '', description: '',
+        suggestedPrice: { min: 1000, max: 10000 },
+        error: `API error ${response.status}: ${errText}`,
+      })
     }
 
     const data = await response.json()
