@@ -192,11 +192,34 @@ export default function ProductDetailPage() {
 
             {/* CTA buttons */}
             {useCart && (
-              <Link
-                href={`/store/${slug}/checkout?cart=${encodeURIComponent(JSON.stringify([{ id: product.id, qty }]))}`}
-                className="flex w-full bg-brand-green text-white font-bold py-4 rounded-2xl text-center hover:bg-brand-dark transition-colors items-center justify-center gap-2">
-                <ShoppingCart size={18} /> Checkout Now
-              </Link>
+              <>
+                {product.variants && product.variants.length > 0 && selectedVariant === null && (
+                  <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-center font-semibold">
+                    ⚠️ Please select an option above before adding to cart
+                  </p>
+                )}
+                <Link
+                  href={selectedVariant !== null || !product.variants?.length
+                    ? `/store/${slug}/checkout?cart=${encodeURIComponent(JSON.stringify([{ 
+                        id: product.id, 
+                        qty,
+                        variantIndex: selectedVariant,
+                        variantName: selectedVariant !== null && product.variants ? product.variants[selectedVariant].name : null,
+                        variantPrice: selectedVariant !== null && product.variants ? product.variants[selectedVariant].price : null
+                      }]))}`
+                    : '#'}
+                  onClick={e => { if (product.variants?.length && selectedVariant === null) e.preventDefault() }}
+                  className={`flex w-full font-bold py-4 rounded-2xl text-center transition-colors items-center justify-center gap-2 ${
+                    product.variants?.length && selectedVariant === null
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-brand-green text-white hover:bg-brand-dark'
+                  }`}>
+                  <ShoppingCart size={18} /> 
+                  {selectedVariant !== null && product.variants
+                    ? `Add ${product.variants[selectedVariant].name} to Cart`
+                    : 'Add to Cart'}
+                </Link>
+              </>
             )}
             {useWhatsApp && (
               <button onClick={orderWhatsApp}

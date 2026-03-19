@@ -14,6 +14,14 @@ interface Product {
   image_url: string | null
 }
 
+interface CartItemMeta {
+  id: string
+  qty: number
+  variantIndex?: number | null
+  variantName?: string | null
+  variantPrice?: number | null
+}
+
 interface CartItem {
   product: Product
   qty: number
@@ -70,10 +78,17 @@ function CheckoutForm() {
           const ids = cartIds.map(c => c.id)
           const { data: products } = await supabase.from('products').select('*').in('id', ids)
           if (products) {
-            const items = cartIds.map(c => ({
-              product: products.find(p => p.id === c.id)!,
-              qty: c.qty,
-            })).filter(i => i.product)
+            const items = (cartIds as CartItemMeta[]).map(c => {
+              const product = products.find(p => p.id === c.id)
+              if (!product) return null
+              // Use variant price if specified
+              if (c.variantPrice) {
+                product.price = c.variantPrice
+                product.price_display = `₦${(c.variantPrice/100).toLocaleString()}`
+              }
+              const name = c.variantName ? `${product.name} (${c.variantName})` : product.name
+              return { product: { ...product, name }, qty: c.qty }
+            }).filter(Boolean) as CartItem[]
             setCart(items)
           }
         } catch (e) {

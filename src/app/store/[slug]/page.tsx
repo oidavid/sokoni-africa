@@ -481,13 +481,21 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                     {product.in_stock ? (
                       <div className="space-y-1.5">
                         {useCart && (
-                          <button onClick={() => addToCart(product)}
-                            style={addedId === product.id ? {} : { backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') }}
-                            className={`w-full text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
-                              addedId === product.id ? 'bg-green-500 text-white' : ''
-                            }`}>
-                            {addedId === product.id ? '✓ Added!' : <><ShoppingCart size={12} /> Add to Cart</>}
-                          </button>
+                          product.variants && product.variants.length > 0 ? (
+                            <Link href={`/store/${store.slug}/product/${product.id}`}
+                              style={{ backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') }}
+                              className="w-full text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all">
+                              <ShoppingCart size={12} /> Select Option
+                            </Link>
+                          ) : (
+                            <button onClick={() => addToCart(product)}
+                              style={addedId === product.id ? {} : { backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') }}
+                              className={`w-full text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
+                                addedId === product.id ? 'bg-green-500 text-white' : ''
+                              }`}>
+                              {addedId === product.id ? '✓ Added!' : <><ShoppingCart size={12} /> Add to Cart</>}
+                            </button>
+                          )
                         )}
 
                       </div>
