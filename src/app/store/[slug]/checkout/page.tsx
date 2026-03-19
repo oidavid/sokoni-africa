@@ -123,9 +123,15 @@ function CheckoutForm() {
     const errs: Record<string, string> = {}
     if (!name.trim()) errs.name = 'Please enter your name'
     const rawPhoneDigits = phone.replace(/\D/g, '')
-    const phoneMinLen = rawPhoneDigits.startsWith('0') ? 11 : 10
+    // Strip country code if user included it to get local number length
+    let localDigits = rawPhoneDigits
+    if (rawPhoneDigits.startsWith(phoneCountry.dial)) {
+      localDigits = rawPhoneDigits.slice(phoneCountry.dial.length)
+    } else if (rawPhoneDigits.startsWith('0')) {
+      localDigits = rawPhoneDigits.slice(1)
+    }
     if (!phone.trim()) errs.phone = 'Please enter your phone number'
-    else if (rawPhoneDigits.length < phoneMinLen) errs.phone = `Please enter a valid phone number for ${phoneCountry.name}`
+    else if (localDigits.length < 10) errs.phone = `Please enter a valid 10-digit phone number for ${phoneCountry.name}`
     if (fulfillment === 'delivery' && !address.trim()) errs.address = 'Please enter your delivery address'
     setErrors(errs)
     return Object.keys(errs).length === 0
