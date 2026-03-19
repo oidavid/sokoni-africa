@@ -135,18 +135,19 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
   }, [cart, store])
 
   function addToCart(product: Product) {
+    // Use name as key so variants (Goya Medium vs Goya Large) are separate lines
     setCart(prev => {
-      const existing = prev.find(i => i.product.id === product.id)
-      if (existing) return prev.map(i => i.product.id === product.id ? { ...i, qty: i.qty + 1 } : i)
+      const existing = prev.find(i => i.product.id === product.id && i.product.name === product.name)
+      if (existing) return prev.map(i => i.product.id === product.id && i.product.name === product.name ? { ...i, qty: i.qty + 1 } : i)
       return [...prev, { product, qty: 1 }]
     })
     setAddedId(product.id)
     setTimeout(() => setAddedId(null), 1500)
   }
 
-  function updateQty(id: string, qty: number) {
-    if (qty <= 0) setCart(prev => prev.filter(i => i.product.id !== id))
-    else setCart(prev => prev.map(i => i.product.id === id ? { ...i, qty } : i))
+  function updateQty(id: string, qty: number, name?: string) {
+    if (qty <= 0) setCart(prev => prev.filter(i => !(i.product.id === id && (!name || i.product.name === name))))
+    else setCart(prev => prev.map(i => i.product.id === id && (!name || i.product.name === name) ? { ...i, qty } : i))
   }
 
   function shareStore() {
@@ -231,7 +232,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                       <button onClick={() => updateQty(item.product.id, item.qty + 1)} style={{ backgroundColor: store.theme_color || '#1A7A4A' }} className="w-6 h-6 rounded-lg flex items-center justify-center"><Plus size={10} style={{ color: getContrastColor(store.theme_color || '#1A7A4A') }} /></button>
                     </div>
                   </div>
-                  <button onClick={() => updateQty(item.product.id, 0)} className="w-7 h-7 bg-red-50 rounded-xl flex items-center justify-center">
+                  <button onClick={() => removeFromCart(item.product.id, item.product.name)} className="w-7 h-7 bg-red-50 rounded-xl flex items-center justify-center">
                     <X size={12} className="text-red-400" />
                   </button>
                 </div>
@@ -401,11 +402,16 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                       price: variant.price,
                       price_display: variant.price_display || `₦${(variant.price/100).toLocaleString()}`,
                     }
-                    for (let i = 0; i < modalQty; i++) addToCart(productWithVariant)
+                    // Add with correct quantity
+                    setCart(prev => {
+                      const existing = prev.find(i => i.product.id === productWithVariant.id && i.product.name === productWithVariant.name)
+                      if (existing) return prev.map(i => i.product.id === productWithVariant.id && i.product.name === productWithVariant.name ? { ...i, qty: i.qty + modalQty } : i)
+                      return [...prev, { product: productWithVariant, qty: modalQty }]
+                    })
+                    // Close modal and go back to shopping — cart button shows updated count
                     setVariantModal(null)
                     setSelectedVariantIndex(null)
                     setModalQty(1)
-                    setCartOpen(true)
                   }}
                   disabled={selectedVariantIndex === null}
                   style={selectedVariantIndex !== null ? { backgroundColor: store?.theme_color || '#1A7A4A' } : {}}
@@ -417,8 +423,13 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                     ? `Add ${modalQty} ${variantModal.variants![selectedVariantIndex].name} to Cart`
                     : 'Select an option first'}
                 </button>
+                <button onClick={() => { setVariantModal(null); setCartOpen(true) }}
+                  className="w-full text-sm font-semibold py-2 border border-gray-200 rounded-2xl"
+                  style={{ color: store?.theme_color || '#1A7A4A' }}>
+                  View Cart & Checkout
+                </button>
                 <button onClick={() => setVariantModal(null)}
-                  className="w-full text-sm text-gray-500 font-semibold py-2">
+                  className="w-full text-sm text-gray-400 font-medium py-1">
                   Continue Shopping
                 </button>
               </div>
