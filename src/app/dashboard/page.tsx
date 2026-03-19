@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ShoppingBag, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil, ShoppingCart, TrendingUp } from 'lucide-react'
+import { ShoppingBag, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil, ShoppingCart, TrendingUp, BarChart2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 interface Merchant {
@@ -235,6 +235,7 @@ export default function DashboardPage() {
           { icon: TrendingUp, label: 'Dashboard', href: '/dashboard', active: true },
           { icon: Package, label: 'Products', href: '/dashboard/products/new', active: false },
           { icon: ShoppingCart, label: 'Orders', href: '/dashboard/orders', active: false },
+          { icon: BarChart2, label: 'Analytics', href: '/dashboard/analytics', active: false },
           { icon: Settings, label: 'Settings', href: '/dashboard/settings', active: false },
         ].map((item, i) => (
           <Link key={i} href={item.href}

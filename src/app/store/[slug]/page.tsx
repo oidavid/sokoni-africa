@@ -92,6 +92,12 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
         setStore(merchant)
         const { data: prods } = await supabase.from('products').select('*').eq('merchant_id', merchant.id).order('created_at', { ascending: false })
         setProducts(prods || [])
+        // Track store view
+        fetch('/api/analytics/view', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ merchant_id: merchant.id })
+        }).catch(() => {})
       }
       setLoading(false)
     }
