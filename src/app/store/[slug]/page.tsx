@@ -27,6 +27,7 @@ interface Product {
   image_url: string | null
   in_stock: boolean
   category: string
+  variants: Array<{name: string; price: number; price_display: string}> | null
 }
 
 interface CartItem {
@@ -456,7 +457,26 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                     <Link href={`/store/${store.slug}/product/${product.id}`} className="block">
                     <h3 className="font-semibold text-gray-800 text-sm leading-tight mb-1 line-clamp-2 hover:text-brand-green transition-colors">{product.name}</h3>
                   </Link>
-                    <p className="font-display font-bold text-base mb-2" style={{ color: store.theme_color || '#1A7A4A' }}>{formatPrice(product)}</p>
+                    <p className="font-display font-bold text-base mb-2" style={{ color: store.theme_color || '#1A7A4A' }}>
+                      {product.variants && product.variants.length > 0
+                        ? (() => {
+                            const prices = product.variants.map(v => v.price)
+                            const min = Math.min(...prices)
+                            const max = Math.max(...prices)
+                            return min === max
+                              ? `₦${(min/100).toLocaleString()}`
+                              : `₦${(min/100).toLocaleString()} – ₦${(max/100).toLocaleString()}`
+                          })()
+                        : formatPrice(product)}
+                    </p>
+                    {product.variants && product.variants.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-1">
+                        {product.variants.slice(0, 3).map((v, i) => (
+                          <span key={i} className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-lg">{v.name}</span>
+                        ))}
+                        {product.variants.length > 3 && <span className="text-xs text-gray-400">+{product.variants.length - 3}</span>}
+                      </div>
+                    )}
 
                     {product.in_stock ? (
                       <div className="space-y-1.5">
