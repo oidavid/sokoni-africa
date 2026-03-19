@@ -139,7 +139,7 @@ function CheckoutForm() {
     setWaError('')
     if (!customerName.trim()) { setWaError('Please enter your name'); return }
     const rawPhone = customerPhone.replace(/\D/g, '')
-    if (!rawPhone || rawPhone.length < 7) { setWaError('Please enter a valid WhatsApp number (min 7 digits)'); return }
+    if (!rawPhone || rawPhone.length < 10) { setWaError('Please enter a valid WhatsApp number (min 10 digits)'); return }
     const itemLines = cart.map(i => `• ${i.product.name} x${i.qty} — ${i.product.price_display || formatNaira(i.product.price)}`).join('\n')
     const localPhone = rawPhone.startsWith('0') ? rawPhone.slice(1) : rawPhone.startsWith(waCountry.dial) ? rawPhone.slice(waCountry.dial.length) : rawPhone
     const waPhone = waCountry.dial + localPhone
