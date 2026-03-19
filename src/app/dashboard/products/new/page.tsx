@@ -30,6 +30,7 @@ export default function AddProductPage() {
   const [uploadingImage, setUploadingImage] = useState(false)
   const [stockQty, setStockQty] = useState<string>('')
   const [trackInventory, setTrackInventory] = useState(false)
+  const [costPrice, setCostPrice] = useState<string>('')
   const [variants, setVariants] = useState<Array<{id: string; name: string; price: string; stock: string}>>([])
   const [showVariants, setShowVariants] = useState(false)
   const [saveError, setSaveError] = useState('')
@@ -125,6 +126,7 @@ export default function AddProductPage() {
       price_display: `₦${priceNum.toLocaleString()}`,
       image_url: imageUrl,
       stock_qty: trackInventory && stockQty ? parseInt(stockQty) : null,
+      cost_price: costPrice ? Math.round(parseFloat(costPrice) * 100) : null,
       variants: showVariants && variants.length > 0 ? variants.map(v => ({
         name: v.name,
         price: Math.round(parseFloat(v.price || String(priceNum)) * 100),
@@ -296,6 +298,25 @@ export default function AddProductPage() {
               </div>
               {state === 'ready' && price && (
                 <p className="text-xs text-gray-400 mt-1">💡 {pid ? 'AI suggest dis price — you fit change am' : 'AI suggested this price — you can adjust it'}</p>
+              )}
+            </div>
+
+            {/* Cost Price */}
+            <div>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">
+                Cost Price <span className="text-gray-400 font-normal normal-case">(optional — for profit tracking)</span>
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-display font-bold text-gray-400">₦</span>
+                <input type="number" value={costPrice} onChange={e => setCostPrice(e.target.value)} min="0"
+                  placeholder="0"
+                  className="w-full bg-white border-2 border-gray-200 rounded-xl pl-8 pr-4 py-3 text-sm font-bold text-brand-dark focus:border-brand-green outline-none" />
+              </div>
+              {costPrice && price && parseFloat(price) > 0 && (
+                <p className="text-xs text-brand-green mt-1 font-semibold">
+                  Profit per unit: ₦{(parseFloat(price) - parseFloat(costPrice || '0')).toLocaleString()}
+                  ({Math.round(((parseFloat(price) - parseFloat(costPrice || '0')) / parseFloat(price)) * 100)}% margin)
+                </p>
               )}
             </div>
 

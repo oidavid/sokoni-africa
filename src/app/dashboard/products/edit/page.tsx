@@ -15,6 +15,7 @@ interface Product {
   in_stock: boolean
   image_url: string | null
   stock_qty: number | null
+  cost_price: number | null
   variants: Array<{name: string; price: number; price_display: string; stock_qty: number | null}> | null
 }
 
@@ -47,6 +48,7 @@ function EditProductForm() {
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [stockQty, setStockQty] = useState<string>('')
   const [trackInventory, setTrackInventory] = useState(false)
+  const [costPrice, setCostPrice] = useState<string>('')
   const [variants, setVariants] = useState<Array<{id: string; name: string; price: string; stock: string}>>([])
   const [showVariants, setShowVariants] = useState(false)
 
@@ -76,6 +78,7 @@ function EditProductForm() {
       imageUrlRef.current = p.image_url
       setStockQty(p.stock_qty != null ? String(p.stock_qty) : '')
       setTrackInventory(p.stock_qty != null)
+      setCostPrice(p.cost_price ? String(p.cost_price / 100) : '')
       if (p.variants && p.variants.length > 0) {
         setShowVariants(true)
         setVariants(p.variants.map((v: {name: string; price: number; stock_qty: number | null}) => ({
@@ -164,6 +167,7 @@ function EditProductForm() {
         in_stock: inStock,
         image_url: imageUrlRef.current || imageUrl,
         stock_qty: trackInventory && stockQty ? parseInt(stockQty) : null,
+        cost_price: costPrice ? Math.round(parseFloat(costPrice) * 100) : null,
         variants: showVariants && variants.length > 0 ? variants.filter(v => v.name).map(v => ({
           name: v.name,
           price: Math.round(parseFloat(v.price || String(parseFloat(price))) * 100),

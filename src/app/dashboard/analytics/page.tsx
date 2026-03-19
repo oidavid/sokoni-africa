@@ -17,6 +17,9 @@ interface AnalyticsData {
   ordersByStatus: Record<string, number>
   dailyViews: Array<{ date: string; views: number }>
   dailyOrders: Array<{ date: string; orders: number; revenue: number }>
+  totalCOGS: number
+  totalProfit: number
+  profitMargin: number
 }
 
 function formatNaira(kobo: number) {
@@ -116,7 +119,29 @@ export default function AnalyticsPage() {
       }
     })
 
-    setData({ totalViews, viewsToday, viewsThisWeek, totalOrders, ordersToday, totalRevenue, revenueThisMonth, topProducts, ordersByStatus, dailyViews, dailyOrders })
+    // Calculate COGS from products cost_price
+    const { data: products } = await supabase
+      .from('products')
+      .select('id, cost_price')
+      .eq('merchant_id', m.id)
+    
+    const productCostMap: Record<string, number> = {}
+    ;(products || []).forEach((p: { id: string; cost_price: number | null }) => {
+      if (p.cost_price) productCostMap[p.id] = p.cost_price
+    })
+
+    let totalCOGS = 0
+    allOrders.forEach(o => {
+      ;(o.items || []).forEach((item: { product_id?: string; price: number; qty: number }) => {
+        const costPrice = item.product_id ? productCostMap[item.product_id] : null
+        if (costPrice) totalCOGS += costPrice * item.qty
+      })
+    })
+
+    const totalProfit = totalRevenue - totalCOGS
+    const profitMargin = totalRevenue > 0 ? Math.round((totalProfit / totalRevenue) * 100) : 0
+
+    setData({ totalViews, viewsToday, viewsThisWeek, totalOrders, ordersToday, totalRevenue, revenueThisMonth, topProducts, ordersByStatus, dailyViews, dailyOrders, totalCOGS, totalProfit, profitMargin })
     setLoading(false)
     setRefreshing(false)
   }, [router])
@@ -201,6 +226,56 @@ export default function AnalyticsPage() {
             </div>
             <div className="text-xs text-gray-400 mt-1">Views → Orders</div>
           </div>
+        </div>
+
+        {/* Financial Summary */}
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-50">
+            <h2 className="font-display font-bold text-brand-dark text-sm">Financial Summary (30 days)</h2>
+          </div>
+          <div className="divide-y divide-gray-50">
+            <div className="px-4 py-3 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-blue-400 rounded-full" />
+                <span className="text-sm text-gray-700">Revenue</span>
+              </div>
+              <span className="font-display font-bold text-blue-600">{formatNaira(data?.revenueThisMonth || 0)}</span>
+            </div>
+            <div className="px-4 py-3 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-red-400 rounded-full" />
+                <span className="text-sm text-gray-700">Cost of Goods (COGS)</span>
+              </div>
+              <span className="font-display font-bold text-red-500">
+                {data?.totalCOGS ? `- ${formatNaira(data.totalCOGS)}` : '—'}
+              </span>
+            </div>
+            <div className="px-4 py-3 flex justify-between items-center bg-brand-light/30">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-brand-green rounded-full" />
+                <span className="text-sm font-semibold text-gray-800">Gross Profit</span>
+              </div>
+              <span className="font-display font-bold text-brand-green">
+                {data?.totalCOGS ? formatNaira(data.totalProfit || 0) : '—'}
+              </span>
+            </div>
+            <div className="px-4 py-3 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-purple-400 rounded-full" />
+                <span className="text-sm text-gray-700">Profit Margin</span>
+              </div>
+              <span className="font-display font-bold text-purple-600">
+                {data?.totalCOGS ? `${data.profitMargin}%` : '—'}
+              </span>
+            </div>
+          </div>
+          {!data?.totalCOGS && (
+            <div className="px-4 py-3 bg-amber-50 border-t border-amber-100">
+              <p className="text-xs text-amber-700">
+                💡 Add cost prices to your products to see profit calculations.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Views chart */}
