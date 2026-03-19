@@ -128,7 +128,8 @@ function CheckoutForm() {
     if (!store) return
     // Use checkout form details if already filled and valid, otherwise show mini form
     const rawPhone = phone.replace(/\D/g, '')
-    if (name.trim() && rawPhone.length >= 10) {
+    const minLen = rawPhone.startsWith('0') ? 11 : 10
+    if (name.trim() && rawPhone.length >= minLen) {
       sendWhatsAppOrder(name, phone)
     } else {
       setShowWaForm(true)
@@ -140,7 +141,8 @@ function CheckoutForm() {
     setWaError('')
     if (!customerName.trim()) { setWaError('Please enter your name'); return }
     const rawPhone = customerPhone.replace(/\D/g, '')
-    if (!rawPhone || rawPhone.length < 10) { setWaError('Please enter a valid WhatsApp number (min 10 digits)'); return }
+    const minLength = rawPhone.startsWith('0') ? 11 : 10
+    if (!rawPhone || rawPhone.length < minLength) { setWaError('Please enter a valid WhatsApp number (e.g. 07067459890)'); return }
     const itemLines = cart.map(i => `• ${i.product.name} x${i.qty} — ${i.product.price_display || formatNaira(i.product.price)}`).join('\n')
     const localPhone = rawPhone.startsWith('0') ? rawPhone.slice(1) : rawPhone.startsWith(waCountry.dial) ? rawPhone.slice(waCountry.dial.length) : rawPhone
     const waPhone = waCountry.dial + localPhone
