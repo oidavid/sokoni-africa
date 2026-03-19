@@ -1,9 +1,10 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, ShoppingCart, Plus, Minus } from 'lucide-react'
+import { ArrowLeft, ShoppingCart, Plus, Minus, Check } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { addToCart } from '@/lib/cart'
 
 interface Product {
   id: string
@@ -24,6 +25,7 @@ interface Merchant {
   whatsapp_number: string
   category: string
   order_mode: string
+  theme_color: string
 }
 
 function formatPrice(p: Product) {
@@ -32,6 +34,7 @@ function formatPrice(p: Product) {
 
 export default function ProductDetailPage() {
   const params = useParams()
+  const router = useRouter()
   const slug = params.slug as string
   const id = params.id as string
 
@@ -41,6 +44,7 @@ export default function ProductDetailPage() {
   const [qty, setQty] = useState(1)
   const [selectedVariant, setSelectedVariant] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
+  const [added, setAdded] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -50,12 +54,8 @@ export default function ProductDetailPage() {
       const { data: p } = await supabase.from('products').select('*').eq('id', id).single()
       if (p) setProduct(p)
       const { data: rel } = await supabase
-        .from('products')
-        .select('*')
-        .eq('merchant_id', merchant.id)
-        .eq('in_stock', true)
-        .neq('id', id)
-        .limit(4)
+        .from('products').select('*')
+        .eq('merchant_id', merchant.id).eq('in_stock', true).neq('id', id).limit(4)
       setRelated(rel || [])
       setLoading(false)
     }
@@ -83,8 +83,8 @@ export default function ProductDetailPage() {
 
   const useCart = store.order_mode === 'cart' || store.order_mode === 'both' || !store.order_mode
   const useWhatsApp = store.order_mode === 'whatsapp' || store.order_mode === 'both' || !store.order_mode
+  const themeColor = store.theme_color || '#1A7A4A'
 
-  // Get active price — use variant price if selected, otherwise base price
   const activePrice = selectedVariant !== null && product.variants
     ? product.variants[selectedVariant].price
     : product.price
@@ -95,27 +95,62 @@ export default function ProductDetailPage() {
 
   const totalDisplay = `₦${(activePrice * qty / 100).toLocaleString()}`
 
+  const hasVariants = product.variants && product.variants.length > 0
+  const canAddToCart = !hasVariants || selectedVariant !== null
+
+  function handleAddToCart() {
+    if (!product || !store) return
+    if (hasVariants && selectedVariant === null) return
+
+    const variantName = selectedVariant !== null && product.variants
+      ? product.variants[selectedVariant].name : null
+
+    addToCart(slug, {
+      productId: product.id,
+      productName: product.name,
+      price: activePrice,
+      priceDisplay: activePriceDisplay,
+      imageUrl: product.image_url,
+      qty,
+      variantName,
+      variantIndex: selectedVariant,
+    })
+
+    setAdded(true)
+    setTimeout(() => setAdded(false), 2000)
+  }
+
+  function handleCheckout() {
+    if (!canAddToCart) return
+    handleAddToCart()
+    router.push(`/store/${slug}/checkout`)
+  }
+
   function orderWhatsApp() {
     if (!store || !product) return
     const variantText = selectedVariant !== null && product.variants
-      ? ` (${product.variants[selectedVariant].name})`
-      : ''
+      ? ` (${product.variants[selectedVariant].name})` : ''
     const msg = `Hi ${store.business_name}! I want to order:\n\n*${product.name}${variantText}* × ${qty} — ${activePriceDisplay}\n\nTotal: ${totalDisplay}\n\nPlease confirm availability. Thank you!`
     window.open(`https://wa.me/${store.whatsapp_number?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank')
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
         <Link href={`/store/${slug}`} className="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center">
           <ArrowLeft size={16} className="text-gray-600" />
         </Link>
         <h1 className="font-display font-bold text-brand-dark truncate flex-1">{product.name}</h1>
+        {useCart && (
+          <Link href={`/store/${slug}/checkout`}
+            className="w-8 h-8 rounded-xl flex items-center justify-center"
+            style={{ backgroundColor: themeColor }}>
+            <ShoppingCart size={15} className="text-white" />
+          </Link>
+        )}
       </div>
 
       <div className="max-w-2xl mx-auto">
-        {/* Product Image */}
         <div className="bg-white">
           {product.image_url ? (
             <img src={product.image_url} alt={product.name} className="w-full aspect-square object-cover" />
@@ -124,7 +159,6 @@ export default function ProductDetailPage() {
           )}
         </div>
 
-        {/* Product Info */}
         <div className="bg-white mt-2 px-4 py-5">
           <div className="flex items-start justify-between gap-3 mb-3">
             <h1 className="font-display font-bold text-xl text-brand-dark leading-tight">{product.name}</h1>
@@ -135,43 +169,49 @@ export default function ProductDetailPage() {
             </span>
           </div>
 
-          {/* Price — updates with variant */}
-          <p className="font-display font-bold text-3xl text-brand-green mb-4">{activePriceDisplay}</p>
+          <p className="font-display font-bold text-3xl mb-4" style={{ color: themeColor }}>
+            {activePriceDisplay}
+          </p>
 
           {product.description && (
             <p className="text-gray-600 text-sm leading-relaxed">{product.description}</p>
           )}
 
           {/* Variants */}
-          {product.variants && product.variants.length > 0 && (
+          {hasVariants && (
             <div className="mt-4">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Choose Option</p>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                Choose Option <span className="text-red-400">*required</span>
+              </p>
               <div className="flex flex-wrap gap-2">
-                {product.variants.map((v, i) => (
+                {product.variants!.map((v, i) => (
                   <button key={i}
                     onClick={() => setSelectedVariant(i === selectedVariant ? null : i)}
                     disabled={v.stock_qty === 0}
-                    className={`px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all ${
+                    className={`px-4 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all ${
                       selectedVariant === i
-                        ? 'border-brand-green bg-brand-light text-brand-green'
-                        : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                    } ${v.stock_qty === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                        ? 'text-white border-transparent'
+                        : 'border-gray-200 text-gray-700 hover:border-gray-300 bg-white'
+                    } ${v.stock_qty === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
+                    style={selectedVariant === i ? { backgroundColor: themeColor, borderColor: themeColor } : {}}>
                     <span>{v.name}</span>
-                    <span className="ml-1.5 text-xs font-bold">
-                      {v.price_display || `₦${(v.price / 100).toLocaleString()}`}
+                    <span className="ml-1.5 font-bold">
+                      {v.price_display || `₦${(v.price/100).toLocaleString()}`}
                     </span>
                     {v.stock_qty === 0 && <span className="ml-1 text-xs text-red-400">Out</span>}
                   </button>
                 ))}
               </div>
+              {hasVariants && selectedVariant === null && (
+                <p className="text-xs text-amber-600 mt-2">👆 Please select an option to continue</p>
+              )}
             </div>
           )}
         </div>
 
-        {/* Order section */}
         {product.in_stock && (
           <div className="bg-white mt-2 px-4 py-5 space-y-4">
-            {/* Quantity + Total */}
+            {/* Quantity */}
             <div className="flex items-center gap-4">
               <span className="text-sm font-semibold text-gray-700">Quantity</span>
               <div className="flex items-center gap-3">
@@ -181,49 +221,39 @@ export default function ProductDetailPage() {
                 </button>
                 <span className="font-display font-bold text-lg w-8 text-center">{qty}</span>
                 <button onClick={() => setQty(q => q + 1)}
-                  className="w-9 h-9 bg-brand-green rounded-xl flex items-center justify-center hover:bg-brand-dark">
+                  style={{ backgroundColor: themeColor }}
+                  className="w-9 h-9 rounded-xl flex items-center justify-center">
                   <Plus size={14} className="text-white" />
                 </button>
               </div>
               <span className="text-sm text-gray-600 ml-auto font-semibold">
-                Total: <span className="text-brand-green">{totalDisplay}</span>
+                Total: <span style={{ color: themeColor }}>{totalDisplay}</span>
               </span>
             </div>
 
-            {/* CTA buttons */}
+            {/* Add to Cart */}
             {useCart && (
-              <>
-                {product.variants && product.variants.length > 0 && selectedVariant === null && (
-                  <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-center font-semibold">
-                    ⚠️ Please select an option above before adding to cart
-                  </p>
-                )}
-                <Link
-                  href={selectedVariant !== null || !product.variants?.length
-                    ? `/store/${slug}/checkout?cart=${encodeURIComponent(JSON.stringify([{ 
-                        id: product.id, 
-                        qty,
-                        variantIndex: selectedVariant,
-                        variantName: selectedVariant !== null && product.variants ? product.variants[selectedVariant].name : null,
-                        variantPrice: selectedVariant !== null && product.variants ? product.variants[selectedVariant].price : null
-                      }]))}`
-                    : '#'}
-                  onClick={e => { if (product.variants?.length && selectedVariant === null) e.preventDefault() }}
-                  className={`flex w-full font-bold py-4 rounded-2xl text-center transition-colors items-center justify-center gap-2 ${
-                    product.variants?.length && selectedVariant === null
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-brand-green text-white hover:bg-brand-dark'
+              <div className="space-y-2">
+                <button onClick={handleAddToCart} disabled={!canAddToCart}
+                  style={canAddToCart ? { backgroundColor: themeColor } : {}}
+                  className={`w-full font-bold py-4 rounded-2xl transition-colors flex items-center justify-center gap-2 ${
+                    !canAddToCart ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : added ? 'bg-green-500 text-white' : 'text-white'
                   }`}>
-                  <ShoppingCart size={18} /> 
-                  {selectedVariant !== null && product.variants
-                    ? `Add ${product.variants[selectedVariant].name} to Cart`
-                    : 'Add to Cart'}
-                </Link>
-              </>
+                  {added ? <><Check size={18} /> Added to Cart!</> : <><ShoppingCart size={18} /> Add to Cart</>}
+                </button>
+                {added && (
+                  <button onClick={handleCheckout}
+                    className="w-full bg-brand-dark text-white font-bold py-3 rounded-2xl flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors">
+                    <ShoppingCart size={16} /> Go to Cart & Checkout
+                  </button>
+                )}
+              </div>
             )}
+
             {useWhatsApp && (
-              <button onClick={orderWhatsApp}
-                className="btn-whatsapp w-full justify-center py-4">
+              <button onClick={orderWhatsApp} disabled={hasVariants && selectedVariant === null}
+                className="btn-whatsapp w-full justify-center py-4 disabled:opacity-40">
                 <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current shrink-0"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
                 Order on WhatsApp
               </button>
@@ -246,7 +276,7 @@ export default function ProductDetailPage() {
                   </div>
                   <div className="p-2.5">
                     <p className="font-semibold text-xs text-gray-800 line-clamp-2 leading-tight">{p.name}</p>
-                    <p className="text-brand-green font-bold text-sm mt-1">{formatPrice(p)}</p>
+                    <p className="font-bold text-sm mt-1" style={{ color: themeColor }}>{formatPrice(p)}</p>
                   </div>
                 </Link>
               ))}
@@ -255,7 +285,7 @@ export default function ProductDetailPage() {
         )}
 
         <div className="px-4 py-6 text-center">
-          <Link href={`/store/${slug}`} className="text-brand-green font-semibold text-sm">
+          <Link href={`/store/${slug}`} className="font-semibold text-sm" style={{ color: themeColor }}>
             ← Back to {store.business_name}
           </Link>
         </div>

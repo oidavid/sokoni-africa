@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ArrowLeft, Check, Loader2, ShoppingCart, MapPin, Phone, User } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { COUNTRIES } from '@/lib/countries'
+import { getCart, clearCart } from '@/lib/cart'
 
 interface Product {
   id: string
@@ -71,24 +72,40 @@ function CheckoutForm() {
       const { data: merchant } = await supabase.from('merchants').select('*').eq('slug', slug).single()
       if (!merchant) return
       setStore(merchant)
+      // Load cart from localStorage
+      const savedCart = getCart(slug)
+      if (savedCart.length > 0) {
+        const ids = [...new Set(savedCart.map(i => i.productId))]
+        const { data: products } = await supabase.from('products').select('*').in('id', ids)
+        if (products) {
+          const items = savedCart.map(item => {
+            const product = products.find(p => p.id === item.productId)
+            if (!product) return null
+            return {
+              product: {
+                ...product,
+                name: item.variantName ? `${product.name} (${item.variantName})` : product.name,
+                price: item.price,
+                price_display: item.priceDisplay,
+              },
+              qty: item.qty,
+            }
+          }).filter(Boolean) as CartItem[]
+          setCart(items)
+        }
+      }
+      // Also check URL param as fallback
       const cartParam = searchParams.get('cart')
-      if (cartParam) {
+      if (!savedCart.length && cartParam) {
         try {
           const cartIds: { id: string; qty: number }[] = JSON.parse(decodeURIComponent(cartParam))
           const ids = cartIds.map(c => c.id)
           const { data: products } = await supabase.from('products').select('*').in('id', ids)
           if (products) {
-            const items = (cartIds as CartItemMeta[]).map(c => {
-              const product = products.find(p => p.id === c.id)
-              if (!product) return null
-              // Use variant price if specified
-              if (c.variantPrice) {
-                product.price = c.variantPrice
-                product.price_display = `₦${(c.variantPrice/100).toLocaleString()}`
-              }
-              const name = c.variantName ? `${product.name} (${c.variantName})` : product.name
-              return { product: { ...product, name }, qty: c.qty }
-            }).filter(Boolean) as CartItem[]
+            const items = cartIds.map(c => ({
+              product: products.find(p => p.id === c.id)!,
+              qty: c.qty,
+            })).filter(i => i.product) as CartItem[]
             setCart(items)
           }
         } catch (e) {
@@ -147,6 +164,7 @@ function CheckoutForm() {
     const normalizedPhone = phoneCountry.dial + localP
     const msg = `🛍️ New Order ${orderNum} — ${store.business_name}!\n\n${itemLines}\n\nTotal: ${formatNaira(subtotal)}\n\nCustomer: ${name}\nPhone: +${normalizedPhone}\n${fulfillment === 'delivery' ? `Delivery to: ${address}` : '📦 PICKUP — customer will collect'}\n${notes ? `Notes: ${notes}` : ''}\n\nReply to confirm.\n\n📲 Tap to message customer: https://wa.me/${normalizedPhone}`
     window.open(`https://wa.me/${store.whatsapp_number?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank')
+    clearCart(slug)
     setSubmitting(false)
     setSubmitted(true)
   }
