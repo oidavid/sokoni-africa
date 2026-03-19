@@ -78,6 +78,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
   const [showSort, setShowSort] = useState(false)
   const [showWhatsAppForm, setShowWhatsAppForm] = useState(false)
   const [orderConfirmed, setOrderConfirmed] = useState(false)
+  const [waError, setWaError] = useState('')
   const [waCountry, setWaCountry] = useState(COUNTRIES[0]) // Default Nigeria
   const [showWaCountryPicker, setShowWaCountryPicker] = useState(false)
   const [waName, setWaName] = useState('')
@@ -247,9 +248,12 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                             ))}
                           </div>
                         )}
+                        {waError && <p className="text-red-500 text-xs font-medium">{waError}</p>}
                         <button onClick={() => {
-                          if (!waName.trim()) { alert('Please enter your name'); return }
-                          if (!waPhone.trim()) { alert('Please enter your WhatsApp number'); return }
+                          setWaError('')
+                          if (!waName.trim()) { setWaError('Please enter your name'); return }
+                          const rawWaPhone = waPhone.replace(/\D/g, '')
+                          if (!rawWaPhone || rawWaPhone.length < 7) { setWaError('Please enter a valid WhatsApp number (min 7 digits)'); return }
                           const lines = cart.map(i => `• ${i.product.name} x${i.qty} — ${formatPrice(i.product)}`).join('\n')
                           const merchantMsg = `Hi ${store.business_name}! I'd like to order:\n\n${lines}\n\nTotal: ₦${(cartTotal / 100).toLocaleString()}\n\nName: ${waName}\nWhatsApp: ${waPhone}\n\nPlease confirm. Thank you!`
                           const customerMsg = `Hi ${waName || 'there'}! Here is your order summary from *${store.business_name}*:\n\n${lines}\n\nTotal: ₦${(cartTotal / 100).toLocaleString()}\n\nThe merchant will confirm your order shortly.`
