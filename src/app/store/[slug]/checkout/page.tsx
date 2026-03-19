@@ -141,7 +141,6 @@ function CheckoutForm() {
     const rawPhone = customerPhone.replace(/\D/g, '')
     if (!rawPhone || rawPhone.length < 7) { setWaError('Please enter a valid WhatsApp number (min 7 digits)'); return }
     const itemLines = cart.map(i => `• ${i.product.name} x${i.qty} — ${i.product.price_display || formatNaira(i.product.price)}`).join('\n')
-    const rawPhone = customerPhone.replace(/\D/g, '')
     const localPhone = rawPhone.startsWith('0') ? rawPhone.slice(1) : rawPhone.startsWith(waCountry.dial) ? rawPhone.slice(waCountry.dial.length) : rawPhone
     const waPhone = waCountry.dial + localPhone
     const msg = `Hi ${store.business_name}! I'd like to order:\n\n${itemLines}\n\nTotal: ${formatNaira(subtotal)}\n\nName: ${customerName}\nWhatsApp: ${customerPhone}\n${fulfillment === 'delivery' && address ? `Address: ${address}` : fulfillment === 'pickup' ? 'I will pick up' : ''}\n${notes ? `Notes: ${notes}` : ''}\n\nPlease confirm. Thank you!\n\n📲 Tap to message customer: https://wa.me/${waPhone}`
