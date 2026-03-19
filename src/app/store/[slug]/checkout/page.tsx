@@ -75,7 +75,7 @@ function CheckoutForm() {
       // Load cart from localStorage
       const savedCart = getCart(slug)
       if (savedCart.length > 0) {
-        const ids = [...new Set(savedCart.map(i => i.productId))]
+        const ids = Array.from(new Set(savedCart.map(i => i.productId)))
         const { data: products } = await supabase.from('products').select('*').in('id', ids)
         if (products) {
           const items = savedCart.map(item => {
