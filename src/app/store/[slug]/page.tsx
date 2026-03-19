@@ -81,6 +81,9 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
   const [showWhatsAppForm, setShowWhatsAppForm] = useState(false)
   const [orderConfirmed, setOrderConfirmed] = useState(false)
   const [waError, setWaError] = useState('')
+  const [variantModal, setVariantModal] = useState<Product | null>(null)
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState<number | null>(null)
+  const [modalQty, setModalQty] = useState(1)
   const [waCountry, setWaCountry] = useState(COUNTRIES[0]) // Default Nigeria
   const [showWaCountryPicker, setShowWaCountryPicker] = useState(false)
   const [waName, setWaName] = useState('')
@@ -324,6 +327,106 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
         </div>
       )}
 
+      {/* Variant Selection Modal */}
+      {variantModal && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setVariantModal(null)} />
+          <div className="relative w-full max-w-sm bg-white rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl">
+            {/* Product info */}
+            <div className="flex items-center gap-3 p-4 border-b border-gray-100">
+              {variantModal.image_url ? (
+                <img src={variantModal.image_url} alt={variantModal.name} className="w-16 h-16 rounded-2xl object-cover shrink-0" />
+              ) : (
+                <div className="w-16 h-16 bg-brand-light rounded-2xl flex items-center justify-center text-2xl shrink-0">{CATEGORY_EMOJI[store?.category || ''] || '🛍️'}</div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-gray-800 text-sm leading-tight">{variantModal.name}</p>
+                <p className="font-bold text-sm mt-0.5" style={{ color: store?.theme_color || '#1A7A4A' }}>
+                  {selectedVariantIndex !== null && variantModal.variants
+                    ? variantModal.variants[selectedVariantIndex].price_display || `₦${(variantModal.variants[selectedVariantIndex].price/100).toLocaleString()}`
+                    : (() => { const prices = variantModal.variants!.map(v => v.price); const min = Math.min(...prices); const max = Math.max(...prices); return min === max ? `₦${(min/100).toLocaleString()}` : `₦${(min/100).toLocaleString()} – ₦${(max/100).toLocaleString()}` })()
+                  }
+                </p>
+              </div>
+              <button onClick={() => setVariantModal(null)} className="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center shrink-0">
+                <X size={14} className="text-gray-500" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-4">
+              {/* Variant options */}
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Choose Option</p>
+                <div className="flex flex-wrap gap-2">
+                  {variantModal.variants!.map((v, i) => (
+                    <button key={i} onClick={() => setSelectedVariantIndex(i)}
+                      disabled={v.stock_qty === 0}
+                      className={`px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all ${
+                        selectedVariantIndex === i ? 'text-white border-transparent' : 'border-gray-200 text-gray-700 bg-white'
+                      } ${v.stock_qty === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
+                      style={selectedVariantIndex === i ? { backgroundColor: store?.theme_color || '#1A7A4A' } : {}}>
+                      {v.name}
+                      <span className="ml-1.5 text-xs">{v.price_display || `₦${(v.price/100).toLocaleString()}`}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quantity */}
+              <div className="flex items-center gap-4">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Quantity</p>
+                <div className="flex items-center gap-3 ml-auto">
+                  <button onClick={() => setModalQty(q => Math.max(1, q - 1))}
+                    className="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center">
+                    <Minus size={13} className="text-gray-600" />
+                  </button>
+                  <span className="font-bold text-lg w-6 text-center">{modalQty}</span>
+                  <button onClick={() => setModalQty(q => q + 1)}
+                    style={{ backgroundColor: store?.theme_color || '#1A7A4A' }}
+                    className="w-8 h-8 rounded-xl flex items-center justify-center">
+                    <Plus size={13} className="text-white" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Buttons */}
+              <div className="space-y-2 pt-1">
+                <button
+                  onClick={() => {
+                    if (selectedVariantIndex === null) { alert('Please select an option'); return }
+                    const variant = variantModal.variants![selectedVariantIndex]
+                    const productWithVariant = {
+                      ...variantModal,
+                      name: `${variantModal.name} (${variant.name})`,
+                      price: variant.price,
+                      price_display: variant.price_display || `₦${(variant.price/100).toLocaleString()}`,
+                    }
+                    for (let i = 0; i < modalQty; i++) addToCart(productWithVariant)
+                    setVariantModal(null)
+                    setSelectedVariantIndex(null)
+                    setModalQty(1)
+                    setCartOpen(true)
+                  }}
+                  disabled={selectedVariantIndex === null}
+                  style={selectedVariantIndex !== null ? { backgroundColor: store?.theme_color || '#1A7A4A' } : {}}
+                  className={`w-full font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 text-sm transition-all ${
+                    selectedVariantIndex === null ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'text-white'
+                  }`}>
+                  <ShoppingCart size={16} />
+                  {selectedVariantIndex !== null
+                    ? `Add ${modalQty} ${variantModal.variants![selectedVariantIndex].name} to Cart`
+                    : 'Select an option first'}
+                </button>
+                <button onClick={() => setVariantModal(null)}
+                  className="w-full text-sm text-gray-500 font-semibold py-2">
+                  Continue Shopping
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Order Confirmed Banner */}
       {orderConfirmed && (
         <div style={{ backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') }} className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 max-w-sm mx-4">
@@ -509,11 +612,11 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                       <div className="space-y-1.5">
                         {useCart && (
                           product.variants && product.variants.length > 0 ? (
-                            <Link href={`/store/${store.slug}/product/${product.id}`}
+                            <button onClick={() => { setVariantModal(product); setSelectedVariantIndex(null); setModalQty(1) }}
                               style={{ backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') }}
                               className="w-full text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all">
                               <ShoppingCart size={12} /> Select Option
-                            </Link>
+                            </button>
                           ) : (
                             <button onClick={() => addToCart(product)}
                               style={addedId === product.id ? {} : { backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') }}
