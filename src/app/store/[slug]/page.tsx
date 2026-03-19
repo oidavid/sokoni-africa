@@ -222,9 +222,9 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                     ) : (
                       <div className="space-y-2 bg-gray-50 rounded-2xl p-3">
                         <p className="text-xs font-semibold text-gray-600">Your details</p>
-                        <input type="text" placeholder="Your name" value={waName}
+                        <input type="text" placeholder="Your name *" value={waName}
                           onChange={e => setWaName(e.target.value)}
-                          className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-brand-green" />
+                          className={`w-full border rounded-xl px-3 py-2 text-sm outline-none focus:border-brand-green ${!waName.trim() && waPhone ? 'border-red-300' : 'border-gray-200'}`} />
                         <div className="flex gap-2">
                           <button onClick={() => setShowWaCountryPicker(!showWaCountryPicker)}
                             className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl px-2 py-2 text-xs font-semibold shrink-0 hover:border-brand-green">
@@ -248,8 +248,10 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                           </div>
                         )}
                         <button onClick={() => {
+                          if (!waName.trim()) { alert('Please enter your name'); return }
+                          if (!waPhone.trim()) { alert('Please enter your WhatsApp number'); return }
                           const lines = cart.map(i => `• ${i.product.name} x${i.qty} — ${formatPrice(i.product)}`).join('\n')
-                          const merchantMsg = `Hi ${store.business_name}! I'd like to order:\n\n${lines}\n\nTotal: ₦${(cartTotal / 100).toLocaleString()}\n\nName: ${waName || 'Not provided'}\nWhatsApp: ${waPhone || 'Not provided'}\n\nPlease confirm. Thank you!`
+                          const merchantMsg = `Hi ${store.business_name}! I'd like to order:\n\n${lines}\n\nTotal: ₦${(cartTotal / 100).toLocaleString()}\n\nName: ${waName}\nWhatsApp: ${waPhone}\n\nPlease confirm. Thank you!`
                           const customerMsg = `Hi ${waName || 'there'}! Here is your order summary from *${store.business_name}*:\n\n${lines}\n\nTotal: ₦${(cartTotal / 100).toLocaleString()}\n\nThe merchant will confirm your order shortly.`
                           const merchantWa = store.whatsapp_number?.replace(/\D/g, '')
                           const rawPhone = waPhone.replace(/\D/g, '')
