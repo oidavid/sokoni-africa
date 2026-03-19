@@ -14,6 +14,7 @@ interface Product {
   price_display: string
   in_stock: boolean
   image_url: string | null
+  stock_qty: number | null
 }
 
 interface Merchant {
@@ -43,6 +44,8 @@ function EditProductForm() {
   const [inStock, setInStock] = useState(true)
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [stockQty, setStockQty] = useState<string>('')
+  const [trackInventory, setTrackInventory] = useState(false)
 
   const fileRef = useRef<HTMLInputElement>(null)
   const merchantIdRef = useRef<string | null>(null)
@@ -68,6 +71,8 @@ function EditProductForm() {
       setInStock(p.in_stock)
       setImageUrl(p.image_url)
       imageUrlRef.current = p.image_url
+      setStockQty(p.stock_qty != null ? String(p.stock_qty) : '')
+      setTrackInventory(p.stock_qty != null)
       setLoading(false)
     }
     load()
@@ -146,6 +151,7 @@ function EditProductForm() {
         price_display: `₦${priceNum.toLocaleString()}`,
         in_stock: inStock,
         image_url: imageUrlRef.current || imageUrl,
+        stock_qty: trackInventory && stockQty ? parseInt(stockQty) : null,
       })
       .eq('id', productId!)
     if (updateError) {
@@ -259,6 +265,29 @@ function EditProductForm() {
             <input type="number" value={price} onChange={e => setPrice(e.target.value)} min="0"
               className="w-full bg-white border-2 border-gray-200 rounded-xl pl-8 pr-4 py-3 text-lg font-display font-bold text-brand-dark focus:border-brand-green outline-none" />
           </div>
+        </div>
+
+        {/* Inventory */}
+        <div className="bg-white border border-gray-100 rounded-xl p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-semibold text-gray-800 text-sm">Track Inventory</div>
+              <div className="text-xs text-gray-500">Set quantity on hand</div>
+            </div>
+            <button onClick={() => setTrackInventory(!trackInventory)}
+              className={`w-12 h-6 rounded-full transition-colors relative ${trackInventory ? 'bg-brand-green' : 'bg-gray-200'}`}>
+              <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all ${trackInventory ? 'left-6' : 'left-0.5'}`} />
+            </button>
+          </div>
+          {trackInventory && (
+            <div>
+              <label className="text-xs text-gray-500 font-medium block mb-1">Quantity in stock</label>
+              <input type="number" min="0" value={stockQty}
+                onChange={e => setStockQty(e.target.value)}
+                placeholder="0"
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold text-brand-dark focus:border-brand-green outline-none" />
+            </div>
+          )}
         </div>
 
         {/* In Stock */}
