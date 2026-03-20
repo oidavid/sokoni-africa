@@ -141,7 +141,7 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 max-w-lg mx-auto pb-10">
-      <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
+      <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3">
         <Link href="/dashboard" className="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center">
           <ArrowLeft size={16} className="text-gray-600" />
         </Link>
