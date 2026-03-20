@@ -27,7 +27,15 @@ export default function PaymentsPage() {
       const merchantEmail = user?.email || fallbackEmail
       if (!merchantEmail) { router.push('/login'); return }
       const { data: m } = await supabase.from('merchants').select('id, business_name, paystack_subaccount, bank_name, account_number').eq('email', merchantEmail).single()
-      if (!m) { router.push('/onboarding'); return }
+      if (!m) {
+        // Try localStorage email as fallback before redirecting
+        const storedEmail = typeof window !== 'undefined' ? localStorage.getItem('earket_merchant_email') : null
+        if (storedEmail && storedEmail !== merchantEmail) {
+          const { data: m2 } = await supabase.from('merchants').select('id, business_name, paystack_subaccount, bank_name, account_number').eq('email', storedEmail).single()
+          if (m2) { setMerchant(m2); if (m2.account_number) setAccountNumber(m2.account_number); const res = await fetch('/api/payment/banks'); setBanks(await res.json()); setLoading(false); return }
+        }
+        router.push('/dashboard'); return
+      }
       setMerchant(m)
       if (m.account_number) setAccountNumber(m.account_number)
       const res = await fetch('/api/payment/banks')
