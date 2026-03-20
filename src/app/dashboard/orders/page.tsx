@@ -172,25 +172,27 @@ export default function OrdersPage() {
               {/* Compact row — always visible */}
               <button onClick={() => setExpandedId(isExpanded ? null : order.id)}
                 className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left">
-                <div className={`w-2 h-2 rounded-full shrink-0 ${status.dot}`} />
+                <div className={`w-2 h-2 rounded-full shrink-0 mt-1 ${status.dot}`} />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-display font-bold text-brand-dark text-sm">{order.order_number}</span>
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${status.color}`}>{status.label}</span>
-                    {order.source === 'web' && <span className="text-xs bg-brand-light text-brand-green font-semibold px-1.5 py-0.5 rounded-full">Online</span>}
+                  {/* Row 1: Customer name + amount */}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-display font-bold text-brand-dark text-sm truncate">
+                      {order.customer_name || 'Unknown Customer'}
+                    </span>
+                    <span className="font-display font-bold text-brand-dark text-sm shrink-0">{formatNaira(order.subtotal)}</span>
                   </div>
+                  {/* Row 2: Order number + status + time */}
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-xs text-gray-500 truncate">{order.customer_name || 'Unknown'}</span>
-                    <span className="text-xs text-gray-300">·</span>
-                    <span className="text-xs text-gray-400">{itemCount} item{itemCount > 1 ? 's' : ''}</span>
-                    <span className="text-xs text-gray-300">·</span>
+                    <span className="text-xs text-gray-400">{order.order_number}</span>
+                    <span className="text-gray-300">·</span>
+                    <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${status.color}`}>{status.label}</span>
+                    <span className="text-gray-300">·</span>
+                    <span className="text-xs text-gray-400">{itemCount} item{itemCount !== 1 ? 's' : ''}</span>
+                    <span className="text-gray-300">·</span>
                     <span className="text-xs text-gray-400">{timeAgo(order.created_at)}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="font-display font-bold text-brand-dark text-sm">{formatNaira(order.subtotal)}</span>
-                  {isExpanded ? <ChevronUp size={14} className="text-gray-400" /> : <ChevronDown size={14} className="text-gray-400" />}
-                </div>
+                {isExpanded ? <ChevronUp size={14} className="text-gray-400 shrink-0" /> : <ChevronDown size={14} className="text-gray-400 shrink-0" />}
               </button>
 
               {/* Expanded details */}
