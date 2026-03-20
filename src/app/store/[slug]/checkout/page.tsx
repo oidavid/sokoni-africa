@@ -34,6 +34,7 @@ interface Merchant {
   slug: string
   whatsapp_number: string
   location: string
+  paystack_subaccount?: string
 }
 
 function formatNaira(amount: number) {
@@ -66,6 +67,7 @@ function CheckoutForm() {
   const [waCountry, setWaCountry] = useState(COUNTRIES[0])
   const [showWaCountryPicker, setShowWaCountryPicker] = useState(false)
   const [waError, setWaError] = useState('')
+  const [payingOnline, setPayingOnline] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -373,8 +375,7 @@ function CheckoutForm() {
           <div>
             <p className="font-semibold text-brand-dark text-sm">Payment</p>
             <p className="text-gray-500 text-xs mt-0.5">
-              The merchant will send payment details on WhatsApp after confirming your order.
-              Accepted: Bank transfer, mobile money, cash on delivery.
+              Pay instantly with card/bank above, or place order and pay via bank transfer, mobile money, or cash on delivery.
             </p>
           </div>
         </div>
@@ -386,6 +387,62 @@ function CheckoutForm() {
             ? <><Loader2 size={18} className="animate-spin" /> Placing Order...</>
             : <><Check size={18} /> Place Order · {formatNaira(subtotal)}</>}
         </button>
+
+        {/* Pay Online with Paystack - only if merchant has payment setup */}
+        {store?.paystack_subaccount && <button onClick={async () => {
+          if (!validate() || !store) return
+          setPayingOnline(true)
+
+          // Create order first
+          const orderNum = 'ORD-' + Math.floor(1000 + Math.random() * 9000)
+          const { data: order } = await supabase.from('orders').insert({
+            merchant_id: store.id,
+            order_number: orderNum,
+            customer_name: name,
+            customer_phone: (() => {
+              const raw = phone.replace(/\D/g, '')
+              const local = raw.startsWith('0') ? raw.slice(1) : raw.startsWith(phoneCountry.dial) ? raw.slice(phoneCountry.dial.length) : raw
+              return phoneCountry.dial + local
+            })(),
+            customer_address: fulfillment === 'delivery' ? address : 'PICKUP',
+            items: cart.map(i => ({ product_id: i.product.id, name: i.product.name, price: i.product.price, qty: i.qty })),
+            subtotal,
+            status: 'new',
+            source: 'web',
+            notes: `${fulfillment === 'pickup' ? 'PICKUP. ' : ''}${notes}`,
+            payment_status: 'pending',
+          }).select('id').single()
+
+          // Initialize Paystack
+          const res = await fetch('/api/payment/initialize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: name.replace(/\s/g, '').toLowerCase() + '@customer.earket.com',
+              amount: subtotal,
+              callback_url: `${window.location.origin}/store/${store.slug}/payment`,
+              metadata: {
+                order_id: order?.id,
+                order_number: orderNum,
+                customer_name: name,
+                merchant: store.business_name,
+              }
+            })
+          })
+          const payData = await res.json()
+          setPayingOnline(false)
+
+          if (payData.authorization_url) {
+            window.location.href = payData.authorization_url
+          } else {
+            alert('Could not initialize payment. Please try again or use WhatsApp order.')
+          }
+        }} disabled={submitting || payingOnline || cart.length === 0}
+          className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition-colors disabled:opacity-40 flex items-center justify-center gap-2">
+          {payingOnline
+            ? <><Loader2 size={18} className="animate-spin" /> Initializing payment...</>
+            : <>💳 Pay Online with Card/Bank</>}
+        </button>}
 
         {/* Divider */}
         <div className="flex items-center gap-3">

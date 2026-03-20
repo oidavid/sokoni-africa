@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ShoppingBag, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil, ShoppingCart, TrendingUp, BarChart2 } from 'lucide-react'
+import { ShoppingBag, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil, ShoppingCart, TrendingUp, BarChart2, CreditCard } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 interface Merchant {
@@ -149,6 +149,21 @@ export default function DashboardPage() {
             <div className="text-xs text-gray-500">Orders</div>
           </Link>
         </div>
+
+        {/* Payment Setup Banner */}
+        {merchant && !(merchant as any).paystack_subaccount && (
+          <Link href="/dashboard/payments"
+            className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-4 hover:bg-amber-100 transition-colors">
+            <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
+              <CreditCard size={18} className="text-amber-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-amber-800 text-sm">Enable Online Payments</p>
+              <p className="text-amber-600 text-xs">Connect your bank account to accept card payments</p>
+            </div>
+            <span className="text-amber-500 text-lg">→</span>
+          </Link>
+        )}
 
         {/* Store link */}
         <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-5">
