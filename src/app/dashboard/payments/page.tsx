@@ -27,11 +27,21 @@ export default function PaymentsPage() {
       const merchantEmail = user?.email || fallbackEmail
       if (!merchantEmail) { router.push('/login'); return }
 
-      const { data: m } = await supabase
+      // Try exact match first, then case-insensitive
+      let { data: m } = await supabase
         .from('merchants')
         .select('id, business_name, paystack_subaccount, bank_name, account_number')
-        .ilike('email', merchantEmail)
+        .eq('email', merchantEmail)
         .single()
+
+      if (!m) {
+        const { data: m2 } = await supabase
+          .from('merchants')
+          .select('id, business_name, paystack_subaccount, bank_name, account_number')
+          .ilike('email', merchantEmail)
+          .maybeSingle()
+        m = m2
+      }
 
       if (!m) { setLoading(false); return }
 
