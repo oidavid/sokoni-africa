@@ -155,6 +155,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </nav>
 
+      {/* Footer */}
+      <footer className="hidden md:block bg-white border-t border-gray-100 py-4 px-4 mt-auto">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-brand-green rounded-md flex items-center justify-center">
+              <ShoppingBag size={12} className="text-white" />
+            </div>
+            <span className="font-display font-bold text-brand-dark text-sm">Earket</span>
+            <span className="text-gray-300 text-xs">·</span>
+            <span className="text-xs text-gray-400">Free online stores for emerging markets</span>
+          </div>
+          <div className="flex items-center gap-4 text-xs text-gray-400">
+            <Link href="/privacy" className="hover:text-brand-green transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-brand-green transition-colors">Terms</Link>
+            <Link href="/contact" className="hover:text-brand-green transition-colors">Help</Link>
+            <span className="text-gray-300">·</span>
+            <span>© {new Date().getFullYear()} Earket</span>
+          </div>
+        </div>
+      </footer>
+
       {/* Bottom padding for mobile nav */}
       <div className="md:hidden h-16" />
     </div>
