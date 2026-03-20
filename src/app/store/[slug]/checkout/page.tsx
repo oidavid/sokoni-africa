@@ -170,8 +170,12 @@ function CheckoutForm() {
     const rawP = phone.replace(/\D/g, '')
     const localP = rawP.startsWith('0') ? rawP.slice(1) : rawP.startsWith(phoneCountry.dial) ? rawP.slice(phoneCountry.dial.length) : rawP
     const normalizedPhone = phoneCountry.dial + localP
+    // Notify merchant via WhatsApp silently (non-blocking)
     const msg = `🛍️ New Order ${orderNum} — ${store.business_name}!\n\n${itemLines}\n\nTotal: ${formatNaira(subtotal)}\n\nCustomer: ${name}\nPhone: +${normalizedPhone}\n${fulfillment === 'delivery' ? `Delivery to: ${address}` : '📦 PICKUP — customer will collect'}\n${notes ? `Notes: ${notes}` : ''}\n\nReply to confirm.\n\n📲 Tap to message customer: https://wa.me/${normalizedPhone}`
-    window.open(`https://wa.me/${store.whatsapp_number?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank')
+    // Open WhatsApp in background to notify merchant
+    const waWindow = window.open(`https://wa.me/${store.whatsapp_number?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank')
+    // Auto-close WhatsApp tab after 3 seconds if opened
+    if (waWindow) setTimeout(() => waWindow.close(), 3000)
     clearCart(slug)
     setSubmitting(false)
     setSubmitted(true)
@@ -375,7 +379,7 @@ function CheckoutForm() {
           <div>
             <p className="font-semibold text-brand-dark text-sm">Payment</p>
             <p className="text-gray-500 text-xs mt-0.5">
-              Pay instantly with card/bank above, or place order and pay via bank transfer, mobile money, or cash on delivery.
+              Place order below and the merchant will send payment details on WhatsApp. Or pay instantly online with the button above.
             </p>
           </div>
         </div>
@@ -388,8 +392,8 @@ function CheckoutForm() {
             : <><Check size={18} /> Place Order · {formatNaira(subtotal)}</>}
         </button>
 
-        {/* Pay Online with Paystack - only if merchant has payment setup */}
-        {store?.paystack_subaccount && <button onClick={async () => {
+        {/* Pay Online with Paystack */}
+        <button onClick={async () => {
           if (!validate() || !store) return
           setPayingOnline(true)
 
@@ -442,7 +446,7 @@ function CheckoutForm() {
           {payingOnline
             ? <><Loader2 size={18} className="animate-spin" /> Initializing payment...</>
             : <>💳 Pay Online with Card/Bank</>}
-        </button>}
+        </button>
 
         {/* Divider */}
         <div className="flex items-center gap-3">
