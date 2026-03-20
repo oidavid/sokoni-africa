@@ -26,21 +26,25 @@ export default function PaymentsPage() {
       const fallbackEmail = typeof window !== 'undefined' ? localStorage.getItem('earket_merchant_email') : null
       const merchantEmail = user?.email || fallbackEmail
       if (!merchantEmail) { router.push('/login'); return }
-      const { data: m } = await supabase.from('merchants').select('id, business_name, paystack_subaccount, bank_name, account_number').eq('email', merchantEmail).single()
-      if (!m) {
-        // Try localStorage email as fallback before redirecting
-        const storedEmail = typeof window !== 'undefined' ? localStorage.getItem('earket_merchant_email') : null
-        if (storedEmail && storedEmail !== merchantEmail) {
-          const { data: m2 } = await supabase.from('merchants').select('id, business_name, paystack_subaccount, bank_name, account_number').eq('email', storedEmail).single()
-          if (m2) { setMerchant(m2); if (m2.account_number) setAccountNumber(m2.account_number); const res = await fetch('/api/payment/banks'); setBanks(await res.json()); setLoading(false); return }
-        }
-        router.push('/dashboard'); return
-      }
+
+      const { data: m } = await supabase
+        .from('merchants')
+        .select('id, business_name, paystack_subaccount, bank_name, account_number')
+        .ilike('email', merchantEmail)
+        .single()
+
+      if (!m) { setLoading(false); return }
+
       setMerchant(m)
       if (m.account_number) setAccountNumber(m.account_number)
-      const res = await fetch('/api/payment/banks')
-      const bankList = await res.json()
-      setBanks(bankList)
+
+      try {
+        const res = await fetch('/api/payment/banks')
+        const bankList = await res.json()
+        setBanks(Array.isArray(bankList) ? bankList : [])
+      } catch (e) {
+        console.error('Banks load error:', e)
+      }
       setLoading(false)
     }
     load()
@@ -86,6 +90,15 @@ export default function PaymentsPage() {
 
   if (loading) {
     return <div className="min-h-screen bg-gray-50 flex items-center justify-center"><Loader2 size={24} className="text-brand-green animate-spin" /></div>
+  }
+
+  if (!merchant) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4 px-4">
+        <p className="text-gray-600 font-semibold">Could not load your store details.</p>
+        <Link href="/dashboard" className="bg-brand-green text-white font-bold px-6 py-3 rounded-xl text-sm">← Back to Dashboard</Link>
+      </div>
+    )
   }
 
   return (
