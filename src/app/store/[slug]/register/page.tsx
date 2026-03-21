@@ -3,6 +3,12 @@ import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Loader2, Star } from 'lucide-react'
+import { createHash } from 'crypto'
+import { supabase } from '@/lib/supabase'
+
+function hashPassword(password: string) {
+  return createHash('sha256').update(password + 'earket24').digest('hex')
+}
 
 export default function CustomerRegisterPage() {
   const params = useParams()
@@ -16,14 +22,28 @@ export default function CustomerRegisterPage() {
   const [error, setError] = useState('')
 
   async function handleRegister() {
+    if (!name || !email || !password) { setError('Please fill all required fields'); return }
+    if (password.length < 6) { setError('Password must be at least 6 characters'); return }
     setLoading(true); setError('')
-    const res = await fetch('/api/customer/register', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, phone, password })
-    })
-    const data = await res.json()
-    if (data.error) { setError(data.error); setLoading(false); return }
-    localStorage.setItem(`earket_customer_${slug}`, JSON.stringify(data.customer))
+
+    // Check if email exists
+    const { data: existing } = await supabase.from('customers')
+      .select('id').eq('email', email.toLowerCase()).maybeSingle()
+    if (existing) { setError('Email already registered. Please sign in.'); setLoading(false); return }
+
+    const { data: customer, error: err } = await supabase.from('customers').insert({
+      name,
+      email: email.toLowerCase(),
+      phone: phone || null,
+      password_hash: hashPassword(password),
+    }).select('id, name, email, phone').single()
+
+    if (err || !customer) {
+      setError(err?.message || 'Registration failed. Please try again.')
+      setLoading(false); return
+    }
+
+    localStorage.setItem(`earket_customer_${slug}`, JSON.stringify(customer))
     router.push(`/store/${slug}/account`)
   }
 
@@ -36,7 +56,6 @@ export default function CustomerRegisterPage() {
         <h1 className="font-display font-bold text-brand-dark">Create Account</h1>
       </div>
       <div className="max-w-sm mx-auto px-4 py-6">
-        {/* Loyalty incentive */}
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 flex items-center gap-3">
           <Star size={24} className="text-amber-500 shrink-0" fill="currentColor" />
           <div>
@@ -46,12 +65,12 @@ export default function CustomerRegisterPage() {
         </div>
         <div className="space-y-4">
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Full Name</label>
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Full Name *</label>
             <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your name"
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-brand-green outline-none" />
           </div>
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Email</label>
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Email *</label>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com"
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-brand-green outline-none" />
           </div>
@@ -61,14 +80,14 @@ export default function CustomerRegisterPage() {
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-brand-green outline-none" />
           </div>
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Password</label>
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Password *</label>
             <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Min 6 characters"
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-brand-green outline-none" />
           </div>
           {error && <p className="text-red-500 text-xs bg-red-50 border border-red-200 rounded-xl p-3">{error}</p>}
-          <button onClick={handleRegister} disabled={loading || !name || !email || !password || password.length < 6}
+          <button onClick={handleRegister} disabled={loading || !name || !email || !password}
             className="w-full bg-brand-green text-white font-bold py-4 rounded-2xl disabled:opacity-40 flex items-center justify-center gap-2">
-            {loading ? <><Loader2 size={18} className="animate-spin" /> Creating account...</> : '✓ Create Account & Start Earning'}
+            {loading ? <><Loader2 size={18} className="animate-spin" /> Creating...</> : '✓ Create Account & Start Earning'}
           </button>
           <p className="text-center text-sm text-gray-500">
             Already have an account? <Link href={`/store/${slug}/login`} className="text-brand-green font-semibold">Sign in</Link>
