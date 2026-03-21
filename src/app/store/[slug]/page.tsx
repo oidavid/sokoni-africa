@@ -164,7 +164,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
     setTimeout(() => setAddedId(null), 1500)
   }
 
-  function removeItem(id: string, name?: string) { setCart(prev => { const newCart = prev.filter(i => !(i.product.id === id && (!name || i.product.name === name))); saveCartItem(newCart); return newCart }) } function updateQty(id: string, qty: number, name?: string) {
+  function updateQty(id: string, qty: number, name?: string) {
     setCart(prev => {
       const newCart = qty <= 0
         ? prev.filter(i => !(i.product.id === id && (!name || i.product.name === name)))
@@ -532,6 +532,11 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
             <ShoppingCart size={16} />
             {cartCount > 0 ? `Cart (${cartCount}) · ₦${(cartTotal / 100).toLocaleString()}` : 'View Cart'}
           </button>
+          <Link href={`/store/${store.slug}/account`}
+            style={{ backgroundColor: 'rgba(0,0,0,0.25)' }}
+            className="flex items-center justify-center gap-2 py-3 px-4 text-sm font-semibold text-white">
+            {customer ? <span className="font-bold">{customer.name[0]}</span> : <User size={16} />}
+          </Link>
         </div>
       </div>
 
