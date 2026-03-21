@@ -59,6 +59,11 @@ const CATEGORY_EMOJI: Record<string, string> = {
   health: '💊', stationery: '📚', automobile: '🚗', other: '🏪'
 }
 
+// Adds a thin space between symbol and number for multi-char symbols (TSh, KSh, GH₵)
+function fmtSymbol(symbol: string, amount: string): string {
+  return symbol.length > 1 ? `${symbol} ${amount}` : `${symbol}${amount}`
+}
+
 function formatPrice(p: Product) {
   if (p.price_display) return p.price_display
   return `₦${(p.price / 100).toLocaleString()}`
@@ -232,6 +237,12 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
   const cartCount = cart.reduce((s, i) => s + i.qty, 0)
   const cartTotal = cart.reduce((s, i) => s + i.product.price * i.qty, 0)
   const categoryEmoji = CATEGORY_EMOJI[store.category] || '🏪'
+  // Derive currency symbol from first product's price_display (e.g. "TSh800" → "TSh")
+  const storeCurrencySymbol = (() => {
+    const firstDisplay = products[0]?.price_display || ''
+    const match = firstDisplay.match(/^[^0-9,]+/)
+    return match ? match[0] : '₦'
+  })()
 
   // Filter and sort
   let filtered = products.filter(p => {
@@ -294,7 +305,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
               <div className="px-4 py-4 border-t border-gray-100 space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-500 text-sm">Total</span>
-                  <span className="font-display font-bold text-lg" style={{ color: store.theme_color || '#1A7A4A' }}>₦{(cartTotal / 100).toLocaleString()}</span>
+                  <span className="font-display font-bold text-lg" style={{ color: store.theme_color || '#1A7A4A' }}>{fmtSymbol(storeCurrencySymbol, (cartTotal / 100).toLocaleString())}</span>
                 </div>
                 <Link href={`/store/${store.slug}/checkout?cart=${encodeURIComponent(JSON.stringify(cart.map(i => ({ id: i.product.id, qty: i.qty }))))}`}
                   onClick={() => setCartOpen(false)}
@@ -347,8 +358,9 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                           else if (rawWaPhone.startsWith('0')) localWaDigits = rawWaPhone.slice(1)
                           if (!rawWaPhone || localWaDigits.length < 10) { setWaError('Please enter a valid 10-digit WhatsApp number'); return }
                           const lines = cart.map(i => `• ${i.product.name} x${i.qty} — ${formatPrice(i.product)}`).join('\n')
-                          const merchantMsg = `Hi ${store.business_name}! I'd like to order:\n\n${lines}\n\nTotal: ₦${(cartTotal / 100).toLocaleString()}\n\nName: ${waName}\nWhatsApp: ${waPhone}\n\nPlease confirm. Thank you!`
-                          const customerMsg = `Hi ${waName || 'there'}! Here is your order summary from *${store.business_name}*:\n\n${lines}\n\nTotal: ₦${(cartTotal / 100).toLocaleString()}\n\nThe merchant will confirm your order shortly.`
+                          const cartTotalDisplay = fmtSymbol(storeCurrencySymbol, (cartTotal / 100).toLocaleString())
+                          const merchantMsg = `Hi ${store.business_name}! I'd like to order:\n\n${lines}\n\nTotal: ${cartTotalDisplay}\n\nName: ${waName}\nWhatsApp: ${waPhone}\n\nPlease confirm. Thank you!`
+                          const customerMsg = `Hi ${waName || 'there'}! Here is your order summary from *${store.business_name}*:\n\n${lines}\n\nTotal: ${cartTotalDisplay}\n\nThe merchant will confirm your order shortly.`
                           const merchantWa = store.whatsapp_number?.replace(/\D/g, '')
                           const rawPhone = waPhone.replace(/\D/g, '')
                           // Strip leading zero or country code if already included
@@ -398,8 +410,8 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                 <p className="font-semibold text-gray-800 text-sm leading-tight">{variantModal.name}</p>
                 <p className="font-bold text-sm mt-0.5" style={{ color: store?.theme_color || '#1A7A4A' }}>
                   {selectedVariantIndex !== null && variantModal.variants
-                    ? variantModal.variants[selectedVariantIndex].price_display || `₦${(variantModal.variants[selectedVariantIndex].price/100).toLocaleString()}`
-                    : (() => { const prices = variantModal.variants!.map(v => v.price); const min = Math.min(...prices); const max = Math.max(...prices); return min === max ? `₦${(min/100).toLocaleString()}` : `₦${(min/100).toLocaleString()} – ₦${(max/100).toLocaleString()}` })()
+                    ? variantModal.variants[selectedVariantIndex].price_display || fmtSymbol(storeCurrencySymbol, (variantModal.variants[selectedVariantIndex].price/100).toLocaleString())
+                    : (() => { const prices = variantModal.variants!.map(v => v.price); const min = Math.min(...prices); const max = Math.max(...prices); return min === max ? fmtSymbol(storeCurrencySymbol, (min/100).toLocaleString()) : `${fmtSymbol(storeCurrencySymbol, (min/100).toLocaleString())} – ${fmtSymbol(storeCurrencySymbol, (max/100).toLocaleString())}` })()
                   }
                 </p>
               </div>
@@ -421,7 +433,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                       } ${v.stock_qty === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
                       style={selectedVariantIndex === i ? { backgroundColor: store?.theme_color || '#1A7A4A' } : {}}>
                       {v.name}
-                      <span className="ml-1.5 text-xs">{v.price_display || `₦${(v.price/100).toLocaleString()}`}</span>
+                      <span className="ml-1.5 text-xs">{v.price_display || fmtSymbol(storeCurrencySymbol, (v.price/100).toLocaleString())}</span>
                     </button>
                   ))}
                 </div>
@@ -454,7 +466,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                       ...variantModal,
                       name: `${variantModal.name} (${variant.name})`,
                       price: variant.price,
-                      price_display: variant.price_display || `₦${(variant.price/100).toLocaleString()}`,
+                      price_display: variant.price_display || fmtSymbol(storeCurrencySymbol, (variant.price/100).toLocaleString()),
                     }
                     setCart(prev => {
                       const existing = prev.find(i => i.product.id === productWithVariant.id && i.product.name === productWithVariant.name)
@@ -558,7 +570,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
             style={{ backgroundColor: 'rgba(0,0,0,0.25)' }}
             className="flex items-center justify-center gap-2 py-3 text-sm font-semibold text-white flex-1">
             <ShoppingCart size={16} />
-            {cartCount > 0 ? `Cart (${cartCount}) · ₦${(cartTotal / 100).toLocaleString()}` : 'View Cart'}
+            {cartCount > 0 ? `Cart (${cartCount}) · ${fmtSymbol(storeCurrencySymbol, (cartTotal / 100).toLocaleString())}` : 'View Cart'}
           </button>
           <div className="relative">
             <button onClick={() => setAccountMenuOpen(!accountMenuOpen)}
@@ -766,7 +778,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
           style={{ backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') }}
         className="fixed bottom-6 right-6 font-bold px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 transition-colors z-40">
           <ShoppingCart size={18} />
-          {cartCount} item{cartCount > 1 ? 's' : ''} · ₦{(cartTotal / 100).toLocaleString()}
+          {cartCount} item{cartCount > 1 ? 's' : ''} · {fmtSymbol(storeCurrencySymbol, (cartTotal / 100).toLocaleString())}
         </button>
       )}
 
