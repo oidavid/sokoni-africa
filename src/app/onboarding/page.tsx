@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { getSampleProducts } from '@/lib/sample-products'
 import { COUNTRIES, normalizeNumber } from '@/lib/countries'
+import { COUNTRY_LIST } from '@/lib/countries-cities'
 
 type Step = 'language' | 'business' | 'whatsapp' | 'email' | 'password' | 'category' | 'location' | 'products' | 'generating' | 'done'
 
@@ -63,9 +64,32 @@ export default function OnboardingPage() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set())
+  const [customCity, setCustomCity] = useState('')
 
   const pid = lang === 'pid'
-  const sampleProducts = category ? getSampleProducts(category) : []
+  const rawSampleProducts = category ? getSampleProducts(category) : []
+  // Get currency for selected country
+  const countryCurrencyMap: Record<string, {symbol: string; rate: number}> = {
+    '234': {symbol: '₦', rate: 1}, '233': {symbol: 'GH₵', rate: 0.0094},
+    '254': {symbol: 'KSh', rate: 0.078}, '27': {symbol: 'R', rate: 0.011},
+    '1': {symbol: '$', rate: 0.00061}, '44': {symbol: '£', rate: 0.00048},
+    '55': {symbol: 'R$', rate: 0.0031}, '92': {symbol: '₨', rate: 0.17},
+    '91': {symbol: '₹', rate: 0.051}, '60': {symbol: 'RM', rate: 0.0029},
+    '63': {symbol: '₱', rate: 0.034}, '62': {symbol: 'Rp', rate: 9.6},
+    '20': {symbol: 'E£', rate: 0.029}, '255': {symbol: 'TSh', rate: 1.53},
+    '256': {symbol: 'USh', rate: 2.29}, '251': {symbol: 'Br', rate: 0.034},
+    '221': {symbol: 'CFA', rate: 0.37}, '237': {symbol: 'FCFA', rate: 0.37},
+  }
+  const selectedCurrency = countryCurrencyMap[selectedCountry.dial] || {symbol: '$', rate: 0.00061}
+  const sampleProducts = rawSampleProducts.map(p => {
+    if (selectedCurrency.symbol === '₦') return p
+    const converted = Math.round(p.price * selectedCurrency.rate)
+    // Round to clean number
+    const rounded = converted >= 1000 ? Math.floor(converted/500)*500 :
+                    converted >= 100 ? Math.floor(converted/50)*50 :
+                    Math.floor(converted/5)*5 || 1
+    return { ...p, price: rounded, price_display: `${selectedCurrency.symbol}${rounded.toLocaleString()}` }
+  })
   const normalizedWa = normalizeNumber(whatsappRaw, selectedCountry.dial)
 
   const generatingSteps = pid ? [
@@ -220,8 +244,8 @@ export default function OnboardingPage() {
               </p>
               <div className="space-y-3">
                 {([
-                  { code: 'pid' as const, label: 'Pidgin English', sub: 'I wan use Pidgin' },
-                  { code: 'en' as const, label: 'English', sub: 'I prefer English' },
+                  { code: 'en' as const, label: '🇬🇧 English', sub: 'Continue in English' },
+                  { code: 'pid' as const, label: '🌍 Pidgin English', sub: 'I wan use Pidgin (West Africa)' },
                 ]).map(l => (
                   <button key={l.code} onClick={() => { setLang(l.code); setStep('business') }}
                     className="w-full flex items-center justify-between bg-white border-2 border-gray-200 hover:border-brand-green rounded-2xl p-4 transition-all group">
@@ -232,6 +256,7 @@ export default function OnboardingPage() {
                     <ArrowRight size={18} className="text-gray-300 group-hover:text-brand-green transition-colors" />
                   </button>
                 ))}
+                <p className="text-xs text-gray-400 text-center pt-2">More languages coming soon · French, Spanish, Arabic, Swahili</p>
               </div>
             </div>
           )}
@@ -359,19 +384,28 @@ export default function OnboardingPage() {
 
           {step === 'location' && (
             <div className="animate-fade-in">
-              <h2 className="font-display text-xl font-bold text-brand-dark mb-6">
+              <h2 className="font-display text-xl font-bold text-brand-dark mb-2">
                 {pid ? 'Where your business dey?' : 'Where is your business located?'}
               </h2>
+              <p className="text-xs text-gray-400 mb-4">
+                Based on {COUNTRY_LIST.find(c => c.dial === selectedCountry.dial)?.flag} {selectedCountry.name}
+              </p>
               <div className="grid grid-cols-3 gap-2">
-                {LOCATIONS.map(loc => (
-                  <button key={loc} onClick={() => setLocation(loc)}
+                {(COUNTRY_LIST.find(c => c.dial === selectedCountry.dial)?.cities || ['Lagos', 'Abuja', 'Port Harcourt', 'Kano', 'Ibadan', 'Benin City', 'Other']).concat(['Other']).filter((v, i, a) => a.indexOf(v) === i).map(loc => (
+                  <button key={loc} onClick={() => { setLocation(loc === 'Other' ? '' : loc); if (loc === 'Other') setCustomCity('') }}
                     className={`py-2.5 px-3 rounded-xl border-2 text-xs font-semibold transition-all ${
-                      location === loc ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600 hover:border-brand-green/50'
+                      (loc === 'Other' ? location === '' : location === loc) ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600 hover:border-brand-green/50'
                     }`}>
                     {loc}
                   </button>
                 ))}
               </div>
+              {location === '' && (
+                <input type="text" value={customCity}
+                  onChange={e => { setCustomCity(e.target.value); setLocation(e.target.value) }}
+                  placeholder="Type your city or town"
+                  className="mt-3 w-full border-2 border-brand-green rounded-xl px-4 py-3 text-sm focus:outline-none" />
+              )}
             </div>
           )}
 
