@@ -138,15 +138,15 @@ export default function HomePage() {
               </div>
               <div className="p-3 space-y-2">
                 {[
-                  { name: "Pounded Yam Flour 5kg", price: "₦4,500", emoji: "🟡" },
-                  { name: "Palm Oil (4 litres)", price: "₦5,200", emoji: "🟠" },
-                  { name: "Dried Crayfish 500g", price: "₦3,800", emoji: "🦐" },
+                  { name: "Pounded Yam Flour 5kg", priceUSD: 2.73, emoji: "🟡" },
+                  { name: "Palm Oil (4 litres)", priceUSD: 3.15, emoji: "🟠" },
+                  { name: "Dried Crayfish 500g", priceUSD: 2.30, emoji: "🦐" },
                 ].map((p, i) => (
                   <div key={i} className="flex items-center gap-2 bg-gray-50 rounded-xl p-2">
                     <div className="w-10 h-10 bg-brand-light rounded-lg flex items-center justify-center text-lg">{p.emoji}</div>
                     <div className="flex-1 min-w-0">
                       <div className="text-xs font-semibold text-gray-800 truncate">{p.name}</div>
-                      <div className="text-xs text-brand-green font-bold">{p.price}</div>
+                      <div className="text-xs text-brand-green font-bold">{formatPrice(p.priceUSD)}</div>
                     </div>
                   </div>
                 ))}
