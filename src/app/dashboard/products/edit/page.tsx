@@ -32,6 +32,7 @@ function EditProductForm() {
 
   const [product, setProduct] = useState<Product | null>(null)
   const [merchant, setMerchant] = useState<Merchant | null>(null)
+  const [currencySymbol, setCurrencySymbol] = useState('₦')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -163,7 +164,7 @@ function EditProductForm() {
         name,
         description,
         price: Math.round(priceNum * 100),
-        price_display: `₦${priceNum.toLocaleString()}`,
+        price_display: `${currencySymbol}${priceNum.toLocaleString()}`,
         in_stock: inStock,
         image_url: imageUrlRef.current || imageUrl,
         stock_qty: trackInventory && stockQty ? parseInt(stockQty) : null,
@@ -283,7 +284,7 @@ function EditProductForm() {
         <div>
           <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Price</label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-display font-bold text-gray-400">₦</span>
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-display font-bold text-gray-400">{currencySymbol}</span>
             <input type="number" value={price} onChange={e => setPrice(e.target.value)} min="0"
               className="w-full bg-white border-2 border-gray-200 rounded-xl pl-8 pr-4 py-3 text-lg font-display font-bold text-brand-dark focus:border-brand-green outline-none" />
           </div>
@@ -339,6 +340,19 @@ function EditProductForm() {
       </div>
     </div>
   )
+}
+
+
+const CURRENCY_BY_COUNTRY: Record<string, {symbol: string; name: string}> = {
+  NG: {symbol: '₦', name: 'NGN'}, GH: {symbol: 'GH₵', name: 'GHS'},
+  KE: {symbol: 'KSh', name: 'KES'}, ZA: {symbol: 'R', name: 'ZAR'},
+  US: {symbol: '$', name: 'USD'}, GB: {symbol: '£', name: 'GBP'},
+  BR: {symbol: 'R$', name: 'BRL'}, PK: {symbol: '₨', name: 'PKR'},
+  IN: {symbol: '₹', name: 'INR'}, EG: {symbol: 'E£', name: 'EGP'},
+  TZ: {symbol: 'TSh', name: 'TZS'}, UG: {symbol: 'USh', name: 'UGX'},
+  ET: {symbol: 'Br', name: 'ETB'}, SN: {symbol: 'CFA', name: 'XOF'},
+  CI: {symbol: 'CFA', name: 'XOF'}, CM: {symbol: 'FCFA', name: 'XAF'},
+  CA: {symbol: 'C$', name: 'CAD'}, AU: {symbol: 'A$', name: 'AUD'},
 }
 
 export default function EditProductPage() {

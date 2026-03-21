@@ -16,6 +16,19 @@ interface Merchant {
   slug: string
 }
 
+
+const CURRENCY_BY_COUNTRY: Record<string, {symbol: string; name: string}> = {
+  NG: {symbol: '₦', name: 'NGN'}, GH: {symbol: 'GH₵', name: 'GHS'},
+  KE: {symbol: 'KSh', name: 'KES'}, ZA: {symbol: 'R', name: 'ZAR'},
+  US: {symbol: '$', name: 'USD'}, GB: {symbol: '£', name: 'GBP'},
+  BR: {symbol: 'R$', name: 'BRL'}, PK: {symbol: '₨', name: 'PKR'},
+  IN: {symbol: '₹', name: 'INR'}, EG: {symbol: 'E£', name: 'EGP'},
+  TZ: {symbol: 'TSh', name: 'TZS'}, UG: {symbol: 'USh', name: 'UGX'},
+  ET: {symbol: 'Br', name: 'ETB'}, SN: {symbol: 'CFA', name: 'XOF'},
+  CI: {symbol: 'CFA', name: 'XOF'}, CM: {symbol: 'FCFA', name: 'XAF'},
+  CA: {symbol: 'C$', name: 'CAD'}, AU: {symbol: 'A$', name: 'AUD'},
+}
+
 export default function AddProductPage() {
   const router = useRouter()
   const [state, setState] = useState<State>('idle')
@@ -25,6 +38,7 @@ export default function AddProductPage() {
   const [price, setPrice] = useState('')
   const [inStock, setInStock] = useState(true)
   const [merchant, setMerchant] = useState<Merchant | null>(null)
+  const [currencySymbol, setCurrencySymbol] = useState('₦')
   const [aiError, setAiError] = useState('')
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [uploadingImage, setUploadingImage] = useState(false)
@@ -45,12 +59,13 @@ export default function AddProductPage() {
       if (!merchantEmail) { router.push('/login'); return }
       const { data: m } = await supabase
         .from('merchants')
-        .select('id, category, language, business_name, slug')
+        .select('id, category, language, business_name, slug, country')
         .eq('email', merchantEmail)
         .single()
       if (!m) { router.push('/onboarding'); return }
       setMerchant(m)
       merchantRef.current = m
+      setCurrencySymbol(CURRENCY_BY_COUNTRY[m.country || 'NG']?.symbol || '₦')
     }
     getMerchant()
   }, [router])
@@ -123,7 +138,7 @@ export default function AddProductPage() {
       name: name.trim(),
       description: description.trim(),
       price: priceKobo,
-      price_display: `₦${priceNum.toLocaleString()}`,
+      price_display: `${currencySymbol}${priceNum.toLocaleString()}`,
       image_url: imageUrl,
       stock_qty: trackInventory && stockQty ? parseInt(stockQty) : null,
       cost_price: costPrice ? Math.round(parseFloat(costPrice) * 100) : null,
@@ -289,9 +304,9 @@ export default function AddProductPage() {
 
             {/* Price */}
             <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Price (₦)</label>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Price ({currencySymbol})</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-display font-bold text-gray-400">₦</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-display font-bold text-gray-400">{currencySymbol}</span>
                 <input type="number" value={price} onChange={e => setPrice(e.target.value)}
                   placeholder="0" min="0"
                   className="w-full bg-white border-2 border-gray-200 rounded-xl pl-8 pr-4 py-3 text-lg font-display font-bold text-brand-dark focus:border-brand-green outline-none" />
@@ -307,14 +322,14 @@ export default function AddProductPage() {
                 Cost Price <span className="text-gray-400 font-normal normal-case">(optional — for profit tracking)</span>
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-display font-bold text-gray-400">₦</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-display font-bold text-gray-400">{currencySymbol}</span>
                 <input type="number" value={costPrice} onChange={e => setCostPrice(e.target.value)} min="0"
                   placeholder="0"
                   className="w-full bg-white border-2 border-gray-200 rounded-xl pl-8 pr-4 py-3 text-sm font-bold text-brand-dark focus:border-brand-green outline-none" />
               </div>
               {costPrice && price && parseFloat(price) > 0 && (
                 <p className="text-xs text-brand-green mt-1 font-semibold">
-                  Profit per unit: ₦{(parseFloat(price) - parseFloat(costPrice || '0')).toLocaleString()}
+                  Profit per unit: {currencySymbol}{(parseFloat(price) - parseFloat(costPrice || '0')).toLocaleString()}
                   ({Math.round(((parseFloat(price) - parseFloat(costPrice || '0')) / parseFloat(price)) * 100)}% margin)
                 </p>
               )}
