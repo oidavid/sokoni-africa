@@ -221,7 +221,9 @@ export default function OnboardingPage() {
     } else if (step === 'category') {
       setStep('location')
     } else if (step === 'location') {
-      if (!location) { setError(pid ? 'Abeg select your city' : 'Please select or enter your city'); return }
+      const finalLocation = location || customCity
+      if (!finalLocation) { setError(pid ? 'Abeg select your city' : 'Please select or enter your city'); return }
+      if (!location && customCity) setLocation(customCity)
       // Check for duplicate business name in same city
       const { data: dupName } = await supabase.from('merchants')
         .select('id').ilike('business_name', businessName.trim()).ilike('location', location).maybeSingle()
@@ -299,7 +301,7 @@ export default function OnboardingPage() {
               </p>
               <input type="text" placeholder="e.g. Tropical Market" value={businessName}
                 onChange={e => { setBusinessName(e.target.value); setError('') }}
-                onKeyDown={e => e.key === 'Enter' && handleNext()} 
+                onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
                 className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
             </div>
@@ -323,7 +325,7 @@ export default function OnboardingPage() {
                 </button>
                 <input type="tel" placeholder="Phone number" value={whatsappRaw}
                   onChange={e => { setWhatsappRaw(e.target.value); setError('') }}
-                  onKeyDown={e => e.key === 'Enter' && handleNext()} 
+                  onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
                   className="flex-1 border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
               </div>
               {showCountryPicker && (
@@ -357,7 +359,7 @@ export default function OnboardingPage() {
               </p>
               <input type="email" placeholder="you@example.com" value={email}
                 onChange={e => { setEmail(e.target.value); setError('') }}
-                onKeyDown={e => e.key === 'Enter' && handleNext()} 
+                onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
                 className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-semibold text-lg outline-none transition-colors" />
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
               <p className="text-xs text-gray-400 mt-3">🔒 {pid ? 'No password wahala' : 'No password required'}</p>
@@ -380,7 +382,7 @@ export default function OnboardingPage() {
                   value={password}
                   onChange={e => { setPassword(e.target.value); setError('') }}
                   onKeyDown={e => e.key === 'Enter' && handleNext()}
-                  
+                  autoFocus
                   className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl pl-10 pr-12 py-4 text-brand-dark font-semibold text-lg outline-none transition-colors"
                 />
                 <button onClick={() => setShowPassword(!showPassword)}
@@ -440,9 +442,11 @@ export default function OnboardingPage() {
                 ))}
               </div>
               {location === '' && (
-                <input type="text" value={customCity} 
-                  onChange={e => setCustomCity(e.target.value)} onBlur={e => setLocation(e.target.value)}
-                  placeholder="Type your city or town"
+                <input type="text" defaultValue=""
+                  onChange={e => setCustomCity(e.target.value)}
+                  onBlur={e => setLocation(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') { setLocation((e.target as HTMLInputElement).value); (e.target as HTMLInputElement).blur() } }}
+                  placeholder="Type your city or town — press Enter when done"
                   className="mt-3 w-full border-2 border-brand-green rounded-xl px-4 py-3 text-sm focus:outline-none" />
               )}
             </div>
@@ -582,7 +586,7 @@ export default function OnboardingPage() {
                 <ArrowLeft size={16} /> {pid ? 'Go Back' : 'Back'}
               </button>
               <button onClick={handleNext}
-                disabled={(step === 'category' && !category) || (step === 'location' && !location)}
+                disabled={(step === 'category' && !category) || (step === 'location' && !location && !customCity)}
                 className="flex-1 bg-brand-green text-white font-bold py-3 rounded-2xl hover:bg-brand-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                 Continue <ArrowRight size={18} />
               </button>
