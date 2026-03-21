@@ -114,6 +114,14 @@ function CheckoutForm() {
           console.error('Cart parse error:', e)
         }
       }
+      // Pre-fill customer details if logged in
+      const storedCustomer = typeof window !== 'undefined' ? localStorage.getItem(`earket_customer_${slug}`) : null
+      if (storedCustomer) {
+        const c = JSON.parse(storedCustomer)
+        if (c.name) setName(c.name)
+        if (c.phone) setPhone(c.phone)
+      }
+
       setLoading(false)
     }
     load()
