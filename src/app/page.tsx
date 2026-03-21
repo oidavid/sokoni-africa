@@ -138,14 +138,14 @@ export default function HomePage() {
               </div>
               <div className="p-3 space-y-2">
                 {[
-                  { name: "Fresh Tomatoes (1kg)", priceUSD: 1.50, emoji: "🍅" },
-                  { name: "Sunflower Oil (1L)", priceUSD: 2.50, emoji: "🫙" },
-                  { name: "White Rice (5kg)", priceUSD: 4.00, emoji: "🍚" },
+                  { name: "Fresh Tomatoes (1kg)", priceUSD: 1.50, img: "https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=80&q=80" },
+                  { name: "Vegetable Oil (2L)", priceUSD: 2.50, img: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=80&q=80" },
+                  { name: "Basmati Rice (5kg)", priceUSD: 4.00, img: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=80&q=80" },
                 ].map((p, i) => (
                   <div key={i} className="flex items-center gap-2 bg-gray-50 rounded-xl p-2">
-                    <div className="w-10 h-10 bg-brand-light rounded-lg flex items-center justify-center text-lg">{p.emoji}</div>
+                    <img src={p.img} alt={p.name} className="w-10 h-10 rounded-lg object-cover shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-semibold text-gray-800 truncate">{p.name}</div>
+                      <div className="text-xs font-semibold text-gray-800 truncate leading-tight">{p.name}</div>
                       <div className="text-xs text-brand-green font-bold">{formatPrice(p.priceUSD)}</div>
                     </div>
                   </div>
