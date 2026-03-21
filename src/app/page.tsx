@@ -138,9 +138,9 @@ export default function HomePage() {
               </div>
               <div className="p-3 space-y-2">
                 {[
-                  { name: "Pounded Yam Flour 5kg", priceUSD: 2.73, emoji: "🟡" },
-                  { name: "Palm Oil (4 litres)", priceUSD: 3.15, emoji: "🟠" },
-                  { name: "Dried Crayfish 500g", priceUSD: 2.30, emoji: "🦐" },
+                  { name: "Fresh Tomatoes (1kg)", priceUSD: 1.50, emoji: "🍅" },
+                  { name: "Sunflower Oil (1L)", priceUSD: 2.50, emoji: "🫙" },
+                  { name: "White Rice (5kg)", priceUSD: 4.00, emoji: "🍚" },
                 ].map((p, i) => (
                   <div key={i} className="flex items-center gap-2 bg-gray-50 rounded-xl p-2">
                     <div className="w-10 h-10 bg-brand-light rounded-lg flex items-center justify-center text-lg">{p.emoji}</div>
