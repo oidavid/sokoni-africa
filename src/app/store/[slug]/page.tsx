@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { Search, MapPin, Share2, ShoppingCart, Plus, Minus, X, ChevronDown, SlidersHorizontal, User } from 'lucide-react'
+import { Search, MapPin, Share2, ShoppingCart, Plus, Minus, X, ChevronDown, SlidersHorizontal, User, Star, MessageCircle, LogOut, Heart } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { COUNTRIES } from '@/lib/countries'
@@ -82,6 +82,9 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
   const [orderConfirmed, setOrderConfirmed] = useState(false)
   const [waError, setWaError] = useState('')
   const [customer, setCustomer] = useState<{id: string; name: string} | null>(null)
+  const [customerPoints, setCustomerPoints] = useState<number>(0)
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false)
+  const [wishlist, setWishlist] = useState<string[]>([])
   const [variantModal, setVariantModal] = useState<Product | null>(null)
   const [selectedVariantIndex, setSelectedVariantIndex] = useState<number | null>(null)
   const [modalQty, setModalQty] = useState(1)
@@ -100,7 +103,18 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
         setProducts(prods || [])
         // Load customer session
         const storedCustomer = typeof window !== 'undefined' ? localStorage.getItem(`earket_customer_${params.slug}`) : null
-        if (storedCustomer) setCustomer(JSON.parse(storedCustomer))
+        if (storedCustomer) {
+          const c = JSON.parse(storedCustomer)
+          setCustomer(c)
+          // Load points
+          const { data: pts } = await supabase.from('customer_points')
+            .select('points').eq('customer_id', c.id).eq('merchant_id', merchant.id).single()
+          if (pts) setCustomerPoints(pts.points)
+          // Load wishlist
+          const { data: wl } = await supabase.from('wishlists')
+            .select('product_id').eq('customer_id', c.id).eq('merchant_id', merchant.id)
+          if (wl) setWishlist(wl.map((w: {product_id: string}) => w.product_id))
+        }
 
         // Track store view
         fetch('/api/analytics/view', {
@@ -148,6 +162,20 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
         qty: i.qty,
         variantName: null,
       })))
+    }
+  }
+
+  async function toggleWishlist(productId: string) {
+    if (!customer || !store) return
+    if (wishlist.includes(productId)) {
+      await supabase.from('wishlists').delete()
+        .eq('customer_id', customer.id).eq('product_id', productId)
+      setWishlist(prev => prev.filter(id => id !== productId))
+    } else {
+      await supabase.from('wishlists').insert({
+        customer_id: customer.id, product_id: productId, merchant_id: store.id
+      })
+      setWishlist(prev => [...prev, productId])
     }
   }
 
@@ -532,11 +560,71 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
             <ShoppingCart size={16} />
             {cartCount > 0 ? `Cart (${cartCount}) · ₦${(cartTotal / 100).toLocaleString()}` : 'View Cart'}
           </button>
-          <Link href={`/store/${store.slug}/account`}
-            style={{ backgroundColor: 'rgba(0,0,0,0.25)' }}
-            className="flex items-center justify-center gap-2 py-3 px-4 text-sm font-semibold text-white">
-            {customer ? <span className="font-bold">{customer.name[0]}</span> : <User size={16} />}
-          </Link>
+          <div className="relative">
+            <button onClick={() => setAccountMenuOpen(!accountMenuOpen)}
+              style={{ backgroundColor: 'rgba(0,0,0,0.25)' }}
+              className="flex items-center justify-center gap-1.5 py-3 px-3 text-sm font-semibold text-white whitespace-nowrap">
+              {customer ? (
+                <>
+                  <span className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center font-bold text-xs">{customer.name[0]}</span>
+                  <span className="hidden sm:inline text-xs">Hi {customer.name.split(' ')[0]}!</span>
+                  {customerPoints > 0 && <span className="text-yellow-300 text-xs font-bold">⭐ {customerPoints}</span>}
+                </>
+              ) : (
+                <><User size={14} /><span className="text-xs">Sign In</span></>
+              )}
+            </button>
+
+            {/* Account dropdown */}
+            {accountMenuOpen && (
+              <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50">
+                {customer ? (
+                  <>
+                    <div className="px-4 py-3 bg-brand-light border-b border-gray-100">
+                      <p className="font-display font-bold text-brand-dark text-sm">Hi {customer.name.split(' ')[0]}! 👋</p>
+                      {customerPoints > 0 && (
+                        <p className="text-xs text-brand-green font-semibold mt-0.5">⭐ {customerPoints} loyalty points</p>
+                      )}
+                    </div>
+                    <Link href={`/store/${store.slug}/account`} onClick={() => setAccountMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-50">
+                      <ShoppingCart size={14} className="text-gray-400" /> My Orders
+                    </Link>
+                    <Link href={`/store/${store.slug}/account`} onClick={() => setAccountMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-50">
+                      <Star size={14} className="text-gray-400" /> My Points & Rewards
+                    </Link>
+                    <a href={`https://wa.me/${store.whatsapp_number?.replace(/\D/g, '')}?text=${encodeURIComponent('Hi! I need help with my order.')}`}
+                      target="_blank" rel="noreferrer" onClick={() => setAccountMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-50">
+                      <MessageCircle size={14} className="text-gray-400" /> Help & Contact
+                    </a>
+                    <button onClick={() => {
+                      localStorage.removeItem(`earket_customer_${store.slug}`)
+                      setCustomer(null); setCustomerPoints(0); setWishlist([]); setAccountMenuOpen(false)
+                    }} className="flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50 w-full text-left">
+                      <LogOut size={14} /> Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="px-4 py-3 border-b border-gray-50">
+                      <p className="font-semibold text-gray-800 text-sm">Welcome!</p>
+                      <p className="text-xs text-gray-400">Sign in to earn loyalty points</p>
+                    </div>
+                    <Link href={`/store/${store.slug}/login`} onClick={() => setAccountMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-brand-green hover:bg-brand-light border-b border-gray-50">
+                      Sign In
+                    </Link>
+                    <Link href={`/store/${store.slug}/register`} onClick={() => setAccountMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-gray-600 hover:bg-gray-50">
+                      ⭐ Create Account & Earn Points
+                    </Link>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
