@@ -299,7 +299,7 @@ export default function OnboardingPage() {
               </p>
               <input type="text" placeholder="e.g. Tropical Market" value={businessName}
                 onChange={e => { setBusinessName(e.target.value); setError('') }}
-                onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
+                onKeyDown={e => e.key === 'Enter' && handleNext()} 
                 className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
             </div>
@@ -323,7 +323,7 @@ export default function OnboardingPage() {
                 </button>
                 <input type="tel" placeholder="Phone number" value={whatsappRaw}
                   onChange={e => { setWhatsappRaw(e.target.value); setError('') }}
-                  onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
+                  onKeyDown={e => e.key === 'Enter' && handleNext()} 
                   className="flex-1 border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
               </div>
               {showCountryPicker && (
@@ -357,7 +357,7 @@ export default function OnboardingPage() {
               </p>
               <input type="email" placeholder="you@example.com" value={email}
                 onChange={e => { setEmail(e.target.value); setError('') }}
-                onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
+                onKeyDown={e => e.key === 'Enter' && handleNext()} 
                 className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-semibold text-lg outline-none transition-colors" />
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
               <p className="text-xs text-gray-400 mt-3">🔒 {pid ? 'No password wahala' : 'No password required'}</p>
@@ -380,7 +380,7 @@ export default function OnboardingPage() {
                   value={password}
                   onChange={e => { setPassword(e.target.value); setError('') }}
                   onKeyDown={e => e.key === 'Enter' && handleNext()}
-                  autoFocus
+                  
                   className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl pl-10 pr-12 py-4 text-brand-dark font-semibold text-lg outline-none transition-colors"
                 />
                 <button onClick={() => setShowPassword(!showPassword)}
@@ -440,7 +440,7 @@ export default function OnboardingPage() {
                 ))}
               </div>
               {location === '' && (
-                <input type="text" value={customCity} autoFocus
+                <input type="text" value={customCity} 
                   onChange={e => { setCustomCity(e.target.value); setLocation(e.target.value) }}
                   placeholder="Type your city or town"
                   className="mt-3 w-full border-2 border-brand-green rounded-xl px-4 py-3 text-sm focus:outline-none" />
