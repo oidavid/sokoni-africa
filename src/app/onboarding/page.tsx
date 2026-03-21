@@ -65,6 +65,7 @@ export default function OnboardingPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set())
   const [customCity, setCustomCity] = useState('')
+  const [showOtherCity, setShowOtherCity] = useState(false)
 
   const pid = lang === 'pid'
   const rawSampleProducts = category ? getSampleProducts(category) : []
@@ -418,9 +419,16 @@ export default function OnboardingPage() {
               <h2 className="font-display text-xl font-bold text-brand-dark mb-2">
                 {pid ? 'Where your business dey?' : 'Where is your business located?'}
               </h2>
-              <p className="text-xs text-gray-400 mb-4">
-                Based on {COUNTRY_LIST.find(c => c.dial === selectedCountry.dial)?.flag} {selectedCountry.name}
-              </p>
+              <div className="flex items-center gap-2 mb-4">
+                <img src={`https://flagcdn.com/20x15/${selectedCountry.code.toLowerCase()}.png`}
+                  alt={selectedCountry.name} className="w-5 h-4 object-cover rounded-sm" />
+                <p className="text-xs text-gray-500">
+                  {location && !showOtherCity
+                    ? <><span className="font-semibold text-gray-700">{location}, {selectedCountry.name}</span> — tap another city to change</>
+                    : <>Showing cities in <span className="font-semibold text-gray-700">{selectedCountry.name}</span></>
+                  }
+                </p>
+              </div>
               <div className="grid grid-cols-3 gap-2">
                 {(COUNTRY_LIST.find(c => c.dial === selectedCountry.dial)?.cities || ['Lagos', 'Abuja', 'Port Harcourt', 'Kano', 'Ibadan', 'Benin City', 'Other']).concat(['Other']).filter((v, i, a) => a.indexOf(v) === i).map(loc => (
                   <button key={loc} onMouseDown={e => e.preventDefault()} onClick={() => { setLocation(loc === 'Other' ? '' : loc); if (loc === 'Other') setCustomCity('') }}
