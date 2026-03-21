@@ -12,6 +12,7 @@ interface Order {
   customer_name: string
   customer_phone: string
   customer_address: string
+  customer_id?: string
   items: Array<{ name: string; price: number; qty: number; product_id?: string }>
   subtotal: number
   status: string
@@ -50,6 +51,8 @@ export default function OrdersPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [loadError, setLoadError] = useState('')
 
+  const [merchantId, setMerchantId] = useState<string>('')
+
   const loadOrders = useCallback(async (showRefresh = false) => {
     if (showRefresh) setRefreshing(true)
     setLoadError('')
@@ -61,10 +64,11 @@ export default function OrdersPage() {
 
       const { data: m, error: mError } = await supabase.from('merchants').select('id, whatsapp_number').eq('email', merchantEmail).single()
       if (mError || !m) { router.push('/onboarding'); return }
+      setMerchantId(m.id)
 
       const { data: orderData, error: oError } = await supabase
         .from('orders')
-        .select('id, created_at, order_number, customer_name, customer_phone, customer_address, items, subtotal, status, source, notes')
+        .select('id, created_at, order_number, customer_name, customer_phone, customer_address, customer_id, items, subtotal, status, source, notes')
         .eq('merchant_id', m.id)
         .order('created_at', { ascending: false })
 
@@ -83,6 +87,7 @@ export default function OrdersPage() {
     setUpdatingId(orderId)
     await supabase.from('orders').update({ status }).eq('id', orderId)
     setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o))
+    const m = { id: merchantId }
 
     if (status === 'delivered') {
       for (const item of order.items || []) {
@@ -92,6 +97,41 @@ export default function OrdersPage() {
             const newQty = Math.max(0, product.stock_qty - item.qty)
             await supabase.from('products').update({ stock_qty: newQty, in_stock: newQty > 0 }).eq('id', item.product_id)
           }
+        }
+      }
+
+      // Award loyalty points to customer on delivery
+      if (order.customer_id) {
+        const pointsEarned = Math.floor((order.subtotal / 100) / 100) // 1 point per ₦100
+        if (pointsEarned > 0) {
+          const { data: existing } = await supabase.from('customer_points')
+            .select('id, points, lifetime_points')
+            .eq('customer_id', order.customer_id)
+            .eq('merchant_id', m.id)
+            .maybeSingle()
+
+          if (existing) {
+            await supabase.from('customer_points').update({
+              points: existing.points + pointsEarned,
+              lifetime_points: existing.lifetime_points + pointsEarned,
+            }).eq('id', existing.id)
+          } else {
+            await supabase.from('customer_points').insert({
+              customer_id: order.customer_id,
+              merchant_id: m.id,
+              points: pointsEarned,
+              lifetime_points: pointsEarned,
+            })
+          }
+
+          await supabase.from('points_transactions').insert({
+            customer_id: order.customer_id,
+            merchant_id: m.id,
+            order_id: orderId,
+            points: pointsEarned,
+            type: 'earn',
+            note: `Earned from order ${order.order_number}`,
+          })
         }
       }
     }
