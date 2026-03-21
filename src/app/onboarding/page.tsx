@@ -441,7 +441,7 @@ export default function OnboardingPage() {
               </div>
               {location === '' && (
                 <input type="text" value={customCity} 
-                  onChange={e => { setCustomCity(e.target.value); setLocation(e.target.value) }}
+                  onChange={e => setCustomCity(e.target.value)} onBlur={e => setLocation(e.target.value)}
                   placeholder="Type your city or town"
                   className="mt-3 w-full border-2 border-brand-green rounded-xl px-4 py-3 text-sm focus:outline-none" />
               )}
