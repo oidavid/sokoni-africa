@@ -40,7 +40,7 @@ const steps = [
 
 export default function HomePage() {
   const [lang, setLang] = useState<'en' | 'pid'>('en')
-  const [currency, setCurrency] = useState<{ symbol: string; rate: number; name: string }>({ symbol: '$', rate: 1, name: 'US Dollar' })
+  const [currency, setCurrency] = useState<{ symbol: string; rate: number; name: string; code: string }>({ symbol: '$', rate: 1, name: 'US Dollar', code: 'USD' })
   const [currencyLoaded, setCurrencyLoaded] = useState(false)
 
   // Detect visitor currency on load
