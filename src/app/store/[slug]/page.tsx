@@ -164,7 +164,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
     setTimeout(() => setAddedId(null), 1500)
   }
 
-  function updateQty(id: string, qty: number, name?: string) {
+  function removeItem(id: string, name?: string) { setCart(prev => { const newCart = prev.filter(i => !(i.product.id === id && (!name || i.product.name === name))); saveCartItem(newCart); return newCart }) } function updateQty(id: string, qty: number, name?: string) {
     setCart(prev => {
       const newCart = qty <= 0
         ? prev.filter(i => !(i.product.id === id && (!name || i.product.name === name)))
