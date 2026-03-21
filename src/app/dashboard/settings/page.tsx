@@ -230,11 +230,22 @@ export default function SettingsPage() {
           <p className="text-xs text-gray-400 mt-1">Shown on your storefront so customers can find you</p>
         </div>
 
-        {/* Location */}
+        {/* Country */}
+        <div>
+          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Country</label>
+          <select value={storeCountry} onChange={e => { setStoreCountry(e.target.value); setLocation('') }}
+            className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-brand-green outline-none">
+            {COUNTRY_LIST.map(c => (
+              <option key={c.code} value={c.code}>{c.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* City */}
         <div>
           <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">City</label>
           <div className="grid grid-cols-3 gap-2">
-            {LOCATIONS.map(loc => (
+            {(COUNTRY_LIST.find(c => c.code === storeCountry)?.cities || []).map(loc => (
               <button key={loc} onClick={() => setLocation(loc)}
                 className={`py-2 px-2 rounded-xl border-2 text-xs font-semibold transition-all ${
                   location === loc ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600'
@@ -242,7 +253,18 @@ export default function SettingsPage() {
                 {loc}
               </button>
             ))}
+            <button onClick={() => setLocation('')}
+              className={`py-2 px-2 rounded-xl border-2 text-xs font-semibold transition-all ${
+                !COUNTRY_LIST.find(c => c.code === storeCountry)?.cities.includes(location) ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600'
+              }`}>
+              Other
+            </button>
           </div>
+          {!COUNTRY_LIST.find(c => c.code === storeCountry)?.cities.includes(location) && (
+            <input type="text" value={location} onChange={e => setLocation(e.target.value)}
+              placeholder="Type your city or town"
+              className="mt-2 w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-brand-green outline-none" />
+          )}
         </div>
 
         {/* WhatsApp */}
