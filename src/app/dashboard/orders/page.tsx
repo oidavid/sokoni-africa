@@ -96,6 +96,21 @@ export default function OrdersPage() {
           if (product?.stock_qty != null) {
             const newQty = Math.max(0, product.stock_qty - item.qty)
             await supabase.from('products').update({ stock_qty: newQty, in_stock: newQty > 0 }).eq('id', item.product_id)
+            // Low stock alert - notify merchant via WhatsApp if stock drops to 5 or below
+            const LOW_STOCK_THRESHOLD = 5
+            if (newQty <= LOW_STOCK_THRESHOLD && newQty > 0) {
+              const { data: prod } = await supabase.from('products').select('name').eq('id', item.product_id).single()
+              const { data: merch } = await supabase.from('merchants').select('whatsapp_number, business_name').eq('id', m.id).single()
+              if (merch?.whatsapp_number && prod?.name) {
+                const alertMsg = `⚠️ Low Stock Alert — ${merch.business_name}
+
+*${prod.name}* is running low!
+Only *${newQty} units* remaining.
+
+Please restock soon to avoid missing orders.`
+                window.open(`https://wa.me/${merch.whatsapp_number.replace(/\D/g, '')}?text=${encodeURIComponent(alertMsg)}`, '_blank')
+              }
+            }
           }
         }
       }
