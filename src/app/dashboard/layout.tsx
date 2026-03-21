@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   ShoppingBag, LayoutDashboard, Package, ShoppingCart,
-  BarChart2, Settings, CreditCard, LogOut, Menu, X, Users, Gift, Boxes
+  BarChart2, Settings, CreditCard, LogOut, Menu, X, Users, Gift, Boxes, Radio
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
@@ -15,6 +15,7 @@ const NAV = [
   { icon: BarChart2, label: 'Analytics', href: '/dashboard/analytics' },
   { icon: CreditCard, label: 'Payments', href: '/dashboard/payments' },
   { icon: Users, label: 'Customers', href: '/dashboard/customers' },
+  { icon: Radio, label: 'Broadcast', href: '/dashboard/broadcast' },
   { icon: Boxes, label: 'Inventory', href: '/dashboard/inventory' },
   { icon: Gift, label: 'Referrals', href: '/dashboard/referrals' },
   { icon: Settings, label: 'Settings', href: '/dashboard/settings' },

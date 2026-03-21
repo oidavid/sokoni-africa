@@ -7,7 +7,7 @@ import { getSampleProducts } from '@/lib/sample-products'
 import { COUNTRIES, normalizeNumber } from '@/lib/countries'
 import { COUNTRY_LIST } from '@/lib/countries-cities'
 
-type Step = 'language' | 'business' | 'whatsapp' | 'email' | 'password' | 'category' | 'location' | 'products' | 'generating' | 'done'
+type Step = 'language' | 'business' | 'whatsapp' | 'email' | 'password' | 'biztype' | 'category' | 'location' | 'products' | 'generating' | 'done'
 
 const CATEGORIES = [
   { id: 'food', label: 'Food & Drinks', emoji: '🍱', pidgin: 'Food & Drink' },
@@ -22,6 +22,19 @@ const CATEGORIES = [
   { id: 'stationery', label: 'Stationery & Office', emoji: '📚', pidgin: 'Books & Office' },
   { id: 'automobile', label: 'Auto Parts & Car', emoji: '🚗', pidgin: 'Car & Auto Parts' },
   { id: 'other', label: 'Other Business', emoji: '🏪', pidgin: 'Other Business' },
+]
+
+const SERVICE_CATEGORIES = [
+  { id: 'home_services', label: 'Home & Technical', emoji: '🔧', pidgin: 'Home Repair & Technical', services: ['Plumber', 'Electrician', 'Generator Repair', 'AC Technician', 'Solar Installer', 'Carpenter', 'Painter', 'Mason', 'Welder', 'Tiler'] },
+  { id: 'auto_services', label: 'Auto & Vehicle', emoji: '🚗', pidgin: 'Car & Vehicle', services: ['Mechanic', 'Car Wash', 'Vulcanizer', 'Auto Electrician', 'Car Detailing', 'Oil Change', 'Panel Beater', 'Motorcycle Repair'] },
+  { id: 'beauty_services', label: 'Beauty & Personal Care', emoji: '💄', pidgin: 'Beauty & Style', services: ['Hair Stylist', 'Barber', 'Makeup Artist', 'Nail Technician', 'Braider', 'Massage Therapist', 'Wig Maker', 'Skincare Consultant'] },
+  { id: 'education', label: 'Education & Tutoring', emoji: '📚', pidgin: 'Teaching & Tutoring', services: ['Home Tutor', 'Exam Prep Tutor', 'Language Tutor', 'Music Teacher', 'Computer Trainer', 'Coding Tutor', 'Online Tutor'] },
+  { id: 'health_wellness', label: 'Health & Wellness', emoji: '🏥', pidgin: 'Health & Wellness', services: ['Home Caregiver', 'Fitness Trainer', 'Nutrition Coach', 'Childcare / Nanny', 'Physiotherapy Assistant', 'Mobile Nurse'] },
+  { id: 'domestic', label: 'Domestic Services', emoji: '🏠', pidgin: 'House Help & Cleaning', services: ['Cleaner', 'Laundry Service', 'Cook / Home Chef', 'House Help', 'Pest Control', 'Ironing Service'] },
+  { id: 'events', label: 'Events & Occasions', emoji: '🎉', pidgin: 'Events & Party', services: ['Caterer', 'Event Planner', 'Photographer', 'Videographer', 'DJ', 'Decorator', 'Cake Maker', 'MC / Host'] },
+  { id: 'digital_services', label: 'Digital & Tech', emoji: '💻', pidgin: 'Digital & Tech', services: ['Graphic Designer', 'Phone Repair', 'Laptop Repair', 'Social Media Manager', 'CV Writer', 'Digital Marketer', 'Printing Service'] },
+  { id: 'transport', label: 'Transport & Delivery', emoji: '🚚', pidgin: 'Delivery & Transport', services: ['Delivery Rider', 'Driver-for-hire', 'Dispatch Service', 'Bike Courier', 'School Run Driver', 'Moving Assistant'] },
+  { id: 'agriculture', label: 'Agriculture', emoji: '🌱', pidgin: 'Farm & Agriculture', services: ['Poultry Consultant', 'Farm Labor Provider', 'Irrigation Technician', 'Tractor Rental', 'Produce Aggregator'] },
 ]
 
 const LOCATIONS = [
@@ -55,6 +68,7 @@ export default function OnboardingPage() {
   const [showCountryPicker, setShowCountryPicker] = useState(false)
   const [email, setEmail] = useState('')
   const [category, setCategory] = useState('')
+  const [businessType, setBusinessType] = useState<'products' | 'services' | ''>('')
   const [location, setLocation] = useState('')
   const [genStep, setGenStep] = useState(0)
   const [storeSlug, setStoreSlug] = useState('')
@@ -109,7 +123,7 @@ export default function OnboardingPage() {
 
   const prevStep: Record<string, Step> = {
     business: 'language', whatsapp: 'business', email: 'whatsapp',
-    password: 'email', category: 'password', location: 'category', products: 'location',
+    password: 'email', biztype: 'password', category: 'biztype', location: 'category', products: 'location',
   }
 
   function toggleProduct(i: number) {
@@ -218,6 +232,9 @@ export default function OnboardingPage() {
     } else if (step === 'password') {
       if (password.length < 4) { setError(pid ? 'Abeg enter at least 4 characters' : 'Password must be at least 4 characters'); return }
       setStep('category')
+    } else if (step === 'biztype') {
+      if (!businessType) { setError('Please select your business type'); return }
+      setStep('category')
     } else if (step === 'category') {
       setStep('location')
     } else if (step === 'location') {
@@ -241,7 +258,7 @@ export default function OnboardingPage() {
     }
   }
 
-  const stepsList = ['business', 'whatsapp', 'email', 'password', 'category', 'location', 'products']
+  const stepsList = ['business', 'whatsapp', 'email', 'password', 'biztype', 'category', 'location', 'products']
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-brand-light to-white flex flex-col">
@@ -394,6 +411,36 @@ export default function OnboardingPage() {
               <p className="text-xs text-gray-400 mt-3">
                 🔒 {pid ? 'Minimum 4 characters. Save am well well.' : 'Minimum 4 characters. Keep it safe.'}
               </p>
+            </div>
+          )}
+
+          {step === 'biztype' && (
+            <div className="animate-fade-in">
+              <h2 className="font-display text-xl font-bold text-brand-dark mb-2">
+                {pid ? 'Wetin you dey do?' : 'What type of business?'}
+              </h2>
+              <p className="text-gray-500 text-sm mb-6">
+                {pid ? 'You dey sell things or you dey offer service?' : 'Are you selling products or offering a service?'}
+              </p>
+              <div className="space-y-3">
+                <button onClick={() => setBusinessType('products')}
+                  className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${businessType === 'products' ? 'border-brand-green bg-brand-light' : 'border-gray-200 bg-white'}`}>
+                  <span className="text-3xl">🛍️</span>
+                  <div className="text-left">
+                    <p className="font-display font-bold text-brand-dark">{pid ? 'I dey sell products' : 'I sell products'}</p>
+                    <p className="text-xs text-gray-500">Food, clothing, electronics, groceries etc.</p>
+                  </div>
+                </button>
+                <button onClick={() => setBusinessType('services')}
+                  className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${businessType === 'services' ? 'border-brand-green bg-brand-light' : 'border-gray-200 bg-white'}`}>
+                  <span className="text-3xl">🔧</span>
+                  <div className="text-left">
+                    <p className="font-display font-bold text-brand-dark">{pid ? 'I dey offer service' : 'I offer a service'}</p>
+                    <p className="text-xs text-gray-500">Repairs, beauty, tutoring, events, delivery etc.</p>
+                  </div>
+                </button>
+              </div>
+              {error && <p className="text-red-500 text-xs mt-3">{error}</p>}
             </div>
           )}
 
