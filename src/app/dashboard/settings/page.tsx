@@ -79,6 +79,14 @@ export default function SettingsPage() {
       setAddress(m.address || '')
       setLocation(m.location || '')
       if (m.country) setStoreCountry(m.country)
+      if (m.location) {
+        // Check if location is in the cities list for the country
+        const { COUNTRY_LIST: cl } = await import('@/lib/countries-cities')
+        const countryData = cl.find(c => c.code === (m.country || 'NG'))
+        if (countryData && !countryData.cities.includes(m.location)) {
+          setCustomCity(m.location)
+        }
+      }
       setOrderMode(m.order_mode || 'both')
       setLoginPin(m.login_pin || '')
       setThemeColor(m.theme_color || '#1A7A4A')
@@ -243,8 +251,10 @@ export default function SettingsPage() {
           <div className="flex gap-2">
             <button onClick={() => setShowCountryPicker(!showCountryPicker)}
               className="flex items-center gap-1.5 bg-white border-2 border-gray-200 rounded-xl px-3 py-3 text-sm font-semibold hover:border-brand-green transition-colors shrink-0">
-              <span>{selectedCountry.flag}</span>
-              <span className="text-gray-600">+{selectedCountry.dial}</span>
+              <img src={`https://flagcdn.com/20x15/${selectedCountry.code.toLowerCase()}.png`}
+                alt={selectedCountry.name} className="w-5 h-4 object-cover rounded-sm"
+                onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
+              <span className="text-gray-600 text-sm font-semibold">+{selectedCountry.dial}</span>
             </button>
             <input type="tel" value={whatsappRaw} onChange={e => setWhatsappRaw(e.target.value)}
               placeholder="Phone number"
@@ -255,7 +265,10 @@ export default function SettingsPage() {
               {COUNTRIES.map(c => (
                 <button key={c.code} onClick={() => { setSelectedCountry(c); setShowCountryPicker(false) }}
                   className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 ${selectedCountry.code === c.code ? 'bg-brand-light text-brand-green font-semibold' : 'text-gray-700'}`}>
-                  <span>{c.flag}</span><span className="flex-1 text-left">{c.name}</span><span className="text-gray-400">+{c.dial}</span>
+                  <img src={`https://flagcdn.com/20x15/${c.code.toLowerCase()}.png`}
+                    alt={c.name} className="w-5 h-4 object-cover rounded-sm shrink-0"
+                    onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
+                  <span className="flex-1 text-left">{c.name}</span><span className="text-gray-400">+{c.dial}</span>
                 </button>
               ))}
             </div>

@@ -288,8 +288,10 @@ export default function OnboardingPage() {
               <div className="flex gap-2 mb-2">
                 <button onClick={() => setShowCountryPicker(!showCountryPicker)}
                   className="flex items-center gap-1.5 bg-white border-2 border-gray-200 rounded-2xl px-3 py-4 text-sm font-semibold hover:border-brand-green transition-colors shrink-0">
-                  <span>{selectedCountry.flag}</span>
-                  <span className="text-gray-600">+{selectedCountry.dial}</span>
+                  <img src={`https://flagcdn.com/20x15/${selectedCountry.code.toLowerCase()}.png`} 
+                    alt={selectedCountry.name} className="w-5 h-4 object-cover rounded-sm" 
+                    onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
+                  <span className="text-gray-600 text-sm font-semibold">+{selectedCountry.dial}</span>
                 </button>
                 <input type="tel" placeholder="Phone number" value={whatsappRaw}
                   onChange={e => { setWhatsappRaw(e.target.value); setError('') }}
@@ -301,7 +303,9 @@ export default function OnboardingPage() {
                   {COUNTRIES.map(c => (
                     <button key={c.code} onClick={() => { setSelectedCountry(c); setShowCountryPicker(false) }}
                       className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 ${selectedCountry.code === c.code ? 'bg-brand-light text-brand-green font-semibold' : 'text-gray-700'}`}>
-                      <span>{c.flag}</span>
+                      <img src={`https://flagcdn.com/20x15/${c.code.toLowerCase()}.png`} 
+                        alt={c.name} className="w-5 h-4 object-cover rounded-sm shrink-0"
+                        onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                       <span className="flex-1 text-left">{c.name}</span>
                       <span className="text-gray-400 text-xs">+{c.dial}</span>
                     </button>
@@ -401,8 +405,9 @@ export default function OnboardingPage() {
                 ))}
               </div>
               {location === '' && (
-                <input type="text" value={customCity}
+                <input type="text" value={customCity} autoFocus
                   onChange={e => { setCustomCity(e.target.value); setLocation(e.target.value) }}
+                  onBlur={e => { if (!e.target.value) {} }} 
                   placeholder="Type your city or town"
                   className="mt-3 w-full border-2 border-brand-green rounded-xl px-4 py-3 text-sm focus:outline-none" />
               )}
