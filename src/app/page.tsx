@@ -40,6 +40,28 @@ const steps = [
 
 export default function HomePage() {
   const [lang, setLang] = useState<'en' | 'pid'>('en')
+  const [currency, setCurrency] = useState<{ symbol: string; rate: number; name: string }>({ symbol: '$', rate: 1, name: 'US Dollar' })
+  const [currencyLoaded, setCurrencyLoaded] = useState(false)
+
+  // Detect visitor currency on load
+  useState(() => {
+    fetch('/api/geo').then(r => r.json()).then(data => {
+      if (data.currency) setCurrency(data.currency)
+      setCurrencyLoaded(true)
+    }).catch(() => setCurrencyLoaded(true))
+  })
+
+  function formatPrice(usd: number) {
+    const raw = usd * currency.rate
+    // Round DOWN to clean numbers based on magnitude
+    let rounded: number
+    if (raw >= 10000) rounded = Math.floor(raw / 1000) * 1000
+    else if (raw >= 1000) rounded = Math.floor(raw / 500) * 500
+    else if (raw >= 100) rounded = Math.floor(raw / 50) * 50
+    else if (raw >= 10) rounded = Math.floor(raw / 5) * 5
+    else rounded = Math.floor(raw)
+    return `${currency.symbol}${rounded.toLocaleString()}`
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -197,7 +219,13 @@ export default function HomePage() {
       {/* Pricing */}
       <section className="py-16 px-4 max-w-5xl mx-auto">
         <h2 className="font-display text-3xl font-bold text-center text-brand-dark mb-3">Simple pricing</h2>
-        <p className="text-center text-gray-500 mb-12 text-sm">No hidden fees. No surprises.</p>
+        <p className="text-center text-gray-500 mb-2 text-sm">No hidden fees. No surprises.</p>
+        {currencyLoaded && currency.code !== 'USD' && (
+          <p className="text-center text-xs text-gray-400 mb-12">Prices shown in {currency.name} · approximate conversion</p>
+        )}
+        {currencyLoaded && currency.code === 'USD' && (
+          <p className="text-center text-xs text-gray-400 mb-12">&nbsp;</p>
+        )}
         <div className="grid sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
           {/* Free */}
           <div className="border-2 border-brand-green rounded-2xl p-6 relative">
@@ -222,7 +250,7 @@ export default function HomePage() {
 
           {/* Pro Setup */}
           <div className="border border-gray-200 rounded-2xl p-6">
-            <div className="text-3xl font-display font-bold text-brand-dark mb-1">$25</div>
+            <div className="text-3xl font-display font-bold text-brand-dark mb-1">{currencyLoaded ? formatPrice(25) : "$25"}</div>
             <div className="text-gray-500 text-sm mb-5">We build it for you</div>
             <ul className="space-y-2 mb-6">
               {["Professional store setup", "We photograph your products", "AI-written descriptions", "WhatsApp bot configured", "Payment setup", "Training session"].map((f, i) => (
@@ -240,7 +268,7 @@ export default function HomePage() {
 
           {/* Monthly */}
           <div className="border border-gray-200 rounded-2xl p-6">
-            <div className="text-3xl font-display font-bold text-brand-dark mb-1">$15<span className="text-lg text-gray-400">/mo</span></div>
+            <div className="text-3xl font-display font-bold text-brand-dark mb-1">{currencyLoaded ? formatPrice(15) : "$15"}<span className="text-lg text-gray-400">/mo</span></div>
             <div className="text-gray-500 text-sm mb-5">We manage it for you</div>
             <ul className="space-y-2 mb-6">
               {["Everything in Setup", "Monthly product updates", "WhatsApp broadcast messages", "Sales performance report", "Priority support", "Promo graphics included"].map((f, i) => (
