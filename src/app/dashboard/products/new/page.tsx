@@ -306,10 +306,10 @@ export default function AddProductPage() {
             <div>
               <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Price ({currencySymbol})</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-display font-bold text-gray-400">{currencySymbol}</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-gray-400 text-sm whitespace-nowrap">{currencySymbol}</span>
                 <input type="number" value={price} onChange={e => setPrice(e.target.value)}
                   placeholder="0" min="0"
-                  className="w-full bg-white border-2 border-gray-200 rounded-xl pl-8 pr-4 py-3 text-lg font-display font-bold text-brand-dark focus:border-brand-green outline-none" />
+                  className="w-full bg-white border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3 text-lg font-display font-bold text-brand-dark focus:border-brand-green outline-none" />
               </div>
               {state === 'ready' && price && (
                 <p className="text-xs text-gray-400 mt-1">💡 {pid ? 'AI suggest dis price — you fit change am' : 'AI suggested this price — you can adjust it'}</p>
@@ -322,10 +322,10 @@ export default function AddProductPage() {
                 Cost Price <span className="text-gray-400 font-normal normal-case">(optional — for profit tracking)</span>
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-display font-bold text-gray-400">{currencySymbol}</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-gray-400 text-sm whitespace-nowrap">{currencySymbol}</span>
                 <input type="number" value={costPrice} onChange={e => setCostPrice(e.target.value)} min="0"
                   placeholder="0"
-                  className="w-full bg-white border-2 border-gray-200 rounded-xl pl-8 pr-4 py-3 text-sm font-bold text-brand-dark focus:border-brand-green outline-none" />
+                  className="w-full bg-white border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3 text-sm font-bold text-brand-dark focus:border-brand-green outline-none" />
               </div>
               {costPrice && price && parseFloat(price) > 0 && (
                 <p className="text-xs text-brand-green mt-1 font-semibold">
