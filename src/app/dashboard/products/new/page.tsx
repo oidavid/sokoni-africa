@@ -16,7 +16,6 @@ interface Merchant {
   slug: string
 }
 
-
 const CURRENCY_BY_COUNTRY: Record<string, {symbol: string; name: string}> = {
   NG: {symbol: '₦', name: 'NGN'}, GH: {symbol: 'GH₵', name: 'GHS'},
   KE: {symbol: 'KSh', name: 'KES'}, ZA: {symbol: 'R', name: 'ZAR'},
@@ -27,6 +26,15 @@ const CURRENCY_BY_COUNTRY: Record<string, {symbol: string; name: string}> = {
   ET: {symbol: 'Br', name: 'ETB'}, SN: {symbol: 'CFA', name: 'XOF'},
   CI: {symbol: 'CFA', name: 'XOF'}, CM: {symbol: 'FCFA', name: 'XAF'},
   CA: {symbol: 'C$', name: 'CAD'}, AU: {symbol: 'A$', name: 'AUD'},
+}
+
+// Dynamic left padding so long symbols (TSh, KSh, FCFA) never overlap the number
+function getPricePadding(symbol: string): string {
+  const len = symbol.length
+  if (len <= 1) return 'pl-8'
+  if (len === 2) return 'pl-10'
+  if (len === 3) return 'pl-12'
+  return 'pl-16' // 4+ chars e.g. FCFA
 }
 
 export default function AddProductPage() {
@@ -81,7 +89,6 @@ export default function AddProductPage() {
       const base64 = reader.result as string
       setPhoto(base64)
       setState('generating')
-      // Upload image to storage in background
       const currentMerchant = merchantRef.current || merchant
       if (currentMerchant) {
         setUploadingImage(true)
@@ -105,12 +112,9 @@ export default function AddProductPage() {
           })
         })
         const data = await res.json()
-
         if (data.name) setName(data.name)
         if (data.description) setDescription(data.description)
-        if (data.suggestedPrice?.min) {
-          setPrice(String(data.suggestedPrice.min))
-        }
+        if (data.suggestedPrice?.min) setPrice(String(data.suggestedPrice.min))
         if (data.error) setAiError(data.error)
       } catch {
         setAiError('AI unavailable — please fill in the details manually')
@@ -173,6 +177,7 @@ export default function AddProductPage() {
   }
 
   const pid = merchant?.language === 'pid'
+  const pricePadding = getPricePadding(currencySymbol)
 
   return (
     <div className="min-h-screen bg-gray-50 max-w-lg mx-auto">
@@ -200,7 +205,7 @@ export default function AddProductPage() {
             <div className="flex gap-3">
               <button onClick={resetForm}
                 className="flex-1 bg-brand-green text-white font-bold py-3 rounded-2xl text-sm">
-                {pid ? 'Add Another' : 'Add Another'}
+                Add Another
               </button>
               <Link href={`/store/${merchant?.slug}`} target="_blank"
                 className="flex-1 bg-white border border-gray-200 text-brand-green font-bold py-3 rounded-2xl text-center text-sm">
@@ -215,9 +220,7 @@ export default function AddProductPage() {
           <>
             {/* Photo upload */}
             <div>
-              <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">
-                {pid ? 'Product Photo' : 'Product Photo'}
-              </p>
+              <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Product Photo</p>
               <input ref={fileRef} type="file" accept="image/*" capture="environment"
                 className="hidden" onChange={handlePhoto} />
 
@@ -230,9 +233,7 @@ export default function AddProductPage() {
                     <Camera size={24} className="text-gray-400 group-hover:text-brand-green" />
                   </div>
                   <div className="text-center">
-                    <p className="font-semibold text-gray-600 text-sm">
-                      {pid ? 'Take photo or upload' : 'Take photo or upload'}
-                    </p>
+                    <p className="font-semibold text-gray-600 text-sm">Take photo or upload</p>
                     <p className="text-xs text-gray-400">
                       {pid ? 'AI go write the description for you ✨' : 'AI will write the description for you ✨'}
                     </p>
@@ -274,7 +275,7 @@ export default function AddProductPage() {
               </div>
             )}
 
-            {/* AI error — non-blocking */}
+            {/* AI error */}
             {aiError && (
               <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 flex items-center gap-2.5">
                 <AlertCircle size={16} className="text-amber-500 shrink-0" />
@@ -284,11 +285,9 @@ export default function AddProductPage() {
 
             {/* Product Name */}
             <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">
-                {pid ? 'Product Name' : 'Product Name'}
-              </label>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Product Name</label>
               <input type="text" value={name} onChange={e => setName(e.target.value)}
-                placeholder={pid ? "e.g. Ankara Print Fabric (6 yards)" : "e.g. Ankara Print Fabric (6 yards)"}
+                placeholder="e.g. Ankara Print Fabric (6 yards)"
                 className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm font-semibold text-gray-800 focus:border-brand-green outline-none" />
             </div>
 
@@ -298,21 +297,27 @@ export default function AddProductPage() {
                 Description {state === 'ready' && !aiError && name && <span className="text-brand-green ml-1 normal-case">✨ AI-generated</span>}
               </label>
               <textarea value={description} onChange={e => setDescription(e.target.value)}
-                placeholder={pid ? "Describe your product..." : "Describe your product..."} rows={4}
+                placeholder="Describe your product..." rows={4}
                 className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 focus:border-brand-green outline-none resize-none" />
             </div>
 
             {/* Price */}
             <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Price ({currencySymbol})</label>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">
+                Price ({currencySymbol})
+              </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-gray-400 text-sm whitespace-nowrap">{currencySymbol}</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-gray-400 text-sm whitespace-nowrap">
+                  {currencySymbol}
+                </span>
                 <input type="number" value={price} onChange={e => setPrice(e.target.value)}
                   placeholder="0" min="0"
-                  className="w-full bg-white border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3 text-lg font-display font-bold text-brand-dark focus:border-brand-green outline-none" />
+                  className={`w-full bg-white border-2 border-gray-200 rounded-xl ${pricePadding} pr-4 py-3 text-lg font-display font-bold text-brand-dark focus:border-brand-green outline-none`} />
               </div>
               {state === 'ready' && price && (
-                <p className="text-xs text-gray-400 mt-1">💡 {pid ? 'AI suggest dis price — you fit change am' : 'AI suggested this price — you can adjust it'}</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  💡 {pid ? 'AI suggest dis price — you fit change am' : 'AI suggested this price — you can adjust it'}
+                </p>
               )}
             </div>
 
@@ -322,10 +327,12 @@ export default function AddProductPage() {
                 Cost Price <span className="text-gray-400 font-normal normal-case">(optional — for profit tracking)</span>
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-gray-400 text-sm whitespace-nowrap">{currencySymbol}</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-gray-400 text-sm whitespace-nowrap">
+                  {currencySymbol}
+                </span>
                 <input type="number" value={costPrice} onChange={e => setCostPrice(e.target.value)} min="0"
                   placeholder="0"
-                  className="w-full bg-white border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3 text-sm font-bold text-brand-dark focus:border-brand-green outline-none" />
+                  className={`w-full bg-white border-2 border-gray-200 rounded-xl ${pricePadding} pr-4 py-3 text-sm font-bold text-brand-dark focus:border-brand-green outline-none`} />
               </div>
               {costPrice && price && parseFloat(price) > 0 && (
                 <p className="text-xs text-brand-green mt-1 font-semibold">
@@ -358,7 +365,7 @@ export default function AddProductPage() {
               )}
             </div>
 
-            {/* Product tip - replaces variants */}
+            {/* Product tip */}
             <div className="bg-brand-light border border-brand-green/20 rounded-xl p-4">
               <p className="text-xs font-semibold text-brand-green mb-1">💡 Selling in different sizes or colors?</p>
               <p className="text-xs text-gray-600">Add each size as a separate product. For example: <span className="font-semibold">"Rice 2kg"</span>, <span className="font-semibold">"Rice 5kg"</span>, <span className="font-semibold">"Rice 10kg"</span> — each with its own photo and price.</p>
@@ -367,11 +374,9 @@ export default function AddProductPage() {
             {/* In Stock toggle */}
             <div className="flex items-center justify-between bg-white border border-gray-100 rounded-xl p-4">
               <div>
-                <div className="font-semibold text-gray-800 text-sm">{pid ? 'In Stock' : 'In Stock'}</div>
+                <div className="font-semibold text-gray-800 text-sm">In Stock</div>
                 <div className="text-xs text-gray-500">
-                  {inStock
-                    ? (pid ? 'Available to order' : 'Available to order')
-                    : (pid ? 'Not available' : 'Not available')}
+                  {inStock ? 'Available to order' : 'Not available'}
                 </div>
               </div>
               <button onClick={() => setInStock(!inStock)}
@@ -393,8 +398,8 @@ export default function AddProductPage() {
               className="w-full bg-brand-green text-white font-bold py-4 rounded-2xl hover:bg-brand-dark 
                          transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
               {state === 'saving'
-                ? <><Loader2 size={18} className="animate-spin" /> {pid ? 'Saving...' : 'Saving...'}</>
-                : <><Check size={18} /> {pid ? 'Add to Store' : 'Add to Store'}</>
+                ? <><Loader2 size={18} className="animate-spin" /> Saving...</>
+                : <><Check size={18} /> Add to Store</>
               }
             </button>
           </>
