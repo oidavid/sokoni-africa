@@ -204,12 +204,12 @@ export default function OnboardingPage() {
       setStep('email')
     } else if (step === 'email') {
       if (!email.trim() || !email.includes('@')) { setError(pid ? 'Abeg enter valid email' : 'Please enter a valid email'); return }
-      // Check for duplicate email
+      // Check for duplicate email - show inline error, don't redirect
       const { data: existing } = await supabase.from('merchants').select('id, slug').eq('email', email.toLowerCase()).maybeSingle()
       if (existing) {
-        setAlreadyExists(true)
-        setStoreSlug(existing.slug)
-        setStep('done')
+        setError(pid 
+          ? 'This email don already dey. Go login instead.' 
+          : 'This email already has a store. Please sign in instead.')
         return
       }
       setStep('password')
