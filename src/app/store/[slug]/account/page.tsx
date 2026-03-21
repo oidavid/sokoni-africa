@@ -30,6 +30,7 @@ export default function CustomerAccountPage() {
   const [customer, setCustomer] = useState<Customer | null>(null)
   const [orders, setOrders] = useState<Order[]>([])
   const [points, setPoints] = useState<Points | null>(null)
+  const [transactions, setTransactions] = useState<Array<{id: string; created_at: string; points: number; type: string; note: string}>>([])
   const [merchant, setMerchant] = useState<{ id: string; business_name: string; theme_color: string } | null>(null)
   const [tab, setTab] = useState<'orders' | 'points'>('orders')
   const [loading, setLoading] = useState(true)
@@ -54,8 +55,14 @@ export default function CustomerAccountPage() {
 
       // Load points
       const { data: pts } = await supabase.from('customer_points')
-        .select('points, lifetime_points').eq('customer_id', c.id).eq('merchant_id', m.id).single()
+        .select('points, lifetime_points').eq('customer_id', c.id).eq('merchant_id', m.id).maybeSingle()
       setPoints(pts)
+      // Load transactions
+      const { data: txns } = await supabase.from('points_transactions')
+        .select('id, created_at, points, type, note')
+        .eq('customer_id', c.id).eq('merchant_id', m.id)
+        .order('created_at', { ascending: false }).limit(20)
+      setTransactions(txns || [])
       setLoading(false)
     }
     load()
@@ -179,22 +186,54 @@ export default function CustomerAccountPage() {
         )}
 
         {tab === 'points' && (
-          <div className="px-4 pb-8">
-            <div className="bg-white rounded-2xl p-4 mb-4">
-              <div className="flex items-center gap-3 mb-4">
+          <div className="px-4 pb-8 space-y-3">
+            <div className="bg-white rounded-2xl p-4">
+              <div className="flex items-center gap-3 mb-3">
                 <Star size={24} className="text-yellow-400" fill="currentColor" />
                 <div>
                   <p className="font-display font-bold text-2xl text-brand-dark">{(points?.points || 0).toLocaleString()} pts</p>
-                  <p className="text-xs text-gray-500">Available to redeem</p>
+                  <p className="text-xs text-gray-500">Available to redeem at checkout</p>
                 </div>
               </div>
-              <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-600">
-                <p className="font-semibold mb-1">How to earn points:</p>
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div className="bg-brand-light rounded-xl p-3 text-center">
+                  <p className="font-display font-bold text-lg text-brand-green">{(points?.lifetime_points || 0).toLocaleString()}</p>
+                  <p className="text-xs text-gray-500">Lifetime earned</p>
+                </div>
+                <div className="bg-amber-50 rounded-xl p-3 text-center">
+                  <p className="font-display font-bold text-lg text-amber-600">₦{(points?.points || 0).toLocaleString()}</p>
+                  <p className="text-xs text-gray-500">Discount value</p>
+                </div>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-600 space-y-1">
+                <p className="font-semibold">How it works:</p>
                 <p>• Earn 1 point for every ₦100 you spend</p>
-                <p>• Points are added after each order</p>
-                <p>• Contact the store to redeem your points</p>
+                <p>• Points credited after order is delivered</p>
+                <p>• 1 point = ₦1 discount at checkout</p>
+                <p>• Apply points when placing your next order</p>
               </div>
             </div>
+
+            {transactions.length > 0 && (
+              <div className="bg-white rounded-2xl overflow-hidden">
+                <div className="px-4 py-3 border-b border-gray-50">
+                  <p className="font-semibold text-gray-800 text-sm">Transaction History</p>
+                </div>
+                <div className="divide-y divide-gray-50">
+                  {transactions.map(t => (
+                    <div key={t.id} className="px-4 py-3 flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-gray-700 font-medium">{t.note}</p>
+                        <p className="text-xs text-gray-400">{new Date(t.created_at).toLocaleDateString()}</p>
+                      </div>
+                      <span className={`font-bold text-sm ${t.type === 'earn' ? 'text-brand-green' : 'text-red-500'}`}>
+                        {t.type === 'earn' ? '+' : '-'}{Math.abs(t.points)} pts
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

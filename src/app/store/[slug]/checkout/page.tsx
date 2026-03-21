@@ -68,6 +68,9 @@ function CheckoutForm() {
   const [showWaCountryPicker, setShowWaCountryPicker] = useState(false)
   const [waError, setWaError] = useState('')
   const [payingOnline, setPayingOnline] = useState(false)
+  const [customerPoints, setCustomerPoints] = useState(0)
+  const [applyPoints, setApplyPoints] = useState(false)
+  const [pointsDiscount, setPointsDiscount] = useState(0)
 
   useEffect(() => {
     async function load() {
@@ -116,10 +119,14 @@ function CheckoutForm() {
       }
       // Pre-fill customer details if logged in
       const storedCustomer = typeof window !== 'undefined' ? localStorage.getItem(`earket_customer_${slug}`) : null
-      if (storedCustomer) {
+      if (storedCustomer && merchant) {
         const c = JSON.parse(storedCustomer)
         if (c.name) setName(c.name)
         if (c.phone) setPhone(c.phone)
+        // Load points balance
+        const { data: pts } = await supabase.from('customer_points')
+          .select('points').eq('customer_id', c.id).eq('merchant_id', merchant.id).maybeSingle()
+        if (pts?.points) setCustomerPoints(pts.points)
       }
 
       setLoading(false)
@@ -127,7 +134,8 @@ function CheckoutForm() {
     load()
   }, [slug, searchParams])
 
-  const subtotal = cart.reduce((sum, i) => sum + i.product.price * i.qty, 0)
+  const rawSubtotal = cart.reduce((sum, i) => sum + i.product.price * i.qty, 0)
+  const subtotal = Math.max(0, rawSubtotal - (applyPoints ? pointsDiscount : 0))
 
   function validate() {
     const errs: Record<string, string> = {}
@@ -172,7 +180,7 @@ function CheckoutForm() {
       subtotal,
       status: 'new',
       source: 'web',
-      notes: `${fulfillment === 'pickup' ? 'PICKUP ORDER. ' : ''}${notes}`,
+      notes: `${fulfillment === 'pickup' ? 'PICKUP ORDER. ' : ''}${applyPoints && pointsDiscount > 0 ? `[Points discount: -₦${(pointsDiscount/100).toLocaleString()}] ` : ''}${notes}`,
       customer_id: (() => {
         try {
           const c = localStorage.getItem(`earket_customer_${slug}`)
@@ -190,7 +198,28 @@ function CheckoutForm() {
     const waWindow = window.open(`https://wa.me/${store.whatsapp_number?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank')
     // Auto-close WhatsApp tab after 3 seconds if opened
     if (waWindow) setTimeout(() => waWindow.close(), 3000)
-    // Points awarded on delivery — not here
+    // Deduct redeemed points if applied
+    if (applyPoints && pointsDiscount > 0) {
+      try {
+        const storedCustomer = localStorage.getItem(`earket_customer_${slug}`)
+        if (storedCustomer && store) {
+          const customer = JSON.parse(storedCustomer)
+          const pointsUsed = Math.ceil(pointsDiscount / 100)
+          const { data: existing } = await supabase.from('customer_points')
+            .select('id, points').eq('customer_id', customer.id).eq('merchant_id', store.id).maybeSingle()
+          if (existing) {
+            await supabase.from('customer_points').update({
+              points: Math.max(0, existing.points - pointsUsed)
+            }).eq('id', existing.id)
+            await supabase.from('points_transactions').insert({
+              customer_id: customer.id, merchant_id: store.id,
+              points: -pointsUsed, type: 'redeem',
+              note: `Redeemed at checkout for ₦${(pointsDiscount/100).toLocaleString()} discount`
+            })
+          }
+        }
+      } catch (e) { console.error('Points deduction error:', e) }
+    }
     clearCart(slug)
     setSubmitting(false)
     setSubmitted(true)
@@ -406,6 +435,40 @@ function CheckoutForm() {
             ? <><Loader2 size={18} className="animate-spin" /> Placing Order...</>
             : <><Check size={18} /> Place Order · {formatNaira(subtotal)}</>}
         </button>
+
+        {/* Points Redemption */}
+        {customerPoints > 0 && (
+          <div className={`rounded-2xl border-2 p-4 transition-all ${applyPoints ? 'border-amber-400 bg-amber-50' : 'border-gray-200 bg-white'}`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">⭐</span>
+                <div>
+                  <p className="font-semibold text-gray-800 text-sm">Use Loyalty Points</p>
+                  <p className="text-xs text-gray-500">You have <span className="font-bold text-amber-600">{customerPoints} pts</span> available</p>
+                </div>
+              </div>
+              <button onClick={() => {
+                const discount = Math.min(customerPoints * 100, rawSubtotal) // 1pt = ₦1 (100 kobo)
+                setPointsDiscount(discount)
+                setApplyPoints(!applyPoints)
+              }} className={`relative w-12 h-6 rounded-full transition-colors ${applyPoints ? 'bg-amber-400' : 'bg-gray-200'}`}>
+                <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${applyPoints ? 'translate-x-6' : 'translate-x-0.5'}`} />
+              </button>
+            </div>
+            {applyPoints && (
+              <div className="mt-3 pt-3 border-t border-amber-200">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Points discount</span>
+                  <span className="font-bold text-amber-600">- ₦{(pointsDiscount/100).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm mt-1">
+                  <span className="font-semibold text-gray-800">New total</span>
+                  <span className="font-display font-bold text-brand-green">₦{(subtotal/100).toLocaleString()}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Pay Online with Paystack */}
         <button onClick={async () => {
