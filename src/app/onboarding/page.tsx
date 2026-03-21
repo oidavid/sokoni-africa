@@ -191,6 +191,7 @@ export default function OnboardingPage() {
     setError('')
     if (step === 'business') {
       if (!businessName.trim()) { setError(pid ? 'Abeg enter your business name' : 'Please enter your business name'); return }
+      // Check for duplicate business name in same location (checked after location is set, skip here)
       setStep('whatsapp')
     } else if (step === 'whatsapp') {
       const digits = whatsappRaw.replace(/\D/g, '')
@@ -208,8 +209,8 @@ export default function OnboardingPage() {
       const { data: existing } = await supabase.from('merchants').select('id, slug').eq('email', email.toLowerCase()).maybeSingle()
       if (existing) {
         setError(pid 
-          ? 'This email don already dey. Go login instead.' 
-          : 'This email already has a store. Please sign in instead.')
+          ? 'This email don already dey. Abeg use another email.' 
+          : 'This email is already registered. Please enter a different email address.')
         return
       }
       setStep('password')
@@ -220,6 +221,16 @@ export default function OnboardingPage() {
       setStep('location')
     } else if (step === 'location') {
       if (!location) { setError(pid ? 'Abeg select your city' : 'Please select or enter your city'); return }
+      // Check for duplicate business name in same city
+      const { data: dupName } = await supabase.from('merchants')
+        .select('id').ilike('business_name', businessName.trim()).ilike('location', location).maybeSingle()
+      if (dupName) {
+        setError(pid
+          ? `"${businessName}" don already exist for ${location}. Abeg choose different name.`
+          : `"${businessName}" already exists in ${location}. Please choose a different business name.`)
+        setStep('business')
+        return
+      }
       setSelectedProducts(new Set(getSampleProducts(category).map((_, i) => i)))
       setStep('products')
     } else if (step === 'products') {
@@ -412,7 +423,7 @@ export default function OnboardingPage() {
               </p>
               <div className="grid grid-cols-3 gap-2">
                 {(COUNTRY_LIST.find(c => c.dial === selectedCountry.dial)?.cities || ['Lagos', 'Abuja', 'Port Harcourt', 'Kano', 'Ibadan', 'Benin City', 'Other']).concat(['Other']).filter((v, i, a) => a.indexOf(v) === i).map(loc => (
-                  <button key={loc} onClick={() => { setLocation(loc === 'Other' ? '' : loc); if (loc === 'Other') setCustomCity('') }}
+                  <button key={loc} onMouseDown={e => e.preventDefault()} onClick={() => { setLocation(loc === 'Other' ? '' : loc); if (loc === 'Other') setCustomCity('') }}
                     className={`py-2.5 px-3 rounded-xl border-2 text-xs font-semibold transition-all ${
                       (loc === 'Other' ? location === '' : location === loc) ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600 hover:border-brand-green/50'
                     }`}>
@@ -423,7 +434,6 @@ export default function OnboardingPage() {
               {location === '' && (
                 <input type="text" value={customCity} autoFocus
                   onChange={e => { setCustomCity(e.target.value); setLocation(e.target.value) }}
-                  onBlur={e => { if (!e.target.value) {} }} 
                   placeholder="Type your city or town"
                   className="mt-3 w-full border-2 border-brand-green rounded-xl px-4 py-3 text-sm focus:outline-none" />
               )}
