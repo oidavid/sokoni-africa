@@ -192,7 +192,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
     setTimeout(() => setAddedId(null), 1500)
   }
 
-  function removeItem(id: string, name?: string) { setCart(prev => { const newCart = prev.filter(i => !(i.product.id === id && (!name || i.product.name === name))); saveCartItem(newCart); return newCart }) } function updateQty(id: string, qty: number, name?: string) {
+  function updateQty(id: string, qty: number, name?: string) {
     setCart(prev => {
       const newCart = qty <= 0
         ? prev.filter(i => !(i.product.id === id && (!name || i.product.name === name)))
@@ -726,21 +726,14 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                     {product.in_stock ? (
                       <div className="space-y-1.5">
                         {useCart && (
-                          !product.in_stock ? (
-                            <div className="w-full text-center text-xs font-semibold py-2 rounded-xl bg-gray-100 text-gray-400">
-                              Out of Stock
-                            </div>
-                          ) :
                           <button onClick={() => addToCart(product)}
-                              style={addedId === product.id ? {} : { backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') }}
-                              className={`w-full text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
-                                addedId === product.id ? 'bg-green-500 text-white' : ''
-                              }`}>
-                              {addedId === product.id ? '✓ Added!' : <><ShoppingCart size={12} /> {store.business_type === 'services' ? 'Book Now' : 'Add to Cart'}</>}
-                            </button>
-                          )
+                            style={addedId === product.id ? {} : { backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') }}
+                            className={`w-full text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
+                              addedId === product.id ? 'bg-green-500 text-white' : ''
+                            }`}>
+                            {addedId === product.id ? '✓ Added!' : <><ShoppingCart size={12} /> {store.business_type === 'services' ? 'Book Now' : 'Add to Cart'}</>}
+                          </button>
                         )}
-
                       </div>
                     ) : (
                       <button disabled className="w-full bg-gray-100 text-gray-400 text-xs font-semibold py-2 rounded-xl cursor-not-allowed">
