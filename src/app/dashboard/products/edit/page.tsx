@@ -312,47 +312,10 @@ function EditProductForm() {
           )}
         </div>
 
-        {/* Variants */}
-        <div className="bg-white border border-gray-100 rounded-xl p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="font-semibold text-gray-800 text-sm">Product Variants</div>
-              <div className="text-xs text-gray-500">Different sizes, weights, colors etc.</div>
-            </div>
-            <button onClick={() => {
-              setShowVariants(!showVariants)
-              if (!showVariants && variants.length === 0) {
-                setVariants([{ id: Date.now().toString(), name: '', price: '', stock: '' }])
-              }
-            }}
-              className={`w-12 h-6 rounded-full transition-colors relative ${showVariants ? 'bg-brand-green' : 'bg-gray-200'}`}>
-              <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all ${showVariants ? 'left-6' : 'left-0.5'}`} />
-            </button>
-          </div>
-          {showVariants && (
-            <div className="space-y-2">
-              <p className="text-xs text-gray-400">e.g. Small / Medium / Large or 500g / 1kg / 2kg</p>
-              {variants.map((v, i) => (
-                <div key={v.id} className="flex gap-2 items-center">
-                  <input type="text" placeholder="e.g. Small" value={v.name}
-                    onChange={e => setVariants(prev => prev.map((x, j) => j === i ? {...x, name: e.target.value} : x))}
-                    className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none focus:border-brand-green" />
-                  <input type="number" placeholder="Price ₦" value={v.price}
-                    onChange={e => setVariants(prev => prev.map((x, j) => j === i ? {...x, price: e.target.value} : x))}
-                    className="w-24 border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none focus:border-brand-green" />
-                  <input type="number" placeholder="Qty" value={v.stock}
-                    onChange={e => setVariants(prev => prev.map((x, j) => j === i ? {...x, stock: e.target.value} : x))}
-                    className="w-16 border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none focus:border-brand-green" />
-                  <button onClick={() => setVariants(prev => prev.filter((_, j) => j !== i))}
-                    className="w-7 h-7 bg-red-50 rounded-xl flex items-center justify-center shrink-0 text-red-400 text-sm">×</button>
-                </div>
-              ))}
-              <button onClick={() => setVariants(prev => [...prev, { id: Date.now().toString(), name: '', price: '', stock: '' }])}
-                className="w-full border border-dashed border-gray-200 rounded-xl py-2 text-xs text-brand-green font-semibold hover:border-brand-green">
-                + Add Variant
-              </button>
-            </div>
-          )}
+        {/* Product tip */}
+        <div className="bg-brand-light border border-brand-green/20 rounded-xl p-4">
+          <p className="text-xs font-semibold text-brand-green mb-1">💡 Selling in different sizes or colors?</p>
+          <p className="text-xs text-gray-600">Add each size as a separate product. For example: <span className="font-semibold">"Rice 2kg"</span>, <span className="font-semibold">"Rice 5kg"</span>, <span className="font-semibold">"Rice 10kg"</span> — each with its own photo and price.</p>
         </div>
 
         {/* In Stock */}
