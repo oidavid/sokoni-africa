@@ -165,6 +165,12 @@ function CheckoutForm() {
       status: 'new',
       source: 'web',
       notes: `${fulfillment === 'pickup' ? 'PICKUP ORDER. ' : ''}${notes}`,
+      customer_id: (() => {
+        try {
+          const c = localStorage.getItem(`earket_customer_${slug}`)
+          return c ? JSON.parse(c).id : null
+        } catch { return null }
+      })(),
     })
     const itemLines = cart.map(i => `• ${i.product.name} x${i.qty} — ${i.product.price_display || formatNaira(i.product.price)}`).join('\n')
     const rawP = phone.replace(/\D/g, '')
@@ -176,6 +182,17 @@ function CheckoutForm() {
     const waWindow = window.open(`https://wa.me/${store.whatsapp_number?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank')
     // Auto-close WhatsApp tab after 3 seconds if opened
     if (waWindow) setTimeout(() => waWindow.close(), 3000)
+    // Award loyalty points if customer is logged in
+    try {
+      const storedCustomer = localStorage.getItem(`earket_customer_${slug}`)
+      if (storedCustomer && store) {
+        const customer = JSON.parse(storedCustomer)
+        await fetch('/api/customer/points', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customer_id: customer.id, merchant_id: store.id, subtotal })
+        })
+      }
+    } catch (e) { console.error('Points error:', e) }
     clearCart(slug)
     setSubmitting(false)
     setSubmitted(true)

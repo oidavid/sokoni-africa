@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { Search, MapPin, Share2, ShoppingCart, Plus, Minus, X, ChevronDown, SlidersHorizontal } from 'lucide-react'
+import { Search, MapPin, Share2, ShoppingCart, Plus, Minus, X, ChevronDown, SlidersHorizontal, User } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { COUNTRIES } from '@/lib/countries'
@@ -81,6 +81,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
   const [showWhatsAppForm, setShowWhatsAppForm] = useState(false)
   const [orderConfirmed, setOrderConfirmed] = useState(false)
   const [waError, setWaError] = useState('')
+  const [customer, setCustomer] = useState<{id: string; name: string} | null>(null)
   const [variantModal, setVariantModal] = useState<Product | null>(null)
   const [selectedVariantIndex, setSelectedVariantIndex] = useState<number | null>(null)
   const [modalQty, setModalQty] = useState(1)
@@ -97,6 +98,10 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
         setStore(merchant)
         const { data: prods } = await supabase.from('products').select('*').eq('merchant_id', merchant.id).order('created_at', { ascending: false })
         setProducts(prods || [])
+        // Load customer session
+        const storedCustomer = typeof window !== 'undefined' ? localStorage.getItem(`earket_customer_${params.slug}`) : null
+        if (storedCustomer) setCustomer(JSON.parse(storedCustomer))
+
         // Track store view
         fetch('/api/analytics/view', {
           method: 'POST',
@@ -159,7 +164,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
     setTimeout(() => setAddedId(null), 1500)
   }
 
-  function removeItem(id: string, name?: string) { setCart(prev => { const newCart = prev.filter(i => !(i.product.id === id && (!name || i.product.name === name))); saveCartItem(newCart); return newCart }) } function updateQty(id: string, qty: number, name?: string) {
+  function updateQty(id: string, qty: number, name?: string) {
     setCart(prev => {
       const newCart = qty <= 0
         ? prev.filter(i => !(i.product.id === id && (!name || i.product.name === name)))
