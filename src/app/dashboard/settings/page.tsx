@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Check, Loader2, ShoppingBag, Upload, Camera } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { COUNTRY_LIST } from '@/lib/countries-cities'
 import { COUNTRIES, normalizeNumber } from '@/lib/countries'
 import { uploadProductImage } from '@/lib/storage'
 
@@ -53,6 +54,8 @@ export default function SettingsPage() {
   const [description, setDescription] = useState('')
   const [address, setAddress] = useState('')
   const [location, setLocation] = useState('')
+  const [storeCountry, setStoreCountry] = useState('NG')
+  const [customCity, setCustomCity] = useState('')
   const [whatsappRaw, setWhatsappRaw] = useState('')
   const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0])
   const [showCountryPicker, setShowCountryPicker] = useState(false)
@@ -75,6 +78,7 @@ export default function SettingsPage() {
       setDescription(m.description || '')
       setAddress(m.address || '')
       setLocation(m.location || '')
+      if (m.country) setStoreCountry(m.country)
       setOrderMode(m.order_mode || 'both')
       setLoginPin(m.login_pin || '')
       setThemeColor(m.theme_color || '#1A7A4A')
@@ -112,6 +116,7 @@ export default function SettingsPage() {
         description,
         address,
         location,
+        country: storeCountry,
         whatsapp_number: normalized,
         phone: normalized,
         order_mode: orderMode,
