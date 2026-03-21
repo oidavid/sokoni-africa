@@ -145,7 +145,7 @@ export default function AddProductPage() {
       variants: showVariants && variants.length > 0 ? variants.map(v => ({
         name: v.name,
         price: Math.round(parseFloat(v.price || String(priceNum)) * 100),
-        price_display: `₦${parseFloat(v.price || String(priceNum)).toLocaleString()}`,
+        price_display: `${currencySymbol}${parseFloat(v.price || String(priceNum)).toLocaleString()}`,
         stock_qty: v.stock ? parseInt(v.stock) : null,
       })) : null,
       in_stock: inStock,
@@ -196,7 +196,7 @@ export default function AddProductPage() {
             </div>
             <h2 className="font-display font-bold text-xl text-brand-dark mb-2">Product Added! 🎉</h2>
             <p className="text-gray-500 text-sm mb-2">{name}</p>
-            <p className="text-brand-green font-bold mb-6">₦{parseFloat(price).toLocaleString()}</p>
+            <p className="text-brand-green font-bold mb-6">{currencySymbol}{parseFloat(price).toLocaleString()}</p>
             <div className="flex gap-3">
               <button onClick={resetForm}
                 className="flex-1 bg-brand-green text-white font-bold py-3 rounded-2xl text-sm">
