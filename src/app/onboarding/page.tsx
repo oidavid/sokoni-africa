@@ -187,16 +187,31 @@ export default function OnboardingPage() {
     setLoginSent('whatsapp')
   }
 
-  function handleNext() {
+  async function handleNext() {
     setError('')
     if (step === 'business') {
       if (!businessName.trim()) { setError(pid ? 'Abeg enter your business name' : 'Please enter your business name'); return }
       setStep('whatsapp')
     } else if (step === 'whatsapp') {
-      if (!whatsappRaw.trim()) { setError(pid ? 'Abeg enter your WhatsApp number' : 'Please enter your WhatsApp number'); return }
+      const digits = whatsappRaw.replace(/\D/g, '')
+      if (!digits) { setError(pid ? 'Abeg enter your WhatsApp number' : 'Please enter your WhatsApp number'); return }
+      // Minimum 9 digits for most countries (Ghana needs 9, Nigeria 10, US 10)
+      const minLen = selectedCountry.dial === '234' ? 10 : selectedCountry.dial === '1' ? 10 : selectedCountry.dial === '44' ? 10 : 9
+      if (digits.length < minLen) {
+        setError(pid ? `Enter correct ${selectedCountry.name} number (minimum ${minLen} digits)` : `Please enter a valid ${selectedCountry.name} phone number (minimum ${minLen} digits)`)
+        return
+      }
       setStep('email')
     } else if (step === 'email') {
       if (!email.trim() || !email.includes('@')) { setError(pid ? 'Abeg enter valid email' : 'Please enter a valid email'); return }
+      // Check for duplicate email
+      const { data: existing } = await supabase.from('merchants').select('id, slug').eq('email', email.toLowerCase()).maybeSingle()
+      if (existing) {
+        setAlreadyExists(true)
+        setStoreSlug(existing.slug)
+        setStep('done')
+        return
+      }
       setStep('password')
     } else if (step === 'password') {
       if (password.length < 4) { setError(pid ? 'Abeg enter at least 4 characters' : 'Password must be at least 4 characters'); return }
@@ -204,6 +219,7 @@ export default function OnboardingPage() {
     } else if (step === 'category') {
       setStep('location')
     } else if (step === 'location') {
+      if (!location) { setError(pid ? 'Abeg select your city' : 'Please select or enter your city'); return }
       setSelectedProducts(new Set(getSampleProducts(category).map((_, i) => i)))
       setStep('products')
     } else if (step === 'products') {
@@ -244,8 +260,8 @@ export default function OnboardingPage() {
               </p>
               <div className="space-y-3">
                 {([
-                  { code: 'en' as const, label: '🇬🇧 English', sub: 'Continue in English' },
-                  { code: 'pid' as const, label: '🌍 Pidgin English', sub: 'I wan use Pidgin (West Africa)' },
+                  { code: 'en' as const, label: 'English', sub: 'Continue in English' },
+                  { code: 'pid' as const, label: '🌍 Pidgin English', sub: 'I wan use Pidgin' },
                 ]).map(l => (
                   <button key={l.code} onClick={() => { setLang(l.code); setStep('business') }}
                     className="w-full flex items-center justify-between bg-white border-2 border-gray-200 hover:border-brand-green rounded-2xl p-4 transition-all group">
