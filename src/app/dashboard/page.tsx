@@ -13,6 +13,7 @@ interface Merchant {
   whatsapp_number: string
   category: string
   email: string
+  business_type?: string
 }
 
 interface Product {
@@ -26,7 +27,10 @@ interface Product {
 const CATEGORY_EMOJI: Record<string, string> = {
   fashion: '👗', food: '🍱', electronics: '📱', beauty: '💄',
   groceries: '🛒', furniture: '🪑', shoes: '👟', phones: '💻',
-  health: '💊', stationery: '📚', automobile: '🚗', other: '🏪'
+  health: '💊', stationery: '📚', automobile: '🚗', other: '🏪',
+  home_services: '🔧', auto_services: '🚗', beauty_services: '💄',
+  education: '📚', health_wellness: '🏥', domestic: '🏠',
+  events: '🎉', digital_services: '💻', transport: '🚚', agriculture: '🌱',
 }
 
 export default function DashboardPage() {
@@ -49,7 +53,6 @@ export default function DashboardPage() {
     setMerchant(m)
     const { data: prods } = await supabase.from('products').select('*').eq('merchant_id', m.id).order('created_at', { ascending: false })
     setProducts(prods || [])
-
     const { count: total } = await supabase.from('orders').select('*', { count: 'exact', head: true }).eq('merchant_id', m.id)
     const { count: newOrders } = await supabase.from('orders').select('*', { count: 'exact', head: true }).eq('merchant_id', m.id).eq('status', 'new')
     setOrderCount(total || 0)
@@ -83,6 +86,7 @@ export default function DashboardPage() {
 
   if (!merchant) return null
 
+  const isService = merchant.business_type === 'services'
   const inStockCount = products.filter(p => p.in_stock).length
   const categoryEmoji = CATEGORY_EMOJI[merchant.category] || '🏪'
   const storeUrl = typeof window !== 'undefined' ? `${window.location.origin}/store/${merchant.slug}` : ''
@@ -120,40 +124,54 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        {/* Add product CTA */}
+        {/* Add product / service CTA */}
         <Link href="/dashboard/products/new"
           className="flex items-center gap-3 bg-brand-green text-white rounded-2xl p-4 mb-5 hover:bg-brand-dark transition-colors active:scale-[0.98]">
-          <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><Plus size={20} /></div>
+          <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+            <Plus size={20} />
+          </div>
           <div>
-            <div className="font-display font-bold">Add New Product</div>
-            <div className="text-xs text-white/70">AI writes the description for you ✨</div>
+            <div className="font-display font-bold">{isService ? 'Add New Service' : 'Add New Product'}</div>
+            <div className="text-xs text-white/70">
+              {isService ? 'Add a service with description and pricing ✨' : 'AI writes the description for you ✨'}
+            </div>
           </div>
         </Link>
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3 mb-5">
           <div className="bg-white rounded-2xl p-3 border border-gray-100">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 bg-blue-50 text-blue-600"><Package size={16} /></div>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 bg-blue-50 text-blue-600">
+              <Package size={16} />
+            </div>
             <div className="font-display font-bold text-xl text-brand-dark">{products.length}</div>
-            <div className="text-xs text-gray-500">Products</div>
+            <div className="text-xs text-gray-500">{isService ? 'Services' : 'Products'}</div>
           </div>
           <div className="bg-white rounded-2xl p-3 border border-gray-100">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 bg-brand-light text-brand-green"><ShoppingBag size={16} /></div>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 bg-brand-light text-brand-green">
+              <ShoppingBag size={16} />
+            </div>
             <div className="font-display font-bold text-xl text-brand-dark">{inStockCount}</div>
-            <div className="text-xs text-gray-500">In Stock</div>
+            <div className="text-xs text-gray-500">{isService ? 'Available' : 'In Stock'}</div>
           </div>
           <Link href="/dashboard/orders" className="bg-white rounded-2xl p-3 border border-gray-100 relative hover:border-brand-green transition-colors">
-            {newOrderCount > 0 && <span className="absolute -top-1 -right-1 w-5 h-5 bg-brand-accent rounded-full text-white text-xs font-bold flex items-center justify-center">{newOrderCount}</span>}
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 bg-amber-50 text-amber-600"><ShoppingCart size={16} /></div>
+            {newOrderCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-brand-accent rounded-full text-white text-xs font-bold flex items-center justify-center">
+                {newOrderCount}
+              </span>
+            )}
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 bg-amber-50 text-amber-600">
+              <ShoppingCart size={16} />
+            </div>
             <div className="font-display font-bold text-xl text-brand-dark">{orderCount}</div>
-            <div className="text-xs text-gray-500">Orders</div>
+            <div className="text-xs text-gray-500">{isService ? 'Bookings' : 'Orders'}</div>
           </Link>
         </div>
 
         {/* Payment Setup Banner */}
-        {merchant && !(merchant as any).paystack_subaccount && (
+        {!(merchant as any).paystack_subaccount && (
           <Link href="/dashboard/payments"
-            className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-4 hover:bg-amber-100 transition-colors">
+            className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-5 hover:bg-amber-100 transition-colors">
             <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
               <CreditCard size={18} className="text-amber-600" />
             </div>
@@ -165,7 +183,7 @@ export default function DashboardPage() {
           </Link>
         )}
 
-        {/* Store link */}
+        {/* Store link + share buttons */}
         <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-5">
           <div className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Your Store</div>
           <div className="flex items-center gap-2 mb-3">
@@ -178,10 +196,7 @@ export default function DashboardPage() {
             </a>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <a href={`https://wa.me/?text=${encodeURIComponent(`🛍️ Shop at *${merchant.business_name}*!
-
-Browse and order online:
-earket.com/share/${merchant.slug}`)}`}
+            <a href={`https://wa.me/?text=${encodeURIComponent(`🛍️ Shop at *${merchant.business_name}*!\n\nBrowse and order online:\nearket.com/share/${merchant.slug}`)}`}
               target="_blank" rel="noreferrer"
               className="flex items-center justify-center gap-1.5 bg-[#25D366] text-white text-xs font-semibold py-2.5 rounded-xl">
               📲 Share on WhatsApp
@@ -199,13 +214,16 @@ earket.com/share/${merchant.slug}`)}`}
           </div>
         </div>
 
-        {/* Sample products nudge */}
-        {products.length > 0 && products.some(p => p.name.startsWith('My Product') || ['Indomie Noodles', 'Golden Penny', 'Vegetable Oil', 'Pounded Yam', 'Ankara Print', 'Plain Cotton'].some(s => p.name.startsWith(s))) && (
+        {/* Sample products nudge — products mode only */}
+        {!isService && products.length > 0 && products.some(p =>
+          p.name.startsWith('My Product') ||
+          ['Indomie Noodles', 'Golden Penny', 'Vegetable Oil', 'Pounded Yam', 'Ankara Print', 'Plain Cotton'].some(s => p.name.startsWith(s))
+        ) && (
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-5 flex items-start gap-3">
             <div className="text-xl shrink-0">📸</div>
             <div>
               <p className="font-semibold text-amber-800 text-sm">Replace sample products with yours</p>
-              <p className="text-amber-700 text-xs mt-0.5">Your store has sample products. Add your real products with your own photos for a better customer experience.</p>
+              <p className="text-amber-700 text-xs mt-0.5">Your store has sample products. Add your real products with photos for a better customer experience.</p>
               <Link href="/dashboard/products/new" className="inline-block mt-2 text-xs font-bold text-amber-800 underline">
                 Add my real products →
               </Link>
@@ -213,18 +231,20 @@ earket.com/share/${merchant.slug}`)}`}
           </div>
         )}
 
-        {/* Products list */}
+        {/* Products / Services list */}
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden mb-5">
           <div className="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
-            <h2 className="font-display font-bold text-brand-dark">Your Products</h2>
+            <h2 className="font-display font-bold text-brand-dark">
+              {isService ? 'Your Services' : 'Your Products'}
+            </h2>
             <Link href="/dashboard/products/new" className="text-xs text-brand-green font-semibold">+ Add</Link>
           </div>
           {products.length === 0 ? (
             <div className="text-center py-10 px-4">
-              <div className="text-3xl mb-2">📦</div>
-              <p className="text-gray-500 text-sm mb-1">No products yet</p>
+              <div className="text-3xl mb-2">{isService ? '🔧' : '📦'}</div>
+              <p className="text-gray-500 text-sm mb-1">{isService ? 'No services yet' : 'No products yet'}</p>
               <Link href="/dashboard/products/new" className="inline-block bg-brand-green text-white text-xs font-bold px-5 py-2.5 rounded-xl mt-2">
-                Add First Product
+                {isService ? 'Add First Service' : 'Add First Product'}
               </Link>
             </div>
           ) : (
@@ -239,7 +259,9 @@ earket.com/share/${merchant.slug}`)}`}
                     <span className="font-medium text-brand-green">{formatPrice(product)}</span>
                     <span>·</span>
                     <span className={product.in_stock ? 'text-green-500' : 'text-red-400'}>
-                      {product.in_stock ? 'In Stock' : 'Out of Stock'}
+                      {isService
+                        ? (product.in_stock ? 'Available' : 'Unavailable')
+                        : (product.in_stock ? 'In Stock' : 'Out of Stock')}
                     </span>
                   </div>
                 </div>
@@ -256,25 +278,29 @@ earket.com/share/${merchant.slug}`)}`}
         <div className="bg-[#075E54] text-white rounded-2xl p-4 flex items-center gap-3">
           <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-xl">💬</div>
           <div className="flex-1 min-w-0">
-            <div className="font-display font-bold text-sm">WhatsApp Orders</div>
+            <div className="font-display font-bold text-sm">
+              WhatsApp {isService ? 'Bookings' : 'Orders'}
+            </div>
             <div className="text-xs text-white/70 truncate">+{merchant.whatsapp_number}</div>
           </div>
           <a href={`https://wa.me/${merchant.whatsapp_number?.replace(/\D/g, '')}`} target="_blank" rel="noreferrer"
-            className="text-xs bg-[#25D366] px-3 py-1.5 rounded-xl font-semibold shrink-0">Open</a>
+            className="text-xs bg-[#25D366] px-3 py-1.5 rounded-xl font-semibold shrink-0">
+            Open
+          </a>
         </div>
       </div>
 
       {/* Bottom nav */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex max-w-lg mx-auto">
         {[
-          { icon: TrendingUp, label: 'Dashboard', href: '/dashboard', active: true },
-          { icon: Package, label: 'Products', href: '/dashboard/products/new', active: false },
-          { icon: ShoppingCart, label: 'Orders', href: '/dashboard/orders', active: false },
-          { icon: BarChart2, label: 'Analytics', href: '/dashboard/analytics', active: false },
-          { icon: Settings, label: 'Settings', href: '/dashboard/settings', active: false },
+          { icon: TrendingUp, label: 'Dashboard', href: '/dashboard' },
+          { icon: Package, label: isService ? 'Services' : 'Products', href: '/dashboard/products/new' },
+          { icon: ShoppingCart, label: isService ? 'Bookings' : 'Orders', href: '/dashboard/orders' },
+          { icon: BarChart2, label: 'Analytics', href: '/dashboard/analytics' },
+          { icon: Settings, label: 'Settings', href: '/dashboard/settings' },
         ].map((item, i) => (
           <Link key={i} href={item.href}
-            className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors ${item.active ? 'text-brand-green' : 'text-gray-400'}`}>
+            className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors ${i === 0 ? 'text-brand-green' : 'text-gray-400'}`}>
             <item.icon size={20} />
             {item.label}
           </Link>
