@@ -172,6 +172,7 @@ export default function OnboardingPage() {
           email,
           phone: normalizedWa,
           language: lang,
+          business_type: businessType || 'products',
           plan: 'free',
           is_active: true,
           login_pin: password,
@@ -231,7 +232,7 @@ export default function OnboardingPage() {
       setStep('password')
     } else if (step === 'password') {
       if (password.length < 4) { setError(pid ? 'Abeg enter at least 4 characters' : 'Password must be at least 4 characters'); return }
-      setStep('category')
+      setStep('biztype')
     } else if (step === 'biztype') {
       if (!businessType) { setError('Please select your business type'); return }
       setStep('category')
@@ -251,6 +252,11 @@ export default function OnboardingPage() {
         setStep('business')
         return
       }
+      // Service businesses skip the product picker
+      if (businessType === 'services') {
+        handleGenerate()
+        return
+      }
       setSelectedProducts(new Set(getSampleProducts(category).map((_, i) => i)))
       setStep('products')
     } else if (step === 'products') {
@@ -258,7 +264,9 @@ export default function OnboardingPage() {
     }
   }
 
-  const stepsList = ['business', 'whatsapp', 'email', 'password', 'biztype', 'category', 'location', 'products']
+  const stepsList = businessType === 'services'
+    ? ['business', 'whatsapp', 'email', 'password', 'biztype', 'category', 'location']
+    : ['business', 'whatsapp', 'email', 'password', 'biztype', 'category', 'location', 'products']
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-brand-light to-white flex flex-col">
@@ -447,10 +455,12 @@ export default function OnboardingPage() {
           {step === 'category' && (
             <div className="animate-fade-in">
               <h2 className="font-display text-xl font-bold text-brand-dark mb-6">
-                {pid ? 'Wetin you dey sell?' : 'What do you sell?'}
+                {businessType === 'services'
+                  ? (pid ? 'Wetin service you dey offer?' : 'What type of service do you offer?')
+                  : (pid ? 'Wetin you dey sell?' : 'What do you sell?')}
               </h2>
               <div className="grid grid-cols-2 gap-2">
-                {CATEGORIES.map(cat => (
+                {(businessType === 'services' ? SERVICE_CATEGORIES : CATEGORIES).map(cat => (
                   <button key={cat.id} onClick={() => setCategory(cat.id)}
                     className={`flex items-center gap-2 p-3 rounded-2xl border-2 text-left transition-all ${
                       category === cat.id ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600 hover:border-brand-green/50'
