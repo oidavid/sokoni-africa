@@ -292,10 +292,10 @@ export default function OnboardingPage() {
                 <ShoppingBag size={28} className="text-white" />
               </div>
               <h1 className="font-display text-2xl font-bold text-brand-dark mb-2">
-                {pid ? 'Make we build your shop' : "Let's build your store"}
+                Let's build your business
               </h1>
               <p className="text-gray-500 text-sm mb-8">
-                {pid ? 'Answer small questions. Your shop go dey live for minutes.' : 'Answer a few quick questions. Your store will be live in minutes.'}
+                Answer a few quick questions. Your page will be live in minutes.
               </p>
               <div className="space-y-3">
                 {([
