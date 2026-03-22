@@ -258,7 +258,7 @@ export default function OnboardingPage() {
         handleGenerate()
         return
       }
-      setSelectedProducts(new Set((businessType === 'services' ? getSampleServices(category) : getSampleProducts(category)).map((_, i) => i)))
+      setSelectedProducts(new Set(getSampleProducts(category).map((_, i) => i)))
       setStep('products')
     } else if (step === 'products') {
       handleGenerate()
