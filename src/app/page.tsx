@@ -7,35 +7,66 @@ import {
 } from 'lucide-react'
 
 const freeFeatures = [
-  "Your own store link (earket.com/yourstore)",
-  "Unlimited products",
-  "WhatsApp order button on every product",
-  "AI writes your product descriptions",
+  "Your own business link (earket.com/yourbusiness)",
+  "Unlimited products & services",
+  "WhatsApp order & booking button",
+  "AI writes your descriptions for you",
   "Works on 2G/3G connections",
   "Accept any payment method",
-  "Order management dashboard",
+  "Order & booking management dashboard",
   "Free forever — no credit card needed",
 ]
 
 const testimonials = [
-  { name: "Tropical Market", location: "Lagos, Nigeria", text: "My customers can now see all my products online and order on WhatsApp. It completely changed how I run my business.", stars: 5 },
-  { name: "Keiko Fashions", location: "Nairobi, Kenya", text: "I set up my store in 5 minutes. Now I get orders from customers I've never met before. The WhatsApp button makes it so easy.", stars: 5 },
-  { name: "Al-Rashid Electronics", location: "Cairo, Egypt", text: "The AI wrote all my product descriptions. My store looks professional and customers trust it. Sales doubled in 2 months.", stars: 5 },
+  {
+    name: "Tropical Market",
+    location: "Lagos, Nigeria",
+    text: "My customers can now see all my products online and order on WhatsApp. It completely changed how I run my business.",
+    stars: 5,
+    type: "🛍️ Retailer",
+  },
+  {
+    name: "Keiko Hair Studio",
+    location: "Nairobi, Kenya",
+    text: "I set up my booking page in 5 minutes. Clients book straight from WhatsApp. No more missed calls or lost business.",
+    stars: 5,
+    type: "💄 Service",
+  },
+  {
+    name: "Al-Rashid Electronics",
+    location: "Cairo, Egypt",
+    text: "The AI wrote all my product descriptions. My store looks professional and customers trust it. Sales doubled in 2 months.",
+    stars: 5,
+    type: "📱 Retailer",
+  },
 ]
 
 const features = [
-  { icon: "⚡", title: "Live in 5 minutes", body: "AI builds your store for you. Just answer a few questions and your store is ready to share." },
+  { icon: "⚡", title: "Live in 5 minutes", body: "Answer a few questions and your business page is ready to share. Products or services — we set it up for you." },
   { icon: "📱", title: "Works on any phone", body: "Optimised for slow connections and basic smartphones. Built for the real world, not Silicon Valley." },
-  { icon: "💬", title: "WhatsApp orders", body: "Customers order straight from WhatsApp. No app to download. No account to create." },
+  { icon: "💬", title: "WhatsApp orders & bookings", body: "Customers order or book straight from WhatsApp. No app to download. No account to create." },
   { icon: "🆓", title: "Free forever", body: "No monthly fee. No hidden charges. No credit card. Free. Period." },
   { icon: "🌍", title: "Built for emerging markets", body: "Works in Nigeria, Kenya, Egypt, Pakistan, Indonesia and beyond. Any country, any language." },
-  { icon: "🤖", title: "AI assistant", body: "AI writes your product descriptions and handles customer enquiries automatically." },
+  { icon: "🤖", title: "AI assistant", body: "AI writes your product and service descriptions automatically. Save time, look professional." },
 ]
 
 const steps = [
-  { title: "Tell us about your business", body: "Answer 3 simple questions. Our AI does the rest." },
-  { title: "Your store goes live instantly", body: "Get a shareable link right away. Share on WhatsApp, Instagram or anywhere." },
-  { title: "Customers order on WhatsApp", body: "They message you directly. You confirm and deliver." },
+  { title: "Tell us about your business", body: "Selling products or offering services? Answer a few quick questions. Our AI does the rest." },
+  { title: "Your page goes live instantly", body: "Get a shareable link right away. Share it on WhatsApp, Instagram or anywhere." },
+  { title: "Customers reach you on WhatsApp", body: "They order or book directly. You confirm and deliver. Simple." },
+]
+
+const businessTypes = [
+  { emoji: "🍱", label: "Food & Groceries" },
+  { emoji: "👗", label: "Fashion & Clothing" },
+  { emoji: "🔧", label: "Home Repairs" },
+  { emoji: "💄", label: "Beauty & Hair" },
+  { emoji: "📱", label: "Electronics" },
+  { emoji: "🎉", label: "Events & Catering" },
+  { emoji: "🚗", label: "Auto Services" },
+  { emoji: "📚", label: "Tutoring" },
+  { emoji: "🏠", label: "Cleaning Services" },
+  { emoji: "🚚", label: "Delivery & Logistics" },
 ]
 
 export default function HomePage() {
@@ -43,7 +74,6 @@ export default function HomePage() {
   const [currency, setCurrency] = useState<{ symbol: string; rate: number; name: string; code: string }>({ symbol: '$', rate: 1, name: 'US Dollar', code: 'USD' })
   const [currencyLoaded, setCurrencyLoaded] = useState(false)
 
-  // Detect visitor currency on load
   useState(() => {
     fetch('/api/geo').then(r => r.json()).then(data => {
       if (data.currency) setCurrency(data.currency)
@@ -53,7 +83,6 @@ export default function HomePage() {
 
   function formatPrice(usd: number) {
     const raw = usd * currency.rate
-    // Round DOWN to clean numbers based on magnitude
     let rounded: number
     if (raw >= 10000) rounded = Math.floor(raw / 1000) * 1000
     else if (raw >= 1000) rounded = Math.floor(raw / 500) * 500
@@ -102,19 +131,29 @@ export default function HomePage() {
         <div className="relative max-w-5xl mx-auto px-4 pt-16 pb-20 text-center">
           <div className="inline-flex items-center gap-2 bg-brand-accent/10 text-brand-accent border border-brand-accent/20 
                           rounded-full px-4 py-1.5 text-xs font-semibold mb-6">
-            🌍 Built for Emerging Markets · Free Forever
+            🌍 For Retailers & Service Providers · Free Forever
           </div>
           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold text-brand-dark leading-tight 
                          text-balance mb-6">
             {lang === 'en'
-              ? 'Your Online Store, Ready in Minutes.'
-              : 'Carry Your Market Enter Online.'}
+              ? 'Your Business, Online in Minutes.'
+              : 'Carry Your Business Enter Online.'}
           </h1>
-          <p className="text-gray-600 text-lg sm:text-xl max-w-2xl mx-auto mb-8">
+          <p className="text-gray-600 text-lg sm:text-xl max-w-2xl mx-auto mb-4">
             {lang === 'en'
-              ? 'Build a free online store. Share it anywhere. Let customers order on WhatsApp. No tech skills needed — works on any phone, anywhere in the world.'
-              : 'Build your free shop for internet in 5 minutes. You no need know tech. E go work on any phone.'}
+              ? 'Whether you sell products or offer services — build your free business page, share it anywhere, and let customers reach you on WhatsApp.'
+              : 'Whether you dey sell things or you dey offer service — build your free page for internet in 5 minutes. E go work on any phone.'}
           </p>
+
+          {/* Two-line value prop */}
+          <div className="flex flex-wrap justify-center gap-3 mb-8 text-sm text-gray-500">
+            <span className="flex items-center gap-1.5"><span className="text-brand-green font-bold">🛍️</span> Sell products online</span>
+            <span className="text-gray-300">·</span>
+            <span className="flex items-center gap-1.5"><span className="text-brand-green font-bold">🔧</span> Offer services & bookings</span>
+            <span className="text-gray-300">·</span>
+            <span className="flex items-center gap-1.5"><span className="text-brand-green font-bold">💬</span> All via WhatsApp</span>
+          </div>
+
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/onboarding"
               className="bg-brand-green text-white font-bold text-base px-8 py-4 rounded-2xl 
@@ -124,7 +163,7 @@ export default function HomePage() {
               <ArrowRight size={18} />
             </Link>
           </div>
-          <p className="text-xs text-gray-400 mt-3">Join thousands of merchants already selling online</p>
+          <p className="text-xs text-gray-400 mt-3">Join thousands of businesses already using Earket</p>
 
           {/* Mock phone preview */}
           <div className="mt-14 flex justify-center">
@@ -159,10 +198,27 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Business types we serve */}
+      <section className="py-10 px-4 bg-white border-b border-gray-100">
+        <div className="max-w-5xl mx-auto text-center">
+          <p className="text-gray-400 text-xs font-semibold uppercase tracking-widest mb-5">Works for all business types</p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {businessTypes.map((b, i) => (
+              <span key={i} className="flex items-center gap-1.5 bg-brand-light text-brand-dark text-xs font-semibold px-3 py-1.5 rounded-full border border-brand-green/10">
+                {b.emoji} {b.label}
+              </span>
+            ))}
+            <span className="flex items-center gap-1.5 bg-gray-100 text-gray-500 text-xs font-semibold px-3 py-1.5 rounded-full">
+              + many more
+            </span>
+          </div>
+        </div>
+      </section>
+
       {/* Markets we serve */}
       <section className="py-10 px-4 bg-brand-dark">
         <div className="max-w-5xl mx-auto text-center">
-          <p className="text-white/50 text-xs font-semibold uppercase tracking-widest mb-6">Serving merchants across</p>
+          <p className="text-white/50 text-xs font-semibold uppercase tracking-widest mb-6">Serving businesses across</p>
           <div className="flex flex-wrap justify-center gap-4 text-sm font-medium text-white/70">
             {['🇳🇬 Nigeria', '🇬🇭 Ghana', '🇰🇪 Kenya', '🇿🇦 South Africa', '🇪🇬 Egypt',
               '🇵🇰 Pakistan', '🇧🇩 Bangladesh', '🇮🇩 Indonesia', '🇵🇭 Philippines', '🌍 & more'].map((m, i) => (
@@ -174,7 +230,8 @@ export default function HomePage() {
 
       {/* How it works */}
       <section className="py-16 px-4 max-w-5xl mx-auto">
-        <h2 className="font-display text-3xl font-bold text-center text-brand-dark mb-12">How it works</h2>
+        <h2 className="font-display text-3xl font-bold text-center text-brand-dark mb-3">How it works</h2>
+        <p className="text-center text-gray-400 text-sm mb-12">Same simple process — whether you sell products or offer services</p>
         <div className="grid sm:grid-cols-3 gap-6">
           {steps.map((step, i) => (
             <div key={i} className="text-center">
@@ -202,7 +259,7 @@ export default function HomePage() {
             Everything you need. Nothing you don't.
           </h2>
           <p className="text-center text-white/50 text-sm mb-12 max-w-xl mx-auto">
-            Designed for merchants in emerging markets where internet is slow, phones are basic, and WhatsApp is how business gets done.
+            Built for businesses in emerging markets — where internet is slow, phones are basic, and WhatsApp is how business gets done.
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {features.map((f, i) => (
@@ -233,7 +290,7 @@ export default function HomePage() {
               Most Popular
             </div>
             <div className="text-3xl font-display font-bold text-brand-dark mb-1">Free</div>
-            <div className="text-gray-500 text-sm mb-5">For every merchant</div>
+            <div className="text-gray-500 text-sm mb-5">For every business</div>
             <ul className="space-y-2 mb-6">
               {freeFeatures.map((f, i) => (
                 <li key={i} className="flex items-start gap-2 text-xs text-gray-600">
@@ -253,7 +310,7 @@ export default function HomePage() {
             <div className="text-3xl font-display font-bold text-brand-dark mb-1">{currencyLoaded ? formatPrice(25) : "$25"}</div>
             <div className="text-gray-500 text-sm mb-5">We build it for you</div>
             <ul className="space-y-2 mb-6">
-              {["Professional store setup", "We photograph your products", "AI-written descriptions", "WhatsApp bot configured", "Payment setup", "Training session"].map((f, i) => (
+              {["Professional page setup", "We photograph your products/services", "AI-written descriptions", "WhatsApp bot configured", "Payment setup", "Training session"].map((f, i) => (
                 <li key={i} className="flex items-start gap-2 text-xs text-gray-600">
                   <Check size={14} className="text-brand-accent mt-0.5 shrink-0" />
                   {f}
@@ -271,7 +328,7 @@ export default function HomePage() {
             <div className="text-3xl font-display font-bold text-brand-dark mb-1">{currencyLoaded ? formatPrice(15) : "$15"}<span className="text-lg text-gray-400">/mo</span></div>
             <div className="text-gray-500 text-sm mb-5">We manage it for you</div>
             <ul className="space-y-2 mb-6">
-              {["Everything in Setup", "Monthly product updates", "WhatsApp broadcast messages", "Sales performance report", "Priority support", "Promo graphics included"].map((f, i) => (
+              {["Everything in Setup", "Monthly product/service updates", "WhatsApp broadcast messages", "Performance report", "Priority support", "Promo graphics included"].map((f, i) => (
                 <li key={i} className="flex items-start gap-2 text-xs text-gray-600">
                   <Check size={14} className="text-gray-400 mt-0.5 shrink-0" />
                   {f}
@@ -289,12 +346,16 @@ export default function HomePage() {
       {/* Testimonials */}
       <section className="py-16 px-4 bg-brand-light">
         <div className="max-w-5xl mx-auto">
-          <h2 className="font-display text-3xl font-bold text-center text-brand-dark mb-12">Merchants love Earket</h2>
+          <h2 className="font-display text-3xl font-bold text-center text-brand-dark mb-3">Businesses love Earket</h2>
+          <p className="text-center text-gray-500 text-sm mb-12">Retailers and service providers across Africa and beyond</p>
           <div className="grid sm:grid-cols-3 gap-6">
             {testimonials.map((t, i) => (
               <div key={i} className="bg-white rounded-2xl p-5 shadow-sm">
-                <div className="flex gap-0.5 mb-3">
-                  {[...Array(t.stars)].map((_, j) => <Star key={j} size={14} className="text-brand-accent fill-brand-accent" />)}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex gap-0.5">
+                    {[...Array(t.stars)].map((_, j) => <Star key={j} size={14} className="text-brand-accent fill-brand-accent" />)}
+                  </div>
+                  <span className="text-xs text-gray-400 font-medium bg-gray-50 px-2 py-0.5 rounded-full">{t.type}</span>
                 </div>
                 <p className="text-gray-600 text-sm mb-4 italic">"{t.text}"</p>
                 <div>
@@ -312,7 +373,8 @@ export default function HomePage() {
         <h2 className="font-display text-3xl sm:text-4xl font-bold text-white mb-4">
           Ready to take your business online?
         </h2>
-        <p className="text-brand-light mb-8 text-lg">Free forever. Live in 5 minutes. No tech skills needed.</p>
+        <p className="text-brand-light mb-2 text-lg">Free forever. Live in 5 minutes. No tech skills needed.</p>
+        <p className="text-white/60 text-sm mb-8">Retailers, service providers, tradespeople — everyone welcome.</p>
         <Link href="/onboarding"
           className="inline-flex items-center gap-2 bg-white text-brand-green font-bold text-lg 
                      px-10 py-4 rounded-2xl hover:bg-brand-light transition-colors active:scale-95 
@@ -331,7 +393,7 @@ export default function HomePage() {
           </div>
           <span className="font-display font-bold text-brand-dark text-sm">Earket</span>
         </div>
-        <p className="mb-3">© 2025 Earket. Free online stores for emerging market merchants.</p>
+        <p className="mb-3">© 2025 Earket. Free online business pages for emerging market entrepreneurs.</p>
         <div className="flex justify-center gap-4">
           <Link href="/privacy" className="hover:text-brand-green">Privacy</Link>
           <Link href="/terms" className="hover:text-brand-green">Terms</Link>
