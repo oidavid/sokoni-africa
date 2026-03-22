@@ -4,6 +4,7 @@ import { ArrowRight, ArrowLeft, Loader2, Check, ShoppingBag, Mail, MessageCircle
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { getSampleProducts } from '@/lib/sample-products'
+import { getSampleServices } from '@/lib/sample-services'
 import { COUNTRIES, normalizeNumber } from '@/lib/countries'
 import { COUNTRY_LIST } from '@/lib/countries-cities'
 
@@ -82,7 +83,7 @@ export default function OnboardingPage() {
   const [showOtherCity, setShowOtherCity] = useState(false)
 
   const pid = lang === 'pid'
-  const rawSampleProducts = category ? getSampleProducts(category) : []
+  const rawSampleItems = category ? (businessType === 'services' ? getSampleServices(category) : getSampleProducts(category)) : []
   // Get currency for selected country
   const countryCurrencyMap: Record<string, {symbol: string; rate: number}> = {
     '234': {symbol: '₦', rate: 1}, '233': {symbol: 'GH₵', rate: 0.0094},
@@ -96,7 +97,7 @@ export default function OnboardingPage() {
     '221': {symbol: 'CFA', rate: 0.37}, '237': {symbol: 'FCFA', rate: 0.37},
   }
   const selectedCurrency = countryCurrencyMap[selectedCountry.dial] || {symbol: '$', rate: 0.00061}
-  const sampleProducts = rawSampleProducts.map(p => {
+  const sampleProducts = rawSampleItems.map(p => {
     if (selectedCurrency.symbol === '₦') return p
     const converted = Math.round(p.price * selectedCurrency.rate)
     // Round to clean number
@@ -257,7 +258,7 @@ export default function OnboardingPage() {
         handleGenerate()
         return
       }
-      setSelectedProducts(new Set(getSampleProducts(category).map((_, i) => i)))
+      setSelectedProducts(new Set((businessType === 'services' ? getSampleServices(category) : getSampleProducts(category)).map((_, i) => i)))
       setStep('products')
     } else if (step === 'products') {
       handleGenerate()
@@ -397,7 +398,7 @@ export default function OnboardingPage() {
                 {pid ? 'Set your password' : 'Set your password'}
               </h2>
               <p className="text-gray-500 text-sm mb-6">
-                {pid ? 'You go use this to login anytime' : 'You will use this to log in to your store anytime'}
+                {pid ? 'You go use this to login anytime' : 'You will use this to log in to your dashboard anytime'}
               </p>
               <div className="relative">
                 <Lock size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -408,6 +409,7 @@ export default function OnboardingPage() {
                   onChange={e => { setPassword(e.target.value); setError('') }}
                   onKeyDown={e => e.key === 'Enter' && handleNext()}
                   autoFocus
+                  autoComplete="new-password"
                   className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl pl-10 pr-12 py-4 text-brand-dark font-semibold text-lg outline-none transition-colors"
                 />
                 <button onClick={() => setShowPassword(!showPassword)}
@@ -425,7 +427,7 @@ export default function OnboardingPage() {
           {step === 'biztype' && (
             <div className="animate-fade-in">
               <h2 className="font-display text-xl font-bold text-brand-dark mb-2">
-                {pid ? 'Wetin you dey do?' : 'What type of business?'}
+                {pid ? 'Wetin you dey do?' : 'Choose your business type'}
               </h2>
               <p className="text-gray-500 text-sm mb-6">
                 {pid ? 'You dey sell things or you dey offer service?' : 'Are you selling products or offering a service?'}
@@ -512,10 +514,10 @@ export default function OnboardingPage() {
           {step === 'products' && (
             <div className="animate-fade-in">
               <h2 className="font-display text-xl font-bold text-brand-dark mb-1">
-                {pid ? 'Pick your starter products' : 'Pick your starter products'}
+                {businessType === 'services' ? 'Pick your starter services' : (pid ? 'Pick your starter products' : 'Pick your starter products')}
               </h2>
               <p className="text-gray-500 text-sm mb-4">
-                {pid ? 'Select products wey you want add. You fit edit them later.' : 'Select products to add. You can edit or replace them later.'}
+                {businessType === 'services' ? 'Select services to add to your page. You can edit them later.' : (pid ? 'Select products wey you want add. You fit edit them later.' : 'Select products to add. You can edit or replace them later.')}
               </p>
               <div className="flex gap-2 mb-3">
                 <button onClick={() => setSelectedProducts(new Set(sampleProducts.map((_, i) => i)))}
@@ -587,10 +589,10 @@ export default function OnboardingPage() {
                 </div>
               )}
               <h2 className="font-display text-2xl font-bold text-brand-dark mb-2">
-                {alreadyExists ? (pid ? 'Your shop dey here! 👋' : 'Welcome back! 👋') : (pid ? 'Your shop don go live! 🎉' : 'Your store is live! 🎉')}
+                {alreadyExists ? (pid ? 'Your shop dey here! 👋' : 'Welcome back! 👋') : (pid ? 'Your shop don go live! 🎉' : 'Your business is live! 🎉')}
               </h2>
               <div className="bg-brand-light border-2 border-brand-green/20 rounded-2xl p-4 mb-6">
-                <p className="text-xs text-gray-500 mb-1">{pid ? 'Your shop link:' : 'Your store link:'}</p>
+                <p className="text-xs text-gray-500 mb-1">{pid ? 'Your shop link:' : 'Your business link:'}</p>
                 <p className="font-display font-bold text-brand-green text-sm">earket.com/store/{storeSlug}</p>
               </div>
               {!loginSent ? (
@@ -627,9 +629,9 @@ export default function OnboardingPage() {
               )}
               <Link href={`/store/${storeSlug}`}
                 className="block w-full bg-brand-green text-white font-bold py-3 rounded-2xl hover:bg-brand-dark transition-colors mb-2 text-sm">
-                {pid ? 'See My Shop' : 'View My Store'}
+                {pid ? 'See My Shop' : 'View My Business'}
               </Link>
-              <a href={`https://wa.me/?text=${encodeURIComponent('Check out my store: https://earket.com/store/' + storeSlug)}`}
+              <a href={`https://wa.me/?text=${encodeURIComponent('Check out my business page: https://earket.com/store/' + storeSlug)}`}
                 target="_blank" rel="noreferrer" className="btn-whatsapp w-full justify-center">
                 📲 {pid ? 'Share for WhatsApp' : 'Share on WhatsApp'}
               </a>
