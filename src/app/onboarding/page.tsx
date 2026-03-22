@@ -4,7 +4,7 @@ import { ArrowRight, ArrowLeft, Loader2, Check, ShoppingBag, Mail, MessageCircle
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { getSampleProducts } from '@/lib/sample-products'
-import { getSampleServices } from '@/lib/sample-services'
+import { getSampleServices, getSampleServicesBySubcategory } from '@/lib/sample-services'
 import { COUNTRIES, normalizeNumber } from '@/lib/countries'
 import { COUNTRY_LIST } from '@/lib/countries-cities'
 
@@ -335,18 +335,39 @@ export default function OnboardingPage() {
   function getFilteredServices() {
     const allServices = getSampleServices(category)
     if (selectedSubcategories.size === 0 && customServices.length === 0) return allServices
-    const keywords: string[] = []
-    selectedSubcategories.forEach(id => { keywords.push(...(SUBCATEGORY_SERVICE_MAP[id] || [])) })
-    const filtered = allServices.filter(s => keywords.some(kw => s.name.toLowerCase().includes(kw.toLowerCase())))
+
+    // Use subcategory-specific service libraries first (richer, more targeted)
+    const subcatServices: typeof allServices = []
+    selectedSubcategories.forEach(id => {
+      const specific = getSampleServicesBySubcategory(id)
+      if (specific.length > 0) {
+        subcatServices.push(...specific)
+      } else {
+        // Fallback: keyword filter from category library
+        const keywords = SUBCATEGORY_SERVICE_MAP[id] || []
+        allServices.filter(s => keywords.some(kw => s.name.toLowerCase().includes(kw.toLowerCase())))
+          .forEach(s => subcatServices.push(s))
+      }
+    })
+
+    // Remove duplicates by name
+    const seen = new Set<string>()
+    const deduped = subcatServices.filter(s => {
+      if (seen.has(s.name)) return false
+      seen.add(s.name)
+      return true
+    })
+
     const customEntries = customServices.map(name => ({
       name,
-      description: `Professional ${name.toLowerCase()} service. Contact us via WhatsApp to book your appointment.`,
+      description: `Professional ${name} service. Contact us via WhatsApp to book your appointment.`,
       price: 500000,
-      price_display: `₦5,000`,
+      price_display: '₦5,000',
       in_stock: true,
-      image_url: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=400&q=80',
+      image_url: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&q=80',
     }))
-    return [...(filtered.length > 0 ? filtered : allServices.slice(0, 5)), ...customEntries]
+
+    return [...(deduped.length > 0 ? deduped : allServices.slice(0, 5)), ...customEntries]
   }
 
   async function handleGenerate() {
