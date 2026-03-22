@@ -181,9 +181,22 @@ export default function OnboardingPage() {
         .select('id')
         .single()
 
-      if (!insertError && newMerchant && selectedProducts.size > 0) {
-        const chosen = sampleProducts.filter((_, i) => selectedProducts.has(i)).map(p => ({ ...p, merchant_id: newMerchant.id }))
-        await supabase.from('products').insert(chosen)
+      if (!insertError && newMerchant) {
+        if (businessType === 'services') {
+          // Auto-insert all sample services for this category
+          const serviceItems = getSampleServices(category).map(s => {
+            if (selectedCurrency.symbol === '₦') return { ...s, merchant_id: newMerchant.id }
+            const converted = Math.round(s.price * selectedCurrency.rate)
+            const rounded = converted >= 1000 ? Math.floor(converted/500)*500 :
+                            converted >= 100 ? Math.floor(converted/50)*50 :
+                            Math.floor(converted/5)*5 || 1
+            return { ...s, price: rounded, price_display: `${selectedCurrency.symbol}${rounded.toLocaleString()}`, merchant_id: newMerchant.id }
+          })
+          if (serviceItems.length > 0) await supabase.from('products').insert(serviceItems)
+        } else if (selectedProducts.size > 0) {
+          const chosen = sampleProducts.filter((_, i) => selectedProducts.has(i)).map(p => ({ ...p, merchant_id: newMerchant.id }))
+          await supabase.from('products').insert(chosen)
+        }
       }
       setStoreSlug(slug)
     } catch (e) {
