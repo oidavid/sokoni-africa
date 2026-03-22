@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { COUNTRIES } from '@/lib/countries'
 import { getCart, saveCart, addToCart as addToLocalCart, clearCart, type CartItem as LocalCartItem } from '@/lib/cart'
-import ServiceStorefrontPage from '@/app/store/[slug]/service-page'
+import ServiceStorefrontPage from '@/components/ServiceStorefrontPage'
 
 interface Merchant {
   id: string
