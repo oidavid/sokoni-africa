@@ -167,15 +167,35 @@ export default function DashboardPage() {
 
         {/* Store link */}
         <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-5">
-          <div className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Your Store Link</div>
-          <div className="flex items-center gap-2">
+          <div className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Your Store</div>
+          <div className="flex items-center gap-2 mb-3">
             <div className="flex-1 bg-brand-light rounded-xl px-3 py-2.5 text-xs font-medium text-brand-green truncate">
               earket.com/store/{merchant.slug}
             </div>
-            <a href={`https://wa.me/?text=${encodeURIComponent('Check out my store: ' + storeUrl)}`}
-              target="_blank" rel="noreferrer" className="btn-whatsapp shrink-0 py-2.5 text-xs">
-              📲 Share
+            <a href={storeUrl} target="_blank" rel="noreferrer"
+              className="shrink-0 bg-brand-green text-white text-xs font-semibold px-3 py-2.5 rounded-xl">
+              Visit
             </a>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <a href={`https://wa.me/?text=${encodeURIComponent(`🛍️ Shop at *${merchant.business_name}*!
+
+Browse and order online:
+earket.com/share/${merchant.slug}`)}`}
+              target="_blank" rel="noreferrer"
+              className="flex items-center justify-center gap-1.5 bg-[#25D366] text-white text-xs font-semibold py-2.5 rounded-xl">
+              📲 Share on WhatsApp
+            </a>
+            <a href={`https://earket.com/share/${merchant.slug}`} target="_blank" rel="noreferrer"
+              className="flex items-center justify-center gap-1.5 bg-brand-light text-brand-green text-xs font-semibold py-2.5 rounded-xl border border-brand-green/20">
+              🔗 Share Page
+            </a>
+          </div>
+          <div className="mt-2">
+            <Link href="/dashboard/broadcast"
+              className="w-full flex items-center justify-center gap-1.5 bg-gray-50 text-gray-600 text-xs font-semibold py-2.5 rounded-xl border border-gray-200">
+              📢 Broadcast to Customers
+            </Link>
           </div>
         </div>
 
