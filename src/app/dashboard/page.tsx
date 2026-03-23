@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ShoppingBag, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil, ShoppingCart, TrendingUp, BarChart2, CreditCard } from 'lucide-react'
+import { ShoppingBag, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil, ShoppingCart, TrendingUp, BarChart2, CreditCard, Sparkles } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 interface Merchant {
@@ -41,6 +41,8 @@ export default function DashboardPage() {
   const [refreshing, setRefreshing] = useState(false)
   const [orderCount, setOrderCount] = useState(0)
   const [newOrderCount, setNewOrderCount] = useState(0)
+  const [refreshingServices, setRefreshingServices] = useState(false)
+  const [refreshDone, setRefreshDone] = useState(false)
 
   const loadData = useCallback(async (showRefresh = false) => {
     if (showRefresh) setRefreshing(true)
@@ -66,6 +68,27 @@ export default function DashboardPage() {
   async function handleLogout() {
     await supabase.auth.signOut()
     router.push('/')
+  }
+
+  async function refreshServices() {
+    if (!merchant || refreshingServices) return
+    setRefreshingServices(true)
+    try {
+      // Delete existing sample/placeholder services
+      await supabase.from('products').delete().eq('merchant_id', merchant.id)
+      // Fetch fresh services based on category
+      const res = await fetch('/api/services/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ merchant_id: merchant.id, category: merchant.category })
+      })
+      await loadData(true)
+      setRefreshDone(true)
+      setTimeout(() => setRefreshDone(false), 4000)
+    } catch (e) {
+      console.error('Refresh error:', e)
+    }
+    setRefreshingServices(false)
   }
 
   function formatPrice(p: Product) {
@@ -212,6 +235,16 @@ export default function DashboardPage() {
               📢 Broadcast to Customers
             </Link>
           </div>
+          {isService && (
+            <div className="mt-2">
+              <button onClick={refreshServices} disabled={refreshingServices}
+                className="w-full flex items-center justify-center gap-1.5 bg-brand-light text-brand-green text-xs font-semibold py-2.5 rounded-xl border border-brand-green/20 disabled:opacity-50">
+                {refreshingServices ? <RefreshCw size={13} className="animate-spin" /> : <Sparkles size={13} />}
+                {refreshDone ? '✅ Services refreshed!' : refreshingServices ? 'Refreshing services...' : 'Refresh My Services'}
+              </button>
+              <p className="text-xs text-gray-400 text-center mt-1">Replace all services with fresh AI-selected ones</p>
+            </div>
+          )}
         </div>
 
         {/* Sample products nudge — products mode only */}
