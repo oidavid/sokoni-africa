@@ -9,7 +9,7 @@ import { COUNTRIES, normalizeNumber } from '@/lib/countries'
 import { COUNTRY_LIST } from '@/lib/countries-cities'
 import { EARKET_THEMES, getThemeStyle, type EarketTheme } from '@/lib/themes'
 
-type Step = 'language' | 'business' | 'whatsapp' | 'email' | 'password' | 'biztype' | 'category' | 'subcategory' | 'location' | 'theme' | 'products' | 'generating' | 'done'
+type Step = 'language' | 'business' | 'whatsapp' | 'email' | 'password' | 'biztype' | 'category' | 'subcategory' | 'location' | 'theme' | 'preview' | 'products' | 'generating' | 'done'
 
 const CATEGORIES = [
   { id: 'food', label: 'Food & Drinks', emoji: '🍱', pidgin: 'Food & Drink' },
@@ -295,7 +295,8 @@ export default function OnboardingPage() {
     subcategory: 'category',
     location: businessType === 'services' ? 'subcategory' : 'category',
     theme: 'location',
-    products: 'theme',
+    preview: 'theme',
+    products: 'preview',
   }
 
   function toggleProduct(i: number) {
@@ -337,40 +338,61 @@ export default function OnboardingPage() {
 
   function getFilteredServices() {
     const allServices = getSampleServices(category)
-    if (selectedSubcategories.size === 0 && customServices.length === 0) return allServices
 
-    // Use subcategory-specific service libraries first (richer, more targeted)
-    const subcatServices: typeof allServices = []
-    selectedSubcategories.forEach(id => {
-      const specific = getSampleServicesBySubcategory(id)
-      if (specific.length > 0) {
-        subcatServices.push(...specific)
-      } else {
-        // Fallback: keyword filter from category library
-        const keywords = SUBCATEGORY_SERVICE_MAP[id] || []
-        allServices.filter(s => keywords.some(kw => s.name.toLowerCase().includes(kw.toLowerCase())))
-          .forEach(s => subcatServices.push(s))
-      }
-    })
-
-    // Remove duplicates by name
-    const seen = new Set<string>()
-    const deduped = subcatServices.filter(s => {
-      if (seen.has(s.name)) return false
-      seen.add(s.name)
-      return true
-    })
-
+    // Build custom entries first so we can dedup against them too
     const customEntries = customServices.map(name => ({
       name,
       description: `Professional ${name} service. Contact us via WhatsApp to book your appointment.`,
       price: 500000,
       price_display: '₦5,000',
       in_stock: true,
-      image_url: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&q=80',
+      image_url: getCustomServiceImage(name),
     }))
 
-    return [...(deduped.length > 0 ? deduped : allServices.slice(0, 5)), ...customEntries]
+    if (selectedSubcategories.size === 0 && customServices.length === 0) {
+      return allServices.slice(0, 8) // cap at 8 for a clean page
+    }
+
+    // Pull from subcategory-specific libraries — take max 5 per subcategory
+    const subcatServices: typeof allServices = []
+    selectedSubcategories.forEach(id => {
+      const specific = getSampleServicesBySubcategory(id)
+      if (specific.length > 0) {
+        subcatServices.push(...specific.slice(0, 5))
+      } else {
+        // Fallback: keyword filter from category library
+        const keywords = SUBCATEGORY_SERVICE_MAP[id] || []
+        allServices
+          .filter(s => keywords.some(kw => s.name.toLowerCase().includes(kw.toLowerCase())))
+          .slice(0, 5)
+          .forEach(s => subcatServices.push(s))
+      }
+    })
+
+    // Strict dedup by normalised name
+    const seen = new Set<string>()
+    const deduped = subcatServices.filter(s => {
+      const key = s.name.toLowerCase().replace(/[^a-z0-9]/g, '')
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+
+    // Combine: subcategory services + custom entries, cap at 12 total
+    const combined = [...(deduped.length > 0 ? deduped : allServices.slice(0, 6)), ...customEntries]
+    return combined.slice(0, 12)
+  }
+
+  function getCustomServiceImage(name: string): string {
+    const n = name.toLowerCase()
+    if (n.includes('wax') || n.includes('brazilian') || n.includes('bikini')) return 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80'
+    if (n.includes('massage') || n.includes('tissue') || n.includes('stone')) return 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&q=80'
+    if (n.includes('facial') || n.includes('skin') || n.includes('glow')) return 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80'
+    if (n.includes('nail') || n.includes('manicure') || n.includes('pedicure')) return 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&q=80'
+    if (n.includes('hair') || n.includes('braid') || n.includes('wig')) return 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80'
+    if (n.includes('makeup') || n.includes('lash') || n.includes('brow')) return 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=400&q=80'
+    if (n.includes('barber') || n.includes('cut') || n.includes('shave')) return 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&q=80'
+    return 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&q=80'
   }
 
   async function handleGenerate() {
@@ -463,20 +485,21 @@ export default function OnboardingPage() {
       // Always go to theme selection after location
       setStep('theme')
     } else if (step === 'theme') {
-      if (businessType === 'services') {
-        handleGenerate()
-        return
+      // Always preview before generating
+      if (businessType !== 'services') {
+        setSelectedProducts(new Set(getSampleProducts(category).map((_, i) => i)))
       }
-      setSelectedProducts(new Set(getSampleProducts(category).map((_, i) => i)))
-      setStep('products')
+      setStep('preview')
+    } else if (step === 'preview') {
+      handleGenerate()
     } else if (step === 'products') {
       handleGenerate()
     }
   }
 
   const stepsList = businessType === 'services'
-    ? ['business', 'whatsapp', 'email', 'password', 'biztype', 'category', 'subcategory', 'location', 'theme']
-    : ['business', 'whatsapp', 'email', 'password', 'biztype', 'category', 'location', 'theme', 'products']
+    ? ['business', 'whatsapp', 'email', 'password', 'biztype', 'category', 'subcategory', 'location', 'theme', 'preview']
+    : ['business', 'whatsapp', 'email', 'password', 'biztype', 'category', 'location', 'theme', 'preview', 'products']
 
   const currentSubcats = SERVICE_SUBCATEGORIES[category] || []
   const totalSelected = selectedSubcategories.size + customServices.length
@@ -665,7 +688,7 @@ export default function OnboardingPage() {
                 {pid ? 'Tick all wey apply. You fit add your own too.' : 'Tick everything that applies. Add your own below.'}
               </p>
 
-              <div className="space-y-2 max-h-52 overflow-y-auto pr-1 mb-4">
+              <div className="space-y-2 max-h-56 overflow-y-auto pr-1 mb-4 rounded-xl border border-gray-100 p-2 bg-gray-50/50">
                 {currentSubcats.map(sub => (
                   <button key={sub.id} onClick={() => toggleSubcategory(sub.id)}
                     className={`w-full flex items-center gap-3 rounded-xl border-2 px-3 py-2.5 text-left transition-all ${selectedSubcategories.has(sub.id) ? 'border-brand-green bg-brand-light' : 'border-gray-200 bg-white hover:border-brand-green/40'}`}>
@@ -682,6 +705,11 @@ export default function OnboardingPage() {
                 ))}
               </div>
 
+              {(SERVICE_SUBCATEGORIES[category] || []).length > 4 && (
+                <p className="text-xs text-gray-400 text-center -mt-2 mb-3 flex items-center justify-center gap-1">
+                  <span>↕</span> Scroll to see all options
+                </p>
+              )}
               {customServices.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-3">
                   {customServices.map(s => (
@@ -804,6 +832,77 @@ export default function OnboardingPage() {
                   <span className="text-xs text-gray-400">Can be changed in Settings</span>
                 </div>
               </div>
+            </div>
+          )}
+
+
+          {/* Preview before publish */}
+          {step === 'preview' && (
+            <div className="animate-fade-in">
+              <h2 className="font-display text-xl font-bold text-brand-dark mb-1">
+                {pid ? 'See wetin your page go look like' : "Here's your business page preview"}
+              </h2>
+              <p className="text-gray-500 text-sm mb-4">
+                {pid ? 'E go look like dis. You fit change everything later.' : 'This is how customers will see your page. You can edit everything after publishing.'}
+              </p>
+
+              {/* Mini store preview card */}
+              <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-md mb-4">
+                {/* Hero preview */}
+                <div className="h-24 flex items-center px-4 gap-3 relative overflow-hidden" style={getThemeStyle(selectedTheme)}>
+                  <div className="absolute inset-0 opacity-20" style={{
+                    backgroundImage: 'radial-gradient(circle at 30% 50%, white 1px, transparent 1px)',
+                    backgroundSize: '20px 20px'
+                  }} />
+                  <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shrink-0 shadow-lg relative z-10">💼</div>
+                  <div className="relative z-10">
+                    <p className="font-display font-bold text-base leading-tight" style={{ color: selectedTheme.textOnPrimary }}>{businessName}</p>
+                    <p className="text-xs opacity-70 mt-0.5" style={{ color: selectedTheme.textOnPrimary }}>{location} · {selectedTheme.name} theme</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <div className="w-1.5 h-1.5 bg-green-300 rounded-full animate-pulse" />
+                      <span className="text-xs opacity-80" style={{ color: selectedTheme.textOnPrimary }}>Open for bookings</span>
+                    </div>
+                  </div>
+                </div>
+                {/* Services preview */}
+                <div className="bg-white p-3">
+                  <p className="text-xs font-semibold text-gray-500 mb-2">
+                    {businessType === 'services'
+                      ? `${getFilteredServices().length} services will be added`
+                      : `${selectedProducts.size} products selected`}
+                  </p>
+                  <div className="space-y-1.5">
+                    {(businessType === 'services' ? getFilteredServices().slice(0, 3) : sampleProducts.filter((_, i) => selectedProducts.has(i)).slice(0, 3)).map((item, i) => (
+                      <div key={i} className="flex items-center gap-2 bg-gray-50 rounded-lg px-2.5 py-1.5">
+                        {item.image_url && <img src={item.image_url} alt="" className="w-7 h-7 rounded-lg object-cover shrink-0" />}
+                        <span className="text-xs font-medium text-gray-700 flex-1 truncate">{item.name}</span>
+                        <span className="text-xs font-bold" style={{ color: selectedTheme.primary }}>{item.price_display}</span>
+                      </div>
+                    ))}
+                    {(businessType === 'services' ? getFilteredServices() : sampleProducts.filter((_, i) => selectedProducts.has(i))).length > 3 && (
+                      <p className="text-xs text-gray-400 text-center py-1">
+                        + {(businessType === 'services' ? getFilteredServices() : sampleProducts.filter((_, i) => selectedProducts.has(i))).length - 3} more services
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Change options */}
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                <button onClick={() => setStep('theme')}
+                  className="flex items-center justify-center gap-1.5 bg-gray-50 border border-gray-200 rounded-xl py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-100">
+                  🎨 Change Theme
+                </button>
+                <button onClick={() => setStep(businessType === 'services' ? 'subcategory' : 'products')}
+                  className="flex items-center justify-center gap-1.5 bg-gray-50 border border-gray-200 rounded-xl py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-100">
+                  ✏️ Edit Services
+                </button>
+              </div>
+
+              <p className="text-xs text-gray-400 text-center mb-2">
+                📸 Images are placeholders — you can upload your own photos after publishing
+              </p>
             </div>
           )}
 
@@ -935,6 +1034,8 @@ export default function OnboardingPage() {
                   ? (totalSelected > 0
                     ? `Continue with ${totalSelected} service${totalSelected !== 1 ? 's' : ''} selected`
                     : 'Continue — add all services')
+                  : step === 'preview'
+                  ? <>🚀 {pid ? 'Publish My Business!' : 'Publish My Business!'}</>
                   : <>Continue <ArrowRight size={18} /></>
                 }
               </button>
