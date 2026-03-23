@@ -356,7 +356,7 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
             <div className="shrink-0 flex flex-col items-center">
               {store.profile_photo_url ? (
                 <div className="w-52 h-52 sm:w-60 sm:h-60 rounded-full overflow-hidden shadow-2xl ring-4"
-                  style={{ ringColor: color }}>
+                  style={{ border: `4px solid ${color}` }}>
                   <img src={store.profile_photo_url} alt={store.business_name}
                     className="w-full h-full object-cover object-top" />
                 </div>
@@ -711,4 +711,5 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
     </div>
   )
 }
+
 
