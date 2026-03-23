@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { MapPin, Share2, Phone, Star, Search, X, ChevronRight, MessageCircle, ExternalLink, CheckCircle } from 'lucide-react'
+import { MapPin, Share2, Phone, Star, Search, X, ChevronRight, MessageCircle, ExternalLink, CheckCircle, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { getThemeById, getThemeStyle } from '@/lib/themes'
@@ -161,6 +161,14 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
   const [loading, setLoading] = useState(true)
   const [selectedService, setSelectedService] = useState<Service | null>(null)
   const [search, setSearch] = useState('')
+  const [formName, setFormName] = useState('')
+  const [formEmail, setFormEmail] = useState('')
+  const [formPhone, setFormPhone] = useState('')
+  const [formService, setFormService] = useState('')
+  const [formMessage, setFormMessage] = useState('')
+  const [formSubmitting, setFormSubmitting] = useState(false)
+  const [formSubmitted, setFormSubmitted] = useState(false)
+  const [formError, setFormError] = useState('')
 
   useEffect(() => {
     async function load() {
@@ -219,6 +227,27 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
     else { navigator.clipboard.writeText(window.location.href); alert('Link copied!') }
   }
 
+  async function handleFormSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!formName.trim() || !formEmail.trim()) { setFormError('Please enter your name and email.'); return }
+    setFormSubmitting(true)
+    setFormError('')
+    try {
+      await supabase.from('leads').insert({
+        merchant_id: store.id,
+        name: formName,
+        email: formEmail,
+        phone: formPhone,
+        service_interest: formService,
+        message: formMessage,
+      })
+      setFormSubmitted(true)
+    } catch {
+      setFormError('Something went wrong. Please try WhatsApp instead.')
+    }
+    setFormSubmitting(false)
+  }
+
   return (
     <div className="min-h-screen bg-white">
 
@@ -261,23 +290,23 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             {store.logo_url
-              ? <img src={store.logo_url} alt={store.business_name} className="w-9 h-9 rounded-xl object-contain shadow-sm" />
-              : <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg font-bold text-white" style={themeStyle as React.CSSProperties}>{store.business_name[0]}</div>
+              ? <img src={store.logo_url} alt={store.business_name} className="w-12 h-12 rounded-xl object-contain shadow-sm" />
+              : <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold text-white shadow-sm" style={themeStyle as React.CSSProperties}>{store.business_name[0]}</div>
             }
             <div>
-              <p className="font-display font-bold text-sm text-gray-900 leading-tight">{store.business_name}</p>
-              <p className="text-xs text-gray-400">{categoryLabel}</p>
+              <p className="font-display font-bold text-base text-gray-900 leading-tight">{store.business_name}</p>
+              <p className="text-xs font-medium" style={{ color }}>{categoryLabel}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(bookMsg)}`}
               target="_blank" rel="noreferrer"
-              className="flex items-center gap-1.5 text-xs font-bold px-4 py-2.5 rounded-xl text-white shadow-sm"
+              className="flex items-center gap-1.5 text-sm font-bold px-5 py-2.5 rounded-xl text-white shadow-sm"
               style={themeStyle as React.CSSProperties}>
               {WA_SVG} <span className="hidden sm:inline">Book a Free Call</span><span className="sm:hidden">Book</span>
             </a>
-            <button onClick={shareStore} className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center text-gray-500 hover:bg-gray-200">
-              <Share2 size={15} />
+            <button onClick={shareStore} className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-gray-500 hover:bg-gray-200">
+              <Share2 size={16} />
             </button>
           </div>
         </div>
@@ -327,7 +356,7 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
             <div className="shrink-0 flex flex-col items-center">
               {store.profile_photo_url ? (
                 <div className="w-52 h-52 sm:w-60 sm:h-60 rounded-full overflow-hidden shadow-2xl ring-4"
-                  style={{ outline: `4px solid ${color}40`, outlineOffset: "4px" }}>
+                  style={{ ringColor: color }}>
                   <img src={store.profile_photo_url} alt={store.business_name}
                     className="w-full h-full object-cover object-top" />
                 </div>
@@ -479,8 +508,107 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
         </div>
       </div>
 
+      {/* ── CONTACT FORM ── */}
+      <div className="py-10 px-4 bg-white border-t border-gray-100">
+        <div className="max-w-3xl mx-auto">
+          <div className="flex flex-col sm:flex-row gap-8">
+            {/* Form */}
+            <div className="flex-1 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+              <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color }}>Get in Touch</p>
+              <h2 className="font-display font-bold text-2xl text-brand-dark mb-1">Schedule a Consultation</h2>
+              <p className="text-sm text-gray-500 mb-5">Fill in your details and we will be in touch within 24 hours.</p>
+
+              {formSubmitted ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: color + '20' }}>
+                    <CheckCircle size={32} style={{ color }} />
+                  </div>
+                  <h3 className="font-display font-bold text-xl text-brand-dark mb-2">Thank you, {formName}!</h3>
+                  <p className="text-gray-500 text-sm mb-5">Your message has been received. We will be in touch within 24 hours.</p>
+                  <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(`Hi ${store.business_name}! I just submitted a consultation request. My name is ${formName}.`)}`}
+                    target="_blank" rel="noreferrer"
+                    className="inline-flex items-center gap-2 font-bold py-3 px-6 rounded-xl text-sm"
+                    style={{ backgroundColor: color, color: contrast }}>
+                    {WA_SVG} Also message on WhatsApp
+                  </a>
+                </div>
+              ) : (
+                <form onSubmit={handleFormSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500 block mb-1">First Name *</label>
+                      <input type="text" value={formName} onChange={e => setFormName(e.target.value)}
+                        placeholder="Your name" required
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500 block mb-1">Email *</label>
+                      <input type="email" value={formEmail} onChange={e => setFormEmail(e.target.value)}
+                        placeholder="your@email.com" required
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 block mb-1">Phone / WhatsApp</label>
+                    <input type="tel" value={formPhone} onChange={e => setFormPhone(e.target.value)}
+                      placeholder="+1 234 567 8900"
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 block mb-1">I'm interested in</label>
+                    <select value={formService} onChange={e => setFormService(e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green bg-white">
+                      <option value="">Select a service...</option>
+                      {available.map(s => (
+                        <option key={s.id} value={s.name}>{s.name}</option>
+                      ))}
+                      <option value="Not sure yet">Not sure yet — I'd like to discuss</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 block mb-1">Message</label>
+                    <textarea value={formMessage} onChange={e => setFormMessage(e.target.value)}
+                      placeholder="Tell us a bit about what you're looking for..."
+                      rows={3}
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green resize-none" />
+                  </div>
+                  {formError && <p className="text-red-500 text-xs">{formError}</p>}
+                  <button type="submit" disabled={formSubmitting}
+                    className="w-full font-bold py-3.5 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2"
+                    style={{ backgroundColor: color, color: contrast }}>
+                    {formSubmitting ? <><Loader2 size={16} className="animate-spin" /> Sending...</> : 'Submit Request'}
+                  </button>
+                  <p className="text-xs text-gray-400 text-center">Or book instantly via WhatsApp below</p>
+                </form>
+              )}
+            </div>
+
+            {/* Testimonials sidebar */}
+            <div className="sm:w-72 shrink-0 space-y-4">
+              <p className="font-display font-bold text-lg text-brand-dark">What clients say</p>
+              {getPlaceholderReviews(store.category, store.location).map((r, i) => (
+                <div key={i} className="bg-gray-50 rounded-2xl p-4">
+                  <div className="flex gap-0.5 mb-2">
+                    {[1,2,3,4,5].map(j => <Star key={j} size={12} className="text-amber-400 fill-amber-400" />)}
+                  </div>
+                  <p className="text-gray-600 text-xs leading-relaxed mb-3">"{r.text}"</p>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+                      style={{ backgroundColor: color }}>{r.name[0]}</div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-800">{r.name}</p>
+                      <p className="text-xs text-gray-400">{r.role}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ── TESTIMONIALS ── */}
-      <div className="py-8" style={{ backgroundColor: color + '08' }}>
+      <div className="py-8 px-4" style={{ backgroundColor: color + '08' }}>
         <div className="max-w-3xl mx-auto px-4">
           <p className="text-xs font-semibold uppercase tracking-widest mb-1 text-center" style={{ color }}>Social Proof</p>
           <h2 className="font-display font-bold text-2xl text-brand-dark mb-1 text-center">Client Stories</h2>
@@ -583,4 +711,3 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
     </div>
   )
 }
-
