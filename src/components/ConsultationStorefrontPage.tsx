@@ -420,94 +420,6 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
         </div>
       </div>
 
-      {/* ── HOW I WORK ── */}
-      <div className="py-8" style={{ backgroundColor: color + '08' }}>
-        <div className="max-w-3xl mx-auto px-4">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1 text-center" style={{ color }}>Process</p>
-          <h2 className="font-display font-bold text-2xl text-brand-dark mb-6 text-center">How It Works</h2>
-          <div className="grid sm:grid-cols-3 gap-4">
-            {howItWorks.map((step, i) => (
-              <div key={i} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 text-center">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3"
-                  style={{ backgroundColor: color + '15' }}>
-                  {step.icon}
-                </div>
-                <div className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white mx-auto mb-2"
-                  style={{ backgroundColor: color }}>
-                  {i + 1}
-                </div>
-                <h3 className="font-display font-bold text-brand-dark text-sm mb-1">{step.title}</h3>
-                <p className="text-gray-500 text-xs leading-relaxed">{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── SERVICES — alternating image+text blocks ── */}
-      <div className="py-10 px-4 bg-white">
-        <div className="max-w-3xl mx-auto">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1 text-center" style={{ color }}>What I Offer</p>
-          <h2 className="font-display font-bold text-2xl sm:text-3xl text-brand-dark mb-2 text-center">Here's How I Can Help</h2>
-          <div className="w-12 h-1 rounded-full mx-auto mb-8" style={{ backgroundColor: color }} />
-
-          {/* Search */}
-          <div className="relative mb-8">
-            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input type="search" placeholder="Search services..." value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full bg-gray-50 rounded-2xl pl-10 pr-4 py-3 text-sm outline-none border border-gray-100 focus:border-brand-green" />
-          </div>
-
-          <div className="space-y-6">
-            {filtered.map((service, idx) => (
-              <div key={service.id}
-                className={`flex flex-col ${idx % 2 === 0 ? 'sm:flex-row' : 'sm:flex-row-reverse'} gap-0 rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all`}>
-                {/* Image */}
-                {service.image_url && (
-                  <div className="sm:w-2/5 shrink-0 overflow-hidden bg-gray-100" style={{ minHeight: '220px' }}>
-                    <img src={service.image_url} alt={service.name}
-                      className="w-full h-full object-cover" style={{ minHeight: '220px' }} loading="lazy" />
-                  </div>
-                )}
-                {/* Content */}
-                <div className="flex-1 bg-white p-6 flex flex-col justify-between">
-                  <div>
-                    <h3 className="font-display font-bold text-xl text-brand-dark mb-3">{service.name}</h3>
-                    <p className="text-gray-500 text-sm leading-relaxed mb-4">{service.description}</p>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(`Hi ${store.business_name}! I'm interested in: ${service.name}. Can we book a free call to discuss?`)}`}
-                      target="_blank" rel="noreferrer"
-                      className="flex items-center justify-center gap-2 font-bold py-3 px-5 rounded-xl text-sm"
-                      style={{ backgroundColor: color, color: contrast }}>
-                      {WA_SVG} Book a Free Call
-                    </a>
-                    <button onClick={() => setSelectedService(service)}
-                      className="flex items-center justify-center gap-1 text-sm font-semibold px-4 py-3 rounded-xl border hover:bg-gray-50"
-                      style={{ borderColor: color, color }}>
-                      More Info <ChevronRight size={14} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* CTA block */}
-          <div className="mt-10 rounded-2xl p-6 text-center" style={{ backgroundColor: color, color: contrast } as React.CSSProperties}>
-            <p className="font-display font-bold text-xl mb-2">Not sure where to start?</p>
-            <p className="text-sm mb-5 opacity-80">Book a free 30-minute discovery call. No obligation, no pressure — just a conversation about your goals.</p>
-            <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(bookMsg)}`}
-              target="_blank" rel="noreferrer"
-              className="inline-flex items-center gap-2 font-bold py-3.5 px-8 rounded-2xl text-sm bg-white shadow-lg"
-              style={{ color }}>
-              {WA_SVG} Book Your Free Call Now
-            </a>
-          </div>
-        </div>
-      </div>
-
       {/* ── CONTACT FORM ── */}
       <div className="py-10 px-4 bg-white border-t border-gray-100">
         <div className="max-w-3xl mx-auto">
@@ -607,31 +519,90 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
         </div>
       </div>
 
-      {/* ── TESTIMONIALS ── */}
-      <div className="py-8 px-4" style={{ backgroundColor: color + '08' }}>
+      {/* ── HOW I WORK ── */}
+      <div className="py-8" style={{ backgroundColor: color + '08' }}>
         <div className="max-w-3xl mx-auto px-4">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1 text-center" style={{ color }}>Social Proof</p>
-          <h2 className="font-display font-bold text-2xl text-brand-dark mb-1 text-center">Client Stories</h2>
-          <p className="text-xs text-gray-400 mb-6 text-center">Log in to your dashboard to add real client testimonials</p>
-          <div className="grid sm:grid-cols-2 gap-4">
-            {reviews.map((r, i) => (
-              <div key={i} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                <div className="flex gap-0.5 mb-3">
-                  {[1,2,3,4,5].map(j => <Star key={j} size={14} className="text-amber-400 fill-amber-400" />)}
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1 text-center" style={{ color }}>Process</p>
+          <h2 className="font-display font-bold text-2xl text-brand-dark mb-6 text-center">How It Works</h2>
+          <div className="grid sm:grid-cols-3 gap-4">
+            {howItWorks.map((step, i) => (
+              <div key={i} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 text-center">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3"
+                  style={{ backgroundColor: color + '15' }}>
+                  {step.icon}
                 </div>
-                <p className="text-gray-600 text-sm leading-relaxed mb-4">"{r.text}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white shrink-0"
-                    style={{ backgroundColor: color }}>
-                    {r.name[0]}
+                <div className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white mx-auto mb-2"
+                  style={{ backgroundColor: color }}>
+                  {i + 1}
+                </div>
+                <h3 className="font-display font-bold text-brand-dark text-sm mb-1">{step.title}</h3>
+                <p className="text-gray-500 text-xs leading-relaxed">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── SERVICES — alternating image+text blocks ── */}
+      <div className="py-10 px-4 bg-white">
+        <div className="max-w-3xl mx-auto">
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1 text-center" style={{ color }}>What I Offer</p>
+          <h2 className="font-display font-bold text-2xl sm:text-3xl text-brand-dark mb-2 text-center">Here's How I Can Help</h2>
+          <div className="w-12 h-1 rounded-full mx-auto mb-8" style={{ backgroundColor: color }} />
+
+          {/* Search */}
+          <div className="relative mb-8">
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input type="search" placeholder="Search services..." value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full bg-gray-50 rounded-2xl pl-10 pr-4 py-3 text-sm outline-none border border-gray-100 focus:border-brand-green" />
+          </div>
+
+          <div className="space-y-6">
+            {filtered.map((service, idx) => (
+              <div key={service.id}
+                className={`flex flex-col ${idx % 2 === 0 ? 'sm:flex-row' : 'sm:flex-row-reverse'} gap-0 rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all`}>
+                {/* Image */}
+                {service.image_url && (
+                  <div className="sm:w-2/5 shrink-0 overflow-hidden bg-gray-100" style={{ minHeight: '220px' }}>
+                    <img src={service.image_url} alt={service.name}
+                      className="w-full h-full object-cover" style={{ minHeight: '220px' }} loading="lazy" />
                   </div>
+                )}
+                {/* Content */}
+                <div className="flex-1 bg-white p-6 flex flex-col justify-between">
                   <div>
-                    <p className="text-sm font-bold text-brand-dark">{r.name}</p>
-                    <p className="text-xs text-gray-400">{r.role} · {store.location}</p>
+                    <h3 className="font-display font-bold text-xl text-brand-dark mb-3">{service.name}</h3>
+                    <p className="text-gray-500 text-sm leading-relaxed mb-4">{service.description}</p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(`Hi ${store.business_name}! I'm interested in: ${service.name}. Can we book a free call to discuss?`)}`}
+                      target="_blank" rel="noreferrer"
+                      className="flex items-center justify-center gap-2 font-bold py-3 px-5 rounded-xl text-sm"
+                      style={{ backgroundColor: color, color: contrast }}>
+                      {WA_SVG} Book a Free Call
+                    </a>
+                    <button onClick={() => setSelectedService(service)}
+                      className="flex items-center justify-center gap-1 text-sm font-semibold px-4 py-3 rounded-xl border hover:bg-gray-50"
+                      style={{ borderColor: color, color }}>
+                      More Info <ChevronRight size={14} />
+                    </button>
                   </div>
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* CTA block */}
+          <div className="mt-10 rounded-2xl p-6 text-center" style={{ backgroundColor: color, color: contrast } as React.CSSProperties}>
+            <p className="font-display font-bold text-xl mb-2">Not sure where to start?</p>
+            <p className="text-sm mb-5 opacity-80">Book a free 30-minute discovery call. No obligation, no pressure — just a conversation about your goals.</p>
+            <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(bookMsg)}`}
+              target="_blank" rel="noreferrer"
+              className="inline-flex items-center gap-2 font-bold py-3.5 px-8 rounded-2xl text-sm bg-white shadow-lg"
+              style={{ color }}>
+              {WA_SVG} Book Your Free Call Now
+            </a>
           </div>
         </div>
       </div>
