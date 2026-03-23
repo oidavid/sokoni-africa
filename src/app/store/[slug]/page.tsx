@@ -7,6 +7,7 @@ import { COUNTRIES } from '@/lib/countries'
 import { getCart, saveCart, addToCart as addToLocalCart, clearCart, type CartItem as LocalCartItem } from '@/lib/cart'
 import { getThemeById, getThemeStyle } from '@/lib/themes'
 import ServiceStorefrontPage from '@/components/ServiceStorefrontPage'
+import ConsultationStorefrontPage from '@/components/ConsultationStorefrontPage'
 
 interface Merchant {
   id: string
@@ -19,8 +20,6 @@ interface Merchant {
   order_mode: string
   theme_color: string
   logo_url: string | null
-  business_type?: string
-  theme_preset?: string
 }
 
 interface Product {
@@ -211,7 +210,15 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
     else { navigator.clipboard.writeText(window.location.href); alert('Link copied!') }
   }
 
-  // Route service businesses to dedicated service layout
+  // Categories that use the consultation/profile layout (no prices, Book a Free Call)
+  const CONSULTATION_CATEGORIES = ['coaching', 'mental_wellness', 'education', 'digital_services', 'health_wellness']
+
+  // Route to consultation layout for profile-led businesses
+  if (!loading && store && store.business_type === 'services' && CONSULTATION_CATEGORIES.includes(store.category)) {
+    return <ConsultationStorefrontPage params={params} />
+  }
+
+  // Route all other service businesses to service menu layout
   if (!loading && store && store.business_type === 'services') {
     return <ServiceStorefrontPage params={params} />
   }
@@ -793,4 +800,3 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
     </div>
   )
 }
-
