@@ -20,6 +20,7 @@ interface Merchant {
   email: string
   description: string
   logo_url: string
+  profile_photo_url?: string
   theme_color: string
   theme_preset?: string
   order_mode: string
@@ -56,6 +57,9 @@ export default function SettingsPage() {
   const [selectedTheme, setSelectedTheme] = useState<EarketTheme>(EARKET_THEMES[0])
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null)
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null)
+  const [uploadingProfilePhoto, setUploadingProfilePhoto] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -87,6 +91,7 @@ export default function SettingsPage() {
         setSelectedTheme(t)
       }
       setLogoUrl(m.logo_url || null)
+      setProfilePhotoUrl(m.profile_photo_url || null)
       const wa = m.whatsapp_number || ''
       const country = COUNTRIES.find(c => c.dial && wa.startsWith(c.dial)) || COUNTRIES[0]
       setSelectedCountry(country)
@@ -95,6 +100,18 @@ export default function SettingsPage() {
     }
     load()
   }, [router])
+
+  async function handleProfilePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !merchant) return
+    setUploadingProfilePhoto(true)
+    const reader = new FileReader()
+    reader.onload = () => setProfilePhotoPreview(reader.result as string)
+    reader.readAsDataURL(file)
+    const url = await uploadProductImage(file, merchant.id + '-profile')
+    if (url) setProfilePhotoUrl(url)
+    setUploadingProfilePhoto(false)
+  }
 
   async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -128,6 +145,7 @@ export default function SettingsPage() {
         theme_color: selectedTheme.primary,
         theme_preset: selectedTheme.id,
         logo_url: logoUrl,
+        profile_photo_url: profilePhotoUrl,
       })
       .eq('id', merchant.id)
     if (updateError) {
@@ -184,6 +202,33 @@ export default function SettingsPage() {
                 <Camera size={16} /> Upload Logo
               </label>
               <p className="text-xs text-gray-400 mt-1.5">Square image recommended (PNG, JPG)</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Profile Photo */}
+        <div>
+          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Profile Photo</label>
+          <p className="text-xs text-gray-400 mb-3">Your face/headshot — shown on coaching & consultation pages. Makes your page feel personal and trustworthy.</p>
+          <input type="file" id="profile-photo-upload" accept="image/*" className="hidden" onChange={handleProfilePhotoUpload} />
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border-2 border-gray-200 relative shrink-0">
+              {(profilePhotoPreview || profilePhotoUrl)
+                ? <img src={profilePhotoPreview || profilePhotoUrl || ''} alt="Profile" className="w-full h-full object-cover" />
+                : <span className="text-2xl">👤</span>
+              }
+              {uploadingProfilePhoto && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-full">
+                  <Loader2 size={16} className="text-white animate-spin" />
+                </div>
+              )}
+            </div>
+            <div>
+              <label htmlFor="profile-photo-upload"
+                className="flex items-center gap-2 bg-white border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-700 hover:border-brand-green cursor-pointer transition-colors">
+                <Camera size={16} /> Upload Profile Photo
+              </label>
+              <p className="text-xs text-gray-400 mt-1.5">Your headshot or professional photo (PNG, JPG)</p>
             </div>
           </div>
         </div>

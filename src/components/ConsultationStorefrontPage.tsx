@@ -18,6 +18,7 @@ interface Merchant {
   business_type?: string
   theme_preset?: string
   address?: string
+  profile_photo_url?: string
 }
 
 interface Service {
@@ -256,102 +257,137 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
       )}
 
       {/* ── NAVBAR ── */}
-      <nav className="relative z-20 flex items-center justify-between px-4 py-4 max-w-3xl mx-auto w-full">
-        <div className="flex items-center gap-3">
-          {store.logo_url
-            ? <img src={store.logo_url} alt={store.business_name} className="w-10 h-10 rounded-xl object-contain bg-white shadow-sm" />
-            : <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-sm" style={themeStyle as React.CSSProperties}>💼</div>
-          }
-          <div>
-            <p className="font-display font-bold text-sm text-gray-900 leading-tight">{store.business_name}</p>
-            <p className="text-xs text-gray-500">{categoryLabel}</p>
+      <nav className="bg-white border-b border-gray-100 px-4 py-3 sticky top-0 z-20">
+        <div className="max-w-3xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {store.logo_url
+              ? <img src={store.logo_url} alt={store.business_name} className="w-9 h-9 rounded-xl object-contain shadow-sm" />
+              : <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg font-bold text-white" style={themeStyle as React.CSSProperties}>{store.business_name[0]}</div>
+            }
+            <div>
+              <p className="font-display font-bold text-sm text-gray-900 leading-tight">{store.business_name}</p>
+              <p className="text-xs text-gray-400">{categoryLabel}</p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(bookMsg)}`}
-            target="_blank" rel="noreferrer"
-            className="hidden sm:flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-xl text-white"
-            style={themeStyle as React.CSSProperties}>
-            {WA_SVG} Book a Call
-          </a>
-          <button onClick={shareStore} className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center text-gray-500 hover:bg-gray-200">
-            <Share2 size={15} />
-          </button>
+          <div className="flex items-center gap-2">
+            <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(bookMsg)}`}
+              target="_blank" rel="noreferrer"
+              className="flex items-center gap-1.5 text-xs font-bold px-4 py-2.5 rounded-xl text-white shadow-sm"
+              style={themeStyle as React.CSSProperties}>
+              {WA_SVG} <span className="hidden sm:inline">Book a Free Call</span><span className="sm:hidden">Book</span>
+            </a>
+            <button onClick={shareStore} className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center text-gray-500 hover:bg-gray-200">
+              <Share2 size={15} />
+            </button>
+          </div>
         </div>
       </nav>
 
-      {/* ── HERO ── Clean minimal, full-width image, one headline ── */}
-      <div className="relative overflow-hidden" style={{ minHeight: '480px' }}>
-        {heroImage && (
-          <div className="absolute inset-0">
-            <img src={heroImage} alt="" className="w-full h-full object-cover object-top" />
-            {/* Light gradient — dark at bottom, mostly transparent at top */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/75" />
-          </div>
-        )}
-        {/* Accepting badge */}
-        <div className="relative px-4 pt-4 flex justify-end max-w-3xl mx-auto">
-          <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1.5">
-            <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse" />
-            <span className="text-xs font-semibold text-white">Accepting new clients</span>
-          </div>
-        </div>
+      {/* ── SPLIT HERO — light background, text left, photo right ── */}
+      <div className="bg-white">
+        <div className="max-w-3xl mx-auto px-4 py-10 sm:py-16">
+          <div className="flex flex-col sm:flex-row items-center gap-8">
+            {/* Text — left side */}
+            <div className="flex-1 text-center sm:text-left">
+              <div className="flex items-center gap-2 mb-4 justify-center sm:justify-start">
+                <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: color }} />
+                <span className="text-xs font-semibold uppercase tracking-widest" style={{ color }}>Accepting new clients</span>
+              </div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">{categoryLabel}</p>
+              <h1 className="font-display font-bold text-gray-900 leading-tight mb-4"
+                style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)' }}>
+                {headline}
+              </h1>
+              <div className="w-12 h-1 rounded-full mb-4 mx-auto sm:mx-0" style={{ backgroundColor: color }} />
+              <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-6 max-w-md mx-auto sm:mx-0">
+                {subheadline}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 max-w-xs mx-auto sm:mx-0">
+                <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(bookMsg)}`}
+                  target="_blank" rel="noreferrer"
+                  className="flex items-center justify-center gap-2 font-bold py-3.5 px-6 rounded-2xl text-sm shadow-lg"
+                  style={{ backgroundColor: color, color: contrast }}>
+                  {WA_SVG} Book a Free Call
+                </a>
+                <a href={`tel:+${waNumber}`}
+                  className="flex items-center justify-center gap-2 border-2 font-semibold py-3.5 px-5 rounded-2xl text-sm"
+                  style={{ borderColor: color, color }}>
+                  <Phone size={15} /> Call Us
+                </a>
+              </div>
+              {store.location && (
+                <div className="flex items-center gap-1.5 mt-4 justify-center sm:justify-start">
+                  <MapPin size={12} className="text-gray-400 shrink-0" />
+                  <span className="text-xs text-gray-400">{store.location}</span>
+                </div>
+              )}
+            </div>
 
-        {/* Hero text — bottom aligned, clean */}
-        <div className="relative flex flex-col items-center justify-end text-center px-6 pb-12 pt-24 max-w-3xl mx-auto">
-          <h1 className="font-display font-bold text-white leading-tight mb-3"
-            style={{ fontSize: 'clamp(1.75rem, 5vw, 2.75rem)' }}>
-            {headline}
-          </h1>
-          <p className="text-white/85 text-sm sm:text-base leading-relaxed mb-8 max-w-md">
-            {personalDescription.length > 120 ? subheadline : personalDescription}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
-            <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(bookMsg)}`}
-              target="_blank" rel="noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 bg-white font-bold py-4 rounded-2xl text-sm shadow-xl"
-              style={{ color }}>
-              {WA_SVG} Book a Free Call
-            </a>
-            <a href={`tel:+${waNumber}`}
-              className="flex items-center justify-center gap-2 bg-white/25 backdrop-blur-sm border border-white/30 text-white font-semibold py-4 px-5 rounded-2xl text-sm">
-              <Phone size={16} /> Call
-            </a>
-          </div>
-          <div className="flex items-center gap-1.5 mt-4">
-            <MapPin size={12} className="text-white/50 shrink-0" />
-            <span className="text-xs text-white/60">{store.location}</span>
+            {/* Photo — right side */}
+            <div className="shrink-0 flex flex-col items-center">
+              {store.profile_photo_url ? (
+                <div className="w-52 h-52 sm:w-60 sm:h-60 rounded-full overflow-hidden shadow-2xl ring-4"
+                  style={{ ringColor: color }}>
+                  <img src={store.profile_photo_url} alt={store.business_name}
+                    className="w-full h-full object-cover object-top" />
+                </div>
+              ) : store.logo_url ? (
+                <div className="w-52 h-52 sm:w-60 sm:h-60 rounded-full overflow-hidden shadow-2xl bg-white"
+                  style={{ border: `4px solid ${color}30` }}>
+                  <img src={store.logo_url} alt={store.business_name}
+                    className="w-full h-full object-contain p-6" />
+                </div>
+              ) : (
+                <div className="w-52 h-52 sm:w-60 sm:h-60 rounded-full flex flex-col items-center justify-center shadow-md"
+                  style={{ backgroundColor: color + '10', border: `3px dashed ${color}40` }}>
+                  <span className="text-4xl mb-2">📸</span>
+                  <p className="text-xs text-gray-400 text-center px-4 leading-tight">Add your photo<br/>in Settings</p>
+                </div>
+              )}
+              {/* Decorative circle behind photo */}
+              <div className="w-52 h-52 sm:w-60 sm:h-60 rounded-full absolute -z-10 translate-x-3 translate-y-3 opacity-20"
+                style={{ backgroundColor: color }} />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ── ABOUT ME ── */}
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        <div className="flex flex-col sm:flex-row gap-5 items-start">
-          {/* Profile photo placeholder */}
-          <div className="w-full sm:w-40 shrink-0">
-            {store.logo_url ? (
-              <img src={store.logo_url} alt={store.business_name}
-                className="w-full sm:w-40 h-48 sm:h-48 rounded-2xl object-cover shadow-md" />
-            ) : (
-              <div className="w-full sm:w-40 h-48 sm:h-48 rounded-2xl bg-gray-100 flex flex-col items-center justify-center shadow-sm border-2 border-dashed border-gray-200">
-                <span className="text-4xl mb-2">📸</span>
-                <p className="text-xs text-gray-400 text-center px-2">Upload your photo from your Dashboard</p>
-              </div>
-            )}
+      {/* ── EMPATHY SECTION — "Are you struggling with...?" ── */}
+      <div className="py-10 px-4" style={{ backgroundColor: color + '08' }}>
+        <div className="max-w-3xl mx-auto">
+          <div className="flex flex-col sm:flex-row gap-8 items-start">
+            <div className="flex-1">
+              <h2 className="font-display font-bold text-2xl sm:text-3xl leading-tight mb-4" style={{ color }}>
+                {store.category === 'coaching' && 'Are you ready to stop playing small and start living fully?'}
+                {store.category === 'mental_wellness' && 'Are you struggling with stress, anxiety, or feeling overwhelmed?'}
+                {store.category === 'education' && 'Is your child struggling to reach their full potential?'}
+                {store.category === 'digital_services' && 'Is your business invisible online?'}
+                {store.category === 'health_wellness' && 'Are you ready to invest in your health and feel your best?'}
+                {!['coaching','mental_wellness','education','digital_services','health_wellness'].includes(store.category) && 'Ready to take the next step?'}
+              </h2>
+            </div>
+            <div className="flex-1">
+              <p className="text-gray-700 text-sm sm:text-base leading-relaxed mb-4">{personalDescription}</p>
+              <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(bookMsg)}`}
+                target="_blank" rel="noreferrer"
+                className="inline-flex items-center gap-2 font-bold text-sm px-5 py-3 rounded-xl"
+                style={{ backgroundColor: color, color: contrast }}>
+                {WA_SVG} Yes — Let's Talk
+              </a>
+            </div>
           </div>
-          {/* Bio */}
-          <div className="flex-1">
-            <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color }}>About</p>
-            <h2 className="font-display font-bold text-2xl text-brand-dark mb-3">{store.business_name}</h2>
-            <p className="text-gray-600 text-sm leading-relaxed mb-4">{personalDescription}</p>
-            <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(bookMsg)}`}
-              target="_blank" rel="noreferrer"
-              className="inline-flex items-center gap-2 text-sm font-bold px-4 py-2.5 rounded-xl"
-              style={{ backgroundColor: color + '15', color }}>
-              {WA_SVG} Let's Talk
-            </a>
-          </div>
+        </div>
+      </div>
+
+      {/* Trust strip */}
+      <div className="bg-white border-b border-gray-100 py-5 px-4">
+        <div className="max-w-3xl mx-auto flex flex-wrap gap-4 justify-center sm:justify-start">
+          {['Free 30-min discovery call', 'No obligation', 'Confidential & professional', '100% WhatsApp booking'].map((t, i) => (
+            <div key={i} className="flex items-center gap-2 text-sm text-gray-600">
+              <CheckCircle size={15} style={{ color }} />
+              {t}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -379,70 +415,67 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
         </div>
       </div>
 
-      {/* ── SERVICES — no prices ── */}
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-2">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color }}>What I Offer</p>
-            <h2 className="font-display font-bold text-2xl text-brand-dark">Services</h2>
+      {/* ── SERVICES — alternating image+text blocks ── */}
+      <div className="py-10 px-4 bg-white">
+        <div className="max-w-3xl mx-auto">
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1 text-center" style={{ color }}>What I Offer</p>
+          <h2 className="font-display font-bold text-2xl sm:text-3xl text-brand-dark mb-2 text-center">Here's How I Can Help</h2>
+          <div className="w-12 h-1 rounded-full mx-auto mb-8" style={{ backgroundColor: color }} />
+
+          {/* Search */}
+          <div className="relative mb-8">
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input type="search" placeholder="Search services..." value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full bg-gray-50 rounded-2xl pl-10 pr-4 py-3 text-sm outline-none border border-gray-100 focus:border-brand-green" />
           </div>
-          <span className="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full">{filtered.length} available</span>
-        </div>
-        <p className="text-sm text-gray-500 mb-5">Book a free call to discuss the right service for your needs and goals.</p>
 
-        {/* Search */}
-        <div className="relative mb-5">
-          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input type="search" placeholder="Search services..." value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full bg-gray-50 rounded-2xl pl-10 pr-4 py-3 text-sm outline-none border border-gray-200 focus:border-brand-green" />
-        </div>
-
-        <div className="space-y-4">
-          {filtered.map(service => (
-            <div key={service.id}
-              className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden">
-              <div className="flex">
+          <div className="space-y-6">
+            {filtered.map((service, idx) => (
+              <div key={service.id}
+                className={`flex flex-col ${idx % 2 === 0 ? 'sm:flex-row' : 'sm:flex-row-reverse'} gap-0 rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all`}>
+                {/* Image */}
                 {service.image_url && (
-                  <div className="w-28 sm:w-36 shrink-0 overflow-hidden">
+                  <div className="sm:w-2/5 shrink-0 overflow-hidden bg-gray-100" style={{ minHeight: '220px' }}>
                     <img src={service.image_url} alt={service.name}
-                      className="w-full h-full object-cover" style={{ minHeight: '120px' }} loading="lazy" />
+                      className="w-full h-full object-cover" style={{ minHeight: '220px' }} loading="lazy" />
                   </div>
                 )}
-                <div className="flex-1 p-4 flex flex-col justify-between">
+                {/* Content */}
+                <div className="flex-1 bg-white p-6 flex flex-col justify-between">
                   <div>
-                    <h3 className="font-display font-bold text-brand-dark text-base leading-tight mb-1">{service.name}</h3>
-                    <p className="text-gray-500 text-xs leading-relaxed line-clamp-2 mb-3">{service.description}</p>
+                    <h3 className="font-display font-bold text-xl text-brand-dark mb-3">{service.name}</h3>
+                    <p className="text-gray-500 text-sm leading-relaxed mb-4">{service.description}</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => setSelectedService(service)}
-                      className="flex items-center gap-1 text-xs font-semibold px-3 py-2 rounded-xl border transition-colors hover:bg-gray-50"
-                      style={{ borderColor: color, color }}>
-                      Learn More <ChevronRight size={12} />
-                    </button>
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(`Hi ${store.business_name}! I'm interested in: ${service.name}. Can we book a free call to discuss?`)}`}
                       target="_blank" rel="noreferrer"
-                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold py-2 rounded-xl"
+                      className="flex items-center justify-center gap-2 font-bold py-3 px-5 rounded-xl text-sm"
                       style={{ backgroundColor: color, color: contrast }}>
                       {WA_SVG} Book a Free Call
                     </a>
+                    <button onClick={() => setSelectedService(service)}
+                      className="flex items-center justify-center gap-1 text-sm font-semibold px-4 py-3 rounded-xl border hover:bg-gray-50"
+                      style={{ borderColor: color, color }}>
+                      More Info <ChevronRight size={14} />
+                    </button>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        {/* CTA after services */}
-        <div className="mt-6 rounded-2xl p-5 text-center" style={{ backgroundColor: color + '10', border: `1px solid ${color}25` }}>
-          <p className="font-display font-bold text-brand-dark text-base mb-1">Not sure where to start?</p>
-          <p className="text-gray-500 text-xs mb-4">Book a free 30-minute discovery call. No obligation, no pressure — just a conversation.</p>
-          <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(bookMsg)}`}
-            target="_blank" rel="noreferrer"
-            style={{ backgroundColor: color, color: contrast }}
-            className="inline-flex items-center gap-2 font-bold py-3 px-6 rounded-2xl text-sm">
-            {WA_SVG} Book Your Free Call Now
-          </a>
+          {/* CTA block */}
+          <div className="mt-10 rounded-2xl p-6 text-center" style={{ backgroundColor: color, color: contrast } as React.CSSProperties}>
+            <p className="font-display font-bold text-xl mb-2">Not sure where to start?</p>
+            <p className="text-sm mb-5 opacity-80">Book a free 30-minute discovery call. No obligation, no pressure — just a conversation about your goals.</p>
+            <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(bookMsg)}`}
+              target="_blank" rel="noreferrer"
+              className="inline-flex items-center gap-2 font-bold py-3.5 px-8 rounded-2xl text-sm bg-white shadow-lg"
+              style={{ color }}>
+              {WA_SVG} Book Your Free Call Now
+            </a>
+          </div>
         </div>
       </div>
 
