@@ -21,6 +21,8 @@ interface Merchant {
   order_mode: string
   theme_color: string
   logo_url: string | null
+  business_type?: string
+  theme_preset?: string
 }
 
 interface Product {
@@ -799,3 +801,4 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
     </div>
   )
 }
+
