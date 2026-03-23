@@ -320,12 +320,15 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
 
           {/* Logo — centered, large */}
           <div className="flex flex-col items-center text-center mb-5">
-            <div className="w-40 h-40 bg-white rounded-3xl overflow-hidden flex items-center justify-center shadow-2xl border-4 border-white/50 mb-4">
-              {store.logo_url
-                ? <img src={store.logo_url} alt={store.business_name} className="w-full h-full object-contain p-1" />
-                : <span className="text-7xl">💼</span>
-              }
-            </div>
+            {store.logo_url ? (
+              <div className="w-40 h-40 rounded-full overflow-hidden mb-4 shadow-2xl ring-4 ring-white/40">
+                <img src={store.logo_url} alt={store.business_name} className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div className="w-40 h-40 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4 shadow-2xl ring-4 ring-white/40">
+                <span className="text-7xl">💼</span>
+              </div>
+            )}
             <h1 className="font-display font-bold text-3xl text-white leading-tight mb-1">{store.business_name}</h1>
             <p className="text-sm font-medium text-white/80 mb-2">{categoryLabel}</p>
             <div className="flex items-center gap-1.5 justify-center">
@@ -545,23 +548,27 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
           </div>
         </div>
 
-        {/* Map preview — opens Google Maps on tap */}
-        <a href={mapsUrl} target="_blank" rel="noreferrer"
-          className="mt-3 flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 hover:bg-gray-100 transition-colors">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-            style={{ backgroundColor: color + '20' }}>
-            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" style={{ color }}>
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
+        {/* Map embed — OpenStreetMap, free, no API key needed */}
+        <a href={mapsUrl} target="_blank" rel="noreferrer" className="mt-3 block rounded-2xl overflow-hidden border border-gray-200 hover:opacity-95 transition-opacity">
+          <iframe
+            title="Business location"
+            width="100%"
+            height="180"
+            loading="lazy"
+            style={{ border: 0, display: 'block' }}
+            src={`https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent('-180,-90,180,90')}&layer=mapnik&marker=&query=${encodeURIComponent((store.address || store.business_name) + ' ' + store.location)}`}
+          />
+          <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-100">
+            <div className="flex items-center gap-2">
+              <MapPin size={14} style={{ color }} />
+              <span className="text-xs font-semibold text-gray-700 truncate max-w-[220px]">
+                {store.address || store.location}
+              </span>
+            </div>
+            <span className="text-xs font-semibold flex items-center gap-1 shrink-0" style={{ color }}>
+              Open Maps <ExternalLink size={10} />
+            </span>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-gray-700">
-              {store.address || store.business_name + ', ' + store.location}
-            </p>
-            <p className="text-xs mt-0.5" style={{ color }}>Tap to open in Google Maps →</p>
-          </div>
-          <ExternalLink size={14} className="text-gray-400 shrink-0" />
         </a>
       </div>
 
