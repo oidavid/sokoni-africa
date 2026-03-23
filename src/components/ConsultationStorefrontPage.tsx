@@ -234,7 +234,7 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
     setFormError('')
     try {
       await supabase.from('leads').insert({
-        merchant_id: store.id,
+        merchant_id: store?.id,
         name: formName,
         email: formEmail,
         phone: formPhone,
