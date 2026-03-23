@@ -6,6 +6,7 @@ import { ArrowLeft, Check, Loader2, ShoppingBag, Upload, Camera } from 'lucide-r
 import { supabase } from '@/lib/supabase'
 import { COUNTRY_LIST } from '@/lib/countries-cities'
 import { COUNTRIES, normalizeNumber } from '@/lib/countries'
+import { EARKET_THEMES, getThemeStyle, getThemeById, type EarketTheme } from '@/lib/themes'
 import { uploadProductImage } from '@/lib/storage'
 
 interface Merchant {
@@ -20,6 +21,7 @@ interface Merchant {
   description: string
   logo_url: string
   theme_color: string
+  theme_preset?: string
   order_mode: string
   login_pin: string
 }
@@ -28,17 +30,6 @@ const LOCATIONS = [
   'Lagos', 'Abuja', 'Port Harcourt', 'Kano', 'Ibadan',
   'Benin City', 'Onitsha', 'Aba', 'Enugu', 'Warri',
   'Kaduna', 'Calabar', 'Jos', 'Ilorin', 'Other'
-]
-
-const THEME_COLORS = [
-  { name: 'Green', value: '#1A7A4A', bg: 'bg-[#1A7A4A]' },
-  { name: 'Blue', value: '#1A56DB', bg: 'bg-[#1A56DB]' },
-  { name: 'Purple', value: '#7E3AF2', bg: 'bg-[#7E3AF2]' },
-  { name: 'Red', value: '#E02424', bg: 'bg-[#E02424]' },
-  { name: 'Orange', value: '#FF5A1F', bg: 'bg-[#FF5A1F]' },
-  { name: 'Black', value: '#111827', bg: 'bg-[#111827]' },
-  { name: 'Teal', value: '#0694A2', bg: 'bg-[#0694A2]' },
-  { name: 'Pink', value: '#E74694', bg: 'bg-[#E74694]' },
 ]
 
 export default function SettingsPage() {
@@ -62,6 +53,7 @@ export default function SettingsPage() {
   const [orderMode, setOrderMode] = useState('both')
   const [loginPin, setLoginPin] = useState('')
   const [themeColor, setThemeColor] = useState('#1A7A4A')
+  const [selectedTheme, setSelectedTheme] = useState<EarketTheme>(EARKET_THEMES[0])
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
 
@@ -90,6 +82,10 @@ export default function SettingsPage() {
       setOrderMode(m.order_mode || 'both')
       setLoginPin(m.login_pin || '')
       setThemeColor(m.theme_color || '#1A7A4A')
+      if (m.theme_preset) {
+        const t = getThemeById(m.theme_preset)
+        setSelectedTheme(t)
+      }
       setLogoUrl(m.logo_url || null)
       const wa = m.whatsapp_number || ''
       const country = COUNTRIES.find(c => c.dial && wa.startsWith(c.dial)) || COUNTRIES[0]
@@ -129,7 +125,8 @@ export default function SettingsPage() {
         phone: normalized,
         order_mode: orderMode,
         login_pin: loginPin || null,
-        theme_color: themeColor,
+        theme_color: selectedTheme.primary,
+        theme_preset: selectedTheme.id,
         logo_url: logoUrl,
       })
       .eq('id', merchant.id)
@@ -191,19 +188,38 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Theme Color */}
+        {/* Theme Picker — full grid */}
         <div>
-          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-3">Store Color</label>
-          <div className="flex gap-2 flex-wrap">
-            {THEME_COLORS.map(color => (
-              <button key={color.value} onClick={() => setThemeColor(color.value)}
-                className={`w-10 h-10 rounded-xl ${color.bg} transition-all ${
-                  themeColor === color.value ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : 'hover:scale-105'
-                }`}
-                title={color.name} />
+          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-3">Brand Theme</label>
+          <div className="grid grid-cols-3 gap-2 mb-3">
+            {EARKET_THEMES.map(theme => (
+              <button key={theme.id} onClick={() => { setSelectedTheme(theme); setThemeColor(theme.primary) }}
+                className={`relative rounded-2xl overflow-hidden border-2 transition-all ${
+                  selectedTheme.id === theme.id ? 'border-brand-green scale-105 shadow-md' : 'border-gray-200 hover:border-gray-300'
+                }`}>
+                <div className="h-10 w-full" style={getThemeStyle(theme) as React.CSSProperties} />
+                <div className="bg-white px-2 py-1.5 text-center">
+                  <p className="text-xs font-semibold text-gray-700 leading-tight">{theme.emoji} {theme.name}</p>
+                </div>
+                {selectedTheme.id === theme.id && (
+                  <div className="absolute top-1 right-1 w-5 h-5 bg-brand-green rounded-full flex items-center justify-center">
+                    <svg viewBox="0 0 12 10" className="w-3 h-3"><path d="M1 5l3 4L11 1" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </div>
+                )}
+              </button>
             ))}
           </div>
-          <p className="text-xs text-gray-400 mt-2">Selected: {THEME_COLORS.find(c => c.value === themeColor)?.name || 'Custom'}</p>
+          {/* Preview */}
+          <div className="rounded-2xl overflow-hidden border border-gray-200">
+            <div className="h-14 flex items-center px-4 gap-3" style={getThemeStyle(selectedTheme) as React.CSSProperties}>
+              <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center text-lg">💼</div>
+              <div>
+                <p className="font-display font-bold text-sm" style={{ color: selectedTheme.textOnPrimary }}>{businessName || merchant?.business_name}</p>
+                <p className="text-xs opacity-70" style={{ color: selectedTheme.textOnPrimary }}>{selectedTheme.name} theme</p>
+              </div>
+            </div>
+          </div>
+          <p className="text-xs text-gray-400 mt-2 text-center">This will update your store page immediately after saving</p>
         </div>
 
         {/* Business Name */}

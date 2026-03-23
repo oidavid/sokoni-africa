@@ -1,84 +1,50 @@
-export interface CountryData {
-  name: string
-  flag: string
-  dial: string
-  currency: string
-  currencySymbol: string
-  cities: string[]
-}
-
-export const COUNTRIES_WITH_CITIES: Record<string, CountryData> = {
-  NG: {
-    name: 'Nigeria', flag: '🇳🇬', dial: '234', currency: 'NGN', currencySymbol: '₦',
-    cities: ['Abuja', 'Abeokuta', 'Akure', 'Asaba', 'Awka', 'Bauchi', 'Benin City', 'Calabar', 'Dutse', 'Ekiti', 'Enugu', 'Gombe', 'Ibadan', 'Ile-Ife', 'Ilorin', 'Jos', 'Kaduna', 'Kano', 'Katsina', 'Lafia', 'Lagos', 'Lokoja', 'Maiduguri', 'Makurdi', 'Minna', 'Nsukka', 'Ogbomosho', 'Onitsha', 'Osogbo', 'Owerri', 'Port Harcourt', 'Sokoto', 'Umuahia', 'Uyo', 'Warri', 'Yenagoa', 'Yola', 'Zaria']
-  },
-  GH: {
-    name: 'Ghana', flag: '🇬🇭', dial: '233', currency: 'GHS', currencySymbol: 'GH₵',
-    cities: ['Accra', 'Kumasi', 'Tamale', 'Takoradi', 'Cape Coast', 'Sunyani', 'Koforidua', 'Ho', 'Wa', 'Bolgatanga', 'Techiman', 'Obuasi']
-  },
-  KE: {
-    name: 'Kenya', flag: '🇰🇪', dial: '254', currency: 'KES', currencySymbol: 'KSh',
-    cities: ['Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Thika', 'Malindi', 'Kitale', 'Garissa', 'Kakamega', 'Nyeri', 'Machakos']
-  },
-  ZA: {
-    name: 'South Africa', flag: '🇿🇦', dial: '27', currency: 'ZAR', currencySymbol: 'R',
-    cities: ['Johannesburg', 'Cape Town', 'Durban', 'Pretoria', 'Port Elizabeth', 'Bloemfontein', 'East London', 'Polokwane', 'Nelspruit', 'Kimberley', 'Rustenburg', 'Pietermaritzburg']
-  },
-  BR: {
-    name: 'Brazil', flag: '🇧🇷', dial: '55', currency: 'BRL', currencySymbol: 'R$',
-    cities: ['São Paulo', 'Rio de Janeiro', 'Brasília', 'Salvador', 'Fortaleza', 'Belo Horizonte', 'Manaus', 'Curitiba', 'Recife', 'Porto Alegre', 'Belém', 'Goiânia']
-  },
-  PK: {
-    name: 'Pakistan', flag: '🇵🇰', dial: '92', currency: 'PKR', currencySymbol: '₨',
-    cities: ['Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Faisalabad', 'Multan', 'Peshawar', 'Quetta', 'Sialkot', 'Gujranwala', 'Hyderabad', 'Bahawalpur']
-  },
-  IN: {
-    name: 'India', flag: '🇮🇳', dial: '91', currency: 'INR', currencySymbol: '₹',
-    cities: ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad', 'Jaipur', 'Surat', 'Lucknow', 'Kanpur', 'Nagpur', 'Visakhapatnam', 'Indore']
-  },
-  EG: {
-    name: 'Egypt', flag: '🇪🇬', dial: '20', currency: 'EGP', currencySymbol: 'E£',
-    cities: ['Cairo', 'Alexandria', 'Giza', 'Shubra El Kheima', 'Port Said', 'Suez', 'Luxor', 'Asyut', 'Ismailia', 'Fayyum', 'Zagazig', 'Aswan']
-  },
-  TZ: {
-    name: 'Tanzania', flag: '🇹🇿', dial: '255', currency: 'TZS', currencySymbol: 'TSh',
-    cities: ['Dar es Salaam', 'Mwanza', 'Arusha', 'Dodoma', 'Mbeya', 'Morogoro', 'Tanga', 'Zanzibar City', 'Kigoma', 'Tabora']
-  },
-  ET: {
-    name: 'Ethiopia', flag: '🇪🇹', dial: '251', currency: 'ETB', currencySymbol: 'Br',
-    cities: ['Addis Ababa', 'Dire Dawa', 'Mekelle', 'Gondar', 'Adama', 'Hawassa', 'Bahir Dar', 'Dessie', 'Jimma', 'Jijiga']
-  },
-  SN: {
-    name: 'Senegal', flag: '🇸🇳', dial: '221', currency: 'XOF', currencySymbol: 'CFA',
-    cities: ['Dakar', 'Thiès', 'Kaolack', 'Saint-Louis', 'Ziguinchor', 'Diourbel', 'Louga', 'Tambacounda', 'Kolda', 'Matam']
-  },
-  CI: {
-    name: "Côte d'Ivoire", flag: '🇨🇮', dial: '225', currency: 'XOF', currencySymbol: 'CFA',
-    cities: ['Abidjan', 'Bouaké', 'Daloa', 'San Pédro', 'Yamoussoukro', 'Korhogo', 'Man', 'Divo', 'Gagnoa', 'Abengourou']
-  },
-  CM: {
-    name: 'Cameroon', flag: '🇨🇲', dial: '237', currency: 'XAF', currencySymbol: 'FCFA',
-    cities: ['Douala', 'Yaoundé', 'Garoua', 'Kousséri', 'Bamenda', 'Bafoussam', 'Ngaoundéré', 'Bertoua', 'Kumba', 'Loum']
-  },
-  UG: {
-    name: 'Uganda', flag: '🇺🇬', dial: '256', currency: 'UGX', currencySymbol: 'USh',
-    cities: ['Kampala', 'Gulu', 'Lira', 'Mbarara', 'Jinja', 'Bwizibwera', 'Mbale', 'Mukono', 'Kasese', 'Masaka']
-  },
-  US: {
-    name: 'United States', flag: '🇺🇸', dial: '1', currency: 'USD', currencySymbol: '$',
-    cities: ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia', 'San Antonio', 'San Diego', 'Dallas', 'San Jose', 'Austin', 'Jacksonville', 'Atlanta', 'Miami', 'Seattle']
-  },
-  GB: {
-    name: 'United Kingdom', flag: '🇬🇧', dial: '44', currency: 'GBP', currencySymbol: '£',
-    cities: ['London', 'Birmingham', 'Manchester', 'Glasgow', 'Liverpool', 'Bristol', 'Sheffield', 'Leeds', 'Edinburgh', 'Leicester', 'Coventry', 'Bradford', 'Nottingham', 'Cardiff', 'Belfast']
-  },
-  CA: {
-    name: 'Canada', flag: '🇨🇦', dial: '1', currency: 'CAD', currencySymbol: 'C$',
-    cities: ['Toronto', 'Montreal', 'Vancouver', 'Calgary', 'Edmonton', 'Ottawa', 'Winnipeg', 'Quebec City', 'Hamilton', 'Kitchener']
-  },
-}
-
-export const COUNTRY_LIST = Object.entries(COUNTRIES_WITH_CITIES).map(([code, data]) => ({
-  code,
-  ...data,
-})).sort((a, b) => a.name.localeCompare(b.name))
+export const COUNTRY_LIST: Array<{ name: string; code: string; dial: string; cities: string[] }> = [
+  { name: 'Nigeria', code: 'NG', dial: '234', cities: ['Lagos', 'Abuja', 'Port Harcourt', 'Kano', 'Ibadan', 'Benin City', 'Onitsha', 'Aba', 'Enugu', 'Warri', 'Kaduna', 'Calabar', 'Jos', 'Ilorin', 'Abeokuta', 'Akure', 'Owerri', 'Uyo', 'Maiduguri', 'Sokoto'] },
+  { name: 'United States', code: 'US', dial: '1', cities: ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia', 'San Antonio', 'San Diego', 'Dallas', 'San Jose', 'Austin', 'Jacksonville', 'Fort Worth', 'Columbus', 'Charlotte', 'Indianapolis', 'San Francisco', 'Seattle', 'Denver', 'Nashville', 'Oklahoma City', 'El Paso', 'Las Vegas', 'Louisville', 'Memphis', 'Boston', 'Portland', 'Baltimore', 'Atlanta', 'Miami', 'Minneapolis', 'Tucson', 'Fresno', 'Sacramento', 'Mesa', 'Kansas City', 'Cleveland', 'Omaha', 'Raleigh', 'Colorado Springs', 'Virginia Beach', 'Long Beach', 'Tampa', 'New Orleans', 'Honolulu', 'Bentonville', 'Rogers', 'Fayetteville', 'Springdale'] },
+  { name: 'United Kingdom', code: 'GB', dial: '44', cities: ['London', 'Birmingham', 'Manchester', 'Leeds', 'Glasgow', 'Sheffield', 'Bradford', 'Liverpool', 'Edinburgh', 'Bristol', 'Cardiff', 'Leicester', 'Coventry', 'Nottingham', 'Newcastle', 'Belfast', 'Brighton', 'Hull', 'Plymouth', 'Southampton', 'Reading', 'Derby', 'Wolverhampton', 'Stoke-on-Trent', 'Oxford', 'Cambridge'] },
+  { name: 'Canada', code: 'CA', dial: '1', cities: ['Toronto', 'Montreal', 'Vancouver', 'Calgary', 'Edmonton', 'Ottawa', 'Winnipeg', 'Quebec City', 'Hamilton', 'Kitchener', 'London', 'Victoria', 'Halifax', 'Oshawa', 'Windsor', 'Saskatoon', 'Regina', 'St. Catharines', 'Barrie', 'Kelowna'] },
+  { name: 'Ghana', code: 'GH', dial: '233', cities: ['Accra', 'Kumasi', 'Tamale', 'Sekondi-Takoradi', 'Cape Coast', 'Sunyani', 'Koforidua', 'Ho', 'Wa', 'Bolgatanga'] },
+  { name: 'Kenya', code: 'KE', dial: '254', cities: ['Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Thika', 'Malindi', 'Kitale', 'Nyeri', 'Machakos'] },
+  { name: 'South Africa', code: 'ZA', dial: '27', cities: ['Johannesburg', 'Cape Town', 'Durban', 'Pretoria', 'Port Elizabeth', 'Bloemfontein', 'East London', 'Nelspruit', 'Kimberley', 'Polokwane', 'Rustenburg', 'George', 'Pietermaritzburg', 'Vanderbijlpark', 'Vereeniging'] },
+  { name: 'Tanzania', code: 'TZ', dial: '255', cities: ['Dar es Salaam', 'Mwanza', 'Arusha', 'Dodoma', 'Mbeya', 'Morogoro', 'Zanzibar', 'Tanga', 'Kahama', 'Tabora'] },
+  { name: 'Uganda', code: 'UG', dial: '256', cities: ['Kampala', 'Gulu', 'Lira', 'Mbarara', 'Jinja', 'Bwizibwera', 'Mbale', 'Mukono', 'Kasese', 'Masaka'] },
+  { name: 'Ethiopia', code: 'ET', dial: '251', cities: ['Addis Ababa', 'Dire Dawa', 'Mekelle', 'Gondar', 'Awasa', 'Adama', 'Bahir Dar', 'Jimma', 'Dessie', 'Harar'] },
+  { name: 'Egypt', code: 'EG', dial: '20', cities: ['Cairo', 'Alexandria', 'Giza', 'Shubra El Kheima', 'Port Said', 'Suez', 'Luxor', 'Asyut', 'Tanta', 'Mansoura'] },
+  { name: 'Senegal', code: 'SN', dial: '221', cities: ['Dakar', 'Thiès', 'Kaolack', 'Ziguinchor', 'Saint-Louis', 'Rufisque', 'Diourbel', 'Louga', 'Mbour', 'Touba'] },
+  { name: 'Cameroon', code: 'CM', dial: '237', cities: ['Douala', 'Yaoundé', 'Bamenda', 'Bafoussam', 'Garoua', 'Maroua', 'Ngaoundéré', 'Bertoua', 'Kumba', 'Edéa'] },
+  { name: "Côte d'Ivoire", code: 'CI', dial: '225', cities: ['Abidjan', 'Bouaké', 'Daloa', 'San-Pédro', 'Yamoussoukro', 'Korhogo', 'Gagnoa', 'Man', 'Divo', 'Abengourou'] },
+  { name: 'India', code: 'IN', dial: '91', cities: ['Mumbai', 'Delhi', 'Bengaluru', 'Hyderabad', 'Ahmedabad', 'Chennai', 'Kolkata', 'Surat', 'Pune', 'Jaipur', 'Lucknow', 'Kanpur', 'Nagpur', 'Indore', 'Thane', 'Bhopal', 'Visakhapatnam', 'Patna', 'Vadodara', 'Ludhiana'] },
+  { name: 'Pakistan', code: 'PK', dial: '92', cities: ['Karachi', 'Lahore', 'Faisalabad', 'Rawalpindi', 'Gujranwala', 'Peshawar', 'Multan', 'Hyderabad', 'Islamabad', 'Quetta'] },
+  { name: 'Bangladesh', code: 'BD', dial: '880', cities: ['Dhaka', 'Chittagong', 'Sylhet', 'Rajshahi', 'Khulna', 'Barisal', 'Comilla', 'Narayanganj', 'Gazipur', 'Mymensingh'] },
+  { name: 'Malaysia', code: 'MY', dial: '60', cities: ['Kuala Lumpur', 'George Town', 'Ipoh', 'Shah Alam', 'Petaling Jaya', 'Johor Bahru', 'Kota Kinabalu', 'Kuching', 'Malacca', 'Subang Jaya'] },
+  { name: 'Philippines', code: 'PH', dial: '63', cities: ['Manila', 'Quezon City', 'Caloocan', 'Davao', 'Cebu', 'Zamboanga', 'Antipolo', 'Pasig', 'Taguig', 'Valenzuela'] },
+  { name: 'Indonesia', code: 'ID', dial: '62', cities: ['Jakarta', 'Surabaya', 'Bandung', 'Medan', 'Semarang', 'Makassar', 'Palembang', 'Depok', 'Tangerang', 'Bekasi'] },
+  { name: 'Brazil', code: 'BR', dial: '55', cities: ['São Paulo', 'Rio de Janeiro', 'Brasília', 'Salvador', 'Fortaleza', 'Belo Horizonte', 'Manaus', 'Curitiba', 'Recife', 'Goiânia'] },
+  { name: 'Mexico', code: 'MX', dial: '52', cities: ['Mexico City', 'Guadalajara', 'Monterrey', 'Puebla', 'Tijuana', 'León', 'Juárez', 'Zapopan', 'Mérida', 'San Luis Potosí'] },
+  { name: 'Australia', code: 'AU', dial: '61', cities: ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide', 'Gold Coast', 'Canberra', 'Newcastle', 'Wollongong', 'Logan City'] },
+  { name: 'Germany', code: 'DE', dial: '49', cities: ['Berlin', 'Hamburg', 'Munich', 'Cologne', 'Frankfurt', 'Stuttgart', 'Düsseldorf', 'Dortmund', 'Essen', 'Leipzig'] },
+  { name: 'France', code: 'FR', dial: '33', cities: ['Paris', 'Marseille', 'Lyon', 'Toulouse', 'Nice', 'Nantes', 'Strasbourg', 'Montpellier', 'Bordeaux', 'Lille'] },
+  { name: 'Netherlands', code: 'NL', dial: '31', cities: ['Amsterdam', 'Rotterdam', 'The Hague', 'Utrecht', 'Eindhoven', 'Tilburg', 'Groningen', 'Almere', 'Breda', 'Nijmegen'] },
+  { name: 'Italy', code: 'IT', dial: '39', cities: ['Rome', 'Milan', 'Naples', 'Turin', 'Palermo', 'Genoa', 'Bologna', 'Florence', 'Bari', 'Catania'] },
+  { name: 'Spain', code: 'ES', dial: '34', cities: ['Madrid', 'Barcelona', 'Valencia', 'Seville', 'Zaragoza', 'Málaga', 'Murcia', 'Palma', 'Las Palmas', 'Bilbao'] },
+  { name: 'Portugal', code: 'PT', dial: '351', cities: ['Lisbon', 'Porto', 'Braga', 'Coimbra', 'Funchal', 'Setúbal', 'Almada', 'Amadora', 'Vila Nova de Gaia', 'Evora'] },
+  { name: 'United Arab Emirates', code: 'AE', dial: '971', cities: ['Dubai', 'Abu Dhabi', 'Sharjah', 'Al Ain', 'Ajman', 'Ras Al Khaimah', 'Fujairah', 'Umm Al Quwain'] },
+  { name: 'Saudi Arabia', code: 'SA', dial: '966', cities: ['Riyadh', 'Jeddah', 'Mecca', 'Medina', 'Dammam', 'Khobar', 'Tabuk', 'Abha', 'Buraidah', 'Khamis Mushait'] },
+  { name: 'Jamaica', code: 'JM', dial: '1876', cities: ['Kingston', 'Spanish Town', 'Portmore', 'Montego Bay', 'May Pen', 'Mandeville', 'Old Harbour', 'Half Way Tree', 'Linstead', 'Ocho Rios'] },
+  { name: 'Trinidad and Tobago', code: 'TT', dial: '1868', cities: ['Port of Spain', 'San Fernando', 'Chaguanas', 'Arima', 'Point Fortin', 'Scarborough'] },
+  { name: 'Zimbabwe', code: 'ZW', dial: '263', cities: ['Harare', 'Bulawayo', 'Chitungwiza', 'Mutare', 'Gweru', 'Kwekwe', 'Kadoma', 'Masvingo', 'Chinhoyi', 'Norton'] },
+  { name: 'Zambia', code: 'ZM', dial: '260', cities: ['Lusaka', 'Kitwe', 'Ndola', 'Kabwe', 'Chingola', 'Mufulira', 'Livingstone', 'Luanshya', 'Kasama', 'Chipata'] },
+  { name: 'Rwanda', code: 'RW', dial: '250', cities: ['Kigali', 'Butare', 'Gitarama', 'Ruhengeri', 'Gisenyi', 'Byumba', 'Cyangugu', 'Kabgayi', 'Kibungo', 'Rwamagana'] },
+  { name: 'DR Congo', code: 'CD', dial: '243', cities: ['Kinshasa', 'Lubumbashi', 'Mbuji-Mayi', 'Kananga', 'Kisangani', 'Bukavu', 'Tshikapa', 'Kolwezi', 'Likasi', 'Goma'] },
+  { name: 'Mozambique', code: 'MZ', dial: '258', cities: ['Maputo', 'Matola', 'Beira', 'Nampula', 'Chimoio', 'Nacala', 'Quelimane', 'Tete', 'Lichinga', 'Pemba'] },
+  { name: 'Angola', code: 'AO', dial: '244', cities: ['Luanda', 'Huambo', 'Lobito', 'Benguela', 'Kuito', 'Lubango', 'Malanje', 'Namibe', 'Soyo', 'Cabinda'] },
+  { name: 'China', code: 'CN', dial: '86', cities: ['Shanghai', 'Beijing', 'Guangzhou', 'Shenzhen', 'Chengdu', 'Tianjin', 'Chongqing', 'Wuhan', "Xi'an", 'Hangzhou'] },
+  { name: 'Japan', code: 'JP', dial: '81', cities: ['Tokyo', 'Osaka', 'Nagoya', 'Sapporo', 'Fukuoka', 'Kobe', 'Kyoto', 'Kawasaki', 'Saitama', 'Hiroshima'] },
+  { name: 'South Korea', code: 'KR', dial: '82', cities: ['Seoul', 'Busan', 'Incheon', 'Daegu', 'Daejeon', 'Gwangju', 'Suwon', 'Ulsan', 'Changwon', 'Seongnam'] },
+  { name: 'Singapore', code: 'SG', dial: '65', cities: ['Singapore'] },
+  { name: 'New Zealand', code: 'NZ', dial: '64', cities: ['Auckland', 'Wellington', 'Christchurch', 'Hamilton', 'Tauranga', 'Dunedin', 'Palmerston North', 'Nelson', 'Rotorua', 'New Plymouth'] },
+  { name: 'Ireland', code: 'IE', dial: '353', cities: ['Dublin', 'Cork', 'Limerick', 'Galway', 'Waterford', 'Drogheda', 'Dundalk', 'Swords', 'Bray', 'Navan'] },
+  { name: 'Sweden', code: 'SE', dial: '46', cities: ['Stockholm', 'Gothenburg', 'Malmö', 'Uppsala', 'Västerås', 'Örebro', 'Linköping', 'Helsingborg', 'Jönköping', 'Norrköping'] },
+  { name: 'Norway', code: 'NO', dial: '47', cities: ['Oslo', 'Bergen', 'Trondheim', 'Stavanger', 'Drammen', 'Fredrikstad', 'Kristiansand', 'Sandnes', 'Tromsø', 'Sarpsborg'] },
+  { name: 'Denmark', code: 'DK', dial: '45', cities: ['Copenhagen', 'Aarhus', 'Odense', 'Aalborg', 'Frederiksberg', 'Esbjerg', 'Randers', 'Kolding', 'Horsens', 'Vejle'] },
+]
