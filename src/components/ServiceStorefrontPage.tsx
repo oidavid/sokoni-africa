@@ -41,6 +41,10 @@ const CATEGORY_HERO: Record<string, string> = {
   digital_services: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=1200&q=80',
   transport: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1200&q=80',
   agriculture: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=1200&q=80',
+  coaching: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1200&q=80',
+  mental_wellness: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=1200&q=80',
+  childcare: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=1200&q=80',
+  food_catering: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=1200&q=80',
 }
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -54,6 +58,10 @@ const CATEGORY_LABEL: Record<string, string> = {
   digital_services: 'Digital & Tech Services',
   transport: 'Transport & Delivery',
   agriculture: 'Agriculture Services',
+  coaching: 'Coaching & Mentoring',
+  mental_wellness: 'Mental Wellness & Counselling',
+  childcare: 'Childcare & Nanny Services',
+  food_catering: 'Food & Catering',
 }
 
 const CATEGORY_TAGLINE: Record<string, string> = {
@@ -67,6 +75,10 @@ const CATEGORY_TAGLINE: Record<string, string> = {
   digital_services: 'Smart tech solutions for your business',
   transport: 'Reliable, on-time delivery and transport',
   agriculture: 'Supporting farmers and agribusiness',
+  coaching: 'Unlock your potential. Transform your life.',
+  mental_wellness: 'Your mind matters. You deserve support.',
+  childcare: 'Safe, caring and trusted childcare for your family.',
+  food_catering: 'Delicious food, beautifully prepared for you.',
 }
 
 function getDuration(name: string): string | null {
@@ -172,6 +184,22 @@ function getPlaceholderReviews(category: string, location: string): Array<{name:
     transport: [
       { name: n1, text: `Very reliable service. Everything arrived on time and in perfect condition. Will definitely use again.` },
       { name: n2, text: `Prompt and professional. Polite, clean and stress-free experience from start to finish. Highly recommend.` },
+    ],
+    coaching: [
+      { name: n1, text: `This coaching changed my life. I came in lost and left with a clear vision and the confidence to actually go for it. Incredible.` },
+      { name: n2, text: `Best investment I've made in myself. The sessions were deep, practical and I saw real results within weeks. Highly recommend.` },
+    ],
+    mental_wellness: [
+      { name: n1, text: `Finally found a space where I felt truly heard. The sessions helped me manage my anxiety in ways I never thought possible.` },
+      { name: n2, text: `Compassionate, professional and genuinely transformational. I came in overwhelmed and left with tools that actually work.` },
+    ],
+    childcare: [
+      { name: n1, text: `My children absolutely love her. She's warm, patient and so reliable. I finally have peace of mind during my working hours.` },
+      { name: n2, text: `Excellent after-school care. Kids are always happy, homework is done and they're well looked after. Couldn't ask for more.` },
+    ],
+    food_catering: [
+      { name: n1, text: `The weekly meal prep has been a total game changer. Fresh, delicious and perfectly portioned. My family loves it.` },
+      { name: n2, text: `Catered our office lunch and everyone was raving about the food. Professional setup, great variety and on time. Will book again!` },
     ],
     agriculture: [
       { name: n1, text: `The installation significantly improved our output. Very professional team and great follow-up support.` },
