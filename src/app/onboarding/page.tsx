@@ -412,6 +412,8 @@ export default function OnboardingPage() {
         business_name: businessName, slug, category, location,
         whatsapp_number: normalizedWa, email, phone: normalizedWa,
         language: lang, business_type: businessType || 'products',
+        theme_color: selectedTheme.primary,
+        theme_preset: selectedTheme.id,
         plan: 'free', is_active: true, login_pin: password,
       }).select('id').single()
 
