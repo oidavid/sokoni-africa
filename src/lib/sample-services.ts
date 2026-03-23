@@ -194,7 +194,7 @@ export const SAMPLE_SERVICES: Record<string, Array<{
     { name: 'After-school Care & Pickup', description: 'Safe after-school pickup and supervision until parents return. Homework help, snacks and structured activities included.', price: 800000, price_display: '₦8,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&q=80' },
     { name: 'Babysitting (Evening / Weekend)', description: 'Reliable babysitting for evenings, date nights and weekends. Caring, fun and experienced. All ages welcome.', price: 500000, price_display: '₦5,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&q=80' },
     { name: 'Homework Help & Study Support', description: 'Patient one-on-one homework assistance for primary and secondary school children. All subjects covered.', price: 500000, price_display: '₦5,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&q=80' },
-    { name: 'Special Needs Childcare', description: 'Experienced carer for children with additional needs. Patient, trained and fully supportive of each each child's unique requirements.', price: 2000000, price_display: '₦20,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&q=80' },
+    { name: 'Special Needs Childcare', description: 'Experienced carer for children with additional needs. Patient, trained and fully supportive of each child with additional needs.', price: 2000000, price_display: '₦20,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&q=80' },
     { name: 'Holiday & Weekend Care', description: 'Fun, safe childcare during school holidays and weekends. Activities, outdoor play and creative learning included.', price: 800000, price_display: '₦8,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&q=80' },
   ],
 
@@ -250,5 +250,6 @@ export function getSampleServices(category: string) {
 export function getSampleServicesBySubcategory(subcategoryId: string) {
   return SAMPLE_SERVICES_BY_SUBCATEGORY[subcategoryId] || []
 }
+
 
 
