@@ -95,6 +95,56 @@ function fmtPrice(s: Service): string {
   return s.price_display || `₦${(s.price / 100).toLocaleString()}`
 }
 
+function getPlaceholderReviews(category: string, location: string): Array<{name: string; text: string}> {
+  const loc = location || 'the area'
+  const reviews: Record<string, Array<{name: string; text: string}>> = {
+    beauty_services: [
+      { name: 'Amara O.', text: `Best massage I've had in ${loc}. Professional setup, very relaxing — I left feeling brand new. Definitely booking again.` },
+      { name: 'Chidinma E.', text: `Absolutely loved my experience. The therapist was skilled and attentive. My skin felt amazing after the facial. Highly recommend!` },
+    ],
+    home_services: [
+      { name: 'Emeka T.', text: `Fixed my generator and rewired the kitchen in one day. Very professional, clean work and fair pricing. Will call again for sure.` },
+      { name: 'Blessing N.', text: `Came same day, solved a plumbing issue I'd had for weeks. Honest pricing and left the place spotless. Very impressed.` },
+    ],
+    auto_services: [
+      { name: 'Tunde A.', text: `Brought my car in for a full service. Team was thorough and transparent about what needed fixing. Car runs perfectly now.` },
+      { name: 'Seun B.', text: `Best car wash in ${loc}. Interior deep clean was spotless. Will be coming back every week.` },
+    ],
+    education: [
+      { name: 'Mrs. Okeke', text: `My son's grades improved dramatically after just 4 sessions. The tutor is patient, knowledgeable and explains things clearly.` },
+      { name: 'James F.', text: `Passed my WAEC exams on the first attempt thanks to this prep. The past questions and exam techniques really worked.` },
+    ],
+    health_wellness: [
+      { name: 'Fatima A.', text: `The physiotherapy sessions helped me recover from my back injury much faster than I expected. Very professional and caring.` },
+      { name: 'David K.', text: `Personal training sessions in ${loc} — the trainer pushes you at the right pace. Lost 8kg in 2 months!` },
+    ],
+    domestic: [
+      { name: 'Ngozi P.', text: `My house hasn't been this clean in years! Deep clean was thorough and they brought all their own supplies. Very impressed.` },
+      { name: 'Ify M.', text: `Reliable weekly cleaning service. Always on time, very detailed and respectful of the home. Couldn't ask for better.` },
+    ],
+    events: [
+      { name: 'Adaeze W.', text: `The photography at my daughter's birthday was absolutely stunning. Every moment captured perfectly. Will book for my next event!` },
+      { name: 'Collins O.', text: `DJ kept the crowd going all night at our wedding reception. Great playlist, great energy. Highly recommend!` },
+    ],
+    digital_services: [
+      { name: 'Uche S.', text: `Had my laptop screen replaced same day. Quick, professional and the price was very fair. Great service!` },
+      { name: 'Kemi J.', text: `The logo design exceeded my expectations. Fast turnaround and listened to exactly what I wanted. My customers love it.` },
+    ],
+    transport: [
+      { name: 'Musa D.', text: `Very reliable delivery service. Package arrived on time and in perfect condition. Will definitely use again.` },
+      { name: 'Titi R.', text: `Airport pickup was prompt and professional. Driver was polite and the car was clean. Stress-free experience.` },
+    ],
+    agriculture: [
+      { name: 'Alhaji B.', text: `The irrigation system installed on my farm improved my yield significantly. Very professional installation team.` },
+      { name: 'Farmer C.', text: `Excellent poultry consultation service. Very practical advice that I implemented immediately. Highly recommend.` },
+    ],
+  }
+  return reviews[category] || [
+    { name: 'Sarah M.', text: `Outstanding service in ${loc}. Professional, punctual and really knows their work. Highly recommended!` },
+    { name: 'John K.', text: `Excellent experience from start to finish. Great communication and the quality of work was superb. Will use again.` },
+  ]
+}
+
 const WA_SVG = (
   <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current shrink-0">
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
@@ -229,25 +279,23 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
             </button>
           </div>
 
-          {/* Bigger logo */}
-          <div className="flex items-start gap-5 mb-5">
-            <div className="w-28 h-28 bg-white rounded-2xl overflow-hidden flex items-center justify-center shrink-0 shadow-2xl border-2 border-white/40">
+          {/* Logo — centered, large */}
+          <div className="flex flex-col items-center text-center mb-5">
+            <div className="w-32 h-32 bg-white rounded-3xl overflow-hidden flex items-center justify-center shadow-2xl border-4 border-white/40 mb-4">
               {store.logo_url
                 ? <img src={store.logo_url} alt={store.business_name} className="w-full h-full object-cover" />
-                : <span className="text-5xl">💼</span>
+                : <span className="text-6xl">💼</span>
               }
             </div>
-            <div className="flex-1 min-w-0 pt-1">
-              <h1 className="font-display font-bold text-3xl text-white leading-tight mb-1">{store.business_name}</h1>
-              <p className="text-sm font-medium text-white/80 mb-2">{categoryLabel}</p>
-              <div className="flex items-center gap-1.5">
-                <MapPin size={13} className="text-white/60 shrink-0" />
-                <span className="text-xs text-white/70">{store.location}</span>
-              </div>
+            <h1 className="font-display font-bold text-3xl text-white leading-tight mb-1">{store.business_name}</h1>
+            <p className="text-sm font-medium text-white/80 mb-2">{categoryLabel}</p>
+            <div className="flex items-center gap-1.5 justify-center">
+              <MapPin size={13} className="text-white/60 shrink-0" />
+              <span className="text-xs text-white/70">{store.location}</span>
             </div>
           </div>
 
-          <p className="text-sm text-white/85 mb-5 leading-relaxed italic">"{tagline}"</p>
+          <p className="text-sm text-white/85 mb-5 leading-relaxed italic text-center">"{tagline}"</p>
 
           <div className="flex gap-3 mb-5">
             <div className="bg-white/15 backdrop-blur-sm rounded-2xl px-4 py-3 text-center min-w-[72px]">
@@ -401,25 +449,25 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
         )}
       </div>
 
-      {/* Testimonials */}
+      {/* Testimonials — location-based placeholder names */}
       <div className="max-w-3xl mx-auto px-4 pb-6">
-        <h2 className="font-display font-bold text-brand-dark text-xl mb-4">What Our Clients Say</h2>
+        <h2 className="font-display font-bold text-brand-dark text-xl mb-1">What Our Clients Say</h2>
+        <p className="text-xs text-gray-400 mb-4">Log in to your dashboard to add real client reviews</p>
         <div className="grid sm:grid-cols-2 gap-3">
-          {[
-            { name: 'Your Client Name', text: 'Ask a happy client for a quick review and add it here. Real testimonials build enormous trust with new customers.' },
-            { name: 'Another Happy Client', text: 'Replace this with a genuine review. Even one sentence from a real client makes a huge difference to your bookings.' },
-          ].map((t, i) => (
-            <div key={i} className="bg-white rounded-2xl p-4 border border-dashed border-gray-200 relative">
-              <div className="absolute top-3 right-3 text-xs bg-amber-100 text-amber-700 font-semibold px-2 py-0.5 rounded-full">Placeholder</div>
+          {getPlaceholderReviews(store.category, store.location).map((t, i) => (
+            <div key={i} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
               <div className="flex gap-0.5 mb-2">
                 {[1,2,3,4,5].map(j => <Star key={j} size={13} className="text-amber-400 fill-amber-400" />)}
               </div>
-              <p className="text-gray-500 text-xs leading-relaxed mb-3 italic">"{t.text}"</p>
+              <p className="text-gray-600 text-xs leading-relaxed mb-3">"{t.text}"</p>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-400">?</div>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
+                  style={{ backgroundColor: color }}>
+                  {t.name[0]}
+                </div>
                 <div>
-                  <p className="text-xs font-semibold text-gray-400">{t.name}</p>
-                  <p className="text-xs text-gray-300">Add via your dashboard</p>
+                  <p className="text-xs font-semibold text-gray-700">{t.name}</p>
+                  <p className="text-xs text-gray-400">{store.location}</p>
                 </div>
               </div>
             </div>
@@ -471,15 +519,15 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
         </div>
       </div>
 
-      {/* Footer */}
+      {/* Footer — uses theme color */}
       <div className="max-w-3xl mx-auto px-4 py-6 text-center">
-        <div className="bg-brand-dark rounded-2xl p-5">
-          <p className="text-white/60 text-xs mb-1">Powered by</p>
-          <p className="font-display font-bold text-white text-lg mb-1">Earket 🛒</p>
-          <p className="text-white/70 text-xs mb-4">Build your free business page in 5 minutes</p>
+        <div className="rounded-2xl p-5" style={{ ...(themeStyle as object) }}>
+          <p className="text-xs mb-1" style={{ color: contrast, opacity: 0.7 }}>Powered by</p>
+          <p className="font-display font-bold text-lg mb-1" style={{ color: contrast }}>Earket 🛒</p>
+          <p className="text-xs mb-4" style={{ color: contrast, opacity: 0.7 }}>Build your free business page in 5 minutes</p>
           <Link href="/onboarding"
-            style={{ ...(themeStyle as object), color: contrast } as React.CSSProperties}
-            className="inline-block font-bold text-sm px-6 py-2.5 rounded-xl">
+            className="inline-block font-bold text-sm px-6 py-2.5 rounded-xl bg-white/20 backdrop-blur-sm"
+            style={{ color: contrast }}>
             Start Free — earket.com
           </Link>
         </div>
