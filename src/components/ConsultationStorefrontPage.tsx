@@ -210,7 +210,8 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
   )
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((store.address || store.business_name) + ' ' + store.location)}`
   const bookMsg = `Hi ${store.business_name}! I'd like to book a free discovery call. Please let me know your availability.`
-  const personalDescription = store.description || `${store.business_name} is a trusted ${categoryLabel.toLowerCase()} based in ${store.location}. We are passionate about helping our clients achieve meaningful, lasting results.`
+  const locationStr = store.location ? ` based in ${store.location}` : ''
+  const personalDescription = store.description || `${store.business_name} is a trusted ${categoryLabel.toLowerCase()}${locationStr}. We are passionate about helping our clients achieve meaningful, lasting results.`
 
   function shareStore() {
     if (navigator.share) navigator.share({ title: store?.business_name, url: window.location.href })
@@ -254,62 +255,72 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
         </div>
       )}
 
-      {/* ── HERO ── */}
-      <div className="relative min-h-[420px] flex flex-col justify-end overflow-hidden" style={themeStyle as React.CSSProperties}>
+      {/* ── NAVBAR ── */}
+      <nav className="relative z-20 flex items-center justify-between px-4 py-4 max-w-3xl mx-auto w-full">
+        <div className="flex items-center gap-3">
+          {store.logo_url
+            ? <img src={store.logo_url} alt={store.business_name} className="w-10 h-10 rounded-xl object-contain bg-white shadow-sm" />
+            : <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-sm" style={themeStyle as React.CSSProperties}>💼</div>
+          }
+          <div>
+            <p className="font-display font-bold text-sm text-gray-900 leading-tight">{store.business_name}</p>
+            <p className="text-xs text-gray-500">{categoryLabel}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(bookMsg)}`}
+            target="_blank" rel="noreferrer"
+            className="hidden sm:flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-xl text-white"
+            style={themeStyle as React.CSSProperties}>
+            {WA_SVG} Book a Call
+          </a>
+          <button onClick={shareStore} className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center text-gray-500 hover:bg-gray-200">
+            <Share2 size={15} />
+          </button>
+        </div>
+      </nav>
+
+      {/* ── HERO ── Clean minimal, full-width image, one headline ── */}
+      <div className="relative overflow-hidden" style={{ minHeight: '480px' }}>
         {heroImage && (
           <div className="absolute inset-0">
-            <img src={heroImage} alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ ...(themeStyle as object), opacity: 0.75 }} />
+            <img src={heroImage} alt="" className="w-full h-full object-cover object-top" />
+            {/* Light gradient — dark at bottom, mostly transparent at top */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/75" />
           </div>
         )}
-        <div className="relative max-w-3xl mx-auto px-4 pt-6 pb-8 w-full">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1.5">
-              <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse" />
-              <span className="text-xs font-semibold text-white">Accepting new clients</span>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={shareStore} className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center text-white"><Share2 size={16} /></button>
-            </div>
+        {/* Accepting badge */}
+        <div className="relative px-4 pt-4 flex justify-end max-w-3xl mx-auto">
+          <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1.5">
+            <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse" />
+            <span className="text-xs font-semibold text-white">Accepting new clients</span>
           </div>
+        </div>
 
-          {/* Logo / Profile */}
-          <div className="flex flex-col items-center text-center mb-6">
-            {store.logo_url ? (
-              <div className="mb-4" style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.4))' }}>
-                <img src={store.logo_url} alt={store.business_name} className="w-36 h-36 rounded-2xl object-contain" />
-              </div>
-            ) : (
-              <div className="w-36 h-36 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4 shadow-2xl">
-                <span className="text-7xl">💼</span>
-              </div>
-            )}
-            <p className="text-xs font-semibold text-white/70 uppercase tracking-widest mb-2">{categoryLabel}</p>
-            <h1 className="font-display font-bold text-3xl text-white leading-tight mb-1">{store.business_name}</h1>
-            <div className="flex items-center gap-1.5 justify-center">
-              <MapPin size={13} className="text-white/60 shrink-0" />
-              <span className="text-xs text-white/70">{store.location}</span>
-            </div>
-          </div>
-
-          {/* Hero headline */}
-          <div className="text-center mb-6">
-            <h2 className="font-display font-bold text-2xl text-white leading-tight mb-2">{headline}</h2>
-            <p className="text-sm text-white/80 leading-relaxed">{subheadline}</p>
-          </div>
-
-          {/* Hero CTAs */}
-          <div className="flex flex-col gap-3">
+        {/* Hero text — bottom aligned, clean */}
+        <div className="relative flex flex-col items-center justify-end text-center px-6 pb-12 pt-24 max-w-3xl mx-auto">
+          <h1 className="font-display font-bold text-white leading-tight mb-3"
+            style={{ fontSize: 'clamp(1.75rem, 5vw, 2.75rem)' }}>
+            {headline}
+          </h1>
+          <p className="text-white/85 text-sm sm:text-base leading-relaxed mb-8 max-w-md">
+            {personalDescription.length > 120 ? subheadline : personalDescription}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
             <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(bookMsg)}`}
               target="_blank" rel="noreferrer"
-              className="flex items-center justify-center gap-2 bg-white font-bold py-4 rounded-2xl text-sm shadow-lg"
+              className="flex-1 flex items-center justify-center gap-2 bg-white font-bold py-4 rounded-2xl text-sm shadow-xl"
               style={{ color }}>
-              {WA_SVG} Book a Free Discovery Call
+              {WA_SVG} Book a Free Call
             </a>
             <a href={`tel:+${waNumber}`}
-              className="flex items-center justify-center gap-2 bg-white/20 backdrop-blur-sm text-white font-semibold py-3 rounded-2xl text-sm">
-              <Phone size={16} /> Call Us
+              className="flex items-center justify-center gap-2 bg-white/25 backdrop-blur-sm border border-white/30 text-white font-semibold py-4 px-5 rounded-2xl text-sm">
+              <Phone size={16} /> Call
             </a>
+          </div>
+          <div className="flex items-center gap-1.5 mt-4">
+            <MapPin size={12} className="text-white/50 shrink-0" />
+            <span className="text-xs text-white/60">{store.location}</span>
           </div>
         </div>
       </div>
