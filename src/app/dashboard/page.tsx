@@ -25,6 +25,7 @@ interface Product {
   price: number
   price_display: string
   in_stock: boolean
+  image_url?: string
 }
 
 const CATEGORY_EMOJI: Record<string, string> = {
@@ -407,3 +408,4 @@ export default function DashboardPage() {
     </div>
   )
 }
+
