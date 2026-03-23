@@ -200,7 +200,8 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
               <p className="text-gray-600 text-sm leading-relaxed mb-5">{selectedService.description}</p>
               <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(`Hi ${store.business_name}! I'd like to book: ${selectedService.name} (${fmtPrice(selectedService)}). Please confirm availability.`)}`}
                 target="_blank" rel="noreferrer"
-                className="w-full flex items-center justify-center gap-2 bg-[#25D366] text-white font-bold py-4 rounded-2xl text-sm mb-2">
+                style={{ backgroundColor: color, color: contrast }}
+                className="w-full flex items-center justify-center gap-2 font-bold py-4 rounded-2xl text-sm mb-2">
                 {WA_SVG} Book This Now on WhatsApp
               </a>
               <button onClick={() => setSelectedService(null)} className="w-full text-sm text-gray-400 font-medium py-2">
@@ -272,7 +273,8 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
           <div className="flex gap-3">
             <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(bookMsg)}`}
               target="_blank" rel="noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 bg-[#25D366] text-white font-bold py-3.5 rounded-2xl text-sm shadow-lg">
+              style={{ backgroundColor: color, color: contrast }}
+            className="flex-1 flex items-center justify-center gap-2 font-bold py-3.5 rounded-2xl text-sm shadow-lg">
               {WA_SVG} Book via WhatsApp
             </a>
             <a href={`tel:+${waNumber}`}
@@ -343,7 +345,8 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
                         </button>
                         <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(`Hi ${store.business_name}! I'd like to book: ${service.name}. Please confirm availability.`)}`}
                           target="_blank" rel="noreferrer"
-                          className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold py-2 rounded-xl bg-[#25D366] text-white">
+                          style={{ backgroundColor: color, color: contrast }}
+                          className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold py-2 rounded-xl">
                           {WA_SVG} Book Now
                         </a>
                       </div>

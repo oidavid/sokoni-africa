@@ -246,10 +246,13 @@ export default function OnboardingPage() {
   const [showOtherCity, setShowOtherCity] = useState(false)
   const [selectedTheme, setSelectedTheme] = useState<EarketTheme>(EARKET_THEMES[0])
   const [selectedSubcategories, setSelectedSubcategories] = useState<Set<string>>(new Set())
-  const [customServices, setCustomServices] = useState<string[]>([])
+  const [customServices, setCustomServices] = useState<Array<{name: string; description: string; price: number; price_display: string}>>([])
   const [customServiceInput, setCustomServiceInput] = useState('')
   const [isListening, setIsListening] = useState(false)
   const recognitionRef = useRef<any>(null)
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [isDescribing, setIsDescribing] = useState(false)
+  const [showSuggestions, setShowSuggestions] = useState(false)
 
   const pid = lang === 'pid'
   const rawSampleItems = category ? (businessType === 'services' ? getSampleServices(category) : getSampleProducts(category)) : []
@@ -308,13 +311,11 @@ export default function OnboardingPage() {
   }
 
   function addCustomService() {
-    const val = customServiceInput.trim()
-    if (val && !customServices.includes(val)) setCustomServices(prev => [...prev, val])
-    setCustomServiceInput('')
+    addCustomServiceWithDescription(customServiceInput)
   }
 
-  function removeCustomService(s: string) {
-    setCustomServices(prev => prev.filter(x => x !== s))
+  function removeCustomService(name: string) {
+    setCustomServices(prev => prev.filter(x => x.name !== name))
   }
 
   function startVoice() {
@@ -336,17 +337,82 @@ export default function OnboardingPage() {
 
   function stopVoice() { recognitionRef.current?.stop(); setIsListening(false) }
 
+  // Common service suggestions per category for dropdown
+  const SERVICE_SUGGESTIONS: Record<string, string[]> = {
+    beauty_services: ['Deep Tissue Massage', 'Hot Stone Massage', 'Swedish Massage', 'Prenatal Massage', 'Couples Massage', 'Sports Massage', 'Aromatherapy Massage', 'Reflexology', 'Lash Lift', 'Lash Extensions', 'Microblading', 'Brazilian Wax', 'Hot Wax', 'Eyebrow Wax', 'Threading', 'Gele Tying', 'Balayage', 'Highlights', 'Keratin Treatment', 'Hair Colour', 'Gel Polish', 'Nail Art', 'Acrylic Nails', 'Dip Powder Nails', 'Beard Trim', 'Kids Haircut'],
+    home_services: ['Roof Repair', 'False Ceiling', 'POP Ceiling', 'CCTV Installation', 'Intercom Installation', 'Borehole Drilling', 'Septic Tank Cleaning', 'Window Installation', 'Door Installation', 'Wallpaper Installation'],
+    auto_services: ['Car Tinting', 'Wheel Alignment', 'Radiator Repair', 'AC Gas Recharge', 'Suspension Repair', 'Clutch Replacement', 'Gearbox Repair', 'Car Wrapping', 'Upholstery Repair'],
+    events: ['Candy Cart', 'Photo Booth', 'Balloon Decoration', 'Chair & Table Rental', 'Generator Hire', 'Ushers & Protocol', 'Security Services', 'Makeup for Events'],
+    digital_services: ['WhatsApp Business Setup', 'Website Design', 'Email Marketing', 'Video Editing', 'Content Writing', 'SEO Services', 'Branding Package', 'Business Card Design'],
+    domestic: ['Fumigation', 'Carpet Cleaning', 'Window Cleaning', 'Upholstery Cleaning', 'Fridge Cleaning', 'Post-Construction Cleaning'],
+    health_wellness: ['Blood Pressure Check', 'Blood Sugar Test', 'Antenatal Care', 'Weight Loss Programme', 'Yoga Classes', 'Pilates', 'Meditation Sessions'],
+    transport: ['Interstate Travel', 'Charter Service', 'Event Shuttle', 'Haulage Service', 'Fuel Delivery'],
+    education: ['SAT Prep', 'IELTS Preparation', 'Creative Writing', 'Drama & Acting', 'Art Classes', 'Dance Lessons'],
+    agriculture: ['Crop Disease Diagnosis', 'Soil Testing', 'Crop Spraying', 'Animal Feed Supply', 'Greenhouse Setup'],
+  }
+
+  function getServiceSuggestions(input: string): string[] {
+    const all = SERVICE_SUGGESTIONS[category] || []
+    if (!input.trim()) return all.slice(0, 8)
+    const lower = input.toLowerCase()
+    return all.filter(s => s.toLowerCase().includes(lower)).slice(0, 6)
+  }
+
+  async function handleCustomInputChange(val: string) {
+    setCustomServiceInput(val)
+    if (val.length >= 2) {
+      const sugg = getServiceSuggestions(val)
+      setSuggestions(sugg)
+      setShowSuggestions(sugg.length > 0)
+    } else if (val.length === 0) {
+      setSuggestions(getServiceSuggestions(''))
+      setShowSuggestions(true)
+    } else {
+      setShowSuggestions(false)
+    }
+  }
+
+  async function addCustomServiceWithDescription(name: string) {
+    const trimmed = name.trim()
+    if (!trimmed || customServices.some(s => s.name === trimmed)) return
+    setShowSuggestions(false)
+    setCustomServiceInput('')
+    setIsDescribing(true)
+    try {
+      const res = await fetch('/api/services/describe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: trimmed, category })
+      })
+      const data = await res.json()
+      setCustomServices(prev => [...prev, {
+        name: trimmed,
+        description: data.description || `Professional ${trimmed} service.`,
+        price: data.price || 1000000,
+        price_display: data.price_display || '₦10,000',
+      }])
+    } catch {
+      setCustomServices(prev => [...prev, {
+        name: trimmed,
+        description: `Professional ${trimmed} service. Contact us via WhatsApp to book.`,
+        price: 1000000,
+        price_display: '₦10,000',
+      }])
+    }
+    setIsDescribing(false)
+  }
+
   function getFilteredServices() {
     const allServices = getSampleServices(category)
 
     // Build custom entries first so we can dedup against them too
-    const customEntries = customServices.map(name => ({
-      name,
-      description: `Professional ${name} service. Contact us via WhatsApp to book your appointment.`,
-      price: 500000,
-      price_display: '₦5,000',
+    const customEntries = customServices.map(s => ({
+      name: s.name,
+      description: s.description,
+      price: s.price,
+      price_display: s.price_display,
       in_stock: true,
-      image_url: getCustomServiceImage(name),
+      image_url: getCustomServiceImage(s.name),
     }))
 
     if (selectedSubcategories.size === 0 && customServices.length === 0) {
@@ -715,9 +781,9 @@ export default function OnboardingPage() {
               {customServices.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-3">
                   {customServices.map(s => (
-                    <span key={s} className="flex items-center gap-1.5 bg-brand-green text-white text-xs font-semibold px-3 py-1.5 rounded-full">
-                      {s}
-                      <button onClick={() => removeCustomService(s)} className="hover:opacity-70"><X size={12} /></button>
+                    <span key={s.name} className="flex items-center gap-1.5 bg-brand-green text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+                      {s.name}
+                      <button onClick={() => removeCustomService(s.name)} className="hover:opacity-70"><X size={12} /></button>
                     </span>
                   ))}
                 </div>
@@ -727,22 +793,43 @@ export default function OnboardingPage() {
                 <p className="text-xs font-semibold text-gray-500 mb-2">
                   {pid ? '➕ Add service wey no dey above' : '➕ Add a service not listed above'}
                 </p>
-                <div className="flex gap-2">
-                  <input type="text" value={customServiceInput}
-                    onChange={e => setCustomServiceInput(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomService() } }}
-                    placeholder="e.g. Deep Tissue Massage"
-                    className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-brand-green" />
-                  <button onClick={isListening ? stopVoice : startVoice}
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-100 text-gray-500 hover:bg-brand-light hover:text-brand-green'}`}
-                    title={isListening ? 'Stop recording' : 'Speak your service'}>
-                    {isListening ? <MicOff size={16} /> : <Mic size={16} />}
-                  </button>
-                  <button onClick={addCustomService} disabled={!customServiceInput.trim()}
-                    className="w-9 h-9 rounded-xl bg-brand-green text-white flex items-center justify-center shrink-0 disabled:opacity-30">
-                    <Plus size={16} />
-                  </button>
+                <div className="relative">
+                  <div className="flex gap-2">
+                    <input type="text" value={customServiceInput}
+                      onChange={e => handleCustomInputChange(e.target.value)}
+                      onFocus={() => { setSuggestions(getServiceSuggestions(customServiceInput)); setShowSuggestions(true) }}
+                      onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomService() } }}
+                      placeholder="e.g. Hot Stone Massage — or pick below"
+                      className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-brand-green" />
+                    <button onClick={isListening ? stopVoice : startVoice}
+                      className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-100 text-gray-500 hover:bg-brand-light hover:text-brand-green'}`}>
+                      {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+                    </button>
+                    <button onClick={addCustomService} disabled={!customServiceInput.trim() || isDescribing}
+                      className="w-9 h-9 rounded-xl bg-brand-green text-white flex items-center justify-center shrink-0 disabled:opacity-30">
+                      {isDescribing ? <Loader2 size={14} className="animate-spin" /> : <Plus size={16} />}
+                    </button>
+                  </div>
+                  {/* Smart suggestions dropdown */}
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 max-h-40 overflow-y-auto">
+                      {suggestions.map(sugg => (
+                        <button key={sugg} onMouseDown={() => addCustomServiceWithDescription(sugg)}
+                          className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-brand-light hover:text-brand-green flex items-center gap-2 transition-colors">
+                          <span className="text-base">✨</span>
+                          {sugg}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
+                {isDescribing && (
+                  <p className="text-xs text-brand-green font-medium mt-1.5 flex items-center gap-1">
+                    <span className="w-2 h-2 bg-brand-green rounded-full animate-pulse inline-block" />
+                    Writing a professional description for you...
+                  </p>
+                )}
                 {isListening && (
                   <p className="text-xs text-red-500 font-medium mt-1.5 flex items-center gap-1">
                     <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse inline-block" />
@@ -771,7 +858,7 @@ export default function OnboardingPage() {
                 </p>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                {(COUNTRY_LIST.find(c => c.dial === selectedCountry.dial)?.cities || ['Lagos', 'Abuja', 'Port Harcourt', 'Kano', 'Ibadan', 'Benin City', 'Other']).concat(['Other']).filter((v, i, a) => a.indexOf(v) === i).map(loc => (
+                {(COUNTRY_LIST.find(c => c.code === selectedCountry.code)?.cities || ['Lagos', 'Abuja', 'Port Harcourt', 'Kano', 'Ibadan', 'Benin City', 'Other']).concat(['Other']).filter((v, i, a) => a.indexOf(v) === i).map(loc => (
                   <button key={loc} onMouseDown={e => e.preventDefault()} onClick={() => { setLocation(loc === 'Other' ? '' : loc); if (loc === 'Other') setCustomCity('') }}
                     className={`py-2.5 px-3 rounded-xl border-2 text-xs font-semibold transition-all ${(loc === 'Other' ? location === '' : location === loc) ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600 hover:border-brand-green/50'}`}>
                     {loc}
