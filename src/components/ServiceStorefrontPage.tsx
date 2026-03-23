@@ -17,7 +17,6 @@ interface Merchant {
   logo_url: string | null
   business_type?: string
   theme_preset?: string
-  theme_color?: string
 }
 
 interface Service {
