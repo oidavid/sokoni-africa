@@ -321,11 +321,13 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
           {/* Logo — centered, large */}
           <div className="flex flex-col items-center text-center mb-5">
             {store.logo_url ? (
-              <div className="w-40 h-40 rounded-full overflow-hidden mb-4 shadow-2xl ring-4 ring-white/40">
-                <img src={store.logo_url} alt={store.business_name} className="w-full h-full object-cover" />
+              <div className="mb-4" style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.4))' }}>
+                <img src={store.logo_url} alt={store.business_name}
+                  className="w-36 h-36 rounded-2xl object-contain"
+                  style={{ background: 'transparent' }} />
               </div>
             ) : (
-              <div className="w-40 h-40 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4 shadow-2xl ring-4 ring-white/40">
+              <div className="w-36 h-36 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4 shadow-2xl">
                 <span className="text-7xl">💼</span>
               </div>
             )}
@@ -548,24 +550,26 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
           </div>
         </div>
 
-        {/* Map embed — OpenStreetMap, free, no API key needed */}
-        <a href={mapsUrl} target="_blank" rel="noreferrer" className="mt-3 block rounded-2xl overflow-hidden border border-gray-200 hover:opacity-95 transition-opacity">
+        {/* Map — Google Maps embed search, free no API key needed */}
+        <a href={mapsUrl} target="_blank" rel="noreferrer"
+          className="mt-3 block rounded-2xl overflow-hidden border border-gray-200 hover:opacity-95 transition-opacity">
           <iframe
-            title="Business location"
+            title="Business location map"
             width="100%"
-            height="180"
+            height="200"
             loading="lazy"
             style={{ border: 0, display: 'block' }}
-            src={`https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent('-180,-90,180,90')}&layer=mapnik&marker=&query=${encodeURIComponent((store.address || store.business_name) + ' ' + store.location)}`}
+            src={`https://maps.google.com/maps?q=${encodeURIComponent((store.address || store.business_name) + ' ' + store.location)}&output=embed&z=15`}
+            allowFullScreen
           />
           <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-100">
-            <div className="flex items-center gap-2">
-              <MapPin size={14} style={{ color }} />
-              <span className="text-xs font-semibold text-gray-700 truncate max-w-[220px]">
+            <div className="flex items-center gap-2 min-w-0">
+              <MapPin size={14} style={{ color }} className="shrink-0" />
+              <span className="text-xs font-semibold text-gray-700 truncate">
                 {store.address || store.location}
               </span>
             </div>
-            <span className="text-xs font-semibold flex items-center gap-1 shrink-0" style={{ color }}>
+            <span className="text-xs font-semibold flex items-center gap-1 shrink-0 ml-2" style={{ color }}>
               Open Maps <ExternalLink size={10} />
             </span>
           </div>
