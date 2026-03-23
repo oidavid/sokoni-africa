@@ -7,8 +7,9 @@ import { getSampleProducts } from '@/lib/sample-products'
 import { getSampleServices, getSampleServicesBySubcategory } from '@/lib/sample-services'
 import { COUNTRIES, normalizeNumber } from '@/lib/countries'
 import { COUNTRY_LIST } from '@/lib/countries-cities'
+import { EARKET_THEMES, getThemeStyle, type EarketTheme } from '@/lib/themes'
 
-type Step = 'language' | 'business' | 'whatsapp' | 'email' | 'password' | 'biztype' | 'category' | 'subcategory' | 'location' | 'products' | 'generating' | 'done'
+type Step = 'language' | 'business' | 'whatsapp' | 'email' | 'password' | 'biztype' | 'category' | 'subcategory' | 'location' | 'theme' | 'products' | 'generating' | 'done'
 
 const CATEGORIES = [
   { id: 'food', label: 'Food & Drinks', emoji: '🍱', pidgin: 'Food & Drink' },
@@ -243,6 +244,7 @@ export default function OnboardingPage() {
   const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set())
   const [customCity, setCustomCity] = useState('')
   const [showOtherCity, setShowOtherCity] = useState(false)
+  const [selectedTheme, setSelectedTheme] = useState<EarketTheme>(EARKET_THEMES[0])
   const [selectedSubcategories, setSelectedSubcategories] = useState<Set<string>>(new Set())
   const [customServices, setCustomServices] = useState<string[]>([])
   const [customServiceInput, setCustomServiceInput] = useState('')
@@ -292,7 +294,8 @@ export default function OnboardingPage() {
     password: 'email', biztype: 'password', category: 'biztype',
     subcategory: 'category',
     location: businessType === 'services' ? 'subcategory' : 'category',
-    products: 'location',
+    theme: 'location',
+    products: 'theme',
   }
 
   function toggleProduct(i: number) {
@@ -457,7 +460,13 @@ export default function OnboardingPage() {
         setError(pid ? `"${businessName}" don already exist for ${location}. Abeg choose different name.` : `"${businessName}" already exists in ${location}. Please choose a different business name.`)
         setStep('business'); return
       }
-      if (businessType === 'services') { handleGenerate(); return }
+      // Always go to theme selection after location
+      setStep('theme')
+    } else if (step === 'theme') {
+      if (businessType === 'services') {
+        handleGenerate()
+        return
+      }
       setSelectedProducts(new Set(getSampleProducts(category).map((_, i) => i)))
       setStep('products')
     } else if (step === 'products') {
@@ -466,8 +475,8 @@ export default function OnboardingPage() {
   }
 
   const stepsList = businessType === 'services'
-    ? ['business', 'whatsapp', 'email', 'password', 'biztype', 'category', 'subcategory', 'location']
-    : ['business', 'whatsapp', 'email', 'password', 'biztype', 'category', 'location', 'products']
+    ? ['business', 'whatsapp', 'email', 'password', 'biztype', 'category', 'subcategory', 'location', 'theme']
+    : ['business', 'whatsapp', 'email', 'password', 'biztype', 'category', 'location', 'theme', 'products']
 
   const currentSubcats = SERVICE_SUBCATEGORIES[category] || []
   const totalSelected = selectedSubcategories.size + customServices.length
@@ -747,6 +756,54 @@ export default function OnboardingPage() {
                   placeholder="Type your city or town — press Enter when done"
                   className="mt-3 w-full border-2 border-brand-green rounded-xl px-4 py-3 text-sm focus:outline-none" />
               )}
+            </div>
+          )}
+
+
+          {/* Theme picker step */}
+          {step === 'theme' && (
+            <div className="animate-fade-in">
+              <h2 className="font-display text-xl font-bold text-brand-dark mb-1">
+                {pid ? 'Choose your brand colour' : 'Choose your brand theme'}
+              </h2>
+              <p className="text-gray-500 text-sm mb-5">
+                {pid ? 'Pick the colour wey go fit your business. You fit change am later.' : 'Pick a theme that fits your business. You can change it anytime.'}
+              </p>
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                {EARKET_THEMES.map(theme => (
+                  <button key={theme.id} onClick={() => setSelectedTheme(theme)}
+                    className={`relative rounded-2xl overflow-hidden border-2 transition-all ${
+                      selectedTheme.id === theme.id ? 'border-brand-green scale-105 shadow-lg' : 'border-gray-200 hover:border-gray-300'
+                    }`}>
+                    {/* Colour preview bar */}
+                    <div className="h-10 w-full" style={getThemeStyle(theme)} />
+                    {/* Theme name */}
+                    <div className="bg-white px-2 py-1.5 text-center">
+                      <p className="text-xs font-semibold text-gray-700 leading-tight">{theme.emoji} {theme.name}</p>
+                      <p className="text-xs text-gray-400 leading-tight truncate">{theme.bestFor.split(',')[0]}</p>
+                    </div>
+                    {selectedTheme.id === theme.id && (
+                      <div className="absolute top-1 right-1 w-5 h-5 bg-brand-green rounded-full flex items-center justify-center">
+                        <svg viewBox="0 0 12 10" className="w-3 h-3"><path d="M1 5l3 4L11 1" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+              {/* Selected theme preview */}
+              <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
+                <div className="h-16 flex items-center px-4 gap-3" style={getThemeStyle(selectedTheme)}>
+                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl">💼</div>
+                  <div>
+                    <p className="font-display font-bold text-sm" style={{ color: selectedTheme.textOnPrimary }}>{businessName || 'Your Business'}</p>
+                    <p className="text-xs opacity-70" style={{ color: selectedTheme.textOnPrimary }}>{location || 'Your City'}</p>
+                  </div>
+                </div>
+                <div className="bg-white px-4 py-2 flex items-center justify-between">
+                  <span className="text-xs text-gray-500">{selectedTheme.name} theme</span>
+                  <span className="text-xs text-gray-400">Can be changed in Settings</span>
+                </div>
+              </div>
             </div>
           )}
 

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ShoppingBag, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil, ShoppingCart, TrendingUp, BarChart2, CreditCard, Sparkles } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { getThemeById, getThemeStyle, EARKET_THEMES, type EarketTheme } from '@/lib/themes'
 
 interface Merchant {
   id: string
@@ -14,6 +15,8 @@ interface Merchant {
   category: string
   email: string
   business_type?: string
+  theme_preset?: string
+  theme_color?: string
 }
 
 interface Product {
@@ -43,6 +46,8 @@ export default function DashboardPage() {
   const [newOrderCount, setNewOrderCount] = useState(0)
   const [refreshingServices, setRefreshingServices] = useState(false)
   const [refreshDone, setRefreshDone] = useState(false)
+  const [showThemePicker, setShowThemePicker] = useState(false)
+  const [savingTheme, setSavingTheme] = useState(false)
 
   const loadData = useCallback(async (showRefresh = false) => {
     if (showRefresh) setRefreshing(true)
@@ -96,6 +101,18 @@ export default function DashboardPage() {
     return `₦${(p.price / 100).toLocaleString()}`
   }
 
+  async function saveTheme(theme: EarketTheme) {
+    if (!merchant) return
+    setSavingTheme(true)
+    await supabase.from('merchants').update({
+      theme_color: theme.primary,
+      theme_preset: theme.id,
+    }).eq('id', merchant.id)
+    setMerchant(prev => prev ? { ...prev, theme_color: theme.primary, theme_preset: theme.id } : prev)
+    setSavingTheme(false)
+    setShowThemePicker(false)
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -134,6 +151,37 @@ export default function DashboardPage() {
           </button>
         </div>
       </nav>
+
+      {/* Theme picker modal */}
+      {showThemePicker && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setShowThemePicker(false)} />
+          <div className="relative w-full max-w-sm bg-white rounded-3xl overflow-hidden shadow-2xl p-5">
+            <h3 className="font-display font-bold text-brand-dark text-lg mb-1">Change Theme</h3>
+            <p className="text-gray-500 text-xs mb-4">Pick a new colour theme for your business page</p>
+            <div className="grid grid-cols-3 gap-2 mb-4 max-h-72 overflow-y-auto">
+              {EARKET_THEMES.map(theme => (
+                <button key={theme.id} onClick={() => saveTheme(theme)}
+                  disabled={savingTheme}
+                  className={`relative rounded-2xl overflow-hidden border-2 transition-all ${
+                    merchant?.theme_preset === theme.id ? 'border-brand-green scale-105 shadow-lg' : 'border-gray-200 hover:border-gray-300'
+                  }`}>
+                  <div className="h-10 w-full" style={getThemeStyle(theme)} />
+                  <div className="bg-white px-2 py-1.5 text-center">
+                    <p className="text-xs font-semibold text-gray-700 leading-tight">{theme.emoji} {theme.name}</p>
+                  </div>
+                  {merchant?.theme_preset === theme.id && (
+                    <div className="absolute top-1 right-1 w-5 h-5 bg-brand-green rounded-full flex items-center justify-center">
+                      <svg viewBox="0 0 12 10" className="w-3 h-3"><path d="M1 5l3 4L11 1" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setShowThemePicker(false)} className="w-full text-sm text-gray-400 font-medium py-2">Cancel</button>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-lg mx-auto px-4 py-5">
         <div className="flex items-center justify-between mb-5">
@@ -208,7 +256,13 @@ export default function DashboardPage() {
 
         {/* Store link + share buttons */}
         <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-5">
-          <div className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Your Store</div>
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Your Store</div>
+            <button onClick={() => setShowThemePicker(true)}
+              className="flex items-center gap-1 text-xs font-semibold text-brand-green bg-brand-light px-2.5 py-1 rounded-lg border border-brand-green/20">
+              🎨 Theme
+            </button>
+          </div>
           <div className="flex items-center gap-2 mb-3">
             <div className="flex-1 bg-brand-light rounded-xl px-3 py-2.5 text-xs font-medium text-brand-green truncate">
               earket.com/store/{merchant.slug}
@@ -246,6 +300,17 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+
+        {/* Private placeholder notice for service businesses */}
+        {isService && products.length > 0 && products.some(p => p.image_url && p.image_url.includes('unsplash')) && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-5 flex items-start gap-3">
+            <span className="text-xl shrink-0">📸</span>
+            <div className="flex-1">
+              <p className="font-semibold text-amber-800 text-sm">Add your own photos</p>
+              <p className="text-amber-700 text-xs mt-0.5">Your services are using placeholder images. Tap any service below to upload your real photos — it builds much more trust with customers.</p>
+            </div>
+          </div>
+        )}
 
         {/* Sample products nudge — products mode only */}
         {!isService && products.length > 0 && products.some(p =>

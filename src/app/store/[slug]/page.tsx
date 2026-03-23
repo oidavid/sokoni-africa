@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { COUNTRIES } from '@/lib/countries'
 import { getCart, saveCart, addToCart as addToLocalCart, clearCart, type CartItem as LocalCartItem } from '@/lib/cart'
+import { getThemeById, getThemeStyle } from '@/lib/themes'
 import ServiceStorefrontPage from '@/components/ServiceStorefrontPage'
 
 interface Merchant {
@@ -18,7 +19,6 @@ interface Merchant {
   order_mode: string
   theme_color: string
   logo_url: string | null
-  business_type?: string
 }
 
 interface Product {
@@ -514,7 +514,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
       )}
 
       {/* Store Header */}
-      <div style={{ backgroundColor: store.theme_color || '#1A7A4A' }} className="text-white">
+      <div style={store.theme_preset ? getThemeStyle(getThemeById(store.theme_preset)) : { backgroundColor: store.theme_color || '#1A7A4A' }} className="text-white">
         <div className="max-w-6xl mx-auto px-4 pt-5 pb-4">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
@@ -791,5 +791,3 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
     </div>
   )
 }
-// cache bust
-

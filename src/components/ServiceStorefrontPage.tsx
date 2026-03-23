@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { MapPin, Share2, Phone, Star, Search, X, Clock, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { getThemeById, getThemeStyle } from '@/lib/themes'
 
 interface Merchant {
   id: string
@@ -15,6 +16,8 @@ interface Merchant {
   theme_color: string
   logo_url: string | null
   business_type?: string
+  theme_preset?: string
+  theme_color?: string
 }
 
 interface Service {
@@ -210,11 +213,11 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
       )}
 
       {/* Hero */}
-      <div className="relative overflow-hidden" style={{ backgroundColor: color }}>
+      <div className="relative overflow-hidden" style={store.theme_preset ? getThemeStyle(getThemeById(store.theme_preset)) : { backgroundColor: color }}>
         {heroImage && (
           <div className="absolute inset-0">
             <img src={heroImage} alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ backgroundColor: color, opacity: 0.82 }} />
+            <div className="absolute inset-0" style={{ background: store.theme_preset ? getThemeStyle(getThemeById(store.theme_preset)).background || color : color, opacity: 0.80 }} />
           </div>
         )}
         <div className="relative max-w-3xl mx-auto px-4 pt-5 pb-8">
@@ -281,16 +284,7 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
         </div>
       </div>
 
-      {/* Placeholder notice */}
-      <div className="max-w-3xl mx-auto px-4 pt-4">
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 flex items-start gap-3">
-          <span className="text-lg shrink-0">📸</span>
-          <div>
-            <p className="text-amber-800 text-xs font-semibold">Placeholder images — replace with your own</p>
-            <p className="text-amber-700 text-xs mt-0.5">Dashboard → tap any service → upload your real photos. Your photos build far more trust with customers.</p>
-          </div>
-        </div>
-      </div>
+
 
       {/* Search */}
       <div className="max-w-3xl mx-auto px-4 py-4">
