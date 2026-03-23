@@ -95,53 +95,92 @@ function fmtPrice(s: Service): string {
   return s.price_display || `₦${(s.price / 100).toLocaleString()}`
 }
 
+// Name pools by region — detected from common location keywords
+function getRegionNames(location: string): { first: [string, string]; last: [string, string] } {
+  const loc = (location || '').toLowerCase()
+  // US / Canada
+  if (/(street|st\.|ave|blvd|road|rd\.|ar|tx|ca|ny|fl|ga|il|oh|wa|co|nc|az|nv|tn|mo|wi|mn|or|ok|ks|ia|ms|al|sc|ky|la|ut|ne|nm|sd|nd|wv|id|mt|wy|ak|hi|vt|nh|ri|de|ct|me|dc|rogers|bentonville|fayetteville|springdale|atlanta|dallas|houston|chicago|miami|seattle|denver|boston|portland|austin|nashville|charlotte|phoenix|las vegas|san|los|new york)/.test(loc)) {
+    return { first: ['Jessica', 'Michael'], last: ['Thompson', 'Williams'] }
+  }
+  // UK
+  if (/(london|manchester|birmingham|leeds|glasgow|edinburgh|bristol|cardiff|liverpool|sheffield|uk|england|scotland|wales)/.test(loc)) {
+    return { first: ['Sophie', 'James'], last: ['Harrison', 'Bennett'] }
+  }
+  // West Africa / Nigeria / Ghana
+  if (/(lagos|abuja|port harcourt|accra|kumasi|nigeria|ghana|benin|enugu|kano|ibadan|onitsha|aba)/.test(loc)) {
+    return { first: ['Amara', 'Chidi'], last: ['Okonkwo', 'Mensah'] }
+  }
+  // East Africa
+  if (/(nairobi|kampala|dar es salaam|kigali|addis|mombasa|kenya|uganda|tanzania|ethiopia|rwanda)/.test(loc)) {
+    return { first: ['Grace', 'Brian'], last: ['Wanjiku', 'Otieno'] }
+  }
+  // South Africa
+  if (/(johannesburg|cape town|durban|pretoria|south africa)/.test(loc)) {
+    return { first: ['Nomsa', 'Thabo'], last: ['Dlamini', 'Nkosi'] }
+  }
+  // UAE / Gulf
+  if (/(dubai|abu dhabi|sharjah|riyadh|jeddah|doha|uae|saudi)/.test(loc)) {
+    return { first: ['Sara', 'Ahmed'], last: ['Al-Rashid', 'Hassan'] }
+  }
+  // India / South Asia
+  if (/(mumbai|delhi|bangalore|hyderabad|chennai|kolkata|india|pakistan|lahore|karachi)/.test(loc)) {
+    return { first: ['Priya', 'Rahul'], last: ['Sharma', 'Patel'] }
+  }
+  // Default — neutral international names
+  return { first: ['Sarah', 'Marcus'], last: ['Mitchell', 'Johnson'] }
+}
+
 function getPlaceholderReviews(category: string, location: string): Array<{name: string; text: string}> {
   const loc = location || 'the area'
+  const names = getRegionNames(location)
+  const n1 = `${names.first[0]} ${names.last[0][0]}.`
+  const n2 = `${names.first[1]} ${names.last[1][0]}.`
+
   const reviews: Record<string, Array<{name: string; text: string}>> = {
     beauty_services: [
-      { name: 'Amara O.', text: `Best massage I've had in ${loc}. Professional setup, very relaxing — I left feeling brand new. Definitely booking again.` },
-      { name: 'Chidinma E.', text: `Absolutely loved my experience. The therapist was skilled and attentive. My skin felt amazing after the facial. Highly recommend!` },
+      { name: n1, text: `Best experience I've had in ${loc}. Professional setup, very relaxing — I left feeling brand new. Definitely booking again.` },
+      { name: n2, text: `Absolutely loved every minute. The therapist was skilled and attentive. My skin felt amazing afterwards. Highly recommend!` },
     ],
     home_services: [
-      { name: 'Emeka T.', text: `Fixed my generator and rewired the kitchen in one day. Very professional, clean work and fair pricing. Will call again for sure.` },
-      { name: 'Blessing N.', text: `Came same day, solved a plumbing issue I'd had for weeks. Honest pricing and left the place spotless. Very impressed.` },
+      { name: n1, text: `Fixed the issue in one visit. Very professional, clean work and fair pricing. Will definitely call again.` },
+      { name: n2, text: `Came same day, solved a problem I'd had for weeks. Left the place spotless. Very impressed with the service.` },
     ],
     auto_services: [
-      { name: 'Tunde A.', text: `Brought my car in for a full service. Team was thorough and transparent about what needed fixing. Car runs perfectly now.` },
-      { name: 'Seun B.', text: `Best car wash in ${loc}. Interior deep clean was spotless. Will be coming back every week.` },
+      { name: n1, text: `Brought my car in and they were thorough and transparent about everything. Car runs perfectly now. Great team.` },
+      { name: n2, text: `Best car service in ${loc}. Very professional, honest pricing and quick turnaround. Will be coming back.` },
     ],
     education: [
-      { name: 'Mrs. Okeke', text: `My son's grades improved dramatically after just 4 sessions. The tutor is patient, knowledgeable and explains things clearly.` },
-      { name: 'James F.', text: `Passed my WAEC exams on the first attempt thanks to this prep. The past questions and exam techniques really worked.` },
+      { name: n1, text: `My child's grades improved dramatically after just 4 sessions. Patient, knowledgeable and explains things clearly.` },
+      { name: n2, text: `Excellent preparation and study techniques. Results showed within weeks. Very happy with the outcome.` },
     ],
     health_wellness: [
-      { name: 'Fatima A.', text: `The physiotherapy sessions helped me recover from my back injury much faster than I expected. Very professional and caring.` },
-      { name: 'David K.', text: `Personal training sessions in ${loc} — the trainer pushes you at the right pace. Lost 8kg in 2 months!` },
+      { name: n1, text: `Helped me recover from my injury much faster than I expected. Very professional and genuinely caring approach.` },
+      { name: n2, text: `Training sessions in ${loc} are excellent — pushes you at the right pace. Saw real results within the first month!` },
     ],
     domestic: [
-      { name: 'Ngozi P.', text: `My house hasn't been this clean in years! Deep clean was thorough and they brought all their own supplies. Very impressed.` },
-      { name: 'Ify M.', text: `Reliable weekly cleaning service. Always on time, very detailed and respectful of the home. Couldn't ask for better.` },
+      { name: n1, text: `My home hasn't been this clean in years! Deep clean was thorough and they brought all their own supplies.` },
+      { name: n2, text: `Reliable weekly cleaning service. Always on time, very detailed and respectful. Couldn't ask for better.` },
     ],
     events: [
-      { name: 'Adaeze W.', text: `The photography at my daughter's birthday was absolutely stunning. Every moment captured perfectly. Will book for my next event!` },
-      { name: 'Collins O.', text: `DJ kept the crowd going all night at our wedding reception. Great playlist, great energy. Highly recommend!` },
+      { name: n1, text: `The photography at my event was absolutely stunning. Every moment captured perfectly. Will definitely book again!` },
+      { name: n2, text: `Kept the crowd going all night. Great energy, perfect playlist. My guests are still talking about it.` },
     ],
     digital_services: [
-      { name: 'Uche S.', text: `Had my laptop screen replaced same day. Quick, professional and the price was very fair. Great service!` },
-      { name: 'Kemi J.', text: `The logo design exceeded my expectations. Fast turnaround and listened to exactly what I wanted. My customers love it.` },
+      { name: n1, text: `Had my device repaired same day. Quick, professional and the price was very fair. Great service overall.` },
+      { name: n2, text: `The design work exceeded my expectations. Fast turnaround and listened to exactly what I wanted. Customers love it.` },
     ],
     transport: [
-      { name: 'Musa D.', text: `Very reliable delivery service. Package arrived on time and in perfect condition. Will definitely use again.` },
-      { name: 'Titi R.', text: `Airport pickup was prompt and professional. Driver was polite and the car was clean. Stress-free experience.` },
+      { name: n1, text: `Very reliable service. Everything arrived on time and in perfect condition. Will definitely use again.` },
+      { name: n2, text: `Prompt and professional. Polite, clean and stress-free experience from start to finish. Highly recommend.` },
     ],
     agriculture: [
-      { name: 'Alhaji B.', text: `The irrigation system installed on my farm improved my yield significantly. Very professional installation team.` },
-      { name: 'Farmer C.', text: `Excellent poultry consultation service. Very practical advice that I implemented immediately. Highly recommend.` },
+      { name: n1, text: `The installation significantly improved our output. Very professional team and great follow-up support.` },
+      { name: n2, text: `Excellent consultation service. Very practical advice that I implemented immediately with great results.` },
     ],
   }
   return reviews[category] || [
-    { name: 'Sarah M.', text: `Outstanding service in ${loc}. Professional, punctual and really knows their work. Highly recommended!` },
-    { name: 'John K.', text: `Excellent experience from start to finish. Great communication and the quality of work was superb. Will use again.` },
+    { name: n1, text: `Outstanding service in ${loc}. Professional, punctual and really knows their work. Highly recommended!` },
+    { name: n2, text: `Excellent experience from start to finish. Great communication and the quality was superb. Will use again.` },
   ]
 }
 
@@ -281,10 +320,10 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
 
           {/* Logo — centered, large */}
           <div className="flex flex-col items-center text-center mb-5">
-            <div className="w-32 h-32 bg-white rounded-3xl overflow-hidden flex items-center justify-center shadow-2xl border-4 border-white/40 mb-4">
+            <div className="w-40 h-40 bg-white rounded-3xl overflow-hidden flex items-center justify-center shadow-2xl border-4 border-white/50 mb-4">
               {store.logo_url
-                ? <img src={store.logo_url} alt={store.business_name} className="w-full h-full object-cover" />
-                : <span className="text-6xl">💼</span>
+                ? <img src={store.logo_url} alt={store.business_name} className="w-full h-full object-contain p-1" />
+                : <span className="text-7xl">💼</span>
               }
             </div>
             <h1 className="font-display font-bold text-3xl text-white leading-tight mb-1">{store.business_name}</h1>
@@ -505,6 +544,25 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
             </div>
           </div>
         </div>
+
+        {/* Map preview — opens Google Maps on tap */}
+        <a href={mapsUrl} target="_blank" rel="noreferrer"
+          className="mt-3 flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 hover:bg-gray-100 transition-colors">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+            style={{ backgroundColor: color + '20' }}>
+            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" style={{ color }}>
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-gray-700">
+              {store.address || store.business_name + ', ' + store.location}
+            </p>
+            <p className="text-xs mt-0.5" style={{ color }}>Tap to open in Google Maps →</p>
+          </div>
+          <ExternalLink size={14} className="text-gray-400 shrink-0" />
+        </a>
       </div>
 
       {/* Sticky footer */}
