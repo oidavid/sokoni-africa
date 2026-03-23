@@ -811,12 +811,12 @@ export default function OnboardingPage() {
               <h2 className="font-display text-xl font-bold text-brand-dark mb-6">
                 {businessType === 'services' ? (pid ? 'Wetin service you dey offer?' : 'What type of service do you offer?') : (pid ? 'Wetin you dey sell?' : 'What do you sell?')}
               </h2>
-              <div className="grid grid-cols-2 gap-2">
+              <div className={businessType === 'services' ? "grid grid-cols-2 gap-2" : "grid grid-cols-2 gap-2"}>
                 {(businessType === 'services' ? SERVICE_CATEGORIES : CATEGORIES).map(cat => (
                   <button key={cat.id} onClick={() => { setCategory(cat.id); setSelectedSubcategories(new Set()) }}
-                    className={`flex items-center gap-2 p-3 rounded-2xl border-2 text-left transition-all ${category === cat.id ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600 hover:border-brand-green/50'}`}>
-                    <span className="text-xl">{cat.emoji}</span>
-                    <span className="text-xs font-semibold leading-tight">{pid ? cat.pidgin : cat.label}</span>
+                    className={`flex items-center gap-2.5 p-3 rounded-2xl border-2 text-left transition-all ${category === cat.id ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600 hover:border-brand-green/50'}`}>
+                    <span className="text-2xl shrink-0">{cat.emoji}</span>
+                    <span className="text-sm font-bold leading-tight">{pid ? cat.pidgin : cat.label}</span>
                   </button>
                 ))}
               </div>
