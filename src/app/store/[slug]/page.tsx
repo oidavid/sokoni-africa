@@ -8,6 +8,7 @@ import { getCart, saveCart, addToCart as addToLocalCart, clearCart, type CartIte
 import { getThemeById, getThemeStyle } from '@/lib/themes'
 import ServiceStorefrontPage from '@/components/ServiceStorefrontPage'
 import ConsultationStorefrontPage from '@/components/ConsultationStorefrontPage'
+import ServicesLedStorefrontPage from '@/components/ServicesLedStorefrontPage'
 
 interface Merchant {
   id: string
@@ -20,8 +21,6 @@ interface Merchant {
   order_mode: string
   theme_color: string
   logo_url: string | null
-  business_type?: string
-  theme_preset?: string
 }
 
 interface Product {
@@ -212,16 +211,14 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
     else { navigator.clipboard.writeText(window.location.href); alert('Link copied!') }
   }
 
-  // Categories that use the consultation/profile layout (no prices, Book a Free Call)
-  const CONSULTATION_CATEGORIES = ['coaching', 'mental_wellness', 'education', 'digital_services', 'health_wellness']
+  // People-led: warm, personal, profile photo, empathy headline
+  const PEOPLE_LED = ['coaching', 'mental_wellness']
+  // Services-led: dark agency feel, grid layout, quote-focused
+  const SERVICES_LED = ['digital_services', 'education', 'health_wellness']
 
-  // Route to consultation layout for profile-led businesses
-  if (!loading && store && store.business_type === 'services' && CONSULTATION_CATEGORIES.includes(store.category)) {
-    return <ConsultationStorefrontPage params={params} />
-  }
-
-  // Route all other service businesses to service menu layout
   if (!loading && store && store.business_type === 'services') {
+    if (PEOPLE_LED.includes(store.category)) return <ConsultationStorefrontPage params={params} />
+    if (SERVICES_LED.includes(store.category)) return <ServicesLedStorefrontPage params={params} />
     return <ServiceStorefrontPage params={params} />
   }
 
@@ -802,5 +799,3 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
     </div>
   )
 }
-
-
