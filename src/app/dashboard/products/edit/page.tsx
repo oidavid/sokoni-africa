@@ -68,8 +68,8 @@ function EditProductForm() {
       if (!m) { router.push('/onboarding'); return }
       setMerchant(m)
       merchantIdRef.current = m.id
-      const { data: p } = await supabase.from('products').select('*').eq('id', productId).single()
-      if (!p) { router.push('/dashboard'); return }
+      const { data: p } = await supabase.from('products').select('*').eq('id', productId).eq('merchant_id', m.id).single()
+      if (!p) { router.push('/dashboard'); return } // blocks access to other merchants' products
       setProduct(p)
       setName(p.name)
       setDescription(p.description || '')
@@ -177,6 +177,7 @@ function EditProductForm() {
         })) : null,
       })
       .eq('id', productId!)
+        .eq('merchant_id', merchantIdRef.current!)
     if (updateError) {
       setError('Failed to save. Please try again.')
     } else {
@@ -189,7 +190,7 @@ function EditProductForm() {
   async function handleDelete() {
     if (!confirm('Delete this product? This cannot be undone.')) return
     setDeleting(true)
-    await supabase.from('products').delete().eq('id', productId!)
+    await supabase.from('products').delete().eq('id', productId!).eq('merchant_id', merchantIdRef.current!)
     router.push('/dashboard')
   }
 

@@ -6,9 +6,26 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+// Simple in-memory rate limit (resets on cold start)
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
+
 export async function POST(req: NextRequest) {
   try {
     const { email, amount, metadata, callback_url, merchant_id } = await req.json()
+
+    // Input validation
+    if (!email || !email.includes('@')) return NextResponse.json({ error: 'Invalid email' }, { status: 400 })
+    if (!amount || amount < 100 || amount > 100000000) return NextResponse.json({ error: 'Invalid amount' }, { status: 400 })
+    if (!merchant_id) return NextResponse.json({ error: 'Invalid merchant' }, { status: 400 })
+
+    // Rate limit: max 5 payment attempts per IP per 10 minutes
+    const ip = req.headers.get('x-forwarded-for') || 'unknown'
+    const now = Date.now()
+    const rateData = rateLimitMap.get(ip) || { count: 0, resetAt: now + 600000 }
+    if (now > rateData.resetAt) { rateData.count = 0; rateData.resetAt = now + 600000 }
+    rateData.count++
+    rateLimitMap.set(ip, rateData)
+    if (rateData.count > 5) return NextResponse.json({ error: 'Too many requests. Please wait.' }, { status: 429 })
 
     const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET_KEY
     if (!PAYSTACK_SECRET) {
