@@ -806,6 +806,37 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
         </button>
       )}
 
+      {/* Testimonials */}
+      {(store as any).testimonials?.length > 0 && (
+        <div className="max-w-6xl mx-auto px-4 mb-4">
+          <div className="bg-white rounded-2xl border border-gray-100 p-5">
+            <h2 className="font-display font-bold text-brand-dark text-base mb-4">What Our Customers Say</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {(store as any).testimonials.map((t: any, i: number) => (
+                <div key={i} className="bg-gray-50 rounded-xl p-4">
+                  <div className="flex gap-0.5 mb-2">
+                    {[1,2,3,4,5].map(s => (
+                      <span key={s} className={`text-sm ${s <= (t.rating||5) ? 'text-amber-400' : 'text-gray-200'}`}>★</span>
+                    ))}
+                  </div>
+                  <p className="text-sm text-gray-700 leading-relaxed italic mb-3">"{t.text}"</p>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+                      style={{ backgroundColor: store.theme_color || '#1A7A4A' }}>
+                      {t.name[0]}
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-gray-800">{t.name}</p>
+                      {t.role && <p className="text-xs text-gray-400">{t.role}</p>}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Find Us */}
       <div className="max-w-6xl mx-auto px-4 mb-4 mt-4">
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
@@ -882,37 +913,6 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
           </div>
         </a>
       </div>
-
-      {/* Testimonials */}
-      {(store as any).testimonials?.length > 0 && (
-        <div className="max-w-6xl mx-auto px-4 mb-4">
-          <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <h2 className="font-display font-bold text-brand-dark text-base mb-4">What Our Customers Say</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {(store as any).testimonials.map((t: any, i: number) => (
-                <div key={i} className="bg-gray-50 rounded-xl p-4">
-                  <div className="flex gap-0.5 mb-2">
-                    {[1,2,3,4,5].map(s => (
-                      <span key={s} className={`text-sm ${s <= (t.rating||5) ? 'text-amber-400' : 'text-gray-200'}`}>★</span>
-                    ))}
-                  </div>
-                  <p className="text-sm text-gray-700 leading-relaxed italic mb-3">"{t.text}"</p>
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-                      style={{ backgroundColor: store.theme_color || '#1A7A4A' }}>
-                      {t.name[0]}
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-gray-800">{t.name}</p>
-                      {t.role && <p className="text-xs text-gray-400">{t.role}</p>}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Viral Footer */}
       <div className="max-w-6xl mx-auto px-4 mb-6 mt-4">
