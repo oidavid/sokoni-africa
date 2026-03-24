@@ -219,7 +219,7 @@ function CheckoutForm() {
       subtotal,
       status: 'new',
       source: 'web',
-      notes: `${fulfillment === 'pickup' ? 'PICKUP ORDER. ' : ''}${applyPoints && pointsDiscount > 0 ? `[Points discount: -₦${(pointsDiscount/100).toLocaleString()}] ` : ''}${notes}`,
+      notes: `${fulfillment === 'pickup' ? 'PICKUP ORDER. ' : ''}${applyPoints && pointsDiscount > 0 ? `[Points discount: -₦${(pointsDiscount/100).toLocaleString()}] ` : ''}${appliedDiscount ? `[Discount code: ${appliedDiscount.code} -${appliedDiscount.type === 'percent' ? appliedDiscount.value + '%' : '₦' + appliedDiscount.value}] ` : ''}${notes}`,
       customer_id: (() => {
         try {
           const c = localStorage.getItem(`earket_customer_${slug}`)
@@ -232,12 +232,20 @@ function CheckoutForm() {
     const localP = rawP.startsWith('0') ? rawP.slice(1) : rawP.startsWith(phoneCountry.dial) ? rawP.slice(phoneCountry.dial.length) : rawP
     const normalizedPhone = phoneCountry.dial + localP
     // Notify merchant via WhatsApp silently (non-blocking)
-    const msg = `🛍️ New Order ${orderNum} — ${store.business_name}!\n\n${itemLines}\n\nTotal: ${formatNaira(subtotal)}\n\nCustomer: ${name}\nPhone: +${normalizedPhone}\n${fulfillment === 'delivery' ? `Delivery to: ${address}` : '📦 PICKUP — customer will collect'}\n${notes ? `Notes: ${notes}` : ''}\n\nReply to confirm.\n\n📲 Tap to message customer: https://wa.me/${normalizedPhone}`
+    const discountLine = appliedDiscount ? `\n🏷️ Discount: ${appliedDiscount.code} (${appliedDiscount.type === 'percent' ? appliedDiscount.value + '% off' : '₦' + appliedDiscount.value + ' off'}) = -${formatNaira(getDiscountAmount())}` : ''
+    const msg = `🛍️ New Order ${orderNum} — ${store.business_name}!\n\n${itemLines}${discountLine}\n\nTotal: ${formatNaira(subtotal)}\n\nCustomer: ${name}\nPhone: +${normalizedPhone}\n${fulfillment === 'delivery' ? `Delivery to: ${address}` : '📦 PICKUP — customer will collect'}\n${notes ? `Notes: ${notes}` : ''}\n\nReply to confirm.\n\n📲 Tap to message customer: https://wa.me/${normalizedPhone}`
     // Open WhatsApp in background to notify merchant
     const waWindow = window.open(`https://wa.me/${store.whatsapp_number?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank')
     // Auto-close WhatsApp tab after 3 seconds if opened
     if (waWindow) setTimeout(() => waWindow.close(), 3000)
     // Deduct redeemed points if applied
+    // Increment discount code uses
+    if (appliedDiscount) {
+      await supabase.from('discount_codes')
+        .update({ uses: supabase.rpc('increment', { row_id: appliedDiscount.id }) })
+        .eq('id', appliedDiscount.id)
+    }
+
     if (applyPoints && pointsDiscount > 0) {
       try {
         const storedCustomer = localStorage.getItem(`earket_customer_${slug}`)
