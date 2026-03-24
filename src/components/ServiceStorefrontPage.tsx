@@ -35,20 +35,20 @@ interface Service {
 }
 
 const CATEGORY_HERO: Record<string, string> = {
-  beauty_services: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1200&q=80',
-  home_services: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1200&q=80',
-  auto_services: 'https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=1200&q=80',
-  education: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&q=80',
-  health_wellness: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1200&q=80',
-  domestic: 'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=1200&q=80',
-  events: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1200&q=80',
-  digital_services: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=1200&q=80',
-  transport: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1200&q=80',
-  agriculture: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=1200&q=80',
-  coaching: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1200&q=80',
-  mental_wellness: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=1200&q=80',
-  childcare: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=1200&q=80',
-  food_catering: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=1200&q=80',
+  beauty_services: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1200&q=80', // salon chair, makeup
+  home_services: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=1200&q=80', // electrician/technician working
+  auto_services: 'https://images.unsplash.com/photo-1625047509248-ec889cbff17f?w=1200&q=80', // mechanic under car hood
+  education: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1200&q=80', // teacher at board
+  health_wellness: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=1200&q=80', // fitness/wellness
+  domestic: 'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=1200&q=80', // clean modern home interior
+  events: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=1200&q=80', // elegant event setup
+  digital_services: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1200&q=80', // laptop/coding
+  transport: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1200&q=80', // professional vehicle
+  agriculture: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=1200&q=80', // farm/crops
+  coaching: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1200&q=80', // professional coaching meeting
+  mental_wellness: 'https://images.unsplash.com/photo-1591343395082-e120087004b4?w=1200&q=80', // calm therapy setting
+  childcare: 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=1200&q=80', // children playing happily
+  food_catering: 'https://images.unsplash.com/photo-1555244162-803834f70033?w=1200&q=80', // catering/food spread
 }
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -351,7 +351,7 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
       <div className="relative overflow-hidden min-h-[360px] flex flex-col justify-end" style={themeStyle as React.CSSProperties}>
         {heroImage && (
           <div className="absolute inset-0">
-            <img src={heroImage} alt="" className="w-full h-full object-cover" />
+            <img src={heroImage} alt="" className="w-full h-full object-cover" style={{ filter: store.theme_color === '#f1f5f9' ? 'brightness(0.95)' : 'brightness(1)' }} />
             <div className="absolute inset-0" style={{ ...(themeStyle as object), opacity: 0.78 }} />
           </div>
         )}
