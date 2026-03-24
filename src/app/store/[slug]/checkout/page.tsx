@@ -75,15 +75,7 @@ function CheckoutForm() {
   const [applyPoints, setApplyPoints] = useState(false)
   const [pointsDiscount, setPointsDiscount] = useState(0)
   const [discountCode, setDiscountCode] = useState('')
-  const [appliedDiscount, setAppliedDiscount] = useState<{code: string; type: string; value: number; id: string} | null>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const d = new URLSearchParams(window.location.search).get('discount')
-        return d ? JSON.parse(decodeURIComponent(d)) : null
-      } catch { return null }
-    }
-    return null
-  })
+  const [appliedDiscount, setAppliedDiscount] = useState<{code: string; type: string; value: number; id: string} | null>(null)
   const [discountError, setDiscountError] = useState('')
   const [applyingDiscount, setApplyingDiscount] = useState(false)
 
@@ -148,6 +140,19 @@ function CheckoutForm() {
     }
     load()
   }, [slug, searchParams])
+
+  useEffect(() => {
+    try {
+      const d = searchParams.get('discount')
+      if (d) {
+        const parsed = JSON.parse(decodeURIComponent(d))
+        if (parsed && parsed.code) {
+          setAppliedDiscount(parsed)
+          setDiscountCode(parsed.code)
+        }
+      }
+    } catch {}
+  }, [searchParams])
 
   const rawSubtotal = cart.reduce((sum, i) => sum + i.product.price * i.qty, 0)
   async function applyDiscount() {
