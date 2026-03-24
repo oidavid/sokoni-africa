@@ -64,7 +64,7 @@ const CATEGORY_HEADLINE: Record<string, string> = {
   beauty_services: 'Look your best. Feel your best.',
   home_services: 'Repairs & installations done right.',
   auto_services: 'Keep your vehicle in top condition.',
-  education: 'Unlock every student's potential.',
+  education: "Unlock every student's potential.",
   health_wellness: 'Invest in your health today.',
   domestic: 'A clean home, a clear mind.',
   events: 'Unforgettable events, expertly planned.',
