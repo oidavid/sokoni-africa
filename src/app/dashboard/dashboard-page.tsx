@@ -50,10 +50,6 @@ export default function DashboardPage() {
   const [refreshDone, setRefreshDone] = useState(false)
   const [showThemePicker, setShowThemePicker] = useState(false)
   const [savingTheme, setSavingTheme] = useState(false)
-  const [announcements, setAnnouncements] = useState<{id:string;message:string;type:string}[]>([])
-  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set())
-  const [proJoined, setProJoined] = useState(false)
-  const [joiningPro, setJoiningPro] = useState(false)
 
   const loadData = useCallback(async (showRefresh = false) => {
     if (showRefresh) setRefreshing(true)
@@ -72,14 +68,6 @@ export default function DashboardPage() {
     setOrderCount(total || 0)
     setNewOrderCount(newOrders || 0)
     setLeadCount(totalLeads || 0)
-    // Fetch active announcements
-    const { data: ann } = await supabase.from('announcements').select('id,message,type').eq('active', true).order('created_at', { ascending: false })
-    setAnnouncements(ann || [])
-    // Check pro waitlist
-    const { data: waitlist } = await supabase.from('pro_waitlist').select('id').eq('merchant_id', m.id).maybeSingle()
-    if (waitlist) setProJoined(true)
-    // Update last login
-    await supabase.from('merchants').update({ last_login_at: new Date().toISOString() }).eq('id', m.id)
     setLoading(false)
     setRefreshing(false)
   }, [router])
@@ -200,56 +188,6 @@ export default function DashboardPage() {
       )}
 
       <div className="max-w-lg mx-auto px-4 py-5">
-
-        {/* Platform Announcements */}
-        {announcements.filter(a => !dismissedIds.has(a.id)).map(a => (
-          <div key={a.id} className={`flex items-start gap-3 rounded-2xl px-4 py-3 mb-3 border ${
-            a.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' :
-            a.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
-            a.type === 'promo'   ? 'bg-purple-50 border-purple-200 text-purple-800' :
-            'bg-blue-50 border-blue-200 text-blue-800'
-          }`}>
-            <p className="text-sm flex-1 font-medium">{a.message}</p>
-            <button onClick={() => setDismissedIds(prev => new Set([...prev, a.id]))}
-              className="text-lg leading-none opacity-50 hover:opacity-100 shrink-0">✕</button>
-          </div>
-        ))}
-
-        {/* Pro Waitlist Banner */}
-        {!proJoined ? (
-          <div className="flex items-center gap-3 bg-gradient-to-r from-purple-50 to-amber-50 border border-purple-200 rounded-2xl p-4 mb-4">
-            <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center shrink-0 text-xl">⭐</div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-purple-900 text-sm">Earket Pro — Coming Soon</p>
-              <p className="text-purple-600 text-xs">Custom domain, premium themes, priority support & more</p>
-            </div>
-            <button
-              disabled={joiningPro}
-              onClick={async () => {
-                if (!merchant) return
-                setJoiningPro(true)
-                await supabase.from('pro_waitlist').upsert({
-                  merchant_id: merchant.id,
-                  email: merchant.email,
-                  business_name: merchant.business_name,
-                }, { onConflict: 'merchant_id' })
-                setProJoined(true)
-                setJoiningPro(false)
-              }}
-              className="text-xs bg-purple-600 text-white px-3 py-2 rounded-xl font-semibold shrink-0 hover:bg-purple-700 transition-colors disabled:opacity-50">
-              {joiningPro ? '...' : 'Join List'}
-            </button>
-          </div>
-        ) : (
-          <div className="flex items-center gap-3 bg-purple-50 border border-purple-200 rounded-2xl p-4 mb-4">
-            <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center shrink-0 text-xl">✅</div>
-            <div className="flex-1">
-              <p className="font-semibold text-purple-900 text-sm">You're on the Pro waitlist!</p>
-              <p className="text-purple-600 text-xs">We'll notify you first when Pro launches.</p>
-            </div>
-          </div>
-        )}
-
         <div className="flex items-center justify-between mb-5">
           <div>
             <h1 className="font-display font-bold text-xl text-brand-dark">{categoryEmoji} {merchant.business_name}</h1>

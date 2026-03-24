@@ -88,7 +88,7 @@ export default function AdminPage() {
   const [email, setEmail] = useState("");
   const [loginError, setLoginError] = useState("");
 
-  const [tab, setTab] = useState<"merchants" | "admins">("merchants");
+  const [tab, setTab] = useState<"merchants" | "admins" | "announcements" | "intelligence" | "pro">("merchants");
   const [stats, setStats] = useState<Stats | null>(null);
   const [merchants, setMerchants] = useState<Merchant[]>([]);
   const [filtered, setFiltered] = useState<Merchant[]>([]);
@@ -107,6 +107,13 @@ export default function AdminPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [actionMessage, setActionMessage] = useState("");
   const [newAdmin, setNewAdmin] = useState({ name: "", email: "", role: "support" as Role, password: "" });
+
+  // Announcements
+  const [announcements, setAnnouncements] = useState<{id:string;message:string;type:string;active:boolean;created_at:string}[]>([]);
+  const [newAnnouncement, setNewAnnouncement] = useState("");
+  const [announcementType, setAnnouncementType] = useState<"info"|"warning"|"success"|"promo">("info");
+  const [savingAnnouncement, setSavingAnnouncement] = useState(false);
+  const [proWaitlist, setProWaitlist] = useState<{id:string;business_name:string;email:string;created_at:string}[]>([]);
 
   // Broadcast state
   const [showBroadcast, setShowBroadcast] = useState(false);
@@ -152,11 +159,13 @@ export default function AdminPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [merchantsRes, leadsRes, ordersRes, adminsRes] = await Promise.all([
+      const [merchantsRes, leadsRes, ordersRes, adminsRes, announcementsRes, waitlistRes] = await Promise.all([
         supabase.from("merchants").select("*").order("created_at", { ascending: false }),
         supabase.from("leads").select("id", { count: "exact" }),
         supabase.from("orders").select("id", { count: "exact" }),
         supabase.from("admin_users").select("*").order("created_at", { ascending: false }),
+        supabase.from("announcements").select("*").order("created_at", { ascending: false }),
+        supabase.from("pro_waitlist").select("*").order("created_at", { ascending: false }),
       ]);
       const all: Merchant[] = merchantsRes.data || [];
       const now = new Date();
@@ -164,6 +173,8 @@ export default function AdminPage() {
       setMerchants(all);
       setFiltered(all);
       setAdminUsers(adminsRes.data || []);
+      setAnnouncements(announcementsRes.data || []);
+      setProWaitlist(waitlistRes.data || []);
       setStats({
         totalMerchants: all.length,
         activeStores: all.filter(m => m.is_published && m.status !== "suspended" && m.status !== "terminated").length,
@@ -390,11 +401,17 @@ export default function AdminPage() {
 
             {/* Tabs */}
             {canDo(auth, "manage_admins") && (
-              <div className={`flex gap-1 mb-6 rounded-lg p-1 border w-fit ${th.tab}`}>
-                {(["merchants","admins"] as const).map(t => (
-                  <button key={t} onClick={() => setTab(t)}
-                    className={`px-5 py-2 text-sm rounded-md transition-colors capitalize ${tab === t ? th.tabActive : th.tabInactive}`}>
-                    {t === "admins" ? "Admin Users" : "Merchants"}
+              <div className={`flex gap-1 mb-6 rounded-lg p-1 border w-fit flex-wrap ${th.tab}`}>
+                {([
+                  { key: "merchants", label: "Merchants" },
+                  { key: "admins", label: "Admin Users" },
+                  { key: "announcements", label: "📣 Announcements" },
+                  { key: "intelligence", label: "📊 Intelligence" },
+                  { key: "pro", label: "⭐ Pro Waitlist" },
+                ] as {key:string;label:string}[]).map(t => (
+                  <button key={t.key} onClick={() => setTab(t.key as typeof tab)}
+                    className={`px-4 py-2 text-sm rounded-md transition-colors ${tab === t.key ? th.tabActive : th.tabInactive}`}>
+                    {t.label}
                   </button>
                 ))}
               </div>
@@ -577,6 +594,224 @@ export default function AdminPage() {
                 </div>
               </>
             )}
+
+            {/* ── ANNOUNCEMENTS TAB ── */}
+            {tab === "announcements" && canDo(auth, "manage_admins") && (
+              <>
+                <div className={`rounded-xl border p-6 mb-6 ${th.surface}`}>
+                  <h2 className={`text-base font-semibold mb-4 ${th.bodyText}`}>Create Announcement</h2>
+                  <div className="space-y-3">
+                    <textarea value={newAnnouncement} onChange={e => setNewAnnouncement(e.target.value)}
+                      placeholder="e.g. 🎉 Earket now supports Ghana Cedis and Kenya Shillings!"
+                      rows={3}
+                      className={`w-full px-4 py-3 rounded-lg text-sm outline-none border font-mono resize-none ${th.modalInput}`} />
+                    <div className="flex gap-3">
+                      <select value={announcementType} onChange={e => setAnnouncementType(e.target.value as "info"|"warning"|"success"|"promo")}
+                        className={`px-3 py-2 rounded-lg text-sm outline-none border font-mono flex-1 ${th.select}`}>
+                        <option value="info">ℹ️ Info</option>
+                        <option value="success">✅ Success</option>
+                        <option value="warning">⚠️ Warning</option>
+                        <option value="promo">⭐ Promo</option>
+                      </select>
+                      <button
+                        disabled={!newAnnouncement.trim() || savingAnnouncement}
+                        onClick={async () => {
+                          setSavingAnnouncement(true);
+                          await supabase.from("announcements").insert({ message: newAnnouncement, type: announcementType, active: true });
+                          setNewAnnouncement("");
+                          await loadData();
+                          setSavingAnnouncement(false);
+                        }}
+                        className="px-6 py-2 rounded-lg text-sm font-semibold disabled:opacity-40 transition-opacity"
+                        style={{ background: dark ? "white" : "#111", color: dark ? "black" : "white" }}>
+                        {savingAnnouncement ? "Saving..." : "Post"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`rounded-xl border overflow-hidden ${th.surface}`}>
+                  <div className={`px-5 py-3.5 border-b ${th.thead}`}>
+                    <span className={`text-xs font-mono uppercase tracking-widest ${th.theadText}`}>Active Announcements</span>
+                  </div>
+                  {announcements.length === 0 ? (
+                    <div className={`px-5 py-12 text-center text-sm font-mono ${th.muted}`}>No announcements yet.</div>
+                  ) : announcements.map((a, i) => (
+                    <div key={a.id} className={`px-5 py-4 border-b flex items-start justify-between gap-4 ${th.rowBorder} ${i % 2 === 0 ? th.row0 : th.row1}`}>
+                      <div className="flex-1">
+                        <p className={`text-sm ${th.bodyText}`}>{a.message}</p>
+                        <div className="flex items-center gap-3 mt-1">
+                          <span className={`text-xs font-mono ${th.muted}`}>{new Date(a.created_at).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" })}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-mono ${
+                            a.type === "success" ? "bg-emerald-500/10 text-emerald-400" :
+                            a.type === "warning" ? "bg-amber-500/10 text-amber-400" :
+                            a.type === "promo"   ? "bg-purple-500/10 text-purple-400" :
+                            "bg-blue-500/10 text-blue-400"
+                          }`}>{a.type}</span>
+                          <span className={`text-xs font-mono ${a.active ? "text-emerald-400" : th.muted}`}>● {a.active ? "Live" : "Off"}</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 shrink-0">
+                        <button onClick={async () => { await supabase.from("announcements").update({ active: !a.active }).eq("id", a.id); loadData(); }}
+                          className={`text-xs px-3 py-1.5 rounded-lg font-mono transition-colors ${a.active ? "bg-amber-500/10 text-amber-400 hover:bg-amber-500/20" : "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"}`}>
+                          {a.active ? "Pause" : "Resume"}
+                        </button>
+                        <button onClick={async () => { await supabase.from("announcements").delete().eq("id", a.id); loadData(); }}
+                          className="text-xs px-3 py-1.5 rounded-lg font-mono bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors">
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* ── INTELLIGENCE TAB ── */}
+            {tab === "intelligence" && canDo(auth, "manage_admins") && (() => {
+              const now = new Date();
+              const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+              const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+              const inactive30 = merchants.filter(m => {
+                const last = (m as any).last_login_at;
+                return !last || new Date(last) < thirtyDaysAgo;
+              });
+              const inactive7 = merchants.filter(m => {
+                const last = (m as any).last_login_at;
+                return last && new Date(last) < sevenDaysAgo && new Date(last) >= thirtyDaysAgo;
+              });
+              const noProducts = merchants.filter(m => !(m as any).has_products);
+              const byCategory = merchants.reduce((acc, m) => {
+                const cat = m.category || "unknown";
+                acc[cat] = (acc[cat] || 0) + 1;
+                return acc;
+              }, {} as Record<string, number>);
+              const byCountry = merchants.reduce((acc, m) => {
+                const c = m.country || "unknown";
+                acc[c] = (acc[c] || 0) + 1;
+                return acc;
+              }, {} as Record<string, number>);
+
+              return (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    {[
+                      { label: "Inactive 30+ days", value: inactive30.length, color: "red", desc: "Haven't logged in recently" },
+                      { label: "Quiet (7–30 days)", value: inactive7.length, color: "amber", desc: "Starting to go quiet" },
+                      { label: "Pro Waitlist", value: proWaitlist.length, color: "purple", desc: "Interested in upgrading" },
+                    ].map(s => (
+                      <div key={s.label} className={`rounded-xl border p-5 ${
+                        s.color === "red" ? "border-red-500/20 bg-red-500/5" :
+                        s.color === "amber" ? "border-amber-500/20 bg-amber-500/5" :
+                        "border-purple-500/20 bg-purple-500/5"
+                      }`}>
+                        <p className={`text-3xl font-bold ${th.bodyText}`}>{s.value}</p>
+                        <p className={`text-sm font-semibold mt-1 ${th.bodyText}`}>{s.label}</p>
+                        <p className={`text-xs font-mono mt-0.5 ${th.muted}`}>{s.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className={`rounded-xl border overflow-hidden ${th.surface}`}>
+                      <div className={`px-5 py-3.5 border-b ${th.thead}`}>
+                        <span className={`text-xs font-mono uppercase tracking-widest ${th.theadText}`}>Merchants by Category</span>
+                      </div>
+                      {Object.entries(byCategory).sort((a,b) => b[1]-a[1]).map(([cat, count], i) => (
+                        <div key={cat} className={`px-5 py-3 border-b flex items-center justify-between ${th.rowBorder} ${i % 2 === 0 ? th.row0 : th.row1}`}>
+                          <span className={`text-sm font-mono ${th.bodyText}`}>{cat}</span>
+                          <div className="flex items-center gap-3">
+                            <div className="w-24 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                              <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${(count / merchants.length) * 100}%` }} />
+                            </div>
+                            <span className={`text-sm font-mono w-6 text-right ${th.muted}`}>{count}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className={`rounded-xl border overflow-hidden ${th.surface}`}>
+                      <div className={`px-5 py-3.5 border-b ${th.thead}`}>
+                        <span className={`text-xs font-mono uppercase tracking-widest ${th.theadText}`}>Merchants by Country</span>
+                      </div>
+                      {Object.entries(byCountry).sort((a,b) => b[1]-a[1]).map(([country, count], i) => (
+                        <div key={country} className={`px-5 py-3 border-b flex items-center justify-between ${th.rowBorder} ${i % 2 === 0 ? th.row0 : th.row1}`}>
+                          <span className={`text-sm font-mono ${th.bodyText}`}>{country}</span>
+                          <div className="flex items-center gap-3">
+                            <div className="w-24 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                              <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(count / merchants.length) * 100}%` }} />
+                            </div>
+                            <span className={`text-sm font-mono w-6 text-right ${th.muted}`}>{count}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {inactive30.length > 0 && (
+                    <div className={`rounded-xl border overflow-hidden mt-6 ${th.surface}`}>
+                      <div className={`px-5 py-3.5 border-b ${th.thead} flex items-center justify-between`}>
+                        <span className={`text-xs font-mono uppercase tracking-widest ${th.theadText}`}>Inactive 30+ Days — Re-engage These</span>
+                        <span className="text-xs text-red-400 font-mono">{inactive30.length} merchants</span>
+                      </div>
+                      {inactive30.slice(0, 10).map((m, i) => (
+                        <div key={m.id} className={`px-5 py-3.5 border-b flex items-center justify-between ${th.rowBorder} ${i % 2 === 0 ? th.row0 : th.row1}`}>
+                          <div>
+                            <p className={`text-sm font-medium ${th.bodyText}`}>{m.business_name}</p>
+                            <p className={`text-xs font-mono ${th.muted}`}>{m.email} · {m.phone}</p>
+                          </div>
+                          <a href={`https://wa.me/${m.phone}?text=${encodeURIComponent(`Hi ${m.business_name}! 👋 Just checking in from Earket — your store is still live at earket.com/store/${m.slug}. Let us know if you need any help!`)}`}
+                            target="_blank" rel="noopener noreferrer"
+                            className="text-xs bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg font-mono transition-colors">
+                            💬 WhatsApp
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+
+            {/* ── PRO WAITLIST TAB ── */}
+            {tab === "pro" && canDo(auth, "manage_admins") && (
+              <>
+                <div className={`rounded-xl border p-5 mb-6 ${th.surface}`}>
+                  <p className={`text-sm ${th.bodyText} mb-1`}>⭐ <strong>{proWaitlist.length} merchants</strong> have expressed interest in Pro.</p>
+                  <p className={`text-xs font-mono ${th.muted}`}>When you're ready to launch, broadcast to this list first — they're your warmest leads.</p>
+                </div>
+                <div className={`rounded-xl border overflow-hidden ${th.surface}`}>
+                  <table className="w-full">
+                    <thead>
+                      <tr className={`border-b ${th.thead}`}>
+                        {["Business","Email","Joined Waitlist","Action"].map(h => (
+                          <th key={h} className={`text-left px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-mono font-normal ${th.theadText}`}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {proWaitlist.length === 0 ? (
+                        <tr><td colSpan={4} className={`px-5 py-12 text-center text-sm font-mono ${th.muted}`}>No waitlist signups yet.</td></tr>
+                      ) : proWaitlist.map((w, i) => (
+                        <tr key={w.id} className={`border-b ${th.rowBorder} ${i % 2 === 0 ? th.row0 : th.row1}`}>
+                          <td className={`px-5 py-4 font-medium text-base ${th.bodyText}`}>{w.business_name}</td>
+                          <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{w.email}</td>
+                          <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{new Date(w.created_at).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" })}</td>
+                          <td className="px-5 py-4">
+                            <a href={`mailto:${w.email}?subject=Earket Pro is here!&body=Hi ${w.business_name}, great news — Earket Pro is now available!`}
+                              className="text-xs bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 px-3 py-1.5 rounded-lg font-mono transition-colors">
+                              ✉️ Email
+                            </a>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+
           </>
         )}
       </div>
