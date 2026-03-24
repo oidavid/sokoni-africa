@@ -75,6 +75,7 @@ export default function SettingsPage() {
   const [heroOverlay, setHeroOverlay] = useState(0.45)
   const [heroTextColor, setHeroTextColor] = useState<'white' | 'dark'>('white')
   const [heroFont, setHeroFont] = useState<'default' | 'serif' | 'mono'>('default')
+  const [logoPosition, setLogoPosition] = useState<'center' | 'top-left' | 'top-right' | 'hidden'>('center')
   const [holidayMode, setHolidayMode] = useState(false)
   const [holidayMessage, setHolidayMessage] = useState('')
   const [testimonials, setTestimonials] = useState<Testimonial[]>([
@@ -125,6 +126,7 @@ export default function SettingsPage() {
       setHeroOverlay(m.hero_overlay ?? 0.45)
       setHeroTextColor(m.hero_text_color || 'white')
       setHeroFont(m.hero_font || 'default')
+      setLogoPosition(m.logo_position || 'center')
       setHolidayMode(m.holiday_mode || false)
       setHolidayMessage(m.holiday_message || '')
       if (m.business_hours) setBusinessHours(m.business_hours)
@@ -187,6 +189,7 @@ export default function SettingsPage() {
         hero_overlay: heroOverlay,
         hero_text_color: heroTextColor,
         hero_font: heroFont,
+        logo_position: logoPosition,
         holiday_mode: holidayMode,
         holiday_message: holidayMessage,
         business_hours: businessHours,
@@ -363,6 +366,63 @@ export default function SettingsPage() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Logo Position */}
+          <div className="mb-4">
+            <label className="text-xs font-semibold text-gray-600 block mb-2">Logo Position</label>
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { key: 'center', label: '⬜ Center (default)' },
+                { key: 'top-left', label: '↖ Top Left' },
+                { key: 'top-right', label: '↗ Top Right' },
+                { key: 'hidden', label: '🚫 Hidden' },
+              ] as const).map(p => (
+                <button key={p.key} onClick={() => setLogoPosition(p.key)}
+                  className={`py-2.5 px-3 rounded-xl border-2 text-xs font-semibold text-left transition-all ${
+                    logoPosition === p.key ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600'
+                  }`}>
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Live Preview */}
+          <div className="mb-2">
+            <label className="text-xs font-semibold text-gray-600 block mb-2">Live Preview</label>
+            <div className="relative w-full h-40 rounded-2xl overflow-hidden border-2 border-gray-200">
+              {(heroImagePreview || heroImageUrl) ? (
+                <img src={heroImagePreview || heroImageUrl!} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-400 to-gray-600" />
+              )}
+              <div className="absolute inset-0" style={{
+                backgroundColor: heroTextColor === 'dark'
+                  ? `rgba(255,255,255,${heroOverlay * 0.6})`
+                  : `rgba(0,0,0,${heroOverlay})`
+              }} />
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+                {logoPosition === 'center' && (
+                  <div className="w-10 h-10 rounded-xl bg-white/30 flex items-center justify-center mb-2 text-lg">💼</div>
+                )}
+                <p className={`font-bold text-base leading-tight ${
+                  heroFont === 'serif' ? 'font-serif' : heroFont === 'mono' ? 'font-mono' : ''
+                }`} style={{ color: heroTextColor === 'dark' ? '#1e293b' : '#ffffff' }}>
+                  {merchant?.business_name || 'Your Business'}
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: heroTextColor === 'dark' ? 'rgba(30,41,59,0.7)' : 'rgba(255,255,255,0.75)' }}>
+                  {merchant?.location || 'Your City'}
+                </p>
+              </div>
+              {logoPosition === 'top-left' && (
+                <div className="absolute top-2 left-2 w-8 h-8 rounded-lg bg-white/30 flex items-center justify-center text-sm">💼</div>
+              )}
+              {logoPosition === 'top-right' && (
+                <div className="absolute top-2 right-2 w-8 h-8 rounded-lg bg-white/30 flex items-center justify-center text-sm">💼</div>
+              )}
+            </div>
+            <p className="text-xs text-gray-400 mt-1 text-center">Updates live as you change settings above</p>
           </div>
         </div>
 
