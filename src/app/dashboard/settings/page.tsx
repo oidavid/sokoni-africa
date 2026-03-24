@@ -228,7 +228,6 @@ export default function SettingsPage() {
 
         {/* Profile Photo — only for service businesses */}
         {merchant?.business_type === 'services' && (
-        <>}
         <div>
           <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Profile Photo</label>
           <p className="text-xs text-gray-400 mb-3">Your face/headshot — shown on coaching & consultation pages. Makes your page feel personal and trustworthy.</p>
@@ -254,6 +253,7 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+        )}
 
         {/* Theme Picker — full grid */}
         <div>
@@ -490,7 +490,3 @@ export default function SettingsPage() {
     </div>
   )
 }
-        </>
-        )}
-
-
