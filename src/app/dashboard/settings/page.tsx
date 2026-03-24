@@ -177,7 +177,6 @@ export default function SettingsPage() {
         holiday_message: holidayMessage,
         business_hours: businessHours,
         testimonials: testimonials.filter(t => t.name.trim() && t.text.trim()),
-        updated_at: new Date().toISOString(),
       })
       .eq('id', merchant.id)
     if (updateError) {
