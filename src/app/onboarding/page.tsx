@@ -552,6 +552,7 @@ export default function OnboardingPage() {
       await supabase.auth.signUp({ email, password })
       const { data: newMerchant, error: insertError } = await supabase.from('merchants').insert({
         business_name: businessName, slug, category, location,
+        country: selectedCountry.code,
         whatsapp_number: normalizedWa, email, phone: normalizedWa,
         language: lang, business_type: businessType || 'products',
         theme_color: selectedTheme.primary,
