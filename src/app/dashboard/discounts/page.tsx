@@ -71,9 +71,11 @@ export default function DiscountsPage() {
   }
 
   async function handleSave() {
-    if (!code.trim()) { setFormError('Please enter a code'); return }
-    if (!value || parseFloat(value) <= 0) { setFormError('Please enter a valid discount value'); return }
-    if (type === 'percent' && parseFloat(value) > 100) { setFormError('Percentage cannot exceed 100%'); return }
+    if (!code.trim()) { setFormError('Please enter a discount code'); return }
+    if (/\s/.test(code)) { setFormError('Code cannot contain spaces — use letters and numbers only'); return }
+    if (!value || parseFloat(value) <= 0) { setFormError('Please enter a discount value greater than 0'); return }
+    if (type === 'percent' && parseFloat(value) > 100) { setFormError('Percentage discount cannot exceed 100%'); return }
+    if (type === 'fixed' && parseFloat(value) > 1000000) { setFormError('Fixed discount amount seems too high — please check'); return }
     setSaving(true)
     setFormError('')
     const { error } = await supabase.from('discount_codes').insert({
@@ -86,7 +88,7 @@ export default function DiscountsPage() {
       expires_at: expiresAt || null,
     })
     if (error) {
-      setFormError(error.message.includes('unique') ? 'This code already exists' : 'Failed to save. Please try again.')
+      setFormError(error.message.includes('unique') ? `The code "${code}" already exists — try a different one` : `Save failed: ${error.message}`)
     } else {
       setCode(''); setValue(''); setMinOrder(''); setMaxUses(''); setExpiresAt('')
       setType('percent'); setShowForm(false)
@@ -147,7 +149,7 @@ export default function DiscountsPage() {
                 <div>
                   <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">Code</label>
                   <div className="flex gap-2">
-                    <input value={code} onChange={e => setCode(e.target.value.toUpperCase())}
+                    <input value={code} onChange={e => setCode(e.target.value.toUpperCase().replace(/\s/g, ''))}
                       placeholder="e.g. SAVE20"
                       className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-mono font-bold uppercase focus:outline-none focus:border-brand-green" />
                     <button onClick={generateCode}
@@ -155,6 +157,8 @@ export default function DiscountsPage() {
                       Generate
                     </button>
                   </div>
+                  <p className="text-xs text-gray-400 mt-1">Letters and numbers only — no spaces. e.g. SAVE10, WELCOME20, EASTER25</p>
+                  <p className="text-xs text-gray-400">No spaces allowed — letters and numbers only (e.g. SAVE20, MARCH10)</p>
                 </div>
 
                 {/* Type */}
