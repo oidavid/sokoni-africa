@@ -241,6 +241,12 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
         service_interest: formService,
         message: formMessage,
       })
+      // Send email notification via our API route
+      await fetch('/api/leads/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ merchant_id: store?.id, name: formName, email: formEmail, service: formService, message: formMessage }),
+      }).catch(() => {})
       setFormSubmitted(true)
     } catch {
       setFormError('Something went wrong. Please try WhatsApp instead.')
