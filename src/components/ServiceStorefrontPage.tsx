@@ -544,7 +544,6 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
       {/* Testimonials — location-based placeholder names */}
       <div className="max-w-3xl mx-auto px-4 pb-6">
         <h2 className="font-display font-bold text-brand-dark text-xl mb-1">What Our Clients Say</h2>
-        <p className="text-xs text-gray-400 mb-4">Log in to your dashboard to add real client reviews</p>
         <div className="grid sm:grid-cols-2 gap-3">
           {((store as any).testimonials?.length > 0 ? (store as any).testimonials : getPlaceholderReviews(store.category, store.location)).map((t: any, i: number) => (
             <div key={i} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
