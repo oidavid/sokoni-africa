@@ -237,8 +237,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
 
   if (!loading && store && store.business_type === 'services') {
     if (PEOPLE_LED.includes(store.category)) return <ConsultationStorefrontPage params={params} />
-    if (SERVICES_LED.includes(store.category)) return <ServicesLedStorefrontPage params={params} />
-    return <ServiceStorefrontPage params={params} />
+    return <ServicesLedStorefrontPage params={params} />
   }
 
   if (loading) {
