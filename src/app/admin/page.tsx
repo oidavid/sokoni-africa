@@ -538,20 +538,26 @@ export default function AdminPage() {
             <div className="mb-4">{statusBadge(selectedMerchant.status)}</div>
 
             {/* Identity Verification */}
-            <div className={`mb-5 rounded-xl border p-4 ${th.noteBox}`}>
-              <p className={`text-xs font-mono uppercase tracking-widest mb-3 ${th.muted}`}>🔒 Identity Verification</p>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className={`text-xs font-mono ${th.muted}`}>Owner Name</span>
-                  <span className={`text-sm font-semibold ${th.bodyText}`}>{selectedMerchant.owner_name || <span className="text-[#555] font-normal text-xs">Not provided</span>}</span>
+            <div className="mb-5 rounded-xl border border-blue-500/20 bg-blue-500/5 p-4">
+              <p className="text-xs font-mono uppercase tracking-widest mb-3 text-blue-400">🔒 Identity Verification</p>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-xs font-mono text-[#888] shrink-0">Owner Name</span>
+                  <span className="text-sm font-semibold text-right" style={{color: dark ? 'white' : '#111'}}>
+                    {selectedMerchant.owner_name ? selectedMerchant.owner_name : <span className="text-[#888] font-normal italic text-xs">Not provided</span>}
+                  </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className={`text-xs font-mono ${th.muted}`}>Email</span>
-                  <span className={`text-sm font-mono ${th.bodyText}`}>{selectedMerchant.email || "—"}</span>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-xs font-mono text-[#888] shrink-0">Email</span>
+                  <span className="text-sm font-mono text-right" style={{color: dark ? 'white' : '#111'}}>
+                    {selectedMerchant.email || "—"}
+                  </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className={`text-xs font-mono ${th.muted}`}>Phone</span>
-                  <span className={`text-sm font-mono ${th.bodyText}`}>{selectedMerchant.phone || "—"}</span>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-xs font-mono text-[#888] shrink-0">Phone</span>
+                  <span className="text-sm font-mono text-right" style={{color: dark ? 'white' : '#111'}}>
+                    {selectedMerchant.phone || "—"}
+                  </span>
                 </div>
               </div>
             </div>
