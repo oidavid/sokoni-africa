@@ -485,7 +485,7 @@ export default function AdminPage() {
                     <thead>
                       <tr className={`border-b ${th.thead}`}>
                         {["","Business","Type","Category","Email","Phone","Country","Status","Joined","Store","Actions"].map(h => (
-                          <th key={h} className={`text-left px-3 py-3 text-[10px] tracking-[0.1em] uppercase font-mono font-normal ${th.theadText} whitespace-nowrap ${h === "Actions" ? "min-w-[100px]" : ""}`}>{h}</th>
+                          <th key={h} className={`text-left px-3 py-3 text-[10px] tracking-[0.1em] uppercase font-mono font-normal ${th.theadText} whitespace-nowrap ${h === "Actions" ? "min-w-[110px]" : ""}`}>{h}</th>
                         ))}
                       </tr>
                     </thead>
@@ -514,7 +514,7 @@ export default function AdminPage() {
                           <td className={`px-3 py-3 font-mono text-xs ${th.muted} whitespace-nowrap`}>{m.category || "—"}</td>
                           <td className={`px-3 py-3 font-mono text-xs ${th.muted} whitespace-nowrap`}>{m.email || "—"}</td>
                           <td className={`px-3 py-3 font-mono text-xs ${th.muted} whitespace-nowrap`}>{m.phone || "—"}</td>
-                          <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{m.country || "—"}</td>
+                          <td className={`px-3 py-3 font-mono text-xs ${th.muted} whitespace-nowrap`}>{m.country || "—"}</td>
                           <td className="px-3 py-3 whitespace-nowrap">{statusBadge(m.status)}</td>
                           <td className={`px-3 py-3 font-mono text-xs ${th.muted} whitespace-nowrap`}>
                             {m.created_at ? new Date(m.created_at).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" }) : "—"}
