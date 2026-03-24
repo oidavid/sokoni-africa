@@ -374,9 +374,12 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
       <div className="relative overflow-hidden min-h-[360px] flex flex-col justify-end" style={themeStyle as React.CSSProperties}>
         {heroImage && (
           <div className="absolute inset-0">
-            <img src={heroImage} alt="" className="w-full h-full object-cover" style={{ filter: store.theme_color === '#f1f5f9' ? 'brightness(0.95)' : 'brightness(1)' }} />
-            <div className="absolute inset-0" style={{ ...(themeStyle as object), opacity: 0.78 }} />
+            <img src={heroImage} alt="" className="w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ backgroundColor: heroTextColor === 'dark' ? `rgba(255,255,255,${heroOverlay * 0.6})` : `rgba(0,0,0,${heroOverlay})` }} />
           </div>
+        )}
+        {!heroImage && (
+          <div className="absolute inset-0" style={themeStyle as React.CSSProperties} />
         )}
         <div className="relative max-w-3xl mx-auto px-4 pt-6 pb-8 w-full">
           <div className="flex items-center justify-between mb-6">
@@ -410,7 +413,7 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
           ))}
 
           {/* Center content block */}
-          <div className={`flex flex-col ${alignClass} ${verticalClass} mb-5 flex-1`}>
+          <div className={`flex flex-col ${alignClass} mb-5`}>
             {logoPosition === 'center' && (
               store.logo_url ? (
                 <div className={`mb-4 ${logoSizeClass}`} style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.4))' }}>
