@@ -496,7 +496,6 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
           </div>
         </div>
       </div>
-      </div>
 
       {/* Search + view toggle */}
       <div className="max-w-3xl mx-auto px-4 py-4">
