@@ -221,6 +221,13 @@ const WA_SVG = (
   </svg>
 )
 
+
+function formatHour(time: string) {
+  const [h, m] = time.split(':').map(Number)
+  const period = h < 12 ? 'AM' : 'PM'
+  const hour = h % 12 || 12
+  return `${hour}:${String(m).padStart(2,'0')} ${period}`
+}
 const DAY_ORDER = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
 
 export default function ServiceStorefrontPage({ params }: { params: { slug: string } }) {
@@ -599,11 +606,11 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
                         const val = store.business_hours![day]
                         if (!val) return null
                         return (
-                          <div key={day} className="flex justify-between text-xs">
-                            <span className="text-gray-500 w-8">{day}</span>
+                          <div key={day} className="flex items-center gap-2 text-xs">
+                            <span className="text-gray-500 w-8 shrink-0">{day}</span>
                             {val.closed
                               ? <span className="text-red-400 font-medium">Closed</span>
-                              : <span className="text-gray-700 font-medium">{val.open} – {val.close}</span>
+                              : <span className="text-gray-700 font-medium">{formatHour(val.open)} – {formatHour(val.close)}</span>
                             }
                           </div>
                         )
