@@ -14,6 +14,8 @@ interface Merchant {
   language: string
   business_name: string
   slug: string
+  country?: string
+  business_type?: string
 }
 
 
@@ -59,13 +61,14 @@ export default function AddProductPage() {
       if (!merchantEmail) { router.push('/login'); return }
       const { data: m } = await supabase
         .from('merchants')
-        .select('id, category, language, business_name, slug, country')
+        .select('id, category, language, business_name, slug, country, business_type')
         .eq('email', merchantEmail)
         .single()
       if (!m) { router.push('/onboarding'); return }
       setMerchant(m)
       merchantRef.current = m
-      setCurrencySymbol(CURRENCY_BY_COUNTRY[m.country || 'NG']?.symbol || '₦')
+      const isServ = m.business_type === 'services'
+      setCurrencySymbol(CURRENCY_BY_COUNTRY[m.country || '']?.symbol || '$')
     }
     getMerchant()
   }, [router])
@@ -182,7 +185,7 @@ export default function AddProductPage() {
           <ArrowLeft size={16} className="text-gray-600" />
         </Link>
         <div>
-          <h1 className="font-display font-bold text-brand-dark leading-tight">Add Product</h1>
+          <h1 className="font-display font-bold text-brand-dark leading-tight">{merchant?.business_type === 'services' ? 'Add Service' : 'Add Product'}</h1>
           {merchant && <p className="text-xs text-gray-400">{merchant.business_name}</p>}
         </div>
       </div>
@@ -194,7 +197,7 @@ export default function AddProductPage() {
             <div className="w-16 h-16 bg-brand-green rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-brand-green/30">
               <Check size={28} className="text-white" />
             </div>
-            <h2 className="font-display font-bold text-xl text-brand-dark mb-2">Product Added! 🎉</h2>
+            <h2 className="font-display font-bold text-xl text-brand-dark mb-2">{merchant?.business_type === 'services' ? 'Service Added! 🎉' : 'Product Added! 🎉'}</h2>
             <p className="text-gray-500 text-sm mb-2">{name}</p>
             <p className="text-brand-green font-bold mb-6">{currencySymbol}{parseFloat(price).toLocaleString()}</p>
             <div className="flex gap-3">
@@ -216,7 +219,7 @@ export default function AddProductPage() {
             {/* Photo upload */}
             <div>
               <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">
-                {pid ? 'Product Photo' : 'Product Photo'}
+                {merchant?.business_type === 'services' ? 'Service Photo' : 'Product Photo'}
               </p>
               <input ref={fileRef} type="file" accept="image/*" capture="environment"
                 className="hidden" onChange={handlePhoto} />
@@ -285,7 +288,7 @@ export default function AddProductPage() {
             {/* Product Name */}
             <div>
               <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">
-                {pid ? 'Product Name' : 'Product Name'}
+                {merchant?.business_type === 'services' ? 'Service Name' : 'Product Name'}
               </label>
               <input type="text" value={name} onChange={e => setName(e.target.value)}
                 placeholder={pid ? "e.g. Ankara Print Fabric (6 yards)" : "e.g. Ankara Print Fabric (6 yards)"}
@@ -298,7 +301,7 @@ export default function AddProductPage() {
                 Description {state === 'ready' && !aiError && name && <span className="text-brand-green ml-1 normal-case">✨ AI-generated</span>}
               </label>
               <textarea value={description} onChange={e => setDescription(e.target.value)}
-                placeholder={pid ? "Describe your product..." : "Describe your product..."} rows={4}
+                placeholder={merchant?.business_type === 'services' ? "Describe your service..." : "Describe your product..."} rows={4}
                 className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 focus:border-brand-green outline-none resize-none" />
             </div>
 
