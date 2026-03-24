@@ -22,6 +22,7 @@ interface Merchant {
   holiday_message?: string
   business_hours?: Record<string, {open: string; close: string; closed: boolean}>
   profile_photo_url?: string
+  updated_at?: string
 }
 
 interface Service {
@@ -382,7 +383,7 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
               {store.profile_photo_url ? (
                 <div className="w-52 h-52 sm:w-60 sm:h-60 rounded-full overflow-hidden shadow-2xl ring-4"
                   style={{ border: `4px solid ${color}` }}>
-                  <img src={store.profile_photo_url} alt={store.business_name}
+                  <img src={`${store.profile_photo_url}?v=${store.updated_at || Date.now()}`} alt={store.business_name}
                     className="w-full h-full object-cover object-top" />
                 </div>
               ) : store.logo_url ? (

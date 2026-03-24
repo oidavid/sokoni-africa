@@ -163,6 +163,7 @@ export default function SettingsPage() {
         holiday_mode: holidayMode,
         holiday_message: holidayMessage,
         business_hours: businessHours,
+        updated_at: new Date().toISOString(),
       })
       .eq('id', merchant.id)
     if (updateError) {
