@@ -600,41 +600,8 @@ export default function OnboardingPage() {
     } else if (step === 'whatsapp') {
       const digits = whatsappRaw.replace(/\D/g, '')
       if (!digits) { setError(pid ? 'Abeg enter your WhatsApp number' : 'Please enter your WhatsApp number'); return }
-      const PHONE_RULES: Record<string, {min:number;max:number}> = {
-        '234': {min:10,max:11}, // Nigeria
-        '1':   {min:10,max:10}, // US/Canada
-        '44':  {min:10,max:11}, // UK
-        '233': {min:9, max:10}, // Ghana
-        '254': {min:9, max:10}, // Kenya
-        '27':  {min:9, max:10}, // South Africa
-        '255': {min:9, max:10}, // Tanzania
-        '256': {min:9, max:10}, // Uganda
-        '250': {min:9, max:9},  // Rwanda
-        '251': {min:9, max:10}, // Ethiopia
-        '221': {min:9, max:9},  // Senegal
-        '237': {min:9, max:9},  // Cameroon
-        '225': {min:10,max:10}, // Côte d'Ivoire
-        '20':  {min:10,max:11}, // Egypt
-        '212': {min:9, max:10}, // Morocco
-        '91':  {min:10,max:10}, // India
-        '92':  {min:10,max:11}, // Pakistan
-        '880': {min:10,max:11}, // Bangladesh
-        '60':  {min:9, max:11}, // Malaysia
-        '63':  {min:10,max:11}, // Philippines
-        '62':  {min:9, max:13}, // Indonesia
-        '55':  {min:10,max:11}, // Brazil
-        '52':  {min:10,max:10}, // Mexico
-        '61':  {min:9, max:9},  // Australia
-        '49':  {min:10,max:12}, // Germany
-        '33':  {min:9, max:10}, // France
-        '971': {min:9, max:9},  // UAE
-        '966': {min:9, max:9},  // Saudi Arabia
-        '243': {min:9, max:10}, // DR Congo
-        '263': {min:9, max:10}, // Zimbabwe
-      }
-      const rule = PHONE_RULES[selectedCountry.dial] || {min:7, max:15}
-      if (digits.length < rule.min) { setError(`Please enter a valid ${selectedCountry.name} number (${rule.min} digits)`); return }
-      if (digits.length > rule.max) { setError(`Too many digits for ${selectedCountry.name} (max ${rule.max})`); return }
+      const minLen = selectedCountry.dial === '234' ? 10 : selectedCountry.dial === '1' ? 10 : selectedCountry.dial === '44' ? 10 : 9
+      if (digits.length < minLen) { setError(`Please enter a valid ${selectedCountry.name} phone number (minimum ${minLen} digits)`); return }
       setStep('email')
     } else if (step === 'email') {
       if (!email.trim() || !email.includes('@')) { setError(pid ? 'Abeg enter valid email' : 'Please enter a valid email'); return }
@@ -735,14 +702,14 @@ export default function OnboardingPage() {
               <p className="text-gray-500 text-sm mb-6">
                 {pid ? 'This go be the name wey customers go see.' : 'This is what customers will see on your page.'}
               </p>
-              <input type="text" placeholder="e.g. JB Solar Installation" value={businessName}
+              <input type="text" placeholder="e.g. Rebecca Massage" value={businessName}
                 onChange={e => { setBusinessName(e.target.value); setError('') }}
                 onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
                 className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
               <p className="text-gray-500 text-sm mt-5 mb-2">
-                {pid ? 'Wetin be your full name?' : "Business owner's full name"}
+                {pid ? 'Wetin be your full name?' : 'Your full name (for account verification)'}
               </p>
-              <input type="text" placeholder="e.g. James Bond" value={ownerName}
+              <input type="text" placeholder="e.g. Rebecca Johnson" value={ownerName}
                 onChange={e => { setOwnerName(e.target.value); setError('') }}
                 onKeyDown={e => e.key === 'Enter' && handleNext()}
                 className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
@@ -797,7 +764,7 @@ export default function OnboardingPage() {
                 onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
                 className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-semibold text-lg outline-none transition-colors" />
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
-
+              <p className="text-xs text-gray-400 mt-3">🔒 {pid ? 'No password wahala' : 'No password required'}</p>
             </div>
           )}
 
