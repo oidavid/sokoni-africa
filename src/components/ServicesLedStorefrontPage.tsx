@@ -87,7 +87,125 @@ const CATEGORY_CONFIG: Record<string, {
   },
 }
 
-const DEFAULT_CONFIG = CATEGORY_CONFIG.digital_services
+  home_services: {
+    hero_image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=1200&q=80',
+    headline: 'Repairs & installations done right.',
+    subheadline: 'Fast, reliable home and technical services. Licensed professionals, guaranteed work.',
+    label: 'Home & Technical Services',
+    cta: 'Book a Service',
+    tagline: 'Trusted repairs, on time and on budget',
+    process: [
+      { icon: '📞', title: 'Quick Booking', desc: 'Tell us what needs fixing. We respond fast and schedule at your convenience.' },
+      { icon: '🔧', title: 'Professional Service', desc: 'Licensed technicians arrive on time with the right tools for the job.' },
+      { icon: '✅', title: 'Guaranteed Work', desc: 'All work is guaranteed. If it's not right, we fix it at no extra cost.' },
+    ],
+  },
+  auto_services: {
+    hero_image: 'https://images.unsplash.com/photo-1615906655593-ad0386982a0f?w=1200&q=80',
+    headline: 'Keep your vehicle in top condition.',
+    subheadline: 'Expert auto repair and maintenance by certified mechanics you can trust.',
+    label: 'Auto & Vehicle Services',
+    cta: 'Book a Service',
+    tagline: 'Quality auto care at fair prices',
+    process: [
+      { icon: '🔍', title: 'Free Diagnosis', desc: 'We inspect your vehicle and give you a clear, honest assessment before any work begins.' },
+      { icon: '🔧', title: 'Expert Repair', desc: 'Certified mechanics fix the problem right the first time using quality parts.' },
+      { icon: '🚗', title: 'Back on the Road', desc: 'We get you moving again quickly with a full quality check before handover.' },
+    ],
+  },
+  beauty_services: {
+    hero_image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1200&q=80',
+    headline: 'Look your best. Feel your best.',
+    subheadline: 'Professional beauty and personal care services in a relaxing, welcoming environment.',
+    label: 'Beauty & Personal Care',
+    cta: 'Book an Appointment',
+    tagline: 'Your beauty, our expertise',
+    process: [
+      { icon: '📅', title: 'Easy Booking', desc: 'Book your appointment via WhatsApp at a time that works for you.' },
+      { icon: '💆', title: 'Expert Care', desc: 'Skilled professionals deliver outstanding results with premium products.' },
+      { icon: '✨', title: 'Love the Result', desc: 'Leave looking and feeling amazing. We won't stop until you're delighted.' },
+    ],
+  },
+  domestic: {
+    hero_image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80',
+    headline: 'A clean home, a clear mind.',
+    subheadline: 'Reliable, thorough domestic services so you can focus on what matters most.',
+    label: 'Domestic Services',
+    cta: 'Book a Service',
+    tagline: 'Professional care for your home',
+    process: [
+      { icon: '📋', title: 'Tell Us What You Need', desc: 'Share your requirements and schedule. We tailor the service to your home.' },
+      { icon: '🏠', title: 'We Handle It', desc: 'Our trained team arrives fully equipped and gets to work immediately.' },
+      { icon: '😊', title: 'Enjoy Your Space', desc: 'Come home to a spotless, fresh, perfectly maintained home every time.' },
+    ],
+  },
+  events: {
+    hero_image: 'https://images.unsplash.com/photo-1478146896981-b80fe463b330?w=1200&q=80',
+    headline: 'Unforgettable events, expertly planned.',
+    subheadline: 'From intimate gatherings to large celebrations — we handle every detail.',
+    label: 'Events & Occasions',
+    cta: 'Plan Your Event',
+    tagline: 'Every event tells a story',
+    process: [
+      { icon: '💬', title: 'Share Your Vision', desc: 'Tell us about your event, budget and ideas. We listen and advise.' },
+      { icon: '📐', title: 'We Plan Everything', desc: 'Full event planning, coordination and supplier management handled for you.' },
+      { icon: '🎉', title: 'Perfect Execution', desc: 'On the day, we manage everything so you can enjoy every moment.' },
+    ],
+  },
+  transport: {
+    hero_image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1200&q=80',
+    headline: 'Safe, reliable transport when you need it.',
+    subheadline: 'Professional drivers and vehicles for personal and business transportation.',
+    label: 'Transport & Delivery',
+    cta: 'Book a Ride',
+    tagline: 'On time, every time',
+    process: [
+      { icon: '📍', title: 'Share Your Route', desc: 'Tell us your pickup, destination and time. We confirm immediately.' },
+      { icon: '🚗', title: 'Professional Driver', desc: 'A vetted, professional driver arrives on time in a clean, safe vehicle.' },
+      { icon: '✅', title: 'Safe Arrival', desc: 'Arrive safely, on time. We track every journey for your peace of mind.' },
+    ],
+  },
+  agriculture: {
+    hero_image: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=1200&q=80',
+    headline: 'Fresh produce, direct from the farm.',
+    subheadline: 'Quality agricultural products and farming services delivered to your door.',
+    label: 'Agriculture & Farm Produce',
+    cta: 'Place an Order',
+    tagline: 'Farm fresh, every time',
+    process: [
+      { icon: '🌱', title: 'Choose Your Produce', desc: 'Browse our fresh, seasonal produce and farm services. Quality guaranteed.' },
+      { icon: '📦', title: 'We Pack & Deliver', desc: 'Your order is carefully packed and delivered fresh to your location.' },
+      { icon: '🤝', title: 'Ongoing Supply', desc: 'Set up regular deliveries and never worry about fresh produce again.' },
+    ],
+  },
+  food_catering: {
+    hero_image: 'https://images.unsplash.com/photo-1555244162-803834f70033?w=1200&q=80',
+    headline: 'Delicious food for every occasion.',
+    subheadline: 'Professional catering and food services that impress every guest.',
+    label: 'Food & Catering',
+    cta: 'Get a Quote',
+    tagline: 'Food that brings people together',
+    process: [
+      { icon: '📋', title: 'Share Your Brief', desc: 'Tell us your event, guest count and menu preferences. We advise on the best options.' },
+      { icon: '👨‍🍳', title: 'We Prepare & Deliver', desc: 'Fresh, delicious food prepared by our chefs and delivered on time.' },
+      { icon: '🍽️', title: 'Everyone Eats Well', desc: 'Sit back and enjoy compliments from your guests on the exceptional food.' },
+    ],
+  },
+  childcare: {
+    hero_image: 'https://images.unsplash.com/photo-1567705323043-dce7c5d78a83?w=1200&q=80',
+    headline: 'Safe, nurturing care for your little ones.',
+    subheadline: 'Qualified childcare professionals you can trust with what matters most.',
+    label: 'Childcare & Nanny Services',
+    cta: 'Book a Carer',
+    tagline: 'Your child's safety, our priority',
+    process: [
+      { icon: '👋', title: 'Meet & Greet', desc: 'We arrange a meet-and-greet so your child and carer get comfortable first.' },
+      { icon: '🛡️', title: 'Background Checked', desc: 'All our carers are fully vetted, background checked and first-aid trained.' },
+      { icon: '❤️', title: 'Peace of Mind', desc: 'Your child thrives in safe, nurturing care while you focus on your day.' },
+    ],
+  },
+
+const DEFAULT_CONFIG = CATEGORY_CONFIG.home_services
 
 function getContrastColor(hex: string): string {
   if (!hex || hex.length < 7) return '#ffffff'
