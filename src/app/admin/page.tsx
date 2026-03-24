@@ -481,11 +481,11 @@ export default function AdminPage() {
                 </div>
 
                 <div className={`rounded-xl border overflow-x-auto ${th.surface}`}>
-                  <table className="w-full min-w-[1100px]">
+                  <table className="w-full min-w-[1300px]">
                     <thead>
                       <tr className={`border-b ${th.thead}`}>
                         {["","Business","Type","Category","Email","Phone","Country","Status","Joined","Store","Actions"].map(h => (
-                          <th key={h} className={`text-left px-3 py-3 text-[10px] tracking-[0.1em] uppercase font-mono font-normal ${th.theadText} whitespace-nowrap`}>{h}</th>
+                          <th key={h} className={`text-left px-3 py-3 text-[10px] tracking-[0.1em] uppercase font-mono font-normal ${th.theadText} whitespace-nowrap ${h === "Actions" ? "min-w-[100px]" : ""}`}>{h}</th>
                         ))}
                       </tr>
                     </thead>
@@ -527,7 +527,7 @@ export default function AdminPage() {
                               </a>
                             ) : <span className={`font-mono text-xs ${th.faint}`}>—</span>}
                           </td>
-                          <td className="px-3 py-3 whitespace-nowrap">
+                          <td className="px-3 py-3 whitespace-nowrap min-w-[100px]">
                             <button onClick={() => { setSelectedMerchant(m); setModalType("actions"); setActionMessage(""); }}
                               className={`text-xs px-3 py-1.5 rounded-lg transition-colors font-mono ${th.btn}`}>
                               Manage
@@ -553,7 +553,7 @@ export default function AdminPage() {
                   </button>
                 </div>
                 <div className={`rounded-xl border overflow-x-auto ${th.surface}`}>
-                  <table className="w-full min-w-[1100px]">
+                  <table className="w-full min-w-[1300px]">
                     <thead>
                       <tr className={`border-b ${th.thead}`}>
                         {["Name","Email","Role","Last Login","Status","Actions"].map(h => (
@@ -782,7 +782,7 @@ export default function AdminPage() {
                   <p className={`text-xs font-mono ${th.muted}`}>When you're ready to launch, broadcast to this list first — they're your warmest leads.</p>
                 </div>
                 <div className={`rounded-xl border overflow-x-auto ${th.surface}`}>
-                  <table className="w-full min-w-[1100px]">
+                  <table className="w-full min-w-[1300px]">
                     <thead>
                       <tr className={`border-b ${th.thead}`}>
                         {["Business","Email","Joined Waitlist","Action"].map(h => (
