@@ -717,7 +717,7 @@ export default function AdminPage() {
                     className={`text-sm px-3 py-1.5 rounded-lg font-mono border transition-colors ${
                       selectMode === opt.key
                         ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-                        : `${th.btn} ${th.border}`
+                        : `${th.btn} border border-transparent`
                     }`}>
                     {opt.label}
                   </button>
