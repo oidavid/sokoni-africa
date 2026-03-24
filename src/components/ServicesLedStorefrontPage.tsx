@@ -111,6 +111,8 @@ const WA_SVG = (
   </svg>
 )
 
+const DAY_ORDER = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+
 export default function ServicesLedStorefrontPage({ params }: { params: { slug: string } }) {
   const [store, setStore] = useState<Merchant | null>(null)
   const [services, setServices] = useState<Service[]>([])
@@ -535,15 +537,19 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
                 <div className="flex-1">
                   <p className="text-xs text-gray-400 mb-1">Business Hours</p>
                   <div className="space-y-0.5">
-                    {Object.entries(store.business_hours).map(([day, val]: [string, any]) => (
-                      <div key={day} className="flex justify-between text-xs">
-                        <span className="text-gray-500 w-8">{day}</span>
-                        {val.closed
-                          ? <span className="text-red-400 font-medium">Closed</span>
-                          : <span className="text-gray-700 font-medium">{val.open} – {val.close}</span>
-                        }
-                      </div>
-                    ))}
+                    {DAY_ORDER.map(day => {
+                        const val = store.business_hours![day]
+                        if (!val) return null
+                        return (
+                          <div key={day} className="flex justify-between text-xs">
+                            <span className="text-gray-500 w-8">{day}</span>
+                            {val.closed
+                              ? <span className="text-red-400 font-medium">Closed</span>
+                              : <span className="text-gray-700 font-medium">{val.open} – {val.close}</span>
+                            }
+                          </div>
+                        )
+                      })}
                   </div>
                 </div>
               </div>
