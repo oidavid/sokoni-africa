@@ -69,12 +69,6 @@ export default function SettingsPage() {
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null)
   const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null)
   const [uploadingProfilePhoto, setUploadingProfilePhoto] = useState(false)
-  const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null)
-  const [heroImagePreview, setHeroImagePreview] = useState<string | null>(null)
-  const [uploadingHero, setUploadingHero] = useState(false)
-  const [heroOverlay, setHeroOverlay] = useState(0.45)
-  const [heroTextColor, setHeroTextColor] = useState<'white' | 'dark'>('white')
-  const [heroFont, setHeroFont] = useState<'default' | 'serif' | 'mono'>('default')
   const [holidayMode, setHolidayMode] = useState(false)
   const [holidayMessage, setHolidayMessage] = useState('')
   const [testimonials, setTestimonials] = useState<Testimonial[]>([
@@ -121,10 +115,6 @@ export default function SettingsPage() {
       }
       setLogoUrl(m.logo_url || null)
       setProfilePhotoUrl(m.profile_photo_url || null)
-      setHeroImageUrl(m.hero_image_url || null)
-      setHeroOverlay(m.hero_overlay ?? 0.45)
-      setHeroTextColor(m.hero_text_color || 'white')
-      setHeroFont(m.hero_font || 'default')
       setHolidayMode(m.holiday_mode || false)
       setHolidayMessage(m.holiday_message || '')
       if (m.business_hours) setBusinessHours(m.business_hours)
@@ -183,10 +173,6 @@ export default function SettingsPage() {
         theme_preset: selectedTheme.id,
         logo_url: logoUrl,
         profile_photo_url: profilePhotoUrl,
-        hero_image_url: heroImageUrl,
-        hero_overlay: heroOverlay,
-        hero_text_color: heroTextColor,
-        hero_font: heroFont,
         holiday_mode: holidayMode,
         holiday_message: holidayMessage,
         business_hours: businessHours,
@@ -280,93 +266,7 @@ export default function SettingsPage() {
         </div>
         )}
 
-        {/* Hero Image & Appearance */}
-        <div>
-          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-3">Hero Image &amp; Appearance</label>
-
-          {/* Hero image upload */}
-          <div className="mb-4">
-            {(heroImagePreview || heroImageUrl) && (
-              <div className="relative w-full h-32 rounded-2xl overflow-hidden mb-3 border-2 border-gray-200">
-                <img src={heroImagePreview || heroImageUrl!} alt="Hero" className="w-full h-full object-cover" />
-                <button onClick={() => { setHeroImageUrl(null); setHeroImagePreview(null); }}
-                  className="absolute top-2 right-2 bg-black/50 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">x</button>
-              </div>
-            )}
-            <label className="flex items-center gap-2 bg-white border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-700 hover:border-brand-green cursor-pointer transition-colors w-fit">
-              {uploadingHero ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-              {uploadingHero ? 'Uploading...' : heroImageUrl ? 'Change Hero Image' : 'Upload Hero Image'}
-              <input type="file" accept="image/*" className="hidden" disabled={uploadingHero}
-                onChange={async (e) => {
-                  const file = e.target.files?.[0]
-                  if (!file || !merchant) return
-                  setUploadingHero(true)
-                  const preview = URL.createObjectURL(file)
-                  setHeroImagePreview(preview)
-                  try {
-                    const url = await uploadProductImage(file, merchant.id)
-                    setHeroImageUrl(url)
-                  } catch { setHeroImagePreview(null) }
-                  setUploadingHero(false)
-                }} />
-            </label>
-            <p className="text-xs text-gray-400 mt-1.5">Recommended: wide landscape photo, at least 1200px wide</p>
-          </div>
-
-          {/* Overlay darkness */}
-          <div className="mb-4">
-            <label className="text-xs font-semibold text-gray-600 block mb-2">
-              Hero Overlay Darkness &mdash; {Math.round(heroOverlay * 100)}%
-            </label>
-            <input type="range" min="0" max="80" step="5"
-              value={Math.round(heroOverlay * 100)}
-              onChange={e => setHeroOverlay(Number(e.target.value) / 100)}
-              className="w-full accent-brand-green" />
-            <div className="flex justify-between text-xs text-gray-400 mt-1">
-              <span>Lighter</span>
-              <span>Darker (more contrast)</span>
-            </div>
-          </div>
-
-          {/* Text color */}
-          <div className="mb-4">
-            <label className="text-xs font-semibold text-gray-600 block mb-2">Hero Text Color</label>
-            <div className="flex gap-2">
-              {(['white', 'dark'] as const).map(c => (
-                <button key={c} onClick={() => setHeroTextColor(c)}
-                  className={`flex-1 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all ${
-                    heroTextColor === c ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600'
-                  }`}>
-                  {c === 'white' ? 'White Text' : 'Dark Text'}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Font style */}
-          <div className="mb-2">
-            <label className="text-xs font-semibold text-gray-600 block mb-2">Business Name Font Style</label>
-            <div className="grid grid-cols-3 gap-2">
-              {([
-                { key: 'default', label: 'Modern', preview: 'Aa' },
-                { key: 'serif', label: 'Classic', preview: 'Aa' },
-                { key: 'mono', label: 'Technical', preview: 'Aa' },
-              ] as const).map(f => (
-                <button key={f.key} onClick={() => setHeroFont(f.key)}
-                  className={`py-3 rounded-xl border-2 text-center transition-all ${
-                    heroFont === f.key ? 'border-brand-green bg-brand-light' : 'border-gray-200 hover:border-gray-300'
-                  }`}>
-                  <div className={`text-lg font-bold mb-0.5 ${
-                    f.key === 'serif' ? 'font-serif' : f.key === 'mono' ? 'font-mono' : 'font-display'
-                  }`}>{f.preview}</div>
-                  <div className="text-xs text-gray-500">{f.label}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Theme Picker - full grid */}
+        {/* Theme Picker â€” full grid */}
         <div>
           <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-3">Brand Theme</label>
           <div className="grid grid-cols-3 gap-2 mb-3">

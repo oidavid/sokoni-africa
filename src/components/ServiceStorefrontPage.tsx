@@ -14,6 +14,10 @@ interface Merchant {
   whatsapp_number: string
   category: string
   theme_color: string
+  hero_image_url?: string
+  hero_overlay?: number
+  hero_text_color?: string
+  hero_font?: string
   logo_url: string | null
   business_type?: string
   theme_preset?: string
@@ -275,7 +279,10 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
   const color = theme?.primary || store.theme_color || '#1A7A4A'
   const contrast = theme?.textOnPrimary || getContrastColor(color)
   const waNumber = store.whatsapp_number?.replace(/\D/g, '')
-  const heroImage = CATEGORY_HERO[store.category]
+  const heroImage = store.hero_image_url || CATEGORY_HERO[store.category]
+  const heroOverlay = store.hero_overlay ?? 0.45
+  const heroTextColor = store.hero_text_color || 'white'
+  const heroFontClass = store.hero_font === 'serif' ? 'font-serif' : store.hero_font === 'mono' ? 'font-mono' : 'font-display'
   const categoryLabel = CATEGORY_LABEL[store.category] || 'Professional Services'
   const tagline = store.description || CATEGORY_TAGLINE[store.category] || 'Quality service you can trust'
   const available = services.filter(s => s.in_stock)
