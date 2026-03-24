@@ -45,7 +45,7 @@ interface Service {
 
 const CATEGORY_HERO: Record<string, string> = {
   beauty_services: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1200&q=80',
-  home_services: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1200&q=80',
+  home_services: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=1200&q=80',
   auto_services: 'https://images.unsplash.com/photo-1615906655593-ad0386982a0f?w=1200&q=80',
   education: 'https://images.unsplash.com/photo-1588072432836-e10032774350?w=1200&q=80',
   health_wellness: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=1200&q=80',
