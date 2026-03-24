@@ -269,7 +269,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
     const { data } = await supabase
       .from('discount_codes')
       .select('*')
-      .eq('merchant_id', store.id)
+      .eq('merchant_id', store!.id)
       .eq('code', discountCode.trim().toUpperCase())
       .eq('active', true)
       .single()
