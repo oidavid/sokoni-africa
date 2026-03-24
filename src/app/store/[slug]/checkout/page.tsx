@@ -35,6 +35,9 @@ interface Merchant {
   whatsapp_number: string
   location: string
   paystack_subaccount?: string
+  logo_url?: string
+  theme_color?: string
+  country?: string
 }
 
 function formatNaira(amount: number) {
@@ -71,6 +74,10 @@ function CheckoutForm() {
   const [customerPoints, setCustomerPoints] = useState(0)
   const [applyPoints, setApplyPoints] = useState(false)
   const [pointsDiscount, setPointsDiscount] = useState(0)
+  const [discountCode, setDiscountCode] = useState('')
+  const [appliedDiscount, setAppliedDiscount] = useState<{code: string; type: string; value: number; id: string} | null>(null)
+  const [discountError, setDiscountError] = useState('')
+  const [applyingDiscount, setApplyingDiscount] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -135,7 +142,39 @@ function CheckoutForm() {
   }, [slug, searchParams])
 
   const rawSubtotal = cart.reduce((sum, i) => sum + i.product.price * i.qty, 0)
-  const subtotal = Math.max(0, rawSubtotal - (applyPoints ? pointsDiscount : 0))
+  async function applyDiscount() {
+    if (!discountCode.trim() || !store) return
+    setApplyingDiscount(true)
+    setDiscountError('')
+    const { data } = await supabase
+      .from('discount_codes')
+      .select('*')
+      .eq('merchant_id', store.id)
+      .eq('code', discountCode.trim().toUpperCase())
+      .eq('active', true)
+      .single()
+    if (!data) {
+      setDiscountError('Invalid or expired code')
+    } else if (data.expires_at && new Date(data.expires_at) < new Date()) {
+      setDiscountError('This code has expired')
+    } else if (data.max_uses && data.uses >= data.max_uses) {
+      setDiscountError('This code has reached its usage limit')
+    } else if (data.min_order > 0 && rawSubtotal / 100 < data.min_order) {
+      setDiscountError(`Minimum order of ₦${data.min_order.toLocaleString()} required`)
+    } else {
+      setAppliedDiscount({ code: data.code, type: data.type, value: data.value, id: data.id })
+      setDiscountError('')
+    }
+    setApplyingDiscount(false)
+  }
+
+  function getDiscountAmount() {
+    if (!appliedDiscount) return 0
+    if (appliedDiscount.type === 'percent') return Math.round(rawSubtotal * appliedDiscount.value / 100)
+    return appliedDiscount.value * 100
+  }
+
+  const subtotal = Math.max(0, rawSubtotal - (applyPoints ? pointsDiscount : 0) - getDiscountAmount())
 
   function validate() {
     const errs: Record<string, string> = {}
@@ -295,12 +334,21 @@ function CheckoutForm() {
 
   return (
     <div className="min-h-screen bg-gray-50 max-w-lg mx-auto">
-      <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
-        <Link href={`/store/${slug}`} className="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center">
-          <ArrowLeft size={16} className="text-gray-600" />
-        </Link>
-        <h1 className="font-display font-bold text-brand-dark">Checkout</h1>
-        <span className="text-xs text-gray-400 ml-auto">{store?.business_name}</span>
+      {/* Branded header */}
+      <div className="sticky top-0 z-10">
+        <div style={{ backgroundColor: store?.theme_color || '#1A7A4A' }} className="px-4 py-3 flex items-center gap-3">
+          <Link href={`/store/${slug}`} className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center">
+            <ArrowLeft size={16} className="text-white" />
+          </Link>
+          {store?.logo_url
+            ? <img src={store.logo_url} alt={store.business_name} className="w-9 h-9 rounded-xl object-contain bg-white/10" />
+            : <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center font-bold text-white text-sm">{store?.business_name?.[0]}</div>
+          }
+          <div className="flex-1 min-w-0">
+            <h1 className="font-display font-bold text-white text-sm leading-tight truncate">{store?.business_name}</h1>
+            <p className="text-white/70 text-xs">Checkout</p>
+          </div>
+        </div>
       </div>
 
       <div className="p-4 space-y-4">
@@ -322,9 +370,40 @@ function CheckoutForm() {
               </p>
             </div>
           ))}
-          <div className="px-4 py-3 border-t border-gray-100 flex justify-between">
-            <span className="font-bold text-gray-800">Total</span>
-            <span className="font-display font-bold text-brand-dark text-lg">{formatNaira(subtotal)}</span>
+          {/* Discount code */}
+          <div className="px-4 py-3 border-t border-gray-100 space-y-2">
+            <div className="flex gap-2">
+              <input value={discountCode} onChange={e => { setDiscountCode(e.target.value.toUpperCase().replace(/\s/g, '')); setDiscountError('') }}
+                placeholder="Discount code"
+                className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:border-brand-green" />
+              <button onClick={applyDiscount} disabled={applyingDiscount || !discountCode.trim()}
+                className="text-xs font-bold px-3 py-2 rounded-xl border border-brand-green text-brand-green bg-brand-light disabled:opacity-40 whitespace-nowrap">
+                {applyingDiscount ? '...' : 'Apply'}
+              </button>
+            </div>
+            {discountError && <p className="text-red-500 text-xs">{discountError}</p>}
+            {appliedDiscount && (
+              <div className="flex items-center justify-between bg-green-50 rounded-xl px-3 py-2">
+                <span className="text-xs font-semibold text-green-700">🎉 {appliedDiscount.code} applied!</span>
+                <button onClick={() => { setAppliedDiscount(null); setDiscountCode('') }} className="text-xs text-gray-400">✕</button>
+              </div>
+            )}
+          </div>
+          <div className="px-4 pb-3 space-y-1 border-t border-gray-50">
+            <div className="flex justify-between text-sm text-gray-500">
+              <span>Subtotal</span>
+              <span>{formatNaira(rawSubtotal)}</span>
+            </div>
+            {appliedDiscount && (
+              <div className="flex justify-between text-sm text-green-600">
+                <span>Discount ({appliedDiscount.type === 'percent' ? `${appliedDiscount.value}%` : `₦${appliedDiscount.value}`})</span>
+                <span>-{formatNaira(getDiscountAmount())}</span>
+              </div>
+            )}
+            <div className="flex justify-between">
+              <span className="font-bold text-gray-800">Total</span>
+              <span className="font-display font-bold text-brand-dark text-lg">{formatNaira(subtotal)}</span>
+            </div>
           </div>
         </div>
 
