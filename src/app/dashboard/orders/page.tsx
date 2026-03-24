@@ -25,6 +25,8 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; dot: string 
   confirmed: { label: 'Confirmed', color: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500' },
   dispatched:{ label: 'Dispatched',color: 'bg-purple-100 text-purple-700',dot: 'bg-purple-500' },
   delivered: { label: 'Delivered', color: 'bg-green-100 text-green-700', dot: 'bg-green-500' },
+  in_progress: { label: 'In Progress', color: 'bg-blue-100 text-blue-700', dot: 'bg-blue-500' },
+  completed: { label: 'Completed', color: 'bg-green-100 text-green-700', dot: 'bg-green-500' },
   cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-600',     dot: 'bg-red-400' },
 }
 
@@ -52,6 +54,7 @@ export default function OrdersPage() {
   const [loadError, setLoadError] = useState('')
 
   const [merchantId, setMerchantId] = useState<string>('')
+  const [isService, setIsService] = useState(false)
 
   const loadOrders = useCallback(async (showRefresh = false) => {
     if (showRefresh) setRefreshing(true)
@@ -62,7 +65,8 @@ export default function OrdersPage() {
       const merchantEmail = user?.email || fallbackEmail
       if (!merchantEmail) { router.push('/login'); return }
 
-      const { data: m, error: mError } = await supabase.from('merchants').select('id, whatsapp_number').eq('email', merchantEmail).single()
+      const { data: m, error: mError } = await supabase.from('merchants').select('id, whatsapp_number, business_type').eq('email', merchantEmail).single()
+      if (m) setIsService(m.business_type === 'services')
       if (mError || !m) { router.push('/onboarding'); return }
       setMerchantId(m.id)
 
@@ -163,7 +167,9 @@ Please restock soon to avoid missing orders.`
     setUpdatingId(null)
   }
 
-  const allFilters = ['new', 'confirmed', 'dispatched', 'delivered', 'all', 'cancelled']
+  const allFilters = isService
+    ? ['new', 'confirmed', 'in_progress', 'completed', 'all', 'cancelled']
+    : ['new', 'confirmed', 'dispatched', 'delivered', 'all', 'cancelled']
   const filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter)
   const newCount = orders.filter(o => o.status === 'new').length
   const counts = Object.fromEntries(allFilters.map(f => [f, f === 'all' ? orders.length : orders.filter(o => o.status === f).length]))
@@ -213,9 +219,9 @@ Please restock soon to avoid missing orders.`
       <div className="divide-y divide-gray-100">
         {filtered.length === 0 ? (
           <div className="text-center py-16 px-4">
-            <div className="text-4xl mb-3">📦</div>
-            <p className="font-semibold text-gray-700 mb-1">No {filter === 'all' ? '' : filter} orders</p>
-            <p className="text-gray-400 text-sm">Orders will appear here</p>
+            <div className="text-4xl mb-3">{isService ? '📋' : '📦'}</div>
+            <p className="font-semibold text-gray-700 mb-1">No {filter === 'all' ? '' : filter} {isService ? 'bookings' : 'orders'}</p>
+            <p className="text-gray-400 text-sm">{isService ? 'Bookings will appear here' : 'Orders will appear here'}</p>
           </div>
         ) : filtered.map(order => {
           const status = STATUS_CONFIG[order.status] || STATUS_CONFIG.new
@@ -286,25 +292,50 @@ Please restock soon to avoid missing orders.`
                   </div>
 
                   {/* Actions */}
-                  {order.status !== 'delivered' && order.status !== 'cancelled' && (
+                  {order.status !== 'delivered' && order.status !== 'completed' && order.status !== 'cancelled' && (
                     <div className="flex gap-2">
-                      {order.status === 'new' && (
-                        <button onClick={() => updateStatus(order.id, 'confirmed', order)} disabled={updatingId === order.id}
-                          className="flex-1 bg-brand-green text-white text-xs font-bold py-2.5 rounded-xl disabled:opacity-50">
-                          ✓ Confirm Order
-                        </button>
-                      )}
-                      {order.status === 'confirmed' && (
-                        <button onClick={() => updateStatus(order.id, 'dispatched', order)} disabled={updatingId === order.id}
-                          className="flex-1 bg-purple-500 text-white text-xs font-bold py-2.5 rounded-xl disabled:opacity-50">
-                          🚚 Mark Dispatched
-                        </button>
-                      )}
-                      {order.status === 'dispatched' && (
-                        <button onClick={() => updateStatus(order.id, 'delivered', order)} disabled={updatingId === order.id}
-                          className="flex-1 bg-brand-green text-white text-xs font-bold py-2.5 rounded-xl disabled:opacity-50">
-                          ✓ Mark Delivered
-                        </button>
+                      {isService ? (
+                        <>
+                          {order.status === 'new' && (
+                            <button onClick={() => updateStatus(order.id, 'confirmed', order)} disabled={updatingId === order.id}
+                              className="flex-1 bg-brand-green text-white text-xs font-bold py-2.5 rounded-xl disabled:opacity-50">
+                              ✓ Confirm Booking
+                            </button>
+                          )}
+                          {order.status === 'confirmed' && (
+                            <button onClick={() => updateStatus(order.id, 'in_progress', order)} disabled={updatingId === order.id}
+                              className="flex-1 bg-blue-500 text-white text-xs font-bold py-2.5 rounded-xl disabled:opacity-50">
+                              ▶ Start Service
+                            </button>
+                          )}
+                          {order.status === 'in_progress' && (
+                            <button onClick={() => updateStatus(order.id, 'completed', order)} disabled={updatingId === order.id}
+                              className="flex-1 bg-brand-green text-white text-xs font-bold py-2.5 rounded-xl disabled:opacity-50">
+                              ✓ Mark Completed
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          {order.status === 'new' && (
+                            <button onClick={() => updateStatus(order.id, 'confirmed', order)} disabled={updatingId === order.id}
+                              className="flex-1 bg-brand-green text-white text-xs font-bold py-2.5 rounded-xl disabled:opacity-50">
+                              ✓ Confirm Order
+                            </button>
+                          )}
+                          {order.status === 'confirmed' && (
+                            <button onClick={() => updateStatus(order.id, 'dispatched', order)} disabled={updatingId === order.id}
+                              className="flex-1 bg-purple-500 text-white text-xs font-bold py-2.5 rounded-xl disabled:opacity-50">
+                              🚚 Mark Dispatched
+                            </button>
+                          )}
+                          {order.status === 'dispatched' && (
+                            <button onClick={() => updateStatus(order.id, 'delivered', order)} disabled={updatingId === order.id}
+                              className="flex-1 bg-brand-green text-white text-xs font-bold py-2.5 rounded-xl disabled:opacity-50">
+                              ✓ Mark Delivered
+                            </button>
+                          )}
+                        </>
                       )}
                       <button onClick={() => updateStatus(order.id, 'cancelled', order)} disabled={updatingId === order.id}
                         className="bg-red-50 text-red-500 text-xs font-bold py-2.5 px-4 rounded-xl disabled:opacity-50">
