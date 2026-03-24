@@ -370,8 +370,41 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
         </div>
       )}
 
-      {/* Hero — taller, bigger logo */}
-      <div className="relative overflow-hidden min-h-[360px] flex flex-col justify-end" style={themeStyle as React.CSSProperties}>
+      {/* Top Header Bar — logo + name always here */}
+      <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
+        <div className="flex items-center gap-3">
+          {store.logo_url ? (
+            <img src={store.logo_url} alt={store.business_name}
+              className={`rounded-xl object-contain ${logoSize === 'small' ? 'w-8 h-8' : logoSize === 'large' ? 'w-14 h-14' : 'w-10 h-10'}`}
+              style={{ background: 'transparent' }} />
+          ) : (
+            <div className={`rounded-xl flex items-center justify-center font-bold text-white ${logoSize === 'small' ? 'w-8 h-8 text-sm' : logoSize === 'large' ? 'w-14 h-14 text-xl' : 'w-10 h-10 text-base'}`}
+              style={themeStyle as React.CSSProperties}>
+              {store.business_name.charAt(0)}
+            </div>
+          )}
+          <div>
+            <p className={`${heroFontClass} font-bold text-gray-900 leading-tight ${fontSizeClass === 'text-5xl' ? 'text-lg' : fontSizeClass === 'text-4xl' ? 'text-base' : fontSizeClass === 'text-2xl' ? 'text-sm' : 'text-base'}`}>
+              {store.business_name}
+            </p>
+            <p className="text-xs font-medium" style={{ color }}>{categoryLabel}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(bookMsg)}`}
+            target="_blank" rel="noreferrer"
+            className="flex items-center gap-1.5 text-white text-xs font-bold px-3 py-2 rounded-xl"
+            style={{ backgroundColor: color }}>
+            {WA_SVG} Book Now
+          </a>
+          <button onClick={shareStore} className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-gray-200">
+            <Share2 size={16} className="text-gray-600" />
+          </button>
+        </div>
+      </div>
+
+      {/* Hero — full bleed image with tagline only */}
+      <div className="relative overflow-hidden min-h-[300px] flex flex-col justify-end" style={!heroImage ? themeStyle as React.CSSProperties : {}}>
         {heroImage && (
           <div className="absolute inset-0">
             <img src={heroImage} alt="" className="w-full h-full object-cover" />
@@ -381,80 +414,44 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
         {!heroImage && (
           <div className="absolute inset-0" style={themeStyle as React.CSSProperties} />
         )}
-        <div className="relative max-w-3xl mx-auto px-4 pt-6 pb-8 w-full">
-          <div className="flex items-center justify-between mb-6">
+        <div className="relative px-4 pt-4 pb-6 w-full">
+          {/* Open badge */}
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1.5">
               <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse" />
-              <span className="text-xs font-semibold text-white">Open for bookings</span>
-            </div>
-            <button onClick={shareStore} className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/30">
-              <Share2 size={16} />
-            </button>
-          </div>
-
-          {/* Corner logos */}
-          {logoPosition === 'top-left' && (store.logo_url ? (
-            <div className={`absolute top-4 left-4 ${logoCornerClass}`} style={{ filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))' }}>
-              <img src={store.logo_url} alt={store.business_name} className="w-full h-full rounded-xl object-contain" style={{ background: 'transparent' }} />
-            </div>
-          ) : (
-            <div className={`absolute top-4 left-4 ${logoCornerClass} rounded-xl bg-white/20 flex items-center justify-center`}>
-              <span className="text-2xl">💼</span>
-            </div>
-          ))}
-          {logoPosition === 'top-right' && (store.logo_url ? (
-            <div className={`absolute top-4 right-14 ${logoCornerClass}`} style={{ filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))' }}>
-              <img src={store.logo_url} alt={store.business_name} className="w-full h-full rounded-xl object-contain" style={{ background: 'transparent' }} />
-            </div>
-          ) : (
-            <div className={`absolute top-4 right-14 ${logoCornerClass} rounded-xl bg-white/20 flex items-center justify-center`}>
-              <span className="text-2xl">💼</span>
-            </div>
-          ))}
-
-          {/* Center content block */}
-          <div className={`flex flex-col ${alignClass} mb-5`}>
-            {logoPosition === 'center' && (
-              store.logo_url ? (
-                <div className={`mb-4 ${logoSizeClass}`} style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.4))' }}>
-                  <img src={store.logo_url} alt={store.business_name} className="w-full h-full rounded-2xl object-contain" style={{ background: 'transparent' }} />
-                </div>
-              ) : (
-                <div className={`${logoSizeClass} rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4 shadow-2xl`}>
-                  <span className="text-7xl">💼</span>
-                </div>
-              )
-            )}
-            <h1 className={`${heroFontClass} font-bold ${fontSizeClass} leading-tight mb-1`} style={{ color: tc }}>{store.business_name}</h1>
-            <p className="text-sm font-medium mb-2" style={{ color: tcMuted }}>{categoryLabel}</p>
-            <div className={`flex items-center gap-1.5 ${textAlign === 'center' ? 'justify-center' : textAlign === 'right' ? 'justify-end' : 'justify-start'}`}>
-              <MapPin size={13} style={{ color: tcMuted }} className="shrink-0" />
-              <span className="text-xs" style={{ color: tcMuted }}>{store.location}</span>
+              <span className="text-xs font-semibold" style={{ color: tc }}>Open for bookings</span>
             </div>
           </div>
 
-          <p className={`text-sm mb-5 leading-relaxed italic ${textAlign === 'center' ? 'text-center' : textAlign === 'right' ? 'text-right' : 'text-left'}`} style={{ color: tcMuted }}>"{tagline}"</p>
+          {/* Tagline + location */}
+          <p className="text-lg font-bold mb-1 leading-snug" style={{ color: tc }}>"{tagline}"</p>
+          <div className="flex items-center gap-1.5 mb-5">
+            <MapPin size={13} style={{ color: tcMuted }} className="shrink-0" />
+            <span className="text-xs" style={{ color: tcMuted }}>{store.location}</span>
+          </div>
 
-          <div className="flex gap-3 mb-5">
+          {/* Stats row */}
+          <div className="flex gap-3 mb-4">
             <div className="bg-white/15 backdrop-blur-sm rounded-2xl px-4 py-3 text-center min-w-[72px]">
-              <div className="font-display font-bold text-2xl text-white">{available.length}</div>
-              <div className="text-xs text-white/70">Services</div>
+              <div className="font-display font-bold text-2xl" style={{ color: tc }}>{available.length}</div>
+              <div className="text-xs" style={{ color: tcMuted }}>Services</div>
             </div>
             <div className="bg-white/15 backdrop-blur-sm rounded-2xl px-4 py-3 text-center">
               <div className="flex gap-0.5 justify-center mb-0.5">
-                {[1,2,3,4,5].map(i => <Star key={i} size={11} fill="white" className="text-white" />)}
+                {[1,2,3,4,5].map(i => <Star key={i} size={11} fill={tc} style={{ color: tc }} />)}
               </div>
-              <div className="text-xs text-white/70">Top Rated</div>
+              <div className="text-xs" style={{ color: tcMuted }}>Top Rated</div>
             </div>
             <div className="bg-white/15 backdrop-blur-sm rounded-2xl px-4 py-3 flex-1 flex items-center justify-center gap-2">
               {WA_SVG}
               <div>
-                <div className="font-bold text-sm text-white">WhatsApp</div>
-                <div className="text-xs text-white/70">Instant Booking</div>
+                <div className="font-bold text-sm" style={{ color: tc }}>WhatsApp</div>
+                <div className="text-xs" style={{ color: tcMuted }}>Instant Booking</div>
               </div>
             </div>
           </div>
 
+          {/* CTA buttons */}
           <div className="flex gap-3">
             <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(bookMsg)}`}
               target="_blank" rel="noreferrer"
@@ -463,7 +460,8 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
               {WA_SVG} Book via WhatsApp
             </a>
             <a href={`tel:+${waNumber}`}
-              className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center hover:bg-white/30 text-white shrink-0">
+              className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center hover:bg-white/30 shrink-0"
+              style={{ color: tc }}>
               <Phone size={18} />
             </a>
           </div>

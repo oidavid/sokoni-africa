@@ -309,34 +309,26 @@ export default function SettingsPage() {
             <div className="absolute inset-0" style={{
               backgroundColor: heroTextColor === 'dark' ? `rgba(255,255,255,${heroOverlay * 0.6})` : `rgba(0,0,0,${heroOverlay})`
             }} />
-            {/* Corner logos in preview */}
-            {logoPosition === 'top-left' && (
-              <div className={`absolute top-2 left-2 rounded-xl flex items-center justify-center ${logoSize === 'small' ? 'w-8 h-8 text-sm' : logoSize === 'large' ? 'w-14 h-14 text-2xl' : 'w-10 h-10 text-lg'}`} style={{ background: 'rgba(255,255,255,0.25)' }}>
-                {logoPreview || logoUrl ? <img src={logoPreview || logoUrl!} className="w-full h-full object-contain rounded-xl" /> : '💼'}
-              </div>
-            )}
-            {logoPosition === 'top-right' && (
-              <div className={`absolute top-2 right-2 rounded-xl flex items-center justify-center ${logoSize === 'small' ? 'w-8 h-8 text-sm' : logoSize === 'large' ? 'w-14 h-14 text-2xl' : 'w-10 h-10 text-lg'}`} style={{ background: 'rgba(255,255,255,0.25)' }}>
-                {logoPreview || logoUrl ? <img src={logoPreview || logoUrl!} className="w-full h-full object-contain rounded-xl" /> : '💼'}
-              </div>
-            )}
-            {/* Text content in preview */}
-            <div className={`absolute inset-0 flex flex-col px-4 py-3 ${
-              textVertical === 'top' ? 'justify-start' : textVertical === 'bottom' ? 'justify-end' : 'justify-center'
-            } ${textAlign === 'left' ? 'items-start' : textAlign === 'right' ? 'items-end' : 'items-center'}`}>
-              {logoPosition === 'center' && (
-                <div className={`rounded-xl flex items-center justify-center mb-1.5 ${logoSize === 'small' ? 'w-7 h-7 text-sm' : logoSize === 'large' ? 'w-14 h-14 text-3xl' : 'w-10 h-10 text-xl'}`} style={{ background: 'rgba(255,255,255,0.25)' }}>
-                  {logoPreview || logoUrl ? <img src={logoPreview || logoUrl!} className="w-full h-full object-contain rounded-xl" /> : '💼'}
+            {/* Header bar — matches actual storefront */}
+            <div className="absolute top-0 left-0 right-0 bg-white/95 backdrop-blur-sm flex items-center gap-2 px-2 py-1.5 border-b border-gray-200/50 z-10">
+              {(logoPreview || logoUrl) ? (
+                <img src={logoPreview || logoUrl!} className={`rounded-lg object-contain flex-shrink-0 ${logoSize === 'small' ? 'w-5 h-5' : logoSize === 'large' ? 'w-9 h-9' : 'w-7 h-7'}`} />
+              ) : (
+                <div className={`rounded-lg bg-brand-green flex items-center justify-center text-white font-bold flex-shrink-0 ${logoSize === 'small' ? 'w-5 h-5 text-[8px]' : logoSize === 'large' ? 'w-9 h-9 text-sm' : 'w-7 h-7 text-xs'}`}>
+                  {merchant?.business_name?.charAt(0) || 'B'}
                 </div>
               )}
-              <p className={`font-bold leading-tight ${heroFont === 'serif' ? 'font-serif' : heroFont === 'mono' ? 'font-mono' : 'font-sans'} ${fontSize === 'sm' ? 'text-sm' : fontSize === 'lg' ? 'text-xl' : fontSize === 'xl' ? 'text-2xl' : 'text-base'} ${textAlign === 'left' ? 'text-left' : textAlign === 'right' ? 'text-right' : 'text-center'}`}
-                style={{ color: heroTextColor === 'dark' ? '#1e293b' : '#ffffff' }}>
-                {merchant?.business_name || 'Your Business'}
-              </p>
-              <p className={`text-xs mt-0.5 ${textAlign === 'left' ? 'text-left' : textAlign === 'right' ? 'text-right' : 'text-center'}`}
-                style={{ color: heroTextColor === 'dark' ? 'rgba(30,41,59,0.7)' : 'rgba(255,255,255,0.75)' }}>
-                {merchant?.location || 'Your City'}
-              </p>
+              <div className="flex-1 min-w-0">
+                <p className={`font-bold text-gray-900 leading-tight truncate text-[10px] ${heroFont === 'serif' ? 'font-serif' : heroFont === 'mono' ? 'font-mono' : ''}`}>
+                  {merchant?.business_name || 'Your Business'}
+                </p>
+              </div>
+              <div className="bg-brand-green text-white text-[8px] font-bold px-1.5 py-0.5 rounded-md flex-shrink-0">Book</div>
+            </div>
+            {/* Hero tagline preview */}
+            <div className="absolute bottom-8 left-0 right-0 px-3">
+              <p className="text-[9px] font-bold text-white/90 leading-tight">"{merchant?.description?.slice(0,40) || 'Quality service you can trust'}"</p>
+              <p className="text-[8px] text-white/60 mt-0.5">{merchant?.location || 'Your City'}</p>
             </div>
             {/* Upload + remove buttons overlay */}
             <div className="absolute bottom-2 left-2 flex gap-2">
