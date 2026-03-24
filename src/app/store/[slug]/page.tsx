@@ -22,6 +22,10 @@ interface Merchant {
   theme_color: string
   logo_url: string | null
   business_type?: string
+  address?: string
+  holiday_mode?: boolean
+  holiday_message?: string
+  business_hours?: Record<string, {open: string; close: string; closed: boolean}>
   theme_preset?: string
 }
 
@@ -71,6 +75,15 @@ function formatPrice(p: Product) {
 }
 
 const PRODUCTS_PER_PAGE = 24
+
+
+function formatHour(time: string) {
+  const [h, m] = time.split(':').map(Number)
+  const period = h < 12 ? 'AM' : 'PM'
+  const hour = h % 12 || 12
+  return `${hour}:${String(m).padStart(2,'0')} ${period}`
+}
+const DAY_ORDER = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
 
 export default function StorefrontPage({ params }: { params: { slug: string } }) {
   const [store, setStore] = useState<Merchant | null>(null)
@@ -267,6 +280,12 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Holiday / Closure Banner */}
+      {store.holiday_mode && (
+        <div className="bg-red-500 text-white text-center px-4 py-3 text-sm font-semibold">
+          🔴 {store.holiday_message || 'We are temporarily closed. Please check back soon!'}
+        </div>
+      )}
       {/* Cart Drawer */}
       {cartOpen && (
         <div className="fixed inset-0 z-50 flex">
@@ -786,6 +805,83 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
           {cartCount} item{cartCount > 1 ? 's' : ''} · ₦{(cartTotal / 100).toLocaleString()}
         </button>
       )}
+
+      {/* Find Us */}
+      <div className="max-w-6xl mx-auto px-4 mb-4 mt-4">
+        <div className="bg-white rounded-2xl border border-gray-100 p-5">
+          <h2 className="font-display font-bold text-brand-dark text-base mb-4">Find Us</h2>
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 bg-brand-light">
+                <MapPin size={16} className="text-brand-green" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-gray-400 mb-0.5">Location</p>
+                <p className="text-sm font-semibold text-gray-800">{store.address || store.location}</p>
+                <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((store.address || store.business_name) + ' ' + store.location)}`}
+                  target="_blank" rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-semibold mt-2 px-3 py-1.5 rounded-lg bg-brand-light text-brand-green">
+                  Get Directions on Google Maps
+                </a>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[#25D366]/10 shrink-0">
+                <MessageCircle size={16} className="text-[#25D366]" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">WhatsApp / Phone</p>
+                <p className="text-sm font-semibold text-gray-800">+{store.whatsapp_number?.replace(/\D/g, '')}</p>
+              </div>
+            </div>
+            {store.business_hours && (
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-brand-light">
+                  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="#1A7A4A" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs text-gray-400 mb-1">Business Hours</p>
+                  <div className="space-y-0.5">
+                    {DAY_ORDER.map(day => {
+                      const val = store.business_hours![day]
+                      if (!val) return null
+                      return (
+                        <div key={day} className="flex items-center gap-2 text-xs">
+                          <span className="text-gray-500 w-8 shrink-0">{day}</span>
+                          {val.closed
+                            ? <span className="text-red-400 font-medium">Closed</span>
+                            : <span className="text-gray-700 font-medium">{formatHour(val.open)} – {formatHour(val.close)}</span>
+                          }
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        <a href={`https://maps.google.com/maps?q=${encodeURIComponent((store.address || store.business_name) + ' ' + store.location)}&output=embed&z=15`}
+          target="_blank" rel="noreferrer"
+          className="mt-3 block rounded-2xl overflow-hidden border border-gray-200 hover:opacity-95 transition-opacity">
+          <iframe
+            title="Business location map"
+            width="100%"
+            height="200"
+            loading="lazy"
+            style={{ border: 0, display: 'block' }}
+            src={`https://maps.google.com/maps?q=${encodeURIComponent((store.address || store.business_name) + ' ' + store.location)}&output=embed&z=15`}
+            allowFullScreen
+          />
+          <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-100">
+            <div className="flex items-center gap-2 min-w-0">
+              <MapPin size={14} className="text-brand-green shrink-0" />
+              <span className="text-xs font-semibold text-gray-700 truncate">{store.address || store.location}</span>
+            </div>
+            <span className="text-xs font-semibold text-brand-green shrink-0 ml-2">Open Maps →</span>
+          </div>
+        </a>
+      </div>
 
       {/* Viral Footer */}
       <div className="max-w-6xl mx-auto px-4 mb-6 mt-4">
