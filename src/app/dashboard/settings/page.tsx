@@ -82,7 +82,6 @@ export default function SettingsPage() {
       const { data: m } = await supabase.from('merchants').select('*').eq('email', merchantEmail).single()
       if (!m) { router.push('/onboarding'); return }
       setMerchant(m)
-      const isServ = m.business_type === 'services'
       setBusinessName(m.business_name || '')
       setDescription(m.description || '')
       setAddress(m.address || '')
@@ -226,17 +225,17 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Profile Photo — only for service businesses */}
+        {/* Profile Photo â€” only for service businesses */}
         {merchant?.business_type === 'services' && (
         <div>
           <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Profile Photo</label>
-          <p className="text-xs text-gray-400 mb-3">Your face/headshot — shown on coaching & consultation pages. Makes your page feel personal and trustworthy.</p>
+          <p className="text-xs text-gray-400 mb-3">Your face/headshot â€” shown on coaching & consultation pages. Makes your page feel personal and trustworthy.</p>
           <input type="file" id="profile-photo-upload" accept="image/*" className="hidden" onChange={handleProfilePhotoUpload} />
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border-2 border-gray-200 relative shrink-0">
               {(profilePhotoPreview || profilePhotoUrl)
                 ? <img src={profilePhotoPreview || profilePhotoUrl || ''} alt="Profile" className="w-full h-full object-cover" />
-                : <span className="text-2xl">👤</span>
+                : <span className="text-2xl">ðŸ‘¤</span>
               }
               {uploadingProfilePhoto && (
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-full">
@@ -255,7 +254,7 @@ export default function SettingsPage() {
         </div>
         )}
 
-        {/* Theme Picker — full grid */}
+        {/* Theme Picker â€” full grid */}
         <div>
           <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-3">Brand Theme</label>
           <div className="grid grid-cols-3 gap-2 mb-3">
@@ -279,7 +278,7 @@ export default function SettingsPage() {
           {/* Preview */}
           <div className="rounded-2xl overflow-hidden border border-gray-200">
             <div className="h-14 flex items-center px-4 gap-3" style={getThemeStyle(selectedTheme) as React.CSSProperties}>
-              <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center text-lg">💼</div>
+              <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center text-lg">ðŸ’¼</div>
               <div>
                 <p className="font-display font-bold text-sm" style={{ color: selectedTheme.textOnPrimary }}>{businessName || merchant?.business_name}</p>
                 <p className="text-xs opacity-70" style={{ color: selectedTheme.textOnPrimary }}>{selectedTheme.name} theme</p>
@@ -419,7 +418,7 @@ export default function SettingsPage() {
           <p className="text-xs text-gray-500 mb-1 font-semibold uppercase tracking-wide">Your Store Link</p>
           <p className="font-display font-bold text-brand-green text-sm">earket.com/store/{merchant?.slug}</p>
           <Link href={`/store/${merchant?.slug}`} target="_blank" className="inline-block mt-2 text-xs text-brand-green font-semibold underline">
-            View store →
+            View store â†’
           </Link>
         </div>
 
