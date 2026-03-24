@@ -199,7 +199,7 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
       {/* Holiday / Closure Banner */}
       {store.holiday_mode && (
         <div className="bg-red-500 text-white text-center px-4 py-3 text-sm font-semibold">
-          🔴 {store.holiday_message || \'We are temporarily closed. Please check back soon!\'}
+          🔴 {store.holiday_message || 'We are temporarily closed. Please check back soon!'}
         </div>
       )}
 

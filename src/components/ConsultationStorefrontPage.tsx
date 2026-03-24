@@ -190,13 +190,6 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
 
   if (loading) return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-
-      {/* Holiday / Closure Banner */}
-      {store.holiday_mode && (
-        <div className="bg-red-500 text-white text-center px-4 py-3 text-sm font-semibold">
-          🔴 {store.holiday_message || \'We are temporarily closed. Please check back soon!\'}
-        </div>
-      )}
       <div className="w-10 h-10 border-4 border-brand-green border-t-transparent rounded-full animate-spin" />
     </div>
   )
@@ -266,6 +259,13 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
 
   return (
     <div className="min-h-screen bg-white">
+
+      {/* Holiday / Closure Banner */}
+      {store.holiday_mode && (
+        <div className="bg-red-500 text-white text-center px-4 py-3 text-sm font-semibold">
+          🔴 {store.holiday_message || 'We are temporarily closed. Please check back soon!'}
+        </div>
+      )}
 
       {/* Service Detail Modal */}
       {selectedService && (
