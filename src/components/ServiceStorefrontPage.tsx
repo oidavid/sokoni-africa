@@ -44,20 +44,37 @@ interface Service {
 }
 
 const CATEGORY_HERO: Record<string, string> = {
-  beauty_services: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1200&q=80', // salon chair, makeup
-  home_services: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=1200&q=80', // electrician/technician working
-  auto_services: 'https://images.unsplash.com/photo-1625047509248-ec889cbff17f?w=1200&q=80', // mechanic under car hood
-  education: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1200&q=80', // teacher at board
-  health_wellness: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=1200&q=80', // fitness/wellness
-  domestic: 'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=1200&q=80', // clean modern home interior
-  events: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=1200&q=80', // elegant event setup
-  digital_services: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1200&q=80', // laptop/coding
-  transport: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1200&q=80', // professional vehicle
-  agriculture: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=1200&q=80', // farm/crops
-  coaching: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1200&q=80', // professional coaching meeting
-  mental_wellness: 'https://images.unsplash.com/photo-1591343395082-e120087004b4?w=1200&q=80', // calm therapy setting
-  childcare: 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=1200&q=80', // children playing happily
-  food_catering: 'https://images.unsplash.com/photo-1555244162-803834f70033?w=1200&q=80', // catering/food spread
+  beauty_services: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1200&q=80',
+  home_services: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1200&q=80',
+  auto_services: 'https://images.unsplash.com/photo-1615906655593-ad0386982a0f?w=1200&q=80',
+  education: 'https://images.unsplash.com/photo-1588072432836-e10032774350?w=1200&q=80',
+  health_wellness: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=1200&q=80',
+  domestic: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80',
+  events: 'https://images.unsplash.com/photo-1478146896981-b80fe463b330?w=1200&q=80',
+  digital_services: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80',
+  transport: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1200&q=80',
+  agriculture: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=1200&q=80',
+  coaching: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&q=80',
+  mental_wellness: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=1200&q=80',
+  childcare: 'https://images.unsplash.com/photo-1567705323043-dce7c5d78a83?w=1200&q=80',
+  food_catering: 'https://images.unsplash.com/photo-1555244162-803834f70033?w=1200&q=80',
+}
+
+const CATEGORY_HEADLINE: Record<string, string> = {
+  beauty_services: 'Look your best. Feel your best.',
+  home_services: 'Repairs & installations done right.',
+  auto_services: 'Keep your vehicle in top condition.',
+  education: 'Unlock every student's potential.',
+  health_wellness: 'Invest in your health today.',
+  domestic: 'A clean home, a clear mind.',
+  events: 'Unforgettable events, expertly planned.',
+  digital_services: 'Grow your business online.',
+  transport: 'Safe, reliable transport when you need it.',
+  agriculture: 'Fresh produce, direct from the farm.',
+  coaching: 'Transform your life. Unlock your potential.',
+  mental_wellness: 'Your mental health matters.',
+  childcare: 'Safe, nurturing care for your little ones.',
+  food_catering: 'Delicious food for every occasion.',
 }
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -300,6 +317,7 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
   const tc = heroTextColor === 'dark' ? '#1e293b' : '#ffffff'
   const tcMuted = heroTextColor === 'dark' ? 'rgba(30,41,59,0.7)' : 'rgba(255,255,255,0.75)'
   const categoryLabel = CATEGORY_LABEL[store.category] || 'Professional Services'
+  const categoryHeadline = store.description || CATEGORY_HEADLINE[store.category] || 'Quality service you can trust'
   const tagline = store.description || CATEGORY_TAGLINE[store.category] || 'Quality service you can trust'
   const available = services.filter(s => s.in_stock)
   const filtered = available.filter(s =>
@@ -403,69 +421,81 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
         </div>
       </div>
 
-      {/* Hero — full bleed image with tagline only */}
-      <div className="relative overflow-hidden min-h-[300px] flex flex-col justify-end" style={!heroImage ? themeStyle as React.CSSProperties : {}}>
-        {heroImage && (
+      {/* Hero — full bleed, agency quality */}
+      <div className="relative overflow-hidden" style={{ minHeight: '420px' }}>
+        {heroImage ? (
           <div className="absolute inset-0">
             <img src={heroImage} alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ backgroundColor: heroTextColor === 'dark' ? `rgba(255,255,255,${heroOverlay * 0.6})` : `rgba(0,0,0,${heroOverlay})` }} />
+            <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${heroOverlay + 0.25})` }} />
           </div>
-        )}
-        {!heroImage && (
+        ) : (
           <div className="absolute inset-0" style={themeStyle as React.CSSProperties} />
         )}
-        <div className="relative px-4 pt-4 pb-6 w-full">
-          {/* Open badge */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1.5">
-              <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse" />
-              <span className="text-xs font-semibold" style={{ color: tc }}>Open for bookings</span>
-            </div>
-          </div>
 
-          {/* Tagline + location */}
-          <p className="text-lg font-bold mb-1 leading-snug" style={{ color: tc }}>"{tagline}"</p>
+        <div className="relative px-5 pt-8 pb-10 max-w-2xl">
+          {/* Status badge */}
           <div className="flex items-center gap-1.5 mb-5">
-            <MapPin size={13} style={{ color: tcMuted }} className="shrink-0" />
-            <span className="text-xs" style={{ color: tcMuted }}>{store.location}</span>
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+            <span className="text-xs font-semibold uppercase tracking-widest text-white/80">Open for Bookings</span>
           </div>
 
-          {/* Stats row */}
-          <div className="flex gap-3 mb-4">
-            <div className="bg-white/15 backdrop-blur-sm rounded-2xl px-4 py-3 text-center min-w-[72px]">
-              <div className="font-display font-bold text-2xl" style={{ color: tc }}>{available.length}</div>
-              <div className="text-xs" style={{ color: tcMuted }}>Services</div>
-            </div>
-            <div className="bg-white/15 backdrop-blur-sm rounded-2xl px-4 py-3 text-center">
-              <div className="flex gap-0.5 justify-center mb-0.5">
-                {[1,2,3,4,5].map(i => <Star key={i} size={11} fill={tc} style={{ color: tc }} />)}
-              </div>
-              <div className="text-xs" style={{ color: tcMuted }}>Top Rated</div>
-            </div>
-            <div className="bg-white/15 backdrop-blur-sm rounded-2xl px-4 py-3 flex-1 flex items-center justify-center gap-2">
-              {WA_SVG}
-              <div>
-                <div className="font-bold text-sm" style={{ color: tc }}>WhatsApp</div>
-                <div className="text-xs" style={{ color: tcMuted }}>Instant Booking</div>
-              </div>
-            </div>
-          </div>
+          {/* Category label */}
+          <p className="text-xs font-bold uppercase tracking-widest mb-3 text-white/60">{categoryLabel}</p>
+
+          {/* Big headline */}
+          <h1 className={`${heroFontClass} font-bold leading-tight mb-4`}
+            style={{ color: '#ffffff', fontSize: fontSizeClass === 'text-5xl' ? '2.8rem' : fontSizeClass === 'text-4xl' ? '2.4rem' : fontSizeClass === 'text-2xl' ? '1.8rem' : '2.2rem' }}>
+            {categoryHeadline}
+          </h1>
+
+          {/* Subtext */}
+          <p className="text-sm text-white/75 mb-6 leading-relaxed max-w-sm">{tagline !== categoryHeadline ? tagline : `Book via WhatsApp for fast, reliable service in ${store.location}.`}</p>
 
           {/* CTA buttons */}
-          <div className="flex gap-3">
+          <div className="flex gap-3 mb-6">
             <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(bookMsg)}`}
               target="_blank" rel="noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 bg-white font-bold py-3.5 rounded-2xl text-sm shadow-lg"
-              style={{ color }}>
+              className="flex items-center gap-2 font-bold py-3 px-5 rounded-2xl text-sm shadow-lg"
+              style={{ backgroundColor: color, color: contrast }}>
               {WA_SVG} Book via WhatsApp
             </a>
-            <a href={`tel:+${waNumber}`}
-              className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center hover:bg-white/30 shrink-0"
-              style={{ color: tc }}>
-              <Phone size={18} />
+            <a href="#services"
+              className="flex items-center gap-2 font-bold py-3 px-5 rounded-2xl text-sm bg-white/20 backdrop-blur-sm text-white border border-white/30 hover:bg-white/30 transition-colors">
+              See Services →
             </a>
           </div>
+
+          {/* Location */}
+          <div className="flex items-center gap-1.5">
+            <MapPin size={13} className="text-white/50 shrink-0" />
+            <span className="text-xs text-white/60">{store.location}</span>
+          </div>
         </div>
+
+        {/* Stats bar at bottom of hero */}
+        <div className="absolute bottom-0 left-0 right-0 bg-black/40 backdrop-blur-sm px-5 py-3 flex items-center justify-between">
+          <div className="flex gap-6">
+            <div>
+              <p className="text-white font-bold text-lg leading-none">{available.length}+</p>
+              <p className="text-white/60 text-xs">Services</p>
+            </div>
+            <div>
+              <p className="text-white font-bold text-lg leading-none">Free</p>
+              <p className="text-white/60 text-xs">Consultation</p>
+            </div>
+            <div>
+              <p className="text-white font-bold text-lg leading-none">Fast</p>
+              <p className="text-white/60 text-xs">Response</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="flex gap-0.5">
+              {[1,2,3,4,5].map(i => <Star key={i} size={10} fill="white" className="text-white" />)}
+            </div>
+            <span className="text-white/70 text-xs">Trusted</span>
+          </div>
+        </div>
+      </div>
       </div>
 
       {/* Search + view toggle */}

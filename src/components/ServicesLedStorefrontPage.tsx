@@ -47,7 +47,7 @@ const CATEGORY_CONFIG: Record<string, {
   tagline: string
 }> = {
   digital_services: {
-    hero_image: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=1200&q=80',
+    hero_image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80',
     headline: 'Grow your business online.',
     subheadline: 'Branding, social media, design and tech — everything your business needs to stand out.',
     label: 'Digital & Tech Services',
@@ -60,7 +60,7 @@ const CATEGORY_CONFIG: Record<string, {
     ],
   },
   education: {
-    hero_image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&q=80',
+    hero_image: 'https://images.unsplash.com/photo-1588072432836-e10032774350?w=1200&q=80',
     headline: 'Unlock every student\'s potential.',
     subheadline: 'Expert tutoring and training that delivers real, measurable results.',
     label: 'Education & Tutoring',
@@ -73,7 +73,7 @@ const CATEGORY_CONFIG: Record<string, {
     ],
   },
   health_wellness: {
-    hero_image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1200&q=80',
+    hero_image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=1200&q=80',
     headline: 'Invest in your health today.',
     subheadline: 'Evidence-based care and fitness programmes tailored to your body and goals.',
     label: 'Health & Wellness',
