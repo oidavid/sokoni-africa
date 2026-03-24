@@ -22,6 +22,7 @@ interface Merchant {
   logo_size?: string
   hero_text_align?: string
   hero_font_size?: string
+  hero_text_vertical?: string
   logo_url: string | null
   business_type?: string
   theme_preset?: string
@@ -291,6 +292,8 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
   const logoSize = store.logo_size || 'medium'
   const textAlign = store.hero_text_align || 'center'
   const fontSizeClass = store.hero_font_size === 'sm' ? 'text-2xl' : store.hero_font_size === 'lg' ? 'text-4xl' : store.hero_font_size === 'xl' ? 'text-5xl' : 'text-3xl'
+  const textVertical = store.hero_text_vertical || 'middle'
+  const verticalClass = textVertical === 'top' ? 'justify-start pt-8' : textVertical === 'bottom' ? 'justify-end pb-8' : 'justify-center'
   const logoSizeClass = logoSize === 'small' ? 'w-20 h-20' : logoSize === 'large' ? 'w-48 h-48' : 'w-36 h-36'
   const logoCornerClass = logoSize === 'small' ? 'w-12 h-12' : logoSize === 'large' ? 'w-24 h-24' : 'w-16 h-16'
   const alignClass = textAlign === 'left' ? 'items-start text-left' : textAlign === 'right' ? 'items-end text-right' : 'items-center text-center'
@@ -407,7 +410,7 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
           ))}
 
           {/* Center content block */}
-          <div className={`flex flex-col ${alignClass} mb-5`}>
+          <div className={`flex flex-col ${alignClass} ${verticalClass} mb-5 flex-1`}>
             {logoPosition === 'center' && (
               store.logo_url ? (
                 <div className={`mb-4 ${logoSizeClass}`} style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.4))' }}>

@@ -13,8 +13,6 @@ interface Merchant {
   location: string
   whatsapp_number: string
   category: string
-  hero_image_url?: string
-  hero_overlay?: number
   theme_color: string
   logo_url: string | null
   business_type?: string
@@ -189,8 +187,6 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
   const contrast = theme?.textOnPrimary || getContrastColor(color)
   const waNumber = store.whatsapp_number?.replace(/\D/g, '')
   const cfg = CATEGORY_CONFIG[store.category] || DEFAULT_CONFIG
-  const heroImage = store.hero_image_url || cfg.hero_image
-  const heroOverlay = store.hero_overlay ?? 0.3
   const available = services.filter(s => s.in_stock)
   const filtered = available.filter(s => s.name.toLowerCase().includes(search.toLowerCase()) || (s.description || '').toLowerCase().includes(search.toLowerCase()))
   const bookMsg = `Hi ${store.business_name}! I'd like to get a free quote. Can we discuss my project?`
@@ -276,9 +272,9 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
 
       {/* ── DARK HERO — full width, bold, agency feel ── */}
       <div className="relative overflow-hidden bg-gray-900" style={{ minHeight: '420px' }}>
-        {heroImage && (
+        {cfg.hero_image && (
           <div className="absolute inset-0">
-            <img src={heroImage} alt="" className="w-full h-full object-cover" style={{ opacity: 1 - heroOverlay }} />
+            <img src={cfg.hero_image} alt="" className="w-full h-full object-cover opacity-30" />
             <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/90 to-gray-900/60" />
           </div>
         )}

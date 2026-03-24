@@ -79,6 +79,7 @@ export default function SettingsPage() {
   const [logoSize, setLogoSize] = useState<'small' | 'medium' | 'large'>('medium')
   const [textAlign, setTextAlign] = useState<'left' | 'center' | 'right'>('center')
   const [fontSize, setFontSize] = useState<'sm' | 'md' | 'lg' | 'xl'>('md')
+  const [textVertical, setTextVertical] = useState<'top' | 'middle' | 'bottom'>('middle')
   const [holidayMode, setHolidayMode] = useState(false)
   const [holidayMessage, setHolidayMessage] = useState('')
   const [testimonials, setTestimonials] = useState<Testimonial[]>([
@@ -133,6 +134,7 @@ export default function SettingsPage() {
       setLogoSize(m.logo_size || 'medium')
       setTextAlign(m.hero_text_align || 'center')
       setFontSize(m.hero_font_size || 'md')
+      setTextVertical(m.hero_text_vertical || 'middle')
       setHolidayMode(m.holiday_mode || false)
       setHolidayMessage(m.holiday_message || '')
       if (m.business_hours) setBusinessHours(m.business_hours)
@@ -199,6 +201,7 @@ export default function SettingsPage() {
         logo_size: logoSize,
         hero_text_align: textAlign,
         hero_font_size: fontSize,
+        hero_text_vertical: textVertical,
         holiday_mode: holidayMode,
         holiday_message: holidayMessage,
         business_hours: businessHours,
@@ -296,219 +299,171 @@ export default function SettingsPage() {
         <div>
           <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-3">Hero Image &amp; Appearance</label>
 
-          {/* Hero image upload */}
-          <div className="mb-4">
-            {(heroImagePreview || heroImageUrl) && (
-              <div className="relative w-full h-32 rounded-2xl overflow-hidden mb-3 border-2 border-gray-200">
-                <img src={heroImagePreview || heroImageUrl!} alt="Hero" className="w-full h-full object-cover" />
-                <button onClick={() => { setHeroImageUrl(null); setHeroImagePreview(null); }}
-                  className="absolute top-2 right-2 bg-black/50 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">x</button>
+          {/* Merged preview + upload */}
+          <div className="relative w-full h-44 rounded-2xl overflow-hidden border-2 border-gray-200 mb-3">
+            {(heroImagePreview || heroImageUrl) ? (
+              <img src={heroImagePreview || heroImageUrl!} alt="Hero" className="absolute inset-0 w-full h-full object-cover" />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-gray-400 to-gray-600" />
+            )}
+            <div className="absolute inset-0" style={{
+              backgroundColor: heroTextColor === 'dark' ? `rgba(255,255,255,${heroOverlay * 0.6})` : `rgba(0,0,0,${heroOverlay})`
+            }} />
+            {/* Corner logos in preview */}
+            {logoPosition === 'top-left' && (
+              <div className={`absolute top-2 left-2 rounded-xl flex items-center justify-center ${logoSize === 'small' ? 'w-8 h-8 text-sm' : logoSize === 'large' ? 'w-14 h-14 text-2xl' : 'w-10 h-10 text-lg'}`} style={{ background: 'rgba(255,255,255,0.25)' }}>
+                {logoPreview || logoUrl ? <img src={logoPreview || logoUrl!} className="w-full h-full object-contain rounded-xl" /> : '💼'}
               </div>
             )}
-            <label className="flex items-center gap-2 bg-white border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-700 hover:border-brand-green cursor-pointer transition-colors w-fit">
-              {uploadingHero ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-              {uploadingHero ? 'Uploading...' : heroImageUrl ? 'Change Hero Image' : 'Upload Hero Image'}
-              <input type="file" accept="image/*" className="hidden" disabled={uploadingHero}
-                onChange={async (e) => {
-                  const file = e.target.files?.[0]
-                  if (!file || !merchant) return
-                  setUploadingHero(true)
-                  const preview = URL.createObjectURL(file)
-                  setHeroImagePreview(preview)
-                  try {
-                    const url = await uploadProductImage(file, merchant.id)
-                    setHeroImageUrl(url)
-                  } catch { setHeroImagePreview(null) }
-                  setUploadingHero(false)
-                }} />
-            </label>
-            <p className="text-xs text-gray-400 mt-1.5">Recommended: wide landscape photo, at least 1200px wide</p>
-          </div>
-
-          {/* Overlay darkness */}
-          <div className="mb-4">
-            <label className="text-xs font-semibold text-gray-600 block mb-2">
-              Hero Overlay Darkness &mdash; {Math.round(heroOverlay * 100)}%
-            </label>
-            <input type="range" min="0" max="80" step="5"
-              value={Math.round(heroOverlay * 100)}
-              onChange={e => setHeroOverlay(Number(e.target.value) / 100)}
-              className="w-full accent-brand-green" />
-            <div className="flex justify-between text-xs text-gray-400 mt-1">
-              <span>Lighter</span>
-              <span>Darker (more contrast)</span>
-            </div>
-          </div>
-
-          {/* Text color */}
-          <div className="mb-4">
-            <label className="text-xs font-semibold text-gray-600 block mb-2">Hero Text Color</label>
-            <div className="flex gap-2">
-              {(['white', 'dark'] as const).map(c => (
-                <button key={c} onClick={() => setHeroTextColor(c)}
-                  className={`flex-1 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all ${
-                    heroTextColor === c ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600'
-                  }`}>
-                  {c === 'white' ? 'White Text' : 'Dark Text'}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Font style */}
-          <div className="mb-2">
-            <label className="text-xs font-semibold text-gray-600 block mb-2">Business Name Font Style</label>
-            <div className="grid grid-cols-3 gap-2">
-              {([
-                { key: 'default', label: 'Modern', preview: 'Aa' },
-                { key: 'serif', label: 'Classic', preview: 'Aa' },
-                { key: 'mono', label: 'Technical', preview: 'Aa' },
-              ] as const).map(f => (
-                <button key={f.key} onClick={() => setHeroFont(f.key)}
-                  className={`py-3 rounded-xl border-2 text-center transition-all ${
-                    heroFont === f.key ? 'border-brand-green bg-brand-light' : 'border-gray-200 hover:border-gray-300'
-                  }`}>
-                  <div className={`text-lg font-bold mb-0.5 ${
-                    f.key === 'serif' ? 'font-serif' : f.key === 'mono' ? 'font-mono' : 'font-display'
-                  }`}>{f.preview}</div>
-                  <div className="text-xs text-gray-500">{f.label}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Logo Position */}
-          <div className="mb-4">
-            <label className="text-xs font-semibold text-gray-600 block mb-2">Logo Position</label>
-            <div className="grid grid-cols-2 gap-2">
-              {([
-                { key: 'center', label: '⬛ Center' },
-                { key: 'top-left', label: '↖ Top Left' },
-                { key: 'top-right', label: '↗ Top Right' },
-                { key: 'hidden', label: '🚫 Hidden' },
-              ] as const).map(p => (
-                <button key={p.key} onClick={() => setLogoPosition(p.key)}
-                  className={`py-2.5 px-3 rounded-xl border-2 text-xs font-semibold text-left transition-all ${
-                    logoPosition === p.key ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600'
-                  }`}>
-                  {p.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Logo Size */}
-          <div className="mb-4">
-            <label className="text-xs font-semibold text-gray-600 block mb-2">Logo Size</label>
-            <div className="flex gap-2">
-              {([
-                { key: 'small', label: 'Small' },
-                { key: 'medium', label: 'Medium' },
-                { key: 'large', label: 'Large' },
-              ] as const).map(s => (
-                <button key={s.key} onClick={() => setLogoSize(s.key)}
-                  className={`flex-1 py-2.5 rounded-xl border-2 text-xs font-semibold transition-all ${
-                    logoSize === s.key ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600'
-                  }`}>
-                  {s.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Text Alignment */}
-          <div className="mb-4">
-            <label className="text-xs font-semibold text-gray-600 block mb-2">Text Alignment</label>
-            <div className="flex gap-2">
-              {([
-                { key: 'left', label: '⬅ Left' },
-                { key: 'center', label: '↔ Center' },
-                { key: 'right', label: '➡ Right' },
-              ] as const).map(a => (
-                <button key={a.key} onClick={() => setTextAlign(a.key)}
-                  className={`flex-1 py-2.5 rounded-xl border-2 text-xs font-semibold transition-all ${
-                    textAlign === a.key ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600'
-                  }`}>
-                  {a.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Font Size */}
-          <div className="mb-4">
-            <label className="text-xs font-semibold text-gray-600 block mb-2">Business Name Size</label>
-            <div className="flex gap-2">
-              {([
-                { key: 'sm', label: 'Small' },
-                { key: 'md', label: 'Medium' },
-                { key: 'lg', label: 'Large' },
-                { key: 'xl', label: 'XL' },
-              ] as const).map(f => (
-                <button key={f.key} onClick={() => setFontSize(f.key)}
-                  className={`flex-1 py-2.5 rounded-xl border-2 text-xs font-semibold transition-all ${
-                    fontSize === f.key ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600'
-                  }`}>
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Live Preview */}
-          <div className="mb-2">
-            <label className="text-xs font-semibold text-gray-600 block mb-2">Live Preview</label>
-            <div className="relative w-full h-44 rounded-2xl overflow-hidden border-2 border-gray-200">
-              {(heroImagePreview || heroImageUrl) ? (
-                <img src={heroImagePreview || heroImageUrl!} alt="" className="absolute inset-0 w-full h-full object-cover" />
-              ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-500 to-gray-700" />
-              )}
-              <div className="absolute inset-0" style={{
-                backgroundColor: heroTextColor === 'dark'
-                  ? `rgba(255,255,255,${heroOverlay * 0.6})`
-                  : `rgba(0,0,0,${heroOverlay})`
-              }} />
-              {/* Corner logos */}
-              {logoPosition === 'top-left' && (
-                <div className={`absolute top-2 left-2 rounded-xl flex items-center justify-center ${logoSize === 'small' ? 'w-8 h-8 text-sm' : logoSize === 'large' ? 'w-14 h-14 text-2xl' : 'w-10 h-10 text-lg'}`}
-                  style={{ background: 'rgba(255,255,255,0.25)' }}>
+            {logoPosition === 'top-right' && (
+              <div className={`absolute top-2 right-2 rounded-xl flex items-center justify-center ${logoSize === 'small' ? 'w-8 h-8 text-sm' : logoSize === 'large' ? 'w-14 h-14 text-2xl' : 'w-10 h-10 text-lg'}`} style={{ background: 'rgba(255,255,255,0.25)' }}>
+                {logoPreview || logoUrl ? <img src={logoPreview || logoUrl!} className="w-full h-full object-contain rounded-xl" /> : '💼'}
+              </div>
+            )}
+            {/* Text content in preview */}
+            <div className={`absolute inset-0 flex flex-col px-4 py-3 ${
+              textVertical === 'top' ? 'justify-start' : textVertical === 'bottom' ? 'justify-end' : 'justify-center'
+            } ${textAlign === 'left' ? 'items-start' : textAlign === 'right' ? 'items-end' : 'items-center'}`}>
+              {logoPosition === 'center' && (
+                <div className={`rounded-xl flex items-center justify-center mb-1.5 ${logoSize === 'small' ? 'w-7 h-7 text-sm' : logoSize === 'large' ? 'w-14 h-14 text-3xl' : 'w-10 h-10 text-xl'}`} style={{ background: 'rgba(255,255,255,0.25)' }}>
                   {logoPreview || logoUrl ? <img src={logoPreview || logoUrl!} className="w-full h-full object-contain rounded-xl" /> : '💼'}
                 </div>
               )}
-              {logoPosition === 'top-right' && (
-                <div className={`absolute top-2 right-2 rounded-xl flex items-center justify-center ${logoSize === 'small' ? 'w-8 h-8 text-sm' : logoSize === 'large' ? 'w-14 h-14 text-2xl' : 'w-10 h-10 text-lg'}`}
-                  style={{ background: 'rgba(255,255,255,0.25)' }}>
-                  {logoPreview || logoUrl ? <img src={logoPreview || logoUrl!} className="w-full h-full object-contain rounded-xl" /> : '💼'}
-                </div>
+              <p className={`font-bold leading-tight ${heroFont === 'serif' ? 'font-serif' : heroFont === 'mono' ? 'font-mono' : 'font-sans'} ${fontSize === 'sm' ? 'text-sm' : fontSize === 'lg' ? 'text-xl' : fontSize === 'xl' ? 'text-2xl' : 'text-base'} ${textAlign === 'left' ? 'text-left' : textAlign === 'right' ? 'text-right' : 'text-center'}`}
+                style={{ color: heroTextColor === 'dark' ? '#1e293b' : '#ffffff' }}>
+                {merchant?.business_name || 'Your Business'}
+              </p>
+              <p className={`text-xs mt-0.5 ${textAlign === 'left' ? 'text-left' : textAlign === 'right' ? 'text-right' : 'text-center'}`}
+                style={{ color: heroTextColor === 'dark' ? 'rgba(30,41,59,0.7)' : 'rgba(255,255,255,0.75)' }}>
+                {merchant?.location || 'Your City'}
+              </p>
+            </div>
+            {/* Upload + remove buttons overlay */}
+            <div className="absolute bottom-2 left-2 flex gap-2">
+              <label className="flex items-center gap-1.5 bg-black/60 text-white rounded-xl px-3 py-1.5 text-xs font-semibold cursor-pointer hover:bg-black/80 transition-colors">
+                {uploadingHero ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}
+                {uploadingHero ? 'Uploading...' : heroImageUrl ? 'Change' : 'Upload Photo'}
+                <input type="file" accept="image/*" className="hidden" disabled={uploadingHero}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (!file || !merchant) return
+                    setUploadingHero(true)
+                    setHeroImagePreview(URL.createObjectURL(file))
+                    try { const url = await uploadProductImage(file, merchant.id); setHeroImageUrl(url) }
+                    catch { setHeroImagePreview(null) }
+                    setUploadingHero(false)
+                  }} />
+              </label>
+              {(heroImageUrl || heroImagePreview) && (
+                <button onClick={() => { setHeroImageUrl(null); setHeroImagePreview(null) }}
+                  className="bg-red-500/70 text-white rounded-xl px-3 py-1.5 text-xs font-semibold hover:bg-red-500 transition-colors">
+                  Remove
+                </button>
               )}
-              {/* Center content */}
-              <div className={`absolute inset-0 flex flex-col justify-center px-4 ${textAlign === 'left' ? 'items-start' : textAlign === 'right' ? 'items-end' : 'items-center'}`}>
-                {logoPosition === 'center' && (
-                  <div className={`rounded-xl flex items-center justify-center mb-2 ${logoSize === 'small' ? 'w-8 h-8 text-sm' : logoSize === 'large' ? 'w-16 h-16 text-3xl' : 'w-12 h-12 text-xl'}`}
-                    style={{ background: 'rgba(255,255,255,0.25)' }}>
-                    {logoPreview || logoUrl ? <img src={logoPreview || logoUrl!} className="w-full h-full object-contain rounded-xl" /> : '💼'}
-                  </div>
-                )}
-                <p className={`font-bold leading-tight ${
-                  heroFont === 'serif' ? 'font-serif' : heroFont === 'mono' ? 'font-mono' : 'font-sans'
-                } ${
-                  fontSize === 'sm' ? 'text-sm' : fontSize === 'lg' ? 'text-xl' : fontSize === 'xl' ? 'text-2xl' : 'text-base'
-                } ${textAlign === 'left' ? 'text-left' : textAlign === 'right' ? 'text-right' : 'text-center'}`}
-                  style={{ color: heroTextColor === 'dark' ? '#1e293b' : '#ffffff' }}>
-                  {merchant?.business_name || 'Your Business'}
-                </p>
-                <p className={`text-xs mt-0.5 ${textAlign === 'left' ? 'text-left' : textAlign === 'right' ? 'text-right' : 'text-center'}`}
-                  style={{ color: heroTextColor === 'dark' ? 'rgba(30,41,59,0.7)' : 'rgba(255,255,255,0.75)' }}>
-                  {merchant?.location || 'Your City'}
-                </p>
+            </div>
+          </div>
+          <p className="text-xs text-gray-400 mb-3">Preview updates live · Recommended: 1200px wide landscape photo</p>
+
+          {/* Compact 2-col grid for controls */}
+          <div className="grid grid-cols-2 gap-3">
+
+            {/* Overlay */}
+            <div className="col-span-2">
+              <label className="text-xs font-semibold text-gray-600 block mb-1">Overlay Darkness — {Math.round(heroOverlay * 100)}%</label>
+              <input type="range" min="0" max="80" step="5" value={Math.round(heroOverlay * 100)}
+                onChange={e => setHeroOverlay(Number(e.target.value) / 100)}
+                className="w-full accent-brand-green" />
+              <div className="flex justify-between text-xs text-gray-400"><span>Lighter</span><span>Darker</span></div>
+            </div>
+
+            {/* Text Color */}
+            <div>
+              <label className="text-xs font-semibold text-gray-600 block mb-1.5">Text Color</label>
+              <div className="flex gap-1.5">
+                {(['white','dark'] as const).map(c => (
+                  <button key={c} onClick={() => setHeroTextColor(c)} className={`flex-1 py-2 rounded-xl border-2 text-xs font-semibold transition-all ${heroTextColor === c ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600'}`}>
+                    {c === 'white' ? '⬜ White' : '⬛ Dark'}
+                  </button>
+                ))}
               </div>
             </div>
-            <p className="text-xs text-gray-400 mt-1 text-center">Updates live as you change settings above</p>
+
+            {/* Font Style */}
+            <div>
+              <label className="text-xs font-semibold text-gray-600 block mb-1.5">Font Style</label>
+              <div className="flex gap-1.5">
+                {([{key:'default',label:'Sans'},{key:'serif',label:'Serif'},{key:'mono',label:'Mono'}] as const).map(f => (
+                  <button key={f.key} onClick={() => setHeroFont(f.key)} className={`flex-1 py-2 rounded-xl border-2 text-xs font-semibold transition-all ${heroFont === f.key ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600'}`}>
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Text Horizontal Align */}
+            <div>
+              <label className="text-xs font-semibold text-gray-600 block mb-1.5">Text Position</label>
+              <div className="flex gap-1.5">
+                {([{key:'left',label:'⬅'},{key:'center',label:'↔'},{key:'right',label:'➡'}] as const).map(a => (
+                  <button key={a.key} onClick={() => setTextAlign(a.key)} className={`flex-1 py-2 rounded-xl border-2 text-xs font-semibold transition-all ${textAlign === a.key ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600'}`}>
+                    {a.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Text Vertical Position */}
+            <div>
+              <label className="text-xs font-semibold text-gray-600 block mb-1.5">Vertical Position</label>
+              <div className="flex gap-1.5">
+                {([{key:'top',label:'Top'},{key:'middle',label:'Mid'},{key:'bottom',label:'Bot'}] as const).map(v => (
+                  <button key={v.key} onClick={() => setTextVertical(v.key)} className={`flex-1 py-2 rounded-xl border-2 text-xs font-semibold transition-all ${textVertical === v.key ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600'}`}>
+                    {v.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Name Size */}
+            <div>
+              <label className="text-xs font-semibold text-gray-600 block mb-1.5">Name Size</label>
+              <div className="flex gap-1.5">
+                {([{key:'sm',label:'S'},{key:'md',label:'M'},{key:'lg',label:'L'},{key:'xl',label:'XL'}] as const).map(f => (
+                  <button key={f.key} onClick={() => setFontSize(f.key)} className={`flex-1 py-2 rounded-xl border-2 text-xs font-semibold transition-all ${fontSize === f.key ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600'}`}>
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Logo Position */}
+            <div>
+              <label className="text-xs font-semibold text-gray-600 block mb-1.5">Logo Position</label>
+              <div className="grid grid-cols-2 gap-1.5">
+                {([{key:'center',label:'Center'},{key:'top-left',label:'↖ Left'},{key:'top-right',label:'↗ Right'},{key:'hidden',label:'Hidden'}] as const).map(p => (
+                  <button key={p.key} onClick={() => setLogoPosition(p.key)} className={`py-2 rounded-xl border-2 text-xs font-semibold transition-all ${logoPosition === p.key ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600'}`}>
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Logo Size */}
+            <div>
+              <label className="text-xs font-semibold text-gray-600 block mb-1.5">Logo Size</label>
+              <div className="flex gap-1.5">
+                {([{key:'small',label:'S'},{key:'medium',label:'M'},{key:'large',label:'L'}] as const).map(s => (
+                  <button key={s.key} onClick={() => setLogoSize(s.key)} className={`flex-1 py-2 rounded-xl border-2 text-xs font-semibold transition-all ${logoSize === s.key ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600'}`}>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
           </div>
         </div>
 
-        {/* Theme Picker - full grid */}
+                {/* Theme Picker - full grid */}
         <div>
           <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-3">Brand Theme</label>
           <div className="grid grid-cols-3 gap-2 mb-3">
