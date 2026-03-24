@@ -498,9 +498,10 @@ export default function SettingsPage() {
 
         {/* Description */}
         <div>
-          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Store Description</label>
+          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Business Tagline / Slogan</label>
+          <p className="text-xs text-gray-400 mb-2">This appears on your hero page. Make it catchy — e.g. "Lagos's most trusted solar installer" or "Fresh meals delivered daily."</p>
           <textarea value={description} onChange={e => setDescription(e.target.value)}
-            placeholder="Tell customers what you sell..." rows={3}
+            placeholder="e.g. Lagos's most trusted solar installer" rows={2}
             className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 focus:border-brand-green outline-none resize-none" />
         </div>
 
