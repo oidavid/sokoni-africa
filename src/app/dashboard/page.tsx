@@ -210,7 +210,7 @@ export default function DashboardPage() {
             'bg-blue-50 border-blue-200 text-blue-800'
           }`}>
             <p className="text-sm flex-1 font-medium">{a.message}</p>
-            <button onClick={() => setDismissedIds(prev => new Set([...prev, a.id]))}
+            <button onClick={() => setDismissedIds(prev => { const next = new Set(Array.from(prev)); next.add(a.id); return next; })}
               className="text-lg leading-none opacity-50 hover:opacity-100 shrink-0">✕</button>
           </div>
         ))}
