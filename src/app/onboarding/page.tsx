@@ -976,9 +976,9 @@ export default function OnboardingPage() {
                 </p>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                {[...(COUNTRY_LIST.find(c => c.code === selectedCountry.code)?.cities || ['Lagos', 'Abuja', 'Port Harcourt', 'Kano', 'Ibadan', 'Benin City']), 'Other'].map(loc => (
-                  <button key={loc} onMouseDown={e => e.preventDefault()} onClick={() => { if (loc === 'Other') { setLocation(''); setShowOtherCity(true); } else { setLocation(loc); setShowOtherCity(false); } }}
-                    className={`py-2.5 px-3 rounded-xl border-2 text-xs font-semibold transition-all ${(loc === 'Other' ? showOtherCity : location === loc) ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600 hover:border-brand-green/50'}`}>
+                {(COUNTRY_LIST.find(c => c.code === selectedCountry.code)?.cities || ['Lagos', 'Abuja', 'Port Harcourt', 'Kano', 'Ibadan', 'Benin City', 'Other']).concat(['Other']).filter((v, i, a) => a.indexOf(v) === i).map(loc => (
+                  <button key={loc} onMouseDown={e => e.preventDefault()} onClick={() => { setLocation(loc === 'Other' ? '' : loc); if (loc === 'Other') setCustomCity('') }}
+                    className={`py-2.5 px-3 rounded-xl border-2 text-xs font-semibold transition-all ${(loc === 'Other' ? location === '' : location === loc) ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600 hover:border-brand-green/50'}`}>
                     {loc}
                   </button>
                 ))}
