@@ -104,11 +104,7 @@ export default function AdminPage() {
   const [actionMessage, setActionMessage] = useState("");
   const [newAdmin, setNewAdmin] = useState({ name: "", email: "", role: "support" as Role, password: "" });
 
-  const categories = [
-    "all","Home","Auto","Beauty","Education","Coaching & Mentoring",
-    "Health & Wellness","Mental Wellness","Domestic","Childcare & Nanny",
-    "Food & Catering","Events","Digital & Tech","Transport","Agriculture",
-  ];
+  const categories = ["all", ...Array.from(new Set(merchants.map(m => m.business_type).filter(Boolean))).sort()];
 
   // ── THEME ──────────────────────────────────────────────────────
   const d = dark;
@@ -331,7 +327,7 @@ export default function AdminPage() {
             className={`text-sm px-3 py-1.5 rounded-lg border transition-colors font-mono ${th.surface} ${th.muted}`}>
             {dark ? "☀ Light" : "☾ Dark"}
           </button>
-          {auth.type !== "none" && (
+          {(auth.type === "super_admin" || auth.type === "staff") && (
             <span className={`text-sm px-3 py-1 rounded-full border font-mono ${ROLE_COLORS[auth.type === "super_admin" ? "super_admin" : (auth as { type: "staff"; user: AdminUser }).user.role]}`}>
               {currentRole}
             </span>
