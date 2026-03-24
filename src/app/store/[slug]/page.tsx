@@ -98,6 +98,10 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
   const [addedId, setAddedId] = useState<string | null>(null)
   const [showSort, setShowSort] = useState(false)
   const [showWhatsAppForm, setShowWhatsAppForm] = useState(false)
+  const [discountCode, setDiscountCode] = useState('')
+  const [appliedDiscount, setAppliedDiscount] = useState<{code: string; type: string; value: number; id: string} | null>(null)
+  const [discountError, setDiscountError] = useState('')
+  const [applyingDiscount, setApplyingDiscount] = useState(false)
   const [orderConfirmed, setOrderConfirmed] = useState(false)
   const [waError, setWaError] = useState('')
   const [customer, setCustomer] = useState<{id: string; name: string} | null>(null)
@@ -258,6 +262,38 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
   }
 
   const useCart = store.order_mode === 'cart' || store.order_mode === 'both' || !store.order_mode
+  async function applyDiscount() {
+    if (!discountCode.trim()) return
+    setApplyingDiscount(true)
+    setDiscountError('')
+    const { data } = await supabase
+      .from('discount_codes')
+      .select('*')
+      .eq('merchant_id', store.id)
+      .eq('code', discountCode.trim().toUpperCase())
+      .eq('active', true)
+      .single()
+    if (!data) {
+      setDiscountError('Invalid or expired code')
+    } else if (data.expires_at && new Date(data.expires_at) < new Date()) {
+      setDiscountError('This code has expired')
+    } else if (data.max_uses && data.uses >= data.max_uses) {
+      setDiscountError('This code has reached its usage limit')
+    } else if (data.min_order > 0 && cartTotal / 100 < data.min_order) {
+      setDiscountError(`Minimum order of ${data.min_order} required`)
+    } else {
+      setAppliedDiscount({ code: data.code, type: data.type, value: data.value, id: data.id })
+      setDiscountError('')
+    }
+    setApplyingDiscount(false)
+  }
+
+  function getDiscountAmount() {
+    if (!appliedDiscount) return 0
+    if (appliedDiscount.type === 'percent') return Math.round(cartTotal * appliedDiscount.value / 100)
+    return appliedDiscount.value * 100
+  }
+
   const useWhatsApp = store.order_mode === 'whatsapp' || store.order_mode === 'both' || !store.order_mode
   const cartCount = cart.reduce((s, i) => s + i.qty, 0)
   const cartTotal = cart.reduce((s, i) => s + i.product.price * i.qty, 0)
@@ -328,9 +364,38 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
             </div>
             {cart.length > 0 && (
               <div className="px-4 py-4 border-t border-gray-100 space-y-3">
+                {/* Discount Code */}
+                <div className="space-y-1.5">
+                  <div className="flex gap-2">
+                    <input value={discountCode} onChange={e => { setDiscountCode(e.target.value.toUpperCase()); setDiscountError('') }}
+                      placeholder="Discount code"
+                      className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:border-brand-green" />
+                    <button onClick={applyDiscount} disabled={applyingDiscount || !discountCode.trim()}
+                      className="text-xs font-bold px-3 py-2 rounded-xl border border-brand-green text-brand-green bg-brand-light disabled:opacity-40">
+                      {applyingDiscount ? '...' : 'Apply'}
+                    </button>
+                  </div>
+                  {discountError && <p className="text-red-500 text-xs">{discountError}</p>}
+                  {appliedDiscount && (
+                    <div className="flex items-center justify-between bg-green-50 rounded-xl px-3 py-2">
+                      <span className="text-xs font-semibold text-green-700">🎉 {appliedDiscount.code} applied!</span>
+                      <button onClick={() => { setAppliedDiscount(null); setDiscountCode('') }} className="text-xs text-gray-400">✕</button>
+                    </div>
+                  )}
+                </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-500 text-sm">Total</span>
-                  <span className="font-display font-bold text-lg" style={{ color: store.theme_color || '#1A7A4A' }}>₦{(cartTotal / 100).toLocaleString()}</span>
+                  <span className="text-gray-500 text-sm">Subtotal</span>
+                  <span className="text-sm text-gray-700">₦{(cartTotal / 100).toLocaleString()}</span>
+                </div>
+                {appliedDiscount && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-green-600 text-sm">Discount ({appliedDiscount.type === 'percent' ? `${appliedDiscount.value}%` : `₦${appliedDiscount.value}`})</span>
+                    <span className="text-green-600 font-semibold text-sm">-₦{(getDiscountAmount() / 100).toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center border-t border-gray-100 pt-2">
+                  <span className="text-gray-500 text-sm font-semibold">Total</span>
+                  <span className="font-display font-bold text-lg" style={{ color: store.theme_color || '#1A7A4A' }}>₦{((cartTotal - getDiscountAmount()) / 100).toLocaleString()}</span>
                 </div>
                 <Link href={`/store/${store.slug}/checkout?cart=${encodeURIComponent(JSON.stringify(cart.map(i => ({ id: i.product.id, qty: i.qty }))))}`}
                   onClick={() => setCartOpen(false)}

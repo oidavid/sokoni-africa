@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ShoppingBag, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil, ShoppingCart, TrendingUp, BarChart2, CreditCard, Sparkles, Inbox } from 'lucide-react'
+import { ShoppingBag, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil, ShoppingCart, TrendingUp, BarChart2, CreditCard, Sparkles, Inbox, Tag } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { getThemeById, getThemeStyle, EARKET_THEMES, type EarketTheme } from '@/lib/themes'
 
@@ -298,6 +298,12 @@ export default function DashboardPage() {
             <Link href="/dashboard/broadcast"
               className="w-full flex items-center justify-center gap-1.5 bg-gray-50 text-gray-600 text-xs font-semibold py-2.5 rounded-xl border border-gray-200">
               📢 Broadcast to Customers
+            </Link>
+          </div>
+          <div className="mt-2">
+            <Link href="/dashboard/discounts"
+              className="w-full flex items-center justify-center gap-1.5 bg-gray-50 text-gray-600 text-xs font-semibold py-2.5 rounded-xl border border-gray-200">
+              🏷️ Discount Codes
             </Link>
           </div>
           {isService && (
