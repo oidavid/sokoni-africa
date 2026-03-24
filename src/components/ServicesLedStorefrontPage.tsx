@@ -404,7 +404,7 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
               <div className="w-2 h-2 rounded-full animate-pulse bg-green-400" />
               <span className="text-xs font-semibold text-green-400 uppercase tracking-widest">Available for new projects</span>
             </div>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: color === '#1A7A4A' ? '#6ee7b7' : contrast }}>{cfg.label}</p>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: color === '#1A7A4A' ? '#6ee7b7' : contrast }}>{cfg.tagline}</p>
             <h1 className="font-display font-bold text-white leading-tight mb-4"
               style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)' }}>
               {cfg.headline}
