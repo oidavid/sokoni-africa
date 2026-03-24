@@ -388,21 +388,21 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
         </div>
       )}
 
-      {/* Top Header Bar — logo + name always here */}
-      <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
+      {/* Top Header Bar — always clean white, always readable */}
+      <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm">
         <div className="flex items-center gap-3">
           {store.logo_url ? (
             <img src={store.logo_url} alt={store.business_name}
-              className={`rounded-xl object-contain ${logoSize === 'small' ? 'w-8 h-8' : logoSize === 'large' ? 'w-14 h-14' : 'w-10 h-10'}`}
+              className="w-12 h-12 rounded-xl object-contain flex-shrink-0"
               style={{ background: 'transparent' }} />
           ) : (
-            <div className={`rounded-xl flex items-center justify-center font-bold text-white ${logoSize === 'small' ? 'w-8 h-8 text-sm' : logoSize === 'large' ? 'w-14 h-14 text-xl' : 'w-10 h-10 text-base'}`}
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-white text-xl flex-shrink-0"
               style={themeStyle as React.CSSProperties}>
-              {store.business_name.charAt(0)}
+              {store.business_name.charAt(0).toUpperCase()}
             </div>
           )}
           <div>
-            <p className={`${heroFontClass} font-bold text-gray-900 leading-tight ${fontSizeClass === 'text-5xl' ? 'text-lg' : fontSizeClass === 'text-4xl' ? 'text-base' : fontSizeClass === 'text-2xl' ? 'text-sm' : 'text-base'}`}>
+            <p className="font-display font-bold text-gray-900 text-base leading-tight">
               {store.business_name}
             </p>
             <p className="text-xs font-medium" style={{ color }}>{categoryLabel}</p>
@@ -411,11 +411,11 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
         <div className="flex items-center gap-2">
           <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(bookMsg)}`}
             target="_blank" rel="noreferrer"
-            className="flex items-center gap-1.5 text-white text-xs font-bold px-3 py-2 rounded-xl"
+            className="flex items-center gap-1.5 text-white text-xs font-bold px-4 py-2.5 rounded-xl whitespace-nowrap"
             style={{ backgroundColor: color }}>
             {WA_SVG} Book Now
           </a>
-          <button onClick={shareStore} className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-gray-200">
+          <button onClick={shareStore} className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-gray-200 flex-shrink-0">
             <Share2 size={16} className="text-gray-600" />
           </button>
         </div>
