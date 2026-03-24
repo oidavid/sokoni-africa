@@ -21,6 +21,7 @@ interface Merchant {
   description: string
   logo_url: string
   profile_photo_url?: string
+  business_type?: string
   theme_color: string
   theme_preset?: string
   order_mode: string
@@ -81,6 +82,7 @@ export default function SettingsPage() {
       const { data: m } = await supabase.from('merchants').select('*').eq('email', merchantEmail).single()
       if (!m) { router.push('/onboarding'); return }
       setMerchant(m)
+      const isServ = m.business_type === 'services'
       setBusinessName(m.business_name || '')
       setDescription(m.description || '')
       setAddress(m.address || '')
@@ -224,7 +226,9 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Profile Photo */}
+        {/* Profile Photo — only for service businesses */}
+        {merchant?.business_type === 'services' && (
+        <>}
         <div>
           <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Profile Photo</label>
           <p className="text-xs text-gray-400 mb-3">Your face/headshot — shown on coaching & consultation pages. Makes your page feel personal and trustworthy.</p>
@@ -486,3 +490,7 @@ export default function SettingsPage() {
     </div>
   )
 }
+        </>
+        )}
+
+

@@ -316,8 +316,8 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             {store.logo_url
-              ? <img src={store.logo_url} alt={store.business_name} className="w-12 h-12 rounded-xl object-contain shadow-sm" />
-              : <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold text-white shadow-sm" style={themeStyle as React.CSSProperties}>{store.business_name[0]}</div>
+              ? <img src={store.logo_url} alt={store.business_name} className="w-14 h-14 rounded-xl object-contain shadow-sm" />
+              : <div className="w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold text-white shadow-sm" style={themeStyle as React.CSSProperties}>{store.business_name[0]}</div>
             }
             <div>
               <p className="font-display font-bold text-base text-gray-900 leading-tight">{store.business_name}</p>
