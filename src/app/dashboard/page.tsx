@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ShoppingBag, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil, ShoppingCart, TrendingUp, BarChart2, CreditCard, Sparkles } from 'lucide-react'
+import { ShoppingBag, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil, ShoppingCart, TrendingUp, BarChart2, CreditCard, Sparkles, Inbox } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { getThemeById, getThemeStyle, EARKET_THEMES, type EarketTheme } from '@/lib/themes'
 
@@ -45,6 +45,7 @@ export default function DashboardPage() {
   const [refreshing, setRefreshing] = useState(false)
   const [orderCount, setOrderCount] = useState(0)
   const [newOrderCount, setNewOrderCount] = useState(0)
+  const [leadCount, setLeadCount] = useState(0)
   const [refreshingServices, setRefreshingServices] = useState(false)
   const [refreshDone, setRefreshDone] = useState(false)
   const [showThemePicker, setShowThemePicker] = useState(false)
@@ -63,8 +64,10 @@ export default function DashboardPage() {
     setProducts(prods || [])
     const { count: total } = await supabase.from('orders').select('*', { count: 'exact', head: true }).eq('merchant_id', m.id)
     const { count: newOrders } = await supabase.from('orders').select('*', { count: 'exact', head: true }).eq('merchant_id', m.id).eq('status', 'new')
+    const { count: totalLeads } = await supabase.from('leads').select('*', { count: 'exact', head: true }).eq('merchant_id', m.id)
     setOrderCount(total || 0)
     setNewOrderCount(newOrders || 0)
+    setLeadCount(totalLeads || 0)
     setLoading(false)
     setRefreshing(false)
   }, [router])
@@ -211,7 +214,7 @@ export default function DashboardPage() {
         </Link>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-3 mb-5">
+        <div className="grid grid-cols-4 gap-3 mb-5">
           <div className="bg-white rounded-2xl p-3 border border-gray-100">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 bg-blue-50 text-blue-600">
               <Package size={16} />
@@ -226,6 +229,13 @@ export default function DashboardPage() {
             <div className="font-display font-bold text-xl text-brand-dark">{inStockCount}</div>
             <div className="text-xs text-gray-500">{isService ? 'Available' : 'In Stock'}</div>
           </div>
+          <Link href="/dashboard/leads" className="bg-white rounded-2xl p-3 border border-gray-100 hover:border-brand-green transition-colors">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 bg-purple-50 text-purple-600">
+              <Inbox size={16} />
+            </div>
+            <div className="font-display font-bold text-xl text-brand-dark">{leadCount}</div>
+            <div className="text-xs text-gray-500">Leads</div>
+          </Link>
           <Link href="/dashboard/orders" className="bg-white rounded-2xl p-3 border border-gray-100 relative hover:border-brand-green transition-colors">
             {newOrderCount > 0 && (
               <span className="absolute -top-1 -right-1 w-5 h-5 bg-brand-accent rounded-full text-white text-xs font-bold flex items-center justify-center">
@@ -394,8 +404,8 @@ export default function DashboardPage() {
         {[
           { icon: TrendingUp, label: 'Dashboard', href: '/dashboard' },
           { icon: Package, label: isService ? 'Services' : 'Products', href: '/dashboard/products/new' },
+          { icon: Inbox, label: 'Leads', href: '/dashboard/leads' },
           { icon: ShoppingCart, label: isService ? 'Bookings' : 'Orders', href: '/dashboard/orders' },
-          { icon: BarChart2, label: 'Analytics', href: '/dashboard/analytics' },
           { icon: Settings, label: 'Settings', href: '/dashboard/settings' },
         ].map((item, i) => (
           <Link key={i} href={item.href}
