@@ -26,6 +26,7 @@ type Merchant = {
   id: string;
   business_name: string;
   business_type: string;
+  category?: string;
   country: string;
   is_published: boolean;
   created_at: string;
@@ -93,6 +94,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
 
   const [search, setSearch] = useState("");
+  const [filterType, setFilterType] = useState("all");
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterCountry, setFilterCountry] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -104,7 +106,8 @@ export default function AdminPage() {
   const [actionMessage, setActionMessage] = useState("");
   const [newAdmin, setNewAdmin] = useState({ name: "", email: "", role: "support" as Role, password: "" });
 
-  const categories = ["all", ...Array.from(new Set(merchants.map(m => m.business_type).filter(Boolean))).sort()];
+  const businessTypes = ["all", ...Array.from(new Set(merchants.map(m => m.business_type).filter(Boolean))).sort()];
+  const categories = ["all", ...Array.from(new Set(merchants.map(m => m.category).filter(Boolean))).sort()];
 
   // ── THEME ──────────────────────────────────────────────────────
   const d = dark;
@@ -187,11 +190,12 @@ export default function AdminPage() {
       m.country?.toLowerCase().includes(search.toLowerCase()) ||
       m.email?.toLowerCase().includes(search.toLowerCase())
     );
-    if (filterCategory !== "all") r = r.filter(m => m.business_type === filterCategory);
+    if (filterType !== "all") r = r.filter(m => m.business_type === filterType);
+    if (filterCategory !== "all") r = r.filter(m => m.category === filterCategory);
     if (filterCountry !== "all") r = r.filter(m => m.country === filterCountry);
     if (filterStatus !== "all") r = r.filter(m => (m.status || "active") === filterStatus);
     setFiltered(r);
-  }, [search, filterCategory, filterCountry, filterStatus, merchants]);
+  }, [search, filterType, filterCategory, filterCountry, filterStatus, merchants]);
 
   const uniqueCountries = ["all", ...Array.from(new Set(merchants.map(m => m.country).filter(Boolean)))];
 
@@ -391,6 +395,10 @@ export default function AdminPage() {
                   <input type="text" placeholder="Search name, email, country..." value={search}
                     onChange={e => setSearch(e.target.value)}
                     className={`px-4 py-2 rounded-lg text-sm outline-none border transition-colors w-72 font-mono ${th.input}`} />
+                  <select value={filterType} onChange={e => setFilterType(e.target.value)}
+                    className={`px-3 py-2 rounded-lg text-sm outline-none border font-mono ${th.select}`}>
+                    {businessTypes.map(t => <option key={t} value={t}>{t === "all" ? "All Types" : t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
+                  </select>
                   <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}
                     className={`px-3 py-2 rounded-lg text-sm outline-none border font-mono ${th.select}`}>
                     {categories.map(c => <option key={c} value={c}>{c === "all" ? "All Categories" : c}</option>)}
@@ -412,7 +420,7 @@ export default function AdminPage() {
                   <table className="w-full">
                     <thead>
                       <tr className={`border-b ${th.thead}`}>
-                        {["Business","Category","Country","Status","Joined","Store","Actions"].map(h => (
+                        {["Business","Type","Category","Country","Status","Joined","Store","Actions"].map(h => (
                           <th key={h} className={`text-left px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-mono font-normal ${th.theadText}`}>{h}</th>
                         ))}
                       </tr>
@@ -427,6 +435,7 @@ export default function AdminPage() {
                             {m.admin_notes && <span className="ml-2 text-[9px] text-amber-400 font-mono align-middle">NOTE</span>}
                           </td>
                           <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{m.business_type || "—"}</td>
+                          <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{m.category || "—"}</td>
                           <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{m.country || "—"}</td>
                           <td className="px-5 py-4">{statusBadge(m.status)}</td>
                           <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>
