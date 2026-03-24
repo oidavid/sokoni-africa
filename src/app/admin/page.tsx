@@ -780,7 +780,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* ── NOTE MODAL ── */}}
+      {/* ── NOTE MODAL ── */}
       {selectedMerchant && modalType === "note" && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className={`rounded-2xl border w-full max-w-md p-6 ${th.modal}`}>
