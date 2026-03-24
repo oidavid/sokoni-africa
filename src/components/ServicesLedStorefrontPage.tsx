@@ -394,8 +394,8 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
       <div className="relative overflow-hidden bg-gray-900" style={{ minHeight: '420px' }}>
         {heroImage && (
           <div className="absolute inset-0">
-            <img src={heroImage} alt="" className="w-full h-full object-cover" style={{ opacity: 1 - heroOverlay }} />
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/90 to-gray-900/60" />
+            <img src={heroImage} alt="" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
           </div>
         )}
         <div className="relative max-w-4xl mx-auto px-4 py-16 sm:py-24">
