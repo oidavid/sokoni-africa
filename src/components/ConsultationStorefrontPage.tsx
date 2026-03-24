@@ -22,6 +22,7 @@ interface Merchant {
   holiday_message?: string
   business_hours?: Record<string, {open: string; close: string; closed: boolean}>
   profile_photo_url?: string
+  testimonials?: Array<{name: string; role: string; text: string; rating: number}>
   updated_at?: string
 }
 
@@ -524,7 +525,7 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
             {/* Testimonials sidebar */}
             <div className="sm:w-72 shrink-0 space-y-4">
               <p className="font-display font-bold text-lg text-brand-dark">What clients say</p>
-              {getPlaceholderReviews(store.category, store.location).map((r, i) => (
+              {((store as any).testimonials?.length > 0 ? (store as any).testimonials : getPlaceholderReviews(store.category, store.location)).map((r: any, i: number) => (
                 <div key={i} className="bg-gray-50 rounded-2xl p-4">
                   <div className="flex gap-0.5 mb-2">
                     {[1,2,3,4,5].map(j => <Star key={j} size={12} className="text-amber-400 fill-amber-400" />)}

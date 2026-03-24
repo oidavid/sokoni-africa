@@ -18,6 +18,7 @@ interface Merchant {
   business_type?: string
   theme_preset?: string
   address?: string
+  testimonials?: Array<{name: string; role: string; text: string; rating: number}>
   holiday_mode?: boolean
   holiday_message?: string
   business_hours?: Record<string, {open: string; close: string; closed: boolean}>
@@ -545,7 +546,7 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
         <h2 className="font-display font-bold text-brand-dark text-xl mb-1">What Our Clients Say</h2>
         <p className="text-xs text-gray-400 mb-4">Log in to your dashboard to add real client reviews</p>
         <div className="grid sm:grid-cols-2 gap-3">
-          {getPlaceholderReviews(store.category, store.location).map((t, i) => (
+          {((store as any).testimonials?.length > 0 ? (store as any).testimonials : getPlaceholderReviews(store.category, store.location)).map((t: any, i: number) => (
             <div key={i} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
               <div className="flex gap-0.5 mb-2">
                 {[1,2,3,4,5].map(j => <Star key={j} size={13} className="text-amber-400 fill-amber-400" />)}
@@ -558,7 +559,7 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-gray-700">{t.name}</p>
-                  <p className="text-xs text-gray-400">{store.location}</p>
+                  {t.role ? <p className="text-xs text-gray-400">{t.role}</p> : <p className="text-xs text-gray-400">{store.location}</p>}
                 </div>
               </div>
             </div>

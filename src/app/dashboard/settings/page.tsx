@@ -34,6 +34,14 @@ const LOCATIONS = [
   'Kaduna', 'Calabar', 'Jos', 'Ilorin', 'Other'
 ]
 
+
+interface Testimonial {
+  name: string
+  role: string
+  text: string
+  rating: number
+}
+
 export default function SettingsPage() {
   const router = useRouter()
   const [merchant, setMerchant] = useState<Merchant | null>(null)
@@ -63,6 +71,9 @@ export default function SettingsPage() {
   const [uploadingProfilePhoto, setUploadingProfilePhoto] = useState(false)
   const [holidayMode, setHolidayMode] = useState(false)
   const [holidayMessage, setHolidayMessage] = useState('')
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([
+    { name: '', role: '', text: '', rating: 5 },
+  ])
   const [businessHours, setBusinessHours] = useState<Record<string, {open: string; close: string; closed: boolean}>>({
     Mon: { open: '09:00', close: '17:00', closed: false },
     Tue: { open: '09:00', close: '17:00', closed: false },
@@ -107,6 +118,7 @@ export default function SettingsPage() {
       setHolidayMode(m.holiday_mode || false)
       setHolidayMessage(m.holiday_message || '')
       if (m.business_hours) setBusinessHours(m.business_hours)
+      if (m.testimonials) setTestimonials(m.testimonials)
       const wa = m.whatsapp_number || ''
       const country = COUNTRIES.find(c => c.dial && wa.startsWith(c.dial)) || COUNTRIES[0]
       setSelectedCountry(country)
@@ -164,6 +176,7 @@ export default function SettingsPage() {
         holiday_mode: holidayMode,
         holiday_message: holidayMessage,
         business_hours: businessHours,
+        testimonials: testimonials.filter(t => t.name.trim() && t.text.trim()),
         updated_at: new Date().toISOString(),
       })
       .eq('id', merchant.id)
@@ -420,6 +433,48 @@ export default function SettingsPage() {
           <Link href={`/store/${merchant?.slug}`} target="_blank" className="inline-block mt-2 text-xs text-brand-green font-semibold underline">
             View store â†’
           </Link>
+        </div>
+
+
+        {/* Testimonials */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-display font-bold text-brand-dark text-sm">Client Testimonials</h2>
+            {testimonials.length < 5 && (
+              <button onClick={() => setTestimonials(t => [...t, { name: '', role: '', text: '', rating: 5 }])}
+                className="text-xs font-semibold text-brand-green bg-brand-light px-3 py-1.5 rounded-lg">
+                + Add
+              </button>
+            )}
+          </div>
+          <p className="text-xs text-gray-400 mb-3">Add up to 5 real client reviews. These replace the placeholder reviews on your store page.</p>
+          <div className="space-y-4">
+            {testimonials.map((t, i) => (
+              <div key={i} className="bg-gray-50 rounded-xl p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-gray-500">Review {i + 1}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-0.5">
+                      {[1,2,3,4,5].map(s => (
+                        <button key={s} onClick={() => setTestimonials(prev => prev.map((r, j) => j === i ? { ...r, rating: s } : r))}>
+                          <span className={`text-sm ${s <= t.rating ? 'text-amber-400' : 'text-gray-300'}`}>★</span>
+                        </button>
+                      ))}
+                    </div>
+                    <button onClick={() => setTestimonials(prev => prev.filter((_, j) => j !== i))}
+                      className="text-red-400 text-xs font-semibold">✕</button>
+                  </div>
+                </div>
+                <input value={t.name} onChange={e => setTestimonials(prev => prev.map((r, j) => j === i ? { ...r, name: e.target.value } : r))}
+                  placeholder="Client name" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-brand-green" />
+                <input value={t.role} onChange={e => setTestimonials(prev => prev.map((r, j) => j === i ? { ...r, role: e.target.value } : r))}
+                  placeholder="Role or title (e.g. Entrepreneur, Teacher)" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-brand-green" />
+                <textarea value={t.text} onChange={e => setTestimonials(prev => prev.map((r, j) => j === i ? { ...r, text: e.target.value } : r))}
+                  placeholder="What did they say about your service?" rows={3}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-brand-green resize-none" />
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Holiday / Closure Mode */}

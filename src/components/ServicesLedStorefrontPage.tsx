@@ -18,6 +18,7 @@ interface Merchant {
   business_type?: string
   theme_preset?: string
   address?: string
+  testimonials?: Array<{name: string; role: string; text: string; rating: number}>
   holiday_mode?: boolean
   holiday_message?: string
   business_hours?: Record<string, {open: string; close: string; closed: boolean}>
@@ -482,7 +483,7 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
             {/* Testimonials */}
             <div className="sm:w-72 shrink-0 space-y-4">
               <p className="font-display font-bold text-lg text-gray-900">What clients say</p>
-              {reviews.map((r, i) => (
+              {((store as any).testimonials?.length > 0 ? (store as any).testimonials : reviews).map((r: any, i: number) => (
                 <div key={i} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
                   <div className="flex gap-0.5 mb-2">{[1,2,3,4,5].map(j => <Star key={j} size={12} className="text-amber-400 fill-amber-400" />)}</div>
                   <p className="text-gray-600 text-xs leading-relaxed mb-3">"{r.text}"</p>
@@ -490,7 +491,7 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
                     <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style={{ backgroundColor: color }}>{r.name[0]}</div>
                     <div>
                       <p className="text-xs font-bold text-gray-800">{r.name}</p>
-                      <p className="text-xs text-gray-400">{r.role}</p>
+                      {r.role && <p className="text-xs text-gray-400">{r.role}</p>}
                     </div>
                   </div>
                 </div>
