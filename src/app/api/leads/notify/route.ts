@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
 
     // Send email via Resend
     const emailBody = {
-      from: 'Earket Leads <leads@earket.com>',
+      from: 'Earket Leads <onboarding@resend.dev>',
       to: [merchant.email],
       subject: `New enquiry from ${name} — ${merchant.business_name}`,
       html: `
