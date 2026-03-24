@@ -40,7 +40,7 @@ export default function AddProductPage() {
   const [price, setPrice] = useState('')
   const [inStock, setInStock] = useState(true)
   const [merchant, setMerchant] = useState<Merchant | null>(null)
-  const [currencySymbol, setCurrencySymbol] = useState('₦')
+  const [currencySymbol, setCurrencySymbol] = useState('$')
   const [aiError, setAiError] = useState('')
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [uploadingImage, setUploadingImage] = useState(false)
@@ -291,7 +291,20 @@ export default function AddProductPage() {
                 {merchant?.business_type === 'services' ? 'Service Name' : 'Product Name'}
               </label>
               <input type="text" value={name} onChange={e => setName(e.target.value)}
-                placeholder={pid ? "e.g. Ankara Print Fabric (6 yards)" : "e.g. Ankara Print Fabric (6 yards)"}
+                placeholder={
+                    merchant?.category === 'digital_services' || merchant?.category === 'digital' ? 'e.g. Website Design Package' :
+                    merchant?.category === 'education' ? 'e.g. English Tutoring (1 hour)' :
+                    merchant?.category === 'health_wellness' ? 'e.g. Full Body Massage (60 min)' :
+                    merchant?.category === 'beauty_services' ? 'e.g. Hair Braiding — Box Braids' :
+                    merchant?.category === 'coaching' ? 'e.g. 1-on-1 Business Coaching Session' :
+                    merchant?.category === 'home_services' ? 'e.g. Home Deep Cleaning (3 bed)' :
+                    merchant?.category === 'auto_services' ? 'e.g. Full Car Service & Oil Change' :
+                    merchant?.category === 'events' ? 'e.g. Event Photography (4 hours)' :
+                    merchant?.category === 'transport' ? 'e.g. Airport Transfer — Lagos' :
+                    merchant?.category === 'food' ? 'e.g. Jollof Rice Party Pack (10 people)' :
+                    merchant?.business_type === 'services' ? 'e.g. Service Name & Duration' :
+                    'e.g. Product Name & Size'
+                  }
                 className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm font-semibold text-gray-800 focus:border-brand-green outline-none" />
             </div>
 
