@@ -268,7 +268,20 @@ Please restock soon to avoid missing orders.`
                         <p className="text-xs text-gray-400 mt-0.5">📍 {order.customer_address}</p>
                       )}
                       {order.customer_address === 'PICKUP' && <p className="text-xs text-brand-green font-semibold mt-0.5">📦 Pickup</p>}
-                      {order.notes && <p className="text-xs text-gray-400 mt-0.5 italic">"{order.notes}"</p>}
+                      {order.notes && (() => {
+                        const discountMatch = order.notes.match(/\[Discount code: ([^\]]+)\]/)
+                        const cleanNotes = order.notes.replace(/\[Discount code: [^\]]+\]\s*/g, '').replace(/PICKUP ORDER\.\s*/g, '').trim()
+                        return (
+                          <>
+                            {discountMatch && (
+                              <span className="inline-flex items-center gap-1 text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full mt-0.5">
+                                🏷️ {discountMatch[1]}
+                              </span>
+                            )}
+                            {cleanNotes && <p className="text-xs text-gray-400 mt-0.5 italic">"{cleanNotes}"</p>}
+                          </>
+                        )
+                      })()}
                     </div>
                     <a href={`https://wa.me/${order.customer_phone?.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi ${order.customer_name}! Regarding your order ${order.order_number}`)}`}
                       target="_blank" rel="noreferrer"

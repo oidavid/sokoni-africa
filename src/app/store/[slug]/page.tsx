@@ -397,7 +397,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                   <span className="text-gray-500 text-sm font-semibold">Total</span>
                   <span className="font-display font-bold text-lg" style={{ color: store.theme_color || '#1A7A4A' }}>₦{((cartTotal - getDiscountAmount()) / 100).toLocaleString()}</span>
                 </div>
-                <Link href={`/store/${store.slug}/checkout?cart=${encodeURIComponent(JSON.stringify(cart.map(i => ({ id: i.product.id, qty: i.qty }))))}`}
+                <Link href={`/store/${store.slug}/checkout?cart=${encodeURIComponent(JSON.stringify(cart.map(i => ({ id: i.product.id, qty: i.qty }))))}&discount=${encodeURIComponent(JSON.stringify(appliedDiscount || null))}`}
                   onClick={() => setCartOpen(false)}
                   style={{ backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') }}
                   className="block w-full font-bold py-3.5 rounded-2xl text-center transition-colors">
