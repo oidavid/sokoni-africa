@@ -76,6 +76,9 @@ export default function SettingsPage() {
   const [heroTextColor, setHeroTextColor] = useState<'white' | 'dark'>('white')
   const [heroFont, setHeroFont] = useState<'default' | 'serif' | 'mono'>('default')
   const [logoPosition, setLogoPosition] = useState<'center' | 'top-left' | 'top-right' | 'hidden'>('center')
+  const [logoSize, setLogoSize] = useState<'small' | 'medium' | 'large'>('medium')
+  const [textAlign, setTextAlign] = useState<'left' | 'center' | 'right'>('center')
+  const [fontSize, setFontSize] = useState<'sm' | 'md' | 'lg' | 'xl'>('md')
   const [holidayMode, setHolidayMode] = useState(false)
   const [holidayMessage, setHolidayMessage] = useState('')
   const [testimonials, setTestimonials] = useState<Testimonial[]>([
@@ -127,6 +130,9 @@ export default function SettingsPage() {
       setHeroTextColor(m.hero_text_color || 'white')
       setHeroFont(m.hero_font || 'default')
       setLogoPosition(m.logo_position || 'center')
+      setLogoSize(m.logo_size || 'medium')
+      setTextAlign(m.hero_text_align || 'center')
+      setFontSize(m.hero_font_size || 'md')
       setHolidayMode(m.holiday_mode || false)
       setHolidayMessage(m.holiday_message || '')
       if (m.business_hours) setBusinessHours(m.business_hours)
@@ -190,6 +196,9 @@ export default function SettingsPage() {
         hero_text_color: heroTextColor,
         hero_font: heroFont,
         logo_position: logoPosition,
+        logo_size: logoSize,
+        hero_text_align: textAlign,
+        hero_font_size: fontSize,
         holiday_mode: holidayMode,
         holiday_message: holidayMessage,
         business_hours: businessHours,
@@ -373,7 +382,7 @@ export default function SettingsPage() {
             <label className="text-xs font-semibold text-gray-600 block mb-2">Logo Position</label>
             <div className="grid grid-cols-2 gap-2">
               {([
-                { key: 'center', label: '⬜ Center (default)' },
+                { key: 'center', label: '⬛ Center' },
                 { key: 'top-left', label: '↖ Top Left' },
                 { key: 'top-right', label: '↗ Top Right' },
                 { key: 'hidden', label: '🚫 Hidden' },
@@ -388,39 +397,112 @@ export default function SettingsPage() {
             </div>
           </div>
 
+          {/* Logo Size */}
+          <div className="mb-4">
+            <label className="text-xs font-semibold text-gray-600 block mb-2">Logo Size</label>
+            <div className="flex gap-2">
+              {([
+                { key: 'small', label: 'Small' },
+                { key: 'medium', label: 'Medium' },
+                { key: 'large', label: 'Large' },
+              ] as const).map(s => (
+                <button key={s.key} onClick={() => setLogoSize(s.key)}
+                  className={`flex-1 py-2.5 rounded-xl border-2 text-xs font-semibold transition-all ${
+                    logoSize === s.key ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600'
+                  }`}>
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Text Alignment */}
+          <div className="mb-4">
+            <label className="text-xs font-semibold text-gray-600 block mb-2">Text Alignment</label>
+            <div className="flex gap-2">
+              {([
+                { key: 'left', label: '⬅ Left' },
+                { key: 'center', label: '↔ Center' },
+                { key: 'right', label: '➡ Right' },
+              ] as const).map(a => (
+                <button key={a.key} onClick={() => setTextAlign(a.key)}
+                  className={`flex-1 py-2.5 rounded-xl border-2 text-xs font-semibold transition-all ${
+                    textAlign === a.key ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600'
+                  }`}>
+                  {a.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Font Size */}
+          <div className="mb-4">
+            <label className="text-xs font-semibold text-gray-600 block mb-2">Business Name Size</label>
+            <div className="flex gap-2">
+              {([
+                { key: 'sm', label: 'Small' },
+                { key: 'md', label: 'Medium' },
+                { key: 'lg', label: 'Large' },
+                { key: 'xl', label: 'XL' },
+              ] as const).map(f => (
+                <button key={f.key} onClick={() => setFontSize(f.key)}
+                  className={`flex-1 py-2.5 rounded-xl border-2 text-xs font-semibold transition-all ${
+                    fontSize === f.key ? 'border-brand-green bg-brand-light text-brand-green' : 'border-gray-200 text-gray-600'
+                  }`}>
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Live Preview */}
           <div className="mb-2">
             <label className="text-xs font-semibold text-gray-600 block mb-2">Live Preview</label>
-            <div className="relative w-full h-40 rounded-2xl overflow-hidden border-2 border-gray-200">
+            <div className="relative w-full h-44 rounded-2xl overflow-hidden border-2 border-gray-200">
               {(heroImagePreview || heroImageUrl) ? (
                 <img src={heroImagePreview || heroImageUrl!} alt="" className="absolute inset-0 w-full h-full object-cover" />
               ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-400 to-gray-600" />
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-500 to-gray-700" />
               )}
               <div className="absolute inset-0" style={{
                 backgroundColor: heroTextColor === 'dark'
                   ? `rgba(255,255,255,${heroOverlay * 0.6})`
                   : `rgba(0,0,0,${heroOverlay})`
               }} />
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+              {/* Corner logos */}
+              {logoPosition === 'top-left' && (
+                <div className={`absolute top-2 left-2 rounded-xl flex items-center justify-center ${logoSize === 'small' ? 'w-8 h-8 text-sm' : logoSize === 'large' ? 'w-14 h-14 text-2xl' : 'w-10 h-10 text-lg'}`}
+                  style={{ background: 'rgba(255,255,255,0.25)' }}>
+                  {logoPreview || logoUrl ? <img src={logoPreview || logoUrl!} className="w-full h-full object-contain rounded-xl" /> : '💼'}
+                </div>
+              )}
+              {logoPosition === 'top-right' && (
+                <div className={`absolute top-2 right-2 rounded-xl flex items-center justify-center ${logoSize === 'small' ? 'w-8 h-8 text-sm' : logoSize === 'large' ? 'w-14 h-14 text-2xl' : 'w-10 h-10 text-lg'}`}
+                  style={{ background: 'rgba(255,255,255,0.25)' }}>
+                  {logoPreview || logoUrl ? <img src={logoPreview || logoUrl!} className="w-full h-full object-contain rounded-xl" /> : '💼'}
+                </div>
+              )}
+              {/* Center content */}
+              <div className={`absolute inset-0 flex flex-col justify-center px-4 ${textAlign === 'left' ? 'items-start' : textAlign === 'right' ? 'items-end' : 'items-center'}`}>
                 {logoPosition === 'center' && (
-                  <div className="w-10 h-10 rounded-xl bg-white/30 flex items-center justify-center mb-2 text-lg">💼</div>
+                  <div className={`rounded-xl flex items-center justify-center mb-2 ${logoSize === 'small' ? 'w-8 h-8 text-sm' : logoSize === 'large' ? 'w-16 h-16 text-3xl' : 'w-12 h-12 text-xl'}`}
+                    style={{ background: 'rgba(255,255,255,0.25)' }}>
+                    {logoPreview || logoUrl ? <img src={logoPreview || logoUrl!} className="w-full h-full object-contain rounded-xl" /> : '💼'}
+                  </div>
                 )}
-                <p className={`font-bold text-base leading-tight ${
-                  heroFont === 'serif' ? 'font-serif' : heroFont === 'mono' ? 'font-mono' : ''
-                }`} style={{ color: heroTextColor === 'dark' ? '#1e293b' : '#ffffff' }}>
+                <p className={`font-bold leading-tight ${
+                  heroFont === 'serif' ? 'font-serif' : heroFont === 'mono' ? 'font-mono' : 'font-sans'
+                } ${
+                  fontSize === 'sm' ? 'text-sm' : fontSize === 'lg' ? 'text-xl' : fontSize === 'xl' ? 'text-2xl' : 'text-base'
+                } ${textAlign === 'left' ? 'text-left' : textAlign === 'right' ? 'text-right' : 'text-center'}`}
+                  style={{ color: heroTextColor === 'dark' ? '#1e293b' : '#ffffff' }}>
                   {merchant?.business_name || 'Your Business'}
                 </p>
-                <p className="text-xs mt-0.5" style={{ color: heroTextColor === 'dark' ? 'rgba(30,41,59,0.7)' : 'rgba(255,255,255,0.75)' }}>
+                <p className={`text-xs mt-0.5 ${textAlign === 'left' ? 'text-left' : textAlign === 'right' ? 'text-right' : 'text-center'}`}
+                  style={{ color: heroTextColor === 'dark' ? 'rgba(30,41,59,0.7)' : 'rgba(255,255,255,0.75)' }}>
                   {merchant?.location || 'Your City'}
                 </p>
               </div>
-              {logoPosition === 'top-left' && (
-                <div className="absolute top-2 left-2 w-8 h-8 rounded-lg bg-white/30 flex items-center justify-center text-sm">💼</div>
-              )}
-              {logoPosition === 'top-right' && (
-                <div className="absolute top-2 right-2 w-8 h-8 rounded-lg bg-white/30 flex items-center justify-center text-sm">💼</div>
-              )}
             </div>
             <p className="text-xs text-gray-400 mt-1 text-center">Updates live as you change settings above</p>
           </div>

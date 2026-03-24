@@ -19,6 +19,9 @@ interface Merchant {
   hero_text_color?: string
   hero_font?: string
   logo_position?: string
+  logo_size?: string
+  hero_text_align?: string
+  hero_font_size?: string
   logo_url: string | null
   business_type?: string
   theme_preset?: string
@@ -285,6 +288,12 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
   const heroTextColor = store.hero_text_color || 'white'
   const heroFontClass = store.hero_font === 'serif' ? 'font-serif' : store.hero_font === 'mono' ? 'font-mono' : 'font-display'
   const logoPosition = store.logo_position || 'center'
+  const logoSize = store.logo_size || 'medium'
+  const textAlign = store.hero_text_align || 'center'
+  const fontSizeClass = store.hero_font_size === 'sm' ? 'text-2xl' : store.hero_font_size === 'lg' ? 'text-4xl' : store.hero_font_size === 'xl' ? 'text-5xl' : 'text-3xl'
+  const logoSizeClass = logoSize === 'small' ? 'w-20 h-20' : logoSize === 'large' ? 'w-48 h-48' : 'w-36 h-36'
+  const logoCornerClass = logoSize === 'small' ? 'w-12 h-12' : logoSize === 'large' ? 'w-24 h-24' : 'w-16 h-16'
+  const alignClass = textAlign === 'left' ? 'items-start text-left' : textAlign === 'right' ? 'items-end text-right' : 'items-center text-center'
   const tc = heroTextColor === 'dark' ? '#1e293b' : '#ffffff'
   const tcMuted = heroTextColor === 'dark' ? 'rgba(30,41,59,0.7)' : 'rgba(255,255,255,0.75)'
   const categoryLabel = CATEGORY_LABEL[store.category] || 'Professional Services'
@@ -377,38 +386,48 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
             </button>
           </div>
 
-          {/* Logo — position aware */}
-          {logoPosition === 'top-left' && store.logo_url && (
-            <div className="absolute top-4 left-4" style={{ filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))' }}>
-              <img src={store.logo_url} alt={store.business_name} className="w-16 h-16 rounded-xl object-contain" style={{ background: 'transparent' }} />
+          {/* Corner logos */}
+          {logoPosition === 'top-left' && (store.logo_url ? (
+            <div className={`absolute top-4 left-4 ${logoCornerClass}`} style={{ filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))' }}>
+              <img src={store.logo_url} alt={store.business_name} className="w-full h-full rounded-xl object-contain" style={{ background: 'transparent' }} />
             </div>
-          )}
-          {logoPosition === 'top-right' && store.logo_url && (
-            <div className="absolute top-4 right-14" style={{ filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))' }}>
-              <img src={store.logo_url} alt={store.business_name} className="w-16 h-16 rounded-xl object-contain" style={{ background: 'transparent' }} />
+          ) : (
+            <div className={`absolute top-4 left-4 ${logoCornerClass} rounded-xl bg-white/20 flex items-center justify-center`}>
+              <span className="text-2xl">💼</span>
             </div>
-          )}
-          <div className={`flex flex-col ${logoPosition === 'center' ? 'items-center text-center' : 'items-center text-center'} mb-5`}>
+          ))}
+          {logoPosition === 'top-right' && (store.logo_url ? (
+            <div className={`absolute top-4 right-14 ${logoCornerClass}`} style={{ filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))' }}>
+              <img src={store.logo_url} alt={store.business_name} className="w-full h-full rounded-xl object-contain" style={{ background: 'transparent' }} />
+            </div>
+          ) : (
+            <div className={`absolute top-4 right-14 ${logoCornerClass} rounded-xl bg-white/20 flex items-center justify-center`}>
+              <span className="text-2xl">💼</span>
+            </div>
+          ))}
+
+          {/* Center content block */}
+          <div className={`flex flex-col ${alignClass} mb-5`}>
             {logoPosition === 'center' && (
               store.logo_url ? (
-                <div className="mb-4" style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.4))' }}>
-                  <img src={store.logo_url} alt={store.business_name} className="w-36 h-36 rounded-2xl object-contain" style={{ background: 'transparent' }} />
+                <div className={`mb-4 ${logoSizeClass}`} style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.4))' }}>
+                  <img src={store.logo_url} alt={store.business_name} className="w-full h-full rounded-2xl object-contain" style={{ background: 'transparent' }} />
                 </div>
               ) : (
-                <div className="w-36 h-36 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4 shadow-2xl">
+                <div className={`${logoSizeClass} rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4 shadow-2xl`}>
                   <span className="text-7xl">💼</span>
                 </div>
               )
             )}
-            <h1 className={`${heroFontClass} font-bold text-3xl leading-tight mb-1`} style={{ color: tc }}>{store.business_name}</h1>
+            <h1 className={`${heroFontClass} font-bold ${fontSizeClass} leading-tight mb-1`} style={{ color: tc }}>{store.business_name}</h1>
             <p className="text-sm font-medium mb-2" style={{ color: tcMuted }}>{categoryLabel}</p>
-            <div className="flex items-center gap-1.5 justify-center">
+            <div className={`flex items-center gap-1.5 ${textAlign === 'center' ? 'justify-center' : textAlign === 'right' ? 'justify-end' : 'justify-start'}`}>
               <MapPin size={13} style={{ color: tcMuted }} className="shrink-0" />
               <span className="text-xs" style={{ color: tcMuted }}>{store.location}</span>
             </div>
           </div>
 
-          <p className="text-sm mb-5 leading-relaxed italic text-center" style={{ color: tcMuted }}>"{tagline}"</p>
+          <p className={`text-sm mb-5 leading-relaxed italic ${textAlign === 'center' ? 'text-center' : textAlign === 'right' ? 'text-right' : 'text-left'}`} style={{ color: tcMuted }}>"{tagline}"</p>
 
           <div className="flex gap-3 mb-5">
             <div className="bg-white/15 backdrop-blur-sm rounded-2xl px-4 py-3 text-center min-w-[72px]">
