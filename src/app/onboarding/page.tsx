@@ -299,6 +299,7 @@ export default function OnboardingPage() {
   const [lang, setLang] = useState<'en' | 'pid'>('pid')
   const [step, setStep] = useState<Step>('language')
   const [businessName, setBusinessName] = useState('')
+  const [ownerName, setOwnerName] = useState('')
   const [whatsappRaw, setWhatsappRaw] = useState('')
   const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0])
   const [showCountryPicker, setShowCountryPicker] = useState(false)
@@ -551,7 +552,7 @@ export default function OnboardingPage() {
     try {
       await supabase.auth.signUp({ email, password })
       const { data: newMerchant, error: insertError } = await supabase.from('merchants').insert({
-        business_name: businessName, slug, category, location,
+        business_name: businessName, owner_name: ownerName, slug, category, location,
         country: selectedCountry.code,
         whatsapp_number: normalizedWa, email, phone: normalizedWa,
         language: lang, business_type: businessType || 'products',
@@ -704,6 +705,13 @@ export default function OnboardingPage() {
               <input type="text" placeholder="e.g. Rebecca Massage" value={businessName}
                 onChange={e => { setBusinessName(e.target.value); setError('') }}
                 onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
+                className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
+              <p className="text-gray-500 text-sm mt-5 mb-2">
+                {pid ? 'Wetin be your full name?' : 'Your full name (for account verification)'}
+              </p>
+              <input type="text" placeholder="e.g. Rebecca Johnson" value={ownerName}
+                onChange={e => { setOwnerName(e.target.value); setError('') }}
+                onKeyDown={e => e.key === 'Enter' && handleNext()}
                 className="w-full border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
             </div>

@@ -32,6 +32,8 @@ type Merchant = {
   created_at: string;
   slug: string;
   email?: string;
+  phone?: string;
+  owner_name?: string;
   status?: string;
   admin_notes?: string;
   temp_password?: string;
@@ -534,6 +536,25 @@ export default function AdminPage() {
             </div>
 
             <div className="mb-4">{statusBadge(selectedMerchant.status)}</div>
+
+            {/* Identity Verification */}
+            <div className={`mb-5 rounded-xl border p-4 ${th.noteBox}`}>
+              <p className={`text-xs font-mono uppercase tracking-widest mb-3 ${th.muted}`}>🔒 Identity Verification</p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs font-mono ${th.muted}`}>Owner Name</span>
+                  <span className={`text-sm font-semibold ${th.bodyText}`}>{selectedMerchant.owner_name || <span className="text-[#555] font-normal text-xs">Not provided</span>}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs font-mono ${th.muted}`}>Email</span>
+                  <span className={`text-sm font-mono ${th.bodyText}`}>{selectedMerchant.email || "—"}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs font-mono ${th.muted}`}>Phone</span>
+                  <span className={`text-sm font-mono ${th.bodyText}`}>{selectedMerchant.phone || "—"}</span>
+                </div>
+              </div>
+            </div>
 
             {actionMessage && (
               <div className="mb-4 text-sm bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 px-4 py-3 rounded-lg font-mono">
