@@ -60,6 +60,17 @@ export default function SettingsPage() {
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null)
   const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null)
   const [uploadingProfilePhoto, setUploadingProfilePhoto] = useState(false)
+  const [holidayMode, setHolidayMode] = useState(false)
+  const [holidayMessage, setHolidayMessage] = useState('')
+  const [businessHours, setBusinessHours] = useState<Record<string, {open: string; close: string; closed: boolean}>>({
+    Mon: { open: '09:00', close: '17:00', closed: false },
+    Tue: { open: '09:00', close: '17:00', closed: false },
+    Wed: { open: '09:00', close: '17:00', closed: false },
+    Thu: { open: '09:00', close: '17:00', closed: false },
+    Fri: { open: '09:00', close: '17:00', closed: false },
+    Sat: { open: '10:00', close: '15:00', closed: false },
+    Sun: { open: '10:00', close: '15:00', closed: true },
+  })
 
   useEffect(() => {
     async function load() {
@@ -92,6 +103,9 @@ export default function SettingsPage() {
       }
       setLogoUrl(m.logo_url || null)
       setProfilePhotoUrl(m.profile_photo_url || null)
+      setHolidayMode(m.holiday_mode || false)
+      setHolidayMessage(m.holiday_message || '')
+      if (m.business_hours) setBusinessHours(m.business_hours)
       const wa = m.whatsapp_number || ''
       const country = COUNTRIES.find(c => c.dial && wa.startsWith(c.dial)) || COUNTRIES[0]
       setSelectedCountry(country)
@@ -146,6 +160,9 @@ export default function SettingsPage() {
         theme_preset: selectedTheme.id,
         logo_url: logoUrl,
         profile_photo_url: profilePhotoUrl,
+        holiday_mode: holidayMode,
+        holiday_message: holidayMessage,
+        business_hours: businessHours,
       })
       .eq('id', merchant.id)
     if (updateError) {
@@ -399,6 +416,58 @@ export default function SettingsPage() {
           <Link href={`/store/${merchant?.slug}`} target="_blank" className="inline-block mt-2 text-xs text-brand-green font-semibold underline">
             View store →
           </Link>
+        </div>
+
+        {/* Holiday / Closure Mode */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-3">
+          <h2 className="font-display font-bold text-brand-dark text-sm">Holiday / Closure Mode</h2>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-gray-700">Close my store temporarily</p>
+              <p className="text-xs text-gray-400 mt-0.5">Customers will see a notice that you're unavailable</p>
+            </div>
+            <button onClick={() => setHolidayMode(v => !v)}
+              className={`relative w-12 h-6 rounded-full transition-colors ${holidayMode ? 'bg-red-500' : 'bg-gray-200'}`}>
+              <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${holidayMode ? 'translate-x-6' : 'translate-x-0.5'}`} />
+            </button>
+          </div>
+          {holidayMode && (
+            <div>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">Message to customers (optional)</label>
+              <input value={holidayMessage} onChange={e => setHolidayMessage(e.target.value)}
+                placeholder="e.g. We're closed for the holidays. Back on Jan 5th!"
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green" />
+            </div>
+          )}
+        </div>
+
+        {/* Business Hours */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-4">
+          <h2 className="font-display font-bold text-brand-dark text-sm mb-3">Business Hours</h2>
+          <div className="space-y-2">
+            {Object.entries(businessHours).map(([day, val]) => (
+              <div key={day} className="flex items-center gap-2">
+                <div className="w-10 text-xs font-semibold text-gray-500">{day}</div>
+                <button onClick={() => setBusinessHours(h => ({ ...h, [day]: { ...h[day], closed: !h[day].closed } }))}
+                  className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${val.closed ? 'bg-gray-200' : 'bg-brand-green'}`}>
+                  <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${val.closed ? 'translate-x-0.5' : 'translate-x-5'}`} />
+                </button>
+                {val.closed ? (
+                  <span className="text-xs text-gray-400 ml-1">Closed</span>
+                ) : (
+                  <div className="flex items-center gap-1.5 flex-1">
+                    <input type="time" value={val.open}
+                      onChange={e => setBusinessHours(h => ({ ...h, [day]: { ...h[day], open: e.target.value } }))}
+                      className="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-brand-green" />
+                    <span className="text-xs text-gray-400">to</span>
+                    <input type="time" value={val.close}
+                      onChange={e => setBusinessHours(h => ({ ...h, [day]: { ...h[day], close: e.target.value } }))}
+                      className="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-brand-green" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         {error && <div className="bg-red-50 border border-red-200 rounded-xl p-3"><p className="text-red-600 text-xs">{error}</p></div>}

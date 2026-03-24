@@ -18,6 +18,9 @@ interface Merchant {
   business_type?: string
   theme_preset?: string
   address?: string
+  holiday_mode?: boolean
+  holiday_message?: string
+  business_hours?: Record<string, {open: string; close: string; closed: boolean}>
 }
 
 interface Service {
@@ -280,6 +283,13 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
 
   return (
     <div className="min-h-screen bg-gray-50">
+
+      {/* Holiday / Closure Banner */}
+      {store.holiday_mode && (
+        <div className="bg-red-500 text-white text-center px-4 py-3 text-sm font-semibold">
+          🔴 {store.holiday_message || 'We are temporarily closed. Please check back soon!'}
+        </div>
+      )}
 
       {/* Detail Modal */}
       {selectedService && (
@@ -575,6 +585,27 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
                 <p className="text-sm font-semibold text-gray-800">+{waNumber}</p>
               </div>
             </div>
+            {store.business_hours && (
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: color + '20' }}>
+                  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke={color} strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs text-gray-400 mb-1">Business Hours</p>
+                  <div className="space-y-0.5">
+                    {Object.entries(store.business_hours).map(([day, val]: [string, any]) => (
+                      <div key={day} className="flex justify-between text-xs">
+                        <span className="text-gray-500 w-8">{day}</span>
+                        {val.closed
+                          ? <span className="text-red-400 font-medium">Closed</span>
+                          : <span className="text-gray-700 font-medium">{val.open} – {val.close}</span>
+                        }
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
