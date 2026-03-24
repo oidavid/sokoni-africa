@@ -5,7 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL = "https://watdsaazzjcsyvnpdthe.supabase.co";
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "earket-admin-2025";
+const ADMIN_PASSWORD = "11881188";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
