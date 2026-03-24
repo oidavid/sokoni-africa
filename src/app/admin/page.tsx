@@ -108,6 +108,14 @@ export default function AdminPage() {
   const [actionMessage, setActionMessage] = useState("");
   const [newAdmin, setNewAdmin] = useState({ name: "", email: "", role: "support" as Role, password: "" });
 
+  // Broadcast state
+  const [showBroadcast, setShowBroadcast] = useState(false);
+  const [broadcastMsg, setBroadcastMsg] = useState("");
+  const [broadcastChannel, setBroadcastChannel] = useState<"whatsapp" | "email">("whatsapp");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectMode, setSelectMode] = useState<"all" | "filtered" | "custom">("filtered");
+  const [broadcastDone, setBroadcastDone] = useState(false);
+
   const businessTypes = ["all", ...Array.from(new Set(merchants.map(m => m.business_type).filter(Boolean))).sort()];
   const categories = ["all", ...Array.from(new Set(merchants.map(m => m.category).filter(Boolean))).sort()];
 
@@ -190,7 +198,9 @@ export default function AdminPage() {
     if (search) r = r.filter(m =>
       m.business_name?.toLowerCase().includes(search.toLowerCase()) ||
       m.country?.toLowerCase().includes(search.toLowerCase()) ||
-      m.email?.toLowerCase().includes(search.toLowerCase())
+      m.email?.toLowerCase().includes(search.toLowerCase()) ||
+      m.phone?.includes(search) ||
+      m.owner_name?.toLowerCase().includes(search.toLowerCase())
     );
     if (filterType !== "all") r = r.filter(m => m.business_type === filterType);
     if (filterCategory !== "all") r = r.filter(m => m.category === filterCategory);
@@ -394,7 +404,7 @@ export default function AdminPage() {
             {tab === "merchants" && (
               <>
                 <div className="flex flex-wrap gap-3 mb-5">
-                  <input type="text" placeholder="Search name, email, country..." value={search}
+                  <input type="text" placeholder="Search name, email, phone, country..." value={search}
                     onChange={e => setSearch(e.target.value)}
                     className={`px-4 py-2 rounded-lg text-sm outline-none border transition-colors w-72 font-mono ${th.input}`} />
                   <select value={filterType} onChange={e => setFilterType(e.target.value)}
@@ -415,14 +425,49 @@ export default function AdminPage() {
                       <option key={s} value={s}>{s === "all" ? "All Statuses" : s.charAt(0).toUpperCase() + s.slice(1)}</option>
                     ))}
                   </select>
-                  <span className={`ml-auto text-sm ${th.muted} self-center font-mono`}>{filtered.length} results</span>
+                  <div className="ml-auto flex items-center gap-3">
+                    <span className={`text-sm ${th.muted} self-center font-mono`}>{filtered.length} results</span>
+                    <label className={`flex items-center gap-2 text-sm font-mono cursor-pointer ${th.muted}`}>
+                      <input type="checkbox"
+                        className="w-4 h-4 rounded accent-emerald-500"
+                        checked={selectedIds.size === filtered.length && filtered.length > 0}
+                        onChange={e => {
+                          if (e.target.checked) { setSelectedIds(new Set(filtered.map(m => m.id))); setSelectMode("filtered"); }
+                          else { setSelectedIds(new Set()); }
+                        }}
+                      /> Select all
+                    </label>
+                    <button
+                      onClick={() => {
+                        const rows = [["Business","Type","Category","Email","Phone","Country","Status","Joined"]];
+                        filtered.forEach(m => rows.push([
+                          m.business_name||"", m.business_type||"", m.category||"",
+                          m.email||"", m.phone||"", m.country||"",
+                          m.status||"active",
+                          m.created_at ? new Date(m.created_at).toLocaleDateString("en-GB") : ""
+                        ]));
+                        const csv = rows.map(r => r.map(v => `"${v}"`).join(",")).join("\n");
+                        const a = document.createElement("a");
+                        a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+                        a.download = "earket-merchants.csv";
+                        a.click();
+                      }}
+                      className={`text-sm px-4 py-2 rounded-lg font-mono transition-colors ${th.btn}`}>
+                      ↓ Export CSV
+                    </button>
+                    <button
+                      onClick={() => { setShowBroadcast(true); setBroadcastDone(false); setBroadcastMsg(""); }}
+                      className="text-sm px-4 py-2 rounded-lg font-mono transition-colors bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20">
+                      📣 Broadcast
+                    </button>
+                  </div>
                 </div>
 
                 <div className={`rounded-xl border overflow-hidden ${th.surface}`}>
                   <table className="w-full">
                     <thead>
                       <tr className={`border-b ${th.thead}`}>
-                        {["Business","Type","Category","Country","Status","Joined","Store","Actions"].map(h => (
+                        {["","Business","Type","Category","Email","Phone","Country","Status","Joined","Store","Actions"].map(h => (
                           <th key={h} className={`text-left px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-mono font-normal ${th.theadText}`}>{h}</th>
                         ))}
                       </tr>
@@ -432,12 +477,26 @@ export default function AdminPage() {
                         <tr><td colSpan={7} className={`px-5 py-12 text-center text-sm font-mono ${th.muted}`}>No merchants found.</td></tr>
                       ) : filtered.map((m, i) => (
                         <tr key={m.id} className={`border-b ${th.rowBorder} ${th.rowHover} transition-colors ${i % 2 === 0 ? th.row0 : th.row1}`}>
+                          <td className="px-3 py-4 w-8">
+                            <input type="checkbox"
+                              checked={selectedIds.has(m.id)}
+                              onChange={e => {
+                                const next = new Set(selectedIds);
+                                e.target.checked ? next.add(m.id) : next.delete(m.id);
+                                setSelectedIds(next);
+                                if (next.size > 0) setSelectMode("custom");
+                              }}
+                              className="w-4 h-4 rounded accent-emerald-500 cursor-pointer"
+                            />
+                          </td>
                           <td className={`px-5 py-4 font-medium text-base ${th.bodyText}`}>
                             {m.business_name || <span className={th.faint}>—</span>}
                             {m.admin_notes && <span className="ml-2 text-[9px] text-amber-400 font-mono align-middle">NOTE</span>}
                           </td>
                           <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{m.business_type || "—"}</td>
                           <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{m.category || "—"}</td>
+                          <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{m.email || "—"}</td>
+                          <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{m.phone || "—"}</td>
                           <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{m.country || "—"}</td>
                           <td className="px-5 py-4">{statusBadge(m.status)}</td>
                           <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>
@@ -622,7 +681,106 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* ── NOTE MODAL ── */}
+      {/* ── BROADCAST MODAL ── */}
+      {showBroadcast && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className={`rounded-2xl border w-full max-w-lg p-6 ${th.modal}`}>
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h2 className={`font-semibold text-lg ${th.bodyText}`}>📣 Broadcast Message</h2>
+                <p className={`text-xs font-mono mt-0.5 ${th.muted}`}>Send to merchants via WhatsApp or Email</p>
+              </div>
+              <button onClick={() => setShowBroadcast(false)} className={`text-xl ${th.muted}`}>✕</button>
+            </div>
+
+            {/* Channel selector */}
+            <div className={`flex gap-1 mb-5 rounded-lg p-1 border ${th.tab}`}>
+              {(["whatsapp","email"] as const).map(c => (
+                <button key={c} onClick={() => setBroadcastChannel(c)}
+                  className={`flex-1 py-2 text-sm rounded-md transition-colors capitalize font-mono ${broadcastChannel === c ? th.tabActive : th.tabInactive}`}>
+                  {c === "whatsapp" ? "💬 WhatsApp" : "✉️ Email"}
+                </button>
+              ))}
+            </div>
+
+            {/* Recipients */}
+            <div className="mb-4">
+              <p className={`text-xs font-mono uppercase tracking-widest mb-2 ${th.muted}`}>Recipients</p>
+              <div className="flex gap-2 flex-wrap">
+                {([
+                  { key: "all", label: `All merchants (${merchants.length})` },
+                  { key: "filtered", label: `Filtered results (${filtered.length})` },
+                  ...(selectedIds.size > 0 ? [{ key: "custom", label: `Selected (${selectedIds.size})` }] : []),
+                ] as { key: string; label: string }[]).map(opt => (
+                  <button key={opt.key}
+                    onClick={() => setSelectMode(opt.key as "all" | "filtered" | "custom")}
+                    className={`text-sm px-3 py-1.5 rounded-lg font-mono border transition-colors ${
+                      selectMode === opt.key
+                        ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                        : `${th.btn} ${th.border}`
+                    }`}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Message */}
+            <div className="mb-5">
+              <p className={`text-xs font-mono uppercase tracking-widest mb-2 ${th.muted}`}>Message</p>
+              <textarea value={broadcastMsg} onChange={e => setBroadcastMsg(e.target.value)}
+                placeholder="Hi! We have an important update for all Earket merchants..."
+                rows={5}
+                className={`w-full px-4 py-3 rounded-lg text-sm outline-none border transition-colors font-mono resize-none ${th.modalInput}`} />
+              <p className={`text-xs font-mono mt-1 ${th.muted}`}>{broadcastMsg.length} characters</p>
+            </div>
+
+            {broadcastDone && (
+              <div className="mb-4 text-sm bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-lg font-mono">
+                {broadcastChannel === "email"
+                  ? "✓ Email client opened with all recipients in BCC."
+                  : "✓ WhatsApp links opened. Work through each tab to send."}
+              </div>
+            )}
+
+            {/* Note about scaling */}
+            <div className={`mb-5 text-xs font-mono px-3 py-2 rounded-lg border ${th.noteBox} ${th.muted}`}>
+              💡 Currently using direct links (free). Upgrade to WhatsApp Business API at 50+ merchants for one-click blasts.
+            </div>
+
+            <div className="flex gap-2">
+              <button onClick={() => setShowBroadcast(false)}
+                className={`flex-1 text-sm py-3 rounded-lg font-mono transition-colors ${th.btn}`}>Cancel</button>
+              <button
+                disabled={!broadcastMsg.trim()}
+                onClick={() => {
+                  const recipientList = selectMode === "all" ? merchants
+                    : selectMode === "filtered" ? filtered
+                    : merchants.filter(m => selectedIds.has(m.id));
+
+                  if (broadcastChannel === "email") {
+                    const emails = recipientList.map(m => m.email).filter(Boolean).join(",");
+                    window.open(`mailto:?bcc=${encodeURIComponent(emails)}&subject=${encodeURIComponent("Message from Earket")}&body=${encodeURIComponent(broadcastMsg)}`);
+                  } else {
+                    const phones = recipientList.map(m => m.phone).filter(Boolean);
+                    phones.forEach((phone, i) => {
+                      setTimeout(() => {
+                        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(broadcastMsg)}`, "_blank");
+                      }, i * 300);
+                    });
+                  }
+                  setBroadcastDone(true);
+                }}
+                className="flex-1 text-sm py-3 rounded-lg font-semibold transition-opacity disabled:opacity-40"
+                style={{ background: dark ? "white" : "#111", color: dark ? "black" : "white" }}>
+                {broadcastChannel === "whatsapp" ? "💬 Open WhatsApp Links" : "✉️ Open Email Client"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── NOTE MODAL ── */}}
       {selectedMerchant && modalType === "note" && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className={`rounded-2xl border w-full max-w-md p-6 ${th.modal}`}>
