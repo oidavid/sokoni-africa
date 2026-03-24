@@ -480,12 +480,12 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                <div className={`rounded-xl border overflow-hidden ${th.surface}`}>
-                  <table className="w-full">
+                <div className={`rounded-xl border overflow-x-auto ${th.surface}`}>
+                  <table className="w-full min-w-[1100px]">
                     <thead>
                       <tr className={`border-b ${th.thead}`}>
                         {["","Business","Type","Category","Email","Phone","Country","Status","Joined","Store","Actions"].map(h => (
-                          <th key={h} className={`text-left px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-mono font-normal ${th.theadText}`}>{h}</th>
+                          <th key={h} className={`text-left px-3 py-3 text-[10px] tracking-[0.1em] uppercase font-mono font-normal ${th.theadText} whitespace-nowrap`}>{h}</th>
                         ))}
                       </tr>
                     </thead>
@@ -494,7 +494,7 @@ export default function AdminPage() {
                         <tr><td colSpan={7} className={`px-5 py-12 text-center text-sm font-mono ${th.muted}`}>No merchants found.</td></tr>
                       ) : filtered.map((m, i) => (
                         <tr key={m.id} className={`border-b ${th.rowBorder} ${th.rowHover} transition-colors ${i % 2 === 0 ? th.row0 : th.row1}`}>
-                          <td className="px-3 py-4 w-8">
+                          <td className="px-2 py-3 w-8">
                             <input type="checkbox"
                               checked={selectedIds.has(m.id)}
                               onChange={e => {
@@ -506,30 +506,30 @@ export default function AdminPage() {
                               className="w-4 h-4 rounded accent-emerald-500 cursor-pointer"
                             />
                           </td>
-                          <td className={`px-5 py-4 font-medium text-base ${th.bodyText}`}>
+                          <td className={`px-3 py-3 font-medium text-sm ${th.bodyText} whitespace-nowrap max-w-[140px] truncate`}>
                             {m.business_name || <span className={th.faint}>—</span>}
                             {m.admin_notes && <span className="ml-2 text-[9px] text-amber-400 font-mono align-middle">NOTE</span>}
                           </td>
-                          <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{m.business_type || "—"}</td>
-                          <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{m.category || "—"}</td>
-                          <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{m.email || "—"}</td>
-                          <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{m.phone || "—"}</td>
+                          <td className={`px-3 py-3 font-mono text-xs ${th.muted} whitespace-nowrap`}>{m.business_type || "—"}</td>
+                          <td className={`px-3 py-3 font-mono text-xs ${th.muted} whitespace-nowrap`}>{m.category || "—"}</td>
+                          <td className={`px-3 py-3 font-mono text-xs ${th.muted} whitespace-nowrap`}>{m.email || "—"}</td>
+                          <td className={`px-3 py-3 font-mono text-xs ${th.muted} whitespace-nowrap`}>{m.phone || "—"}</td>
                           <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{m.country || "—"}</td>
-                          <td className="px-5 py-4">{statusBadge(m.status)}</td>
-                          <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>
+                          <td className="px-3 py-3 whitespace-nowrap">{statusBadge(m.status)}</td>
+                          <td className={`px-3 py-3 font-mono text-xs ${th.muted} whitespace-nowrap`}>
                             {m.created_at ? new Date(m.created_at).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" }) : "—"}
                           </td>
-                          <td className="px-5 py-4">
+                          <td className="px-3 py-3 whitespace-nowrap">
                             {m.slug ? (
                               <a href={`https://earket.com/store/${m.slug}`} target="_blank" rel="noopener noreferrer"
-                                className={`font-mono text-sm underline underline-offset-4 transition-colors ${th.muted} hover:${th.bodyText}`}>
+                                className={`font-mono text-xs underline underline-offset-4 transition-colors ${th.muted} hover:${th.bodyText}`}>
                                 /{m.slug}
                               </a>
-                            ) : <span className={`font-mono text-sm ${th.faint}`}>—</span>}
+                            ) : <span className={`font-mono text-xs ${th.faint}`}>—</span>}
                           </td>
-                          <td className="px-5 py-4">
+                          <td className="px-3 py-3 whitespace-nowrap">
                             <button onClick={() => { setSelectedMerchant(m); setModalType("actions"); setActionMessage(""); }}
-                              className={`text-sm px-4 py-2 rounded-lg transition-colors font-mono ${th.btn}`}>
+                              className={`text-xs px-3 py-1.5 rounded-lg transition-colors font-mono ${th.btn}`}>
                               Manage
                             </button>
                           </td>
@@ -552,8 +552,8 @@ export default function AdminPage() {
                     + Add Admin
                   </button>
                 </div>
-                <div className={`rounded-xl border overflow-hidden ${th.surface}`}>
-                  <table className="w-full">
+                <div className={`rounded-xl border overflow-x-auto ${th.surface}`}>
+                  <table className="w-full min-w-[1100px]">
                     <thead>
                       <tr className={`border-b ${th.thead}`}>
                         {["Name","Email","Role","Last Login","Status","Actions"].map(h => (
@@ -564,7 +564,7 @@ export default function AdminPage() {
                     <tbody>
                       {adminUsers.map((a, i) => (
                         <tr key={a.id} className={`border-b ${th.rowBorder} ${i % 2 === 0 ? th.row0 : th.row1}`}>
-                          <td className={`px-5 py-4 font-medium text-base ${th.bodyText}`}>{a.name}</td>
+                          <td className={`px-3 py-3 font-medium text-sm ${th.bodyText} whitespace-nowrap max-w-[140px] truncate`}>{a.name}</td>
                           <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{a.email}</td>
                           <td className="px-5 py-4">
                             <span className={`text-sm px-2.5 py-1 rounded-full border font-mono ${ROLE_COLORS[a.role]}`}>
@@ -781,8 +781,8 @@ export default function AdminPage() {
                   <p className={`text-sm ${th.bodyText} mb-1`}>⭐ <strong>{proWaitlist.length} merchants</strong> have expressed interest in Pro.</p>
                   <p className={`text-xs font-mono ${th.muted}`}>When you're ready to launch, broadcast to this list first — they're your warmest leads.</p>
                 </div>
-                <div className={`rounded-xl border overflow-hidden ${th.surface}`}>
-                  <table className="w-full">
+                <div className={`rounded-xl border overflow-x-auto ${th.surface}`}>
+                  <table className="w-full min-w-[1100px]">
                     <thead>
                       <tr className={`border-b ${th.thead}`}>
                         {["Business","Email","Joined Waitlist","Action"].map(h => (
@@ -795,7 +795,7 @@ export default function AdminPage() {
                         <tr><td colSpan={4} className={`px-5 py-12 text-center text-sm font-mono ${th.muted}`}>No waitlist signups yet.</td></tr>
                       ) : proWaitlist.map((w, i) => (
                         <tr key={w.id} className={`border-b ${th.rowBorder} ${i % 2 === 0 ? th.row0 : th.row1}`}>
-                          <td className={`px-5 py-4 font-medium text-base ${th.bodyText}`}>{w.business_name}</td>
+                          <td className={`px-3 py-3 font-medium text-sm ${th.bodyText} whitespace-nowrap max-w-[140px] truncate`}>{w.business_name}</td>
                           <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{w.email}</td>
                           <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{new Date(w.created_at).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" })}</td>
                           <td className="px-5 py-4">
