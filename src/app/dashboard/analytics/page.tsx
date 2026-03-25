@@ -60,8 +60,8 @@ export default function AnalyticsPage() {
     // Set currency based on country
     const currencyMap: Record<string, string> = {
       'NG': '₦', 'GH': 'GH₵', 'KE': 'KSh', 'ZA': 'R', 'US': '$', 'GB': '£',
-      'CA': 'CA$', 'AU': 'A$', 'EU': '€', 'DE': '€', 'FR': '€', 'IT': '€',
-      'NG': '₦', 'TZ': 'TSh', 'UG': 'USh', 'ET': 'Br', 'SN': 'CFA', 'CM': 'FCFA',
+      'CA': 'CA$', 'AU': 'A$', 'DE': '€', 'FR': '€', 'IT': '€', 'ES': '€',
+      'TZ': 'TSh', 'UG': 'USh', 'ET': 'Br', 'SN': 'CFA', 'CM': 'FCFA',
       'IN': '₹', 'AE': 'AED', 'SA': 'SAR', 'JP': '¥', 'CN': '¥', 'BR': 'R$',
     }
     setCurrencySymbol(currencyMap[m.country || 'NG'] || '₦')
