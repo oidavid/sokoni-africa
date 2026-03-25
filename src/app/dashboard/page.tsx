@@ -1,10 +1,10 @@
 'use client'
-import { ShoppingBag, FileText, useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { ShoppingBag, FileText, useRouter } from 'next/navigation'
-import { ShoppingBag, FileText, ShoppingBag, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil, ShoppingCart, TrendingUp, BarChart2, CreditCard, Sparkles, Inbox, Tag } from 'lucide-react'
-import { ShoppingBag, FileText, supabase } from '@/lib/supabase'
-import { ShoppingBag, FileText, getThemeById, getThemeStyle, EARKET_THEMES, type EarketTheme } from '@/lib/themes'
+import { useRouter } from 'next/navigation'
+import { ShoppingBag, FileText, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil, ShoppingCart, TrendingUp, BarChart2, CreditCard, Sparkles, Inbox, Tag } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+import { getThemeById, getThemeStyle, EARKET_THEMES, type EarketTheme } from '@/lib/themes'
 
 interface Merchant {
   id: string
@@ -508,4 +508,5 @@ export default function DashboardPage() {
     </div>
   )
 }
+
 
