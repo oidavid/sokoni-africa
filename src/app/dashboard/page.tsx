@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ShoppingBag, FileText, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil, ShoppingCart, TrendingUp, BarChart2, CreditCard, Sparkles, Inbox, Tag, Megaphone, ChevronDown, ChevronUp } from 'lucide-react'
+import { ShoppingBag, FileText, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil, ShoppingCart, TrendingUp, BarChart2, CreditCard, Sparkles, Inbox, Tag, Megaphone, ChevronDown, ChevronUp, Star } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { getThemeById, getThemeStyle, EARKET_THEMES, type EarketTheme } from '@/lib/themes'
 
@@ -402,6 +402,18 @@ export default function DashboardPage() {
               <div>
                 <div className="font-semibold text-sm text-gray-800">Analytics</div>
                 <div className="text-xs text-gray-500 leading-snug mt-0.5">Views & conversions</div>
+              </div>
+            </Link>
+
+            {/* Customers */}
+            <Link href="/dashboard/customers"
+              className="flex flex-col gap-2 bg-amber-50 border-2 border-amber-300 rounded-2xl p-3.5 hover:brightness-95 transition-all active:scale-[0.98] shadow-sm">
+              <div className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center">
+                <Star size={17} className="text-amber-600" />
+              </div>
+              <div>
+                <div className="font-semibold text-sm text-gray-800">Customers</div>
+                <div className="text-xs text-gray-500 leading-snug mt-0.5">Loyalty & contacts</div>
               </div>
             </Link>
 
