@@ -137,16 +137,22 @@ export default function CashSalePage() {
       merchant_id: merchant.id,
       status: 'completed',
       source: 'cash_pos',
-      total,
       subtotal: total,
       items,
+      payment_method: 'cash',
+      payment_status: 'cash',
       customer_name: customerName.trim() || 'Walk-in Customer',
       customer_id: customerId,
       customer_phone: cleanWA || null,
       customer_email: customerEmail || null,
     })
 
-    if (error) { console.error('Order insert error:', error); setSaving(false); return }
+    if (error) {
+      console.error('Order insert error:', error)
+      alert(`Save failed: ${error.message}`)
+      setSaving(false)
+      return
+    }
 
     const today = new Date().toISOString().split('T')[0]
     try { await supabase.rpc('increment_analytics', { p_merchant_id: merchant.id, p_date: today, p_field: 'views' }) } catch {}
