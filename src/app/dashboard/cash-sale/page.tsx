@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 interface Product {
   id: string;
@@ -38,7 +38,6 @@ interface TodaySale {
 
 export default function CashSalePage() {
   const router = useRouter();
-  const supabase = createClient();
 
   const [merchantId, setMerchantId] = useState<string | null>(null);
   const [merchantName, setMerchantName] = useState('');
