@@ -802,12 +802,14 @@ export default function OnboardingPage() {
                     />
                   </div>
                   <div className="max-h-48 overflow-y-auto">
-                    {[...COUNTRIES]
-                      .filter(c => c.code !== 'OTHER')
-                      .sort((a, b) => a.name.localeCompare(b.name))
-                      .filter(c => countrySearch === '' || c.name.toLowerCase().includes(countrySearch.toLowerCase()) || c.dial.includes(countrySearch))
-                      .concat(COUNTRIES.filter(c => c.code === 'OTHER'))
-                      .map(c => (
+                    {(() => {
+                      const priority = ['NG','GH','KE','ZA','SN','CI','CM','US','GB','CA','AE']
+                      const priorityCountries = priority.map(code => COUNTRIES.find(c => c.code === code)).filter(Boolean) as typeof COUNTRIES
+                      const rest = [...COUNTRIES].filter(c => !priority.includes(c.code) && c.code !== 'OTHER').sort((a,b) => a.name.localeCompare(b.name))
+                      const all = [...priorityCountries, ...rest, ...COUNTRIES.filter(c => c.code === 'OTHER')]
+                      const filtered = countrySearch === '' ? all : all.filter(c => c.name.toLowerCase().includes(countrySearch.toLowerCase()) || c.dial.includes(countrySearch))
+                      return filtered
+                    })().map(c => (
                         <button key={c.code} onClick={() => { setSelectedCountry(c); setShowCountryPicker(false); setCountrySearch('') }}
                           className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 ${selectedCountry.code === c.code ? 'bg-brand-light text-brand-green font-semibold' : 'text-gray-700'}`}>
                           <img src={`https://flagcdn.com/20x15/${c.code.toLowerCase()}.png`}
@@ -816,7 +818,7 @@ export default function OnboardingPage() {
                           <span className="flex-1 text-left">{c.name}</span>
                           <span className="text-gray-400 text-xs">+{c.dial}</span>
                         </button>
-                      ))}
+                    ))}
                   </div>
                 </div>
               )}
