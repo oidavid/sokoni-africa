@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, TrendingUp, ShoppingCart, Eye, DollarSign, Package, RefreshCw, MessageCircle } from 'lucide-react'
+import { ArrowLeft, TrendingUp, ShoppingCart, Eye, TrendingUp as RevenueIcon, Package, RefreshCw, MessageCircle, Calendar } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 interface AnalyticsData {
@@ -25,8 +25,9 @@ interface AnalyticsData {
   profitMargin: number
 }
 
-function formatNaira(kobo: number) {
-  return `₦${(kobo / 100).toLocaleString()}`
+function formatCurrency(kobo: number, symbol: string) {
+  const amount = kobo / 100
+  return `${symbol}${amount.toLocaleString()}`
 }
 
 function formatDate(dateStr: string) {
@@ -40,6 +41,11 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [merchantSlug, setMerchantSlug] = useState('')
+  const [currencySymbol, setCurrencySymbol] = useState('₦')
+  const [dateFrom, setDateFrom] = useState(() => new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+  const [dateTo, setDateTo] = useState(() => new Date().toISOString().split('T')[0])
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const [quickRange, setQuickRange] = useState<'7d'|'30d'|'90d'|'1y'|'custom'>('30d')
 
   const load = useCallback(async (showRefresh = false) => {
     if (showRefresh) setRefreshing(true)
@@ -48,20 +54,28 @@ export default function AnalyticsPage() {
     const merchantEmail = user?.email || fallbackEmail
     if (!merchantEmail) { router.push('/login'); return }
 
-    const { data: m } = await supabase.from('merchants').select('id, slug').eq('email', merchantEmail).single()
+    const { data: m } = await supabase.from('merchants').select('id, slug, country').eq('email', merchantEmail).single()
     if (!m) { router.push('/onboarding'); return }
     setMerchantSlug(m.slug)
+    // Set currency based on country
+    const currencyMap: Record<string, string> = {
+      'NG': '₦', 'GH': 'GH₵', 'KE': 'KSh', 'ZA': 'R', 'US': '$', 'GB': '£',
+      'CA': 'CA$', 'AU': 'A$', 'EU': '€', 'DE': '€', 'FR': '€', 'IT': '€',
+      'NG': '₦', 'TZ': 'TSh', 'UG': 'USh', 'ET': 'Br', 'SN': 'CFA', 'CM': 'FCFA',
+      'IN': '₹', 'AE': 'AED', 'SA': 'SAR', 'JP': '¥', 'CN': '¥', 'BR': 'R$',
+    }
+    setCurrencySymbol(currencyMap[m.country || 'NG'] || '₦')
 
     const today = new Date().toISOString().split('T')[0]
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-    const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
 
     // Analytics views
     const { data: analytics } = await supabase
       .from('store_analytics')
       .select('date, views, whatsapp_clicks')
       .eq('merchant_id', m.id)
-      .gte('date', monthAgo)
+      .gte('date', dateFrom)
+      .lte('date', dateTo)
       .order('date', { ascending: true })
 
     // Orders
@@ -69,7 +83,8 @@ export default function AnalyticsPage() {
       .from('orders')
       .select('created_at, subtotal, status, items')
       .eq('merchant_id', m.id)
-      .gte('created_at', monthAgo + 'T00:00:00')
+      .gte('created_at', dateFrom + 'T00:00:00')
+      .lte('created_at', dateTo + 'T23:59:59')
       .order('created_at', { ascending: true })
 
     const allAnalytics = analytics || []
@@ -153,7 +168,7 @@ export default function AnalyticsPage() {
     setRefreshing(false)
   }, [router])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => { load() }, [load, dateFrom, dateTo])
 
   if (loading) {
     return (
@@ -178,6 +193,37 @@ export default function AnalyticsPage() {
           className="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center">
           <RefreshCw size={14} className={`text-gray-500 ${refreshing ? 'animate-spin' : ''}`} />
         </button>
+      </div>
+
+      {/* Date range picker */}
+      <div className="px-4 py-3 bg-white border-b border-gray-100">
+        <div className="flex items-center gap-2 mb-2">
+          {(['7d','30d','90d','1y'] as const).map(r => (
+            <button key={r} onClick={() => {
+              setQuickRange(r)
+              const days = r === '7d' ? 7 : r === '30d' ? 30 : r === '90d' ? 90 : 365
+              setDateFrom(new Date(Date.now() - days * 86400000).toISOString().split('T')[0])
+              setDateTo(new Date().toISOString().split('T')[0])
+            }}
+              className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all ${quickRange === r ? 'bg-brand-green text-white' : 'bg-gray-100 text-gray-500'}`}>
+              {r}
+            </button>
+          ))}
+          <button onClick={() => { setQuickRange('custom'); setShowDatePicker(!showDatePicker) }}
+            className={`flex items-center gap-1 px-3 py-1 rounded-xl text-xs font-semibold transition-all ${quickRange === 'custom' ? 'bg-brand-green text-white' : 'bg-gray-100 text-gray-500'}`}>
+            <Calendar size={11} /> Custom
+          </button>
+        </div>
+        {showDatePicker && (
+          <div className="flex items-center gap-2 mt-2">
+            <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+              className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none focus:border-brand-green" />
+            <span className="text-xs text-gray-400">to</span>
+            <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
+              className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none focus:border-brand-green" />
+            <button onClick={() => load()} className="bg-brand-green text-white text-xs font-bold px-3 py-2 rounded-xl">Go</button>
+          </div>
+        )}
       </div>
 
       <div className="p-4 space-y-4">
@@ -226,12 +272,12 @@ export default function AnalyticsPage() {
           <div className="bg-white rounded-2xl p-4 border border-gray-100">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 bg-green-50 rounded-xl flex items-center justify-center">
-                <DollarSign size={16} className="text-green-500" />
+                <TrendingUp size={16} className="text-green-500" />
               </div>
-              <span className="text-xs font-semibold text-gray-500">Revenue (30d)</span>
+              <span className="text-xs font-semibold text-gray-500">Revenue ({quickRange === "custom" ? "custom" : quickRange})</span>
             </div>
-            <div className="font-display font-bold text-2xl text-brand-dark">{formatNaira(data?.revenueThisMonth || 0)}</div>
-            <div className="text-xs text-gray-400 mt-1">Last 30 days</div>
+            <div className="font-display font-bold text-2xl text-brand-dark">{formatCurrency(data?.revenueThisMonth || 0, currencySymbol)}</div>
+            <div className="text-xs text-gray-400 mt-1">{dateFrom} → {dateTo}</div>
           </div>
 
           <div className="bg-white rounded-2xl p-4 border border-gray-100">
@@ -259,7 +305,7 @@ export default function AnalyticsPage() {
                 <div className="w-3 h-3 bg-blue-400 rounded-full" />
                 <span className="text-sm text-gray-700">Revenue</span>
               </div>
-              <span className="font-display font-bold text-blue-600">{formatNaira(data?.revenueThisMonth || 0)}</span>
+              <span className="font-display font-bold text-blue-600">{formatCurrency(data?.revenueThisMonth || 0, currencySymbol)}</span>
             </div>
             <div className="px-4 py-3 flex justify-between items-center">
               <div className="flex items-center gap-2">
@@ -267,7 +313,7 @@ export default function AnalyticsPage() {
                 <span className="text-sm text-gray-700">Cost of Goods (COGS)</span>
               </div>
               <span className="font-display font-bold text-red-500">
-                {data?.totalCOGS ? `- ${formatNaira(data.totalCOGS)}` : '—'}
+                {data?.totalCOGS ? `- ${formatCurrency(data.totalCOGS, currencySymbol)}` : '—'}
               </span>
             </div>
             <div className="px-4 py-3 flex justify-between items-center bg-brand-light/30">
@@ -276,7 +322,7 @@ export default function AnalyticsPage() {
                 <span className="text-sm font-semibold text-gray-800">Gross Profit</span>
               </div>
               <span className="font-display font-bold text-brand-green">
-                {data?.totalCOGS ? formatNaira(data.totalProfit || 0) : '—'}
+                {data?.totalCOGS ? formatCurrency(data.totalProfit || 0, currencySymbol) : '—'}
               </span>
             </div>
             <div className="px-4 py-3 flex justify-between items-center">
@@ -369,7 +415,7 @@ export default function AnalyticsPage() {
                     <p className="text-sm font-semibold text-gray-800 truncate">{p.name}</p>
                     <p className="text-xs text-gray-400">{p.orders} sold</p>
                   </div>
-                  <span className="font-display font-bold text-brand-green text-sm">{formatNaira(p.revenue)}</span>
+                  <span className="font-display font-bold text-brand-green text-sm">{formatCurrency(p.revenue, currencySymbol)}</span>
                 </div>
               ))}
             </div>
