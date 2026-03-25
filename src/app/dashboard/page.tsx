@@ -344,17 +344,17 @@ export default function DashboardPage() {
               <span className="self-start text-[10px] bg-brand-green text-white px-2 py-0.5 rounded-full font-semibold">Record now →</span>
             </Link>
 
-            {/* Credit Report — primary featured card */}
-            <Link href="/dashboard/credit-report"
-              className="flex flex-col gap-2 bg-slate-50 border-2 border-slate-400 rounded-2xl p-4 hover:brightness-95 transition-all active:scale-[0.98] shadow-sm">
-              <div className="w-10 h-10 bg-slate-200 rounded-xl flex items-center justify-center">
-                <FileText size={20} className="text-slate-600" />
+            {/* Sales Report — primary featured card */}
+            <Link href="/dashboard/cash-sale?tab=today"
+              className="flex flex-col gap-2 bg-indigo-50 border-2 border-indigo-400 rounded-2xl p-4 hover:brightness-95 transition-all active:scale-[0.98] shadow-sm">
+              <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+                <TrendingUp size={20} className="text-indigo-600" />
               </div>
               <div>
-                <div className="font-display font-bold text-sm text-brand-dark">Credit Report</div>
-                <div className="text-xs text-gray-500 leading-snug mt-0.5">PDF report for loans</div>
+                <div className="font-display font-bold text-sm text-brand-dark">Sales Report</div>
+                <div className="text-xs text-gray-500 leading-snug mt-0.5">Today's cash sales</div>
               </div>
-              <span className="self-start text-[10px] bg-slate-700 text-white px-2 py-0.5 rounded-full font-semibold">Generate →</span>
+              <span className="self-start text-[10px] bg-indigo-600 text-white px-2 py-0.5 rounded-full font-semibold">View →</span>
             </Link>
           </div>
         </div>
@@ -438,6 +438,18 @@ export default function DashboardPage() {
               <div>
                 <div className="font-semibold text-sm text-gray-800">Discount Codes</div>
                 <div className="text-xs text-gray-500 leading-snug mt-0.5">Create promo offers</div>
+              </div>
+            </Link>
+
+            {/* Credit Report */}
+            <Link href="/dashboard/credit-report"
+              className="flex flex-col gap-2 bg-slate-50 border-2 border-slate-300 rounded-2xl p-3.5 hover:brightness-95 transition-all active:scale-[0.98] shadow-sm">
+              <div className="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center">
+                <FileText size={17} className="text-slate-600" />
+              </div>
+              <div>
+                <div className="font-semibold text-sm text-gray-800">Credit Report</div>
+                <div className="text-xs text-gray-500 leading-snug mt-0.5">PDF report for loans</div>
               </div>
             </Link>
 
