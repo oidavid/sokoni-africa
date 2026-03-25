@@ -229,19 +229,26 @@ export default function DashboardPage() {
 
       <div className="max-w-lg mx-auto px-4 py-4">
 
-        {/* Platform Announcements */}
-        {announcements.filter(a => !dismissedIds.has(a.id)).map(a => (
-          <div key={a.id} className={`flex items-start gap-3 rounded-2xl px-4 py-3 mb-3 border ${
-            a.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' :
-            a.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
-            a.type === 'promo'   ? 'bg-purple-50 border-purple-200 text-purple-800' :
-            'bg-blue-50 border-blue-200 text-blue-800'
-          }`}>
-            <p className="text-sm flex-1 font-medium">{a.message}</p>
-            <button onClick={() => setDismissedIds(prev => { const next = new Set(Array.from(prev)); next.add(a.id); return next; })}
-              className="text-lg leading-none opacity-50 hover:opacity-100 shrink-0">✕</button>
+        {/* ── PLATFORM ANNOUNCEMENTS — top priority, above everything ── */}
+        {announcements.filter(a => !dismissedIds.has(a.id)).length > 0 && (
+          <div className="mb-4">
+            {announcements.filter(a => !dismissedIds.has(a.id)).map(a => (
+              <div key={a.id} className={`flex items-start gap-3 rounded-2xl px-4 py-3.5 mb-2 border ${
+                a.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' :
+                a.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
+                a.type === 'promo'   ? 'bg-brand-light border-brand-green/30 text-brand-dark' :
+                'bg-sky-50 border-sky-200 text-sky-900'
+              }`}>
+                <span className="text-lg shrink-0">
+                  {a.type === 'warning' ? '⚠️' : a.type === 'success' ? '✅' : a.type === 'promo' ? '🎁' : '📢'}
+                </span>
+                <p className="text-sm flex-1 font-medium leading-snug">{a.message}</p>
+                <button onClick={() => setDismissedIds(prev => { const next = new Set(Array.from(prev)); next.add(a.id); return next; })}
+                  className="text-lg leading-none opacity-40 hover:opacity-80 shrink-0 mt-0.5">✕</button>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
 
         {/* ── STATS ROW ── */}
         <div className="grid grid-cols-4 gap-2 mb-4">
@@ -304,15 +311,15 @@ export default function DashboardPage() {
 
             {/* Credit Report — primary featured card */}
             <Link href="/dashboard/credit-report"
-              className="flex flex-col gap-2 bg-white border-2 border-purple-300 rounded-2xl p-4 hover:bg-purple-50 transition-colors active:scale-[0.98]">
-              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-                <FileText size={20} className="text-purple-600" />
+              className="flex flex-col gap-2 bg-white border-2 border-slate-300 rounded-2xl p-4 hover:bg-slate-50 transition-colors active:scale-[0.98]">
+              <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
+                <FileText size={20} className="text-slate-600" />
               </div>
               <div>
                 <div className="font-display font-bold text-sm text-brand-dark">Credit Report</div>
                 <div className="text-xs text-gray-500 leading-snug mt-0.5">PDF report for loans</div>
               </div>
-              <span className="self-start text-[10px] bg-purple-600 text-white px-2 py-0.5 rounded-full font-semibold">Generate →</span>
+              <span className="self-start text-[10px] bg-slate-700 text-white px-2 py-0.5 rounded-full font-semibold">Generate →</span>
             </Link>
           </div>
         </div>
