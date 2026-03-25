@@ -303,6 +303,7 @@ export default function OnboardingPage() {
   const [whatsappRaw, setWhatsappRaw] = useState('')
   const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0])
   const [showCountryPicker, setShowCountryPicker] = useState(false)
+  const [countrySearch, setCountrySearch] = useState('')
   const [email, setEmail] = useState('')
   const [category, setCategory] = useState('')
   const [businessType, setBusinessType] = useState<'products' | 'services' | ''>('')
@@ -332,13 +333,32 @@ export default function OnboardingPage() {
   const countryCurrencyMap: Record<string, {symbol: string; rate: number}> = {
     '234': {symbol: '₦', rate: 1}, '233': {symbol: 'GH₵', rate: 0.0094},
     '254': {symbol: 'KSh', rate: 0.078}, '27': {symbol: 'R', rate: 0.011},
-    '1': {symbol: '$', rate: 0.00061}, '44': {symbol: '£', rate: 0.00048},
+    '1': {symbol: '$', rate: 0.00061}, '1876': {symbol: 'J$', rate: 0.094},
+    '1868': {symbol: 'TT$', rate: 0.0041}, '1809': {symbol: 'RD$', rate: 0.035},
+    '44': {symbol: '£', rate: 0.00048}, '353': {symbol: '€', rate: 0.00056},
     '55': {symbol: 'R$', rate: 0.0031}, '92': {symbol: '₨', rate: 0.17},
     '91': {symbol: '₹', rate: 0.051}, '60': {symbol: 'RM', rate: 0.0029},
     '63': {symbol: '₱', rate: 0.034}, '62': {symbol: 'Rp', rate: 9.6},
     '20': {symbol: 'E£', rate: 0.029}, '255': {symbol: 'TSh', rate: 1.53},
     '256': {symbol: 'USh', rate: 2.29}, '251': {symbol: 'Br', rate: 0.034},
     '221': {symbol: 'CFA', rate: 0.37}, '237': {symbol: 'FCFA', rate: 0.37},
+    '33': {symbol: '€', rate: 0.00056}, '49': {symbol: '€', rate: 0.00056},
+    '34': {symbol: '€', rate: 0.00056}, '39': {symbol: '€', rate: 0.00056},
+    '31': {symbol: '€', rate: 0.00056}, '32': {symbol: '€', rate: 0.00056},
+    '351': {symbol: '€', rate: 0.00056}, '30': {symbol: '€', rate: 0.00056},
+    '43': {symbol: '€', rate: 0.00056}, '358': {symbol: '€', rate: 0.00056},
+    '46': {symbol: 'kr', rate: 0.0064}, '47': {symbol: 'kr', rate: 0.0059},
+    '45': {symbol: 'kr', rate: 0.0074}, '41': {symbol: 'CHF', rate: 0.00056},
+    '81': {symbol: '¥', rate: 0.092}, '82': {symbol: '₩', rate: 0.83},
+    '86': {symbol: '¥', rate: 0.0044}, '64': {symbol: 'NZ$', rate: 0.001},
+    '61': {symbol: 'A$', rate: 0.00093}, '65': {symbol: 'S$', rate: 0.00082},
+    '971': {symbol: 'AED', rate: 0.0022}, '966': {symbol: 'SAR', rate: 0.0023},
+    '974': {symbol: 'QAR', rate: 0.0022}, '965': {symbol: 'KWD', rate: 0.00019},
+    '968': {symbol: 'OMR', rate: 0.00023}, '52': {symbol: 'MX$', rate: 0.011},
+    '54': {symbol: 'AR$', rate: 0.54}, '57': {symbol: 'COP', rate: 2.47},
+    '51': {symbol: 'S/', rate: 0.0023}, '56': {symbol: 'CL$', rate: 0.57},
+    '58': {symbol: 'Bs', rate: 0.022}, '509': {symbol: 'HTG', rate: 0.082},
+    '592': {symbol: 'GY$', rate: 0.13}, '597': {symbol: 'SRD', rate: 0.022},
   }
   const selectedCurrency = countryCurrencyMap[selectedCountry.dial] || {symbol: '$', rate: 0.00061}
   const sampleProducts = rawSampleItems.map(p => {
@@ -770,17 +790,34 @@ export default function OnboardingPage() {
                   className="flex-1 border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
               </div>
               {showCountryPicker && (
-                <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-lg max-h-52 overflow-y-auto mb-2">
-                  {COUNTRIES.map(c => (
-                    <button key={c.code} onClick={() => { setSelectedCountry(c); setShowCountryPicker(false) }}
-                      className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 ${selectedCountry.code === c.code ? 'bg-brand-light text-brand-green font-semibold' : 'text-gray-700'}`}>
-                      <img src={`https://flagcdn.com/20x15/${c.code.toLowerCase()}.png`}
-                        alt={c.name} className="w-5 h-4 object-cover rounded-sm shrink-0"
-                        onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
-                      <span className="flex-1 text-left">{c.name}</span>
-                      <span className="text-gray-400 text-xs">+{c.dial}</span>
-                    </button>
-                  ))}
+                <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-lg mb-2">
+                  <div className="p-2 border-b border-gray-100">
+                    <input
+                      type="text"
+                      placeholder="Search country..."
+                      value={countrySearch}
+                      onChange={e => setCountrySearch(e.target.value)}
+                      autoFocus
+                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl outline-none focus:border-brand-green"
+                    />
+                  </div>
+                  <div className="max-h-48 overflow-y-auto">
+                    {[...COUNTRIES]
+                      .filter(c => c.code !== 'OTHER')
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .filter(c => countrySearch === '' || c.name.toLowerCase().includes(countrySearch.toLowerCase()) || c.dial.includes(countrySearch))
+                      .concat(COUNTRIES.filter(c => c.code === 'OTHER'))
+                      .map(c => (
+                        <button key={c.code} onClick={() => { setSelectedCountry(c); setShowCountryPicker(false); setCountrySearch('') }}
+                          className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 ${selectedCountry.code === c.code ? 'bg-brand-light text-brand-green font-semibold' : 'text-gray-700'}`}>
+                          <img src={`https://flagcdn.com/20x15/${c.code.toLowerCase()}.png`}
+                            alt={c.name} className="w-5 h-4 object-cover rounded-sm shrink-0"
+                            onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
+                          <span className="flex-1 text-left">{c.name}</span>
+                          <span className="text-gray-400 text-xs">+{c.dial}</span>
+                        </button>
+                      ))}
+                  </div>
                 </div>
               )}
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
