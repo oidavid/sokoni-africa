@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ShoppingBag, FileText, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil, ShoppingCart, TrendingUp, BarChart2, CreditCard, Sparkles, Inbox, Tag } from 'lucide-react'
+import { ShoppingBag, FileText, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil, ShoppingCart, TrendingUp, BarChart2, CreditCard, Sparkles, Inbox, Tag, Megaphone, ChevronDown, ChevronUp } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { getThemeById, getThemeStyle, EARKET_THEMES, type EarketTheme } from '@/lib/themes'
 
@@ -37,6 +37,8 @@ const CATEGORY_EMOJI: Record<string, string> = {
   events: '🎉', digital_services: '💻', transport: '🚚', agriculture: '🌱',
 }
 
+const GRID_PREVIEW = 9 // products visible before "show all"
+
 export default function DashboardPage() {
   const router = useRouter()
   const [merchant, setMerchant] = useState<Merchant | null>(null)
@@ -54,6 +56,7 @@ export default function DashboardPage() {
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set())
   const [proJoined, setProJoined] = useState(false)
   const [joiningPro, setJoiningPro] = useState(false)
+  const [showAllProducts, setShowAllProducts] = useState(false)
 
   const loadData = useCallback(async (showRefresh = false) => {
     if (showRefresh) setRefreshing(true)
@@ -72,13 +75,10 @@ export default function DashboardPage() {
     setOrderCount(total || 0)
     setNewOrderCount(newOrders || 0)
     setLeadCount(totalLeads || 0)
-    // Fetch active announcements
     const { data: ann } = await supabase.from('announcements').select('id,message,type').eq('active', true).order('created_at', { ascending: false })
     setAnnouncements(ann || [])
-    // Check pro waitlist
     const { data: waitlist } = await supabase.from('pro_waitlist').select('id').eq('merchant_id', m.id).maybeSingle()
     if (waitlist) setProJoined(true)
-    // Update last login
     await supabase.from('merchants').update({ last_login_at: new Date().toISOString() }).eq('id', m.id)
     setLoading(false)
     setRefreshing(false)
@@ -95,10 +95,8 @@ export default function DashboardPage() {
     if (!merchant || refreshingServices) return
     setRefreshingServices(true)
     try {
-      // Delete existing sample/placeholder services
       await supabase.from('products').delete().eq('merchant_id', merchant.id)
-      // Fetch fresh services based on category
-      const res = await fetch('/api/services/refresh', {
+      await fetch('/api/services/refresh', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ merchant_id: merchant.id, category: merchant.category })
@@ -146,20 +144,50 @@ export default function DashboardPage() {
   const inStockCount = products.filter(p => p.in_stock).length
   const categoryEmoji = CATEGORY_EMOJI[merchant.category] || '🏪'
   const storeUrl = typeof window !== 'undefined' ? `${window.location.origin}/store/${merchant.slug}` : ''
+  const visibleProducts = showAllProducts ? products : products.slice(0, GRID_PREVIEW)
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
+
+      {/* ── TOP NAV ── */}
       <nav className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 bg-brand-green rounded-lg flex items-center justify-center">
             <ShoppingBag size={14} className="text-white" />
           </div>
-          <span className="font-display font-bold text-brand-dark">Earket</span>
+          <div>
+            <div className="font-display font-bold text-sm text-brand-dark leading-tight">{merchant.business_name}</div>
+            <div className="text-xs text-gray-400 leading-tight">{merchant.location}</div>
+          </div>
         </div>
         <div className="flex items-center gap-2">
+          {/* Pro pill in nav — no longer a full-width banner */}
+          {!proJoined && (
+            <button
+              disabled={joiningPro}
+              onClick={async () => {
+                if (!merchant) return
+                setJoiningPro(true)
+                await supabase.from('pro_waitlist').upsert({
+                  merchant_id: merchant.id,
+                  email: merchant.email,
+                  business_name: merchant.business_name,
+                }, { onConflict: 'merchant_id' })
+                setProJoined(true)
+                setJoiningPro(false)
+              }}
+              className="text-xs bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-1.5 rounded-xl font-semibold hover:bg-purple-100 transition-colors disabled:opacity-50">
+              {joiningPro ? '...' : '⭐ Pro'}
+            </button>
+          )}
+          {proJoined && (
+            <span className="text-xs bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-1.5 rounded-xl font-semibold">
+              ✅ Pro list
+            </span>
+          )}
           <Link href={`/store/${merchant.slug}`} target="_blank"
-            className="flex items-center gap-1.5 text-xs text-brand-green font-medium border border-brand-green/20 bg-brand-light rounded-xl px-3 py-2 hover:bg-brand-green hover:text-white transition-colors">
-            <ExternalLink size={12} /> View Store
+            className="flex items-center gap-1 text-xs text-brand-green font-semibold border border-brand-green/20 bg-brand-light rounded-xl px-3 py-1.5 hover:bg-brand-green hover:text-white transition-colors">
+            <ExternalLink size={11} /> View Store
           </Link>
           <button onClick={handleLogout}
             className="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-gray-200">
@@ -168,7 +196,7 @@ export default function DashboardPage() {
         </div>
       </nav>
 
-      {/* Theme picker modal */}
+      {/* Theme picker modal — unchanged */}
       {showThemePicker && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60" onClick={() => setShowThemePicker(false)} />
@@ -199,7 +227,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="max-w-lg mx-auto px-4 py-5">
+      <div className="max-w-lg mx-auto px-4 py-4">
 
         {/* Platform Announcements */}
         {announcements.filter(a => !dismissedIds.has(a.id)).map(a => (
@@ -215,55 +243,83 @@ export default function DashboardPage() {
           </div>
         ))}
 
-        {/* Pro Waitlist Banner */}
-        {!proJoined ? (
-          <div className="flex items-center gap-3 bg-gradient-to-r from-purple-50 to-amber-50 border border-purple-200 rounded-2xl p-4 mb-4">
-            <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center shrink-0 text-xl">⭐</div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-purple-900 text-sm">Earket Pro — Coming Soon</p>
-              <p className="text-purple-600 text-xs">Custom domain, premium themes, priority support & more</p>
-            </div>
-            <button
-              disabled={joiningPro}
-              onClick={async () => {
-                if (!merchant) return
-                setJoiningPro(true)
-                await supabase.from('pro_waitlist').upsert({
-                  merchant_id: merchant.id,
-                  email: merchant.email,
-                  business_name: merchant.business_name,
-                }, { onConflict: 'merchant_id' })
-                setProJoined(true)
-                setJoiningPro(false)
-              }}
-              className="text-xs bg-purple-600 text-white px-3 py-2 rounded-xl font-semibold shrink-0 hover:bg-purple-700 transition-colors disabled:opacity-50">
-              {joiningPro ? '...' : 'Join List'}
-            </button>
+        {/* ── STATS ROW ── */}
+        <div className="grid grid-cols-4 gap-2 mb-4">
+          <div className="bg-white rounded-2xl p-3 border border-gray-100 text-center">
+            <div className="font-display font-bold text-xl text-brand-dark">{products.length}</div>
+            <div className="text-xs text-gray-500">{isService ? 'Services' : 'Products'}</div>
           </div>
-        ) : (
-          <div className="flex items-center gap-3 bg-purple-50 border border-purple-200 rounded-2xl p-4 mb-4">
-            <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center shrink-0 text-xl">✅</div>
-            <div className="flex-1">
-              <p className="font-semibold text-purple-900 text-sm">You're on the Pro waitlist!</p>
-              <p className="text-purple-600 text-xs">We'll notify you first when Pro launches.</p>
-            </div>
+          <div className="bg-white rounded-2xl p-3 border border-gray-100 text-center">
+            <div className="font-display font-bold text-xl text-brand-dark">{inStockCount}</div>
+            <div className="text-xs text-gray-500">{isService ? 'Active' : 'In Stock'}</div>
           </div>
-        )}
-
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <h1 className="font-display font-bold text-xl text-brand-dark">{categoryEmoji} {merchant.business_name}</h1>
-            <p className="text-gray-500 text-sm">{merchant.location}</p>
-          </div>
-          <button onClick={() => loadData(true)} disabled={refreshing}
-            className="w-9 h-9 bg-white border border-gray-200 rounded-xl flex items-center justify-center hover:bg-gray-50">
-            <RefreshCw size={15} className={`text-gray-400 ${refreshing ? 'animate-spin' : ''}`} />
-          </button>
+          <Link href="/dashboard/leads" className="bg-white rounded-2xl p-3 border border-gray-100 text-center hover:border-brand-green transition-colors">
+            <div className="font-display font-bold text-xl text-brand-dark">{leadCount}</div>
+            <div className="text-xs text-gray-500">Leads</div>
+          </Link>
+          <Link href="/dashboard/orders" className="bg-white rounded-2xl p-3 border border-gray-100 text-center relative hover:border-brand-green transition-colors">
+            {newOrderCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-brand-accent rounded-full text-white text-xs font-bold flex items-center justify-center">{newOrderCount}</span>
+            )}
+            <div className="font-display font-bold text-xl text-brand-dark">{orderCount}</div>
+            <div className="text-xs text-gray-500">{isService ? 'Bookings' : 'Orders'}</div>
+          </Link>
         </div>
 
-        {/* Add product / service CTA */}
+        {/* ── STORE URL BAR ── */}
+        <div className="bg-white rounded-2xl border border-gray-100 px-3 py-2.5 flex items-center gap-2 mb-4">
+          <div className="flex-1 text-xs font-medium text-brand-green truncate">earket.com/store/{merchant.slug}</div>
+          <button onClick={() => setShowThemePicker(true)}
+            className="text-xs text-brand-green font-semibold bg-brand-light px-2 py-1 rounded-lg border border-brand-green/20 shrink-0">
+            🎨
+          </button>
+          <a href={`https://wa.me/?text=${encodeURIComponent(`🛍️ Shop at *${merchant.business_name}*!\n\nearket.com/store/${merchant.slug}`)}`}
+            target="_blank" rel="noreferrer"
+            className="text-xs bg-[#25D366] text-white font-semibold px-2.5 py-1 rounded-lg shrink-0">
+            Share
+          </a>
+          <a href={storeUrl} target="_blank" rel="noreferrer"
+            className="text-xs bg-brand-green text-white font-semibold px-2.5 py-1 rounded-lg shrink-0">
+            Visit
+          </a>
+        </div>
+
+        {/* ── HERO ACTION: CASH SALE + CREDIT REPORT ── */}
+        <div className="mb-1">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Record & Build Credit</p>
+          <div className="grid grid-cols-2 gap-3 mb-3">
+
+            {/* Cash Sale — primary featured card */}
+            <Link href="/dashboard/cash-sale"
+              className="flex flex-col gap-2 bg-white border-2 border-brand-green rounded-2xl p-4 hover:bg-brand-light transition-colors active:scale-[0.98]">
+              <div className="w-10 h-10 bg-brand-green/10 rounded-xl flex items-center justify-center">
+                <ShoppingBag size={20} className="text-brand-green" />
+              </div>
+              <div>
+                <div className="font-display font-bold text-sm text-brand-dark">Cash Sale</div>
+                <div className="text-xs text-gray-500 leading-snug mt-0.5">Record a walk-in sale</div>
+              </div>
+              <span className="self-start text-[10px] bg-brand-green text-white px-2 py-0.5 rounded-full font-semibold">Record now →</span>
+            </Link>
+
+            {/* Credit Report — primary featured card */}
+            <Link href="/dashboard/credit-report"
+              className="flex flex-col gap-2 bg-white border-2 border-purple-300 rounded-2xl p-4 hover:bg-purple-50 transition-colors active:scale-[0.98]">
+              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                <FileText size={20} className="text-purple-600" />
+              </div>
+              <div>
+                <div className="font-display font-bold text-sm text-brand-dark">Credit Report</div>
+                <div className="text-xs text-gray-500 leading-snug mt-0.5">PDF report for loans</div>
+              </div>
+              <span className="self-start text-[10px] bg-purple-600 text-white px-2 py-0.5 rounded-full font-semibold">Generate →</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* ── ADD PRODUCT CTA ── */}
         <Link href="/dashboard/products/new"
-          className="flex items-center gap-3 bg-brand-green text-white rounded-2xl p-4 mb-5 hover:bg-brand-dark transition-colors active:scale-[0.98]">
+          className="flex items-center gap-3 bg-brand-green text-white rounded-2xl p-4 mb-4 hover:bg-brand-dark transition-colors active:scale-[0.98]">
           <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
             <Plus size={20} />
           </div>
@@ -275,154 +331,90 @@ export default function DashboardPage() {
           </div>
         </Link>
 
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-3 mb-5">
-          <div className="bg-white rounded-2xl p-3 border border-gray-100">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 bg-blue-50 text-blue-600">
-              <Package size={16} />
-            </div>
-            <div className="font-display font-bold text-xl text-brand-dark">{products.length}</div>
-            <div className="text-xs text-gray-500">{isService ? 'Services' : 'Products'}</div>
-          </div>
-          <div className="bg-white rounded-2xl p-3 border border-gray-100">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 bg-brand-light text-brand-green">
-              <ShoppingBag size={16} />
-            </div>
-            <div className="font-display font-bold text-xl text-brand-dark">{inStockCount}</div>
-            <div className="text-xs text-gray-500">{isService ? 'Available' : 'In Stock'}</div>
-          </div>
-          <Link href="/dashboard/leads" className="bg-white rounded-2xl p-3 border border-gray-100 hover:border-brand-green transition-colors">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 bg-purple-50 text-purple-600">
-              <Inbox size={16} />
-            </div>
-            <div className="font-display font-bold text-xl text-brand-dark">{leadCount}</div>
-            <div className="text-xs text-gray-500">Leads</div>
-          </Link>
-          <Link href="/dashboard/orders" className="bg-white rounded-2xl p-3 border border-gray-100 relative hover:border-brand-green transition-colors">
-            {newOrderCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-brand-accent rounded-full text-white text-xs font-bold flex items-center justify-center">
-                {newOrderCount}
-              </span>
+        {/* ── SECONDARY ACTIONS — 2x2 grid ── */}
+        <div className="mb-4">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Manage</p>
+          <div className="grid grid-cols-2 gap-3">
+
+            {/* Enable Payments */}
+            {!(merchant as any).paystack_subaccount && (
+              <Link href="/dashboard/payments"
+                className="flex flex-col gap-2 bg-white border border-amber-200 rounded-2xl p-3.5 hover:bg-amber-50 transition-colors">
+                <div className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center">
+                  <CreditCard size={17} className="text-amber-600" />
+                </div>
+                <div>
+                  <div className="font-semibold text-sm text-gray-800">Online Payments</div>
+                  <div className="text-xs text-gray-500 leading-snug mt-0.5">Connect bank account</div>
+                </div>
+                <span className="self-start text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">Setup needed</span>
+              </Link>
             )}
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 bg-amber-50 text-amber-600">
-              <ShoppingCart size={16} />
-            </div>
-            <div className="font-display font-bold text-xl text-brand-dark">{orderCount}</div>
-            <div className="text-xs text-gray-500">{isService ? 'Bookings' : 'Orders'}</div>
-          </Link>
-        </div>
 
-        {/* Payment Setup Banner */}
-        {!(merchant as any).paystack_subaccount && (
-          <Link href="/dashboard/payments"
-            className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-5 hover:bg-amber-100 transition-colors">
-            <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
-              <CreditCard size={18} className="text-amber-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-amber-800 text-sm">Enable Online Payments</p>
-              <p className="text-amber-600 text-xs">Connect your bank account to accept card payments</p>
-            </div>
-            <span className="text-amber-500 text-lg">→</span>
-          </Link>
-        )}
-
-        {/* Store link + share buttons */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-5">
-          <div className="flex items-center justify-between mb-2">
-            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Your Store</div>
-            <button onClick={() => setShowThemePicker(true)}
-              className="flex items-center gap-1 text-xs font-semibold text-brand-green bg-brand-light px-2.5 py-1 rounded-lg border border-brand-green/20">
-              🎨 Theme
-            </button>
-          </div>
-          <div className="flex items-center gap-2 mb-3">
-            <div className="flex-1 bg-brand-light rounded-xl px-3 py-2.5 text-xs font-medium text-brand-green truncate">
-              earket.com/store/{merchant.slug}
-            </div>
-            <a href={storeUrl} target="_blank" rel="noreferrer"
-              className="shrink-0 bg-brand-green text-white text-xs font-semibold px-3 py-2.5 rounded-xl">
-              Visit
-            </a>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <a href={`https://wa.me/?text=${encodeURIComponent(`🛍️ Shop at *${merchant.business_name}*!\n\nBrowse and order online:\nearket.com/share/${merchant.slug}`)}`}
-              target="_blank" rel="noreferrer"
-              className="flex items-center justify-center gap-1.5 bg-[#25D366] text-white text-xs font-semibold py-2.5 rounded-xl">
-              📲 Share on WhatsApp
-            </a>
-            <a href={`https://earket.com/share/${merchant.slug}`} target="_blank" rel="noreferrer"
-              className="flex items-center justify-center gap-1.5 bg-brand-light text-brand-green text-xs font-semibold py-2.5 rounded-xl border border-brand-green/20">
-              🔗 Share Page
-            </a>
-          </div>
-          <div className="mt-2">
-            <Link href="/dashboard/cash-sale"
-            className="flex items-center gap-3 bg-white rounded-2xl p-3 border border-gray-100 hover:border-brand-green transition-colors">
-            <div className="w-10 h-10 bg-brand-green/10 rounded-xl flex items-center justify-center shrink-0">
-              <ShoppingBag size={18} className="text-brand-green" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-gray-900">Cash Sale</p>
-              <p className="text-xs text-gray-500">Record a walk-in sale</p>
-            </div>
-          </Link>
-
-          <Link href="/dashboard/credit-report"
-            className="flex items-center gap-3 bg-white rounded-2xl p-3 border border-gray-100 hover:border-brand-green transition-colors">
-            <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center shrink-0">
-              <FileText size={18} className="text-purple-600" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-gray-900">Credit Report</p>
-              <p className="text-xs text-gray-500">Generate sales report for loans</p>
-            </div>
-          </Link>
-
-          <Link href="/dashboard/broadcast"
-              className="w-full flex items-center justify-center gap-1.5 bg-gray-50 text-gray-600 text-xs font-semibold py-2.5 rounded-xl border border-gray-200">
-              📢 Broadcast to Customers
+            {/* Analytics */}
+            <Link href="/dashboard/analytics"
+              className="flex flex-col gap-2 bg-white border border-gray-100 rounded-2xl p-3.5 hover:border-brand-green transition-colors">
+              <div className="w-9 h-9 bg-brand-light rounded-xl flex items-center justify-center">
+                <BarChart2 size={17} className="text-brand-green" />
+              </div>
+              <div>
+                <div className="font-semibold text-sm text-gray-800">Analytics</div>
+                <div className="text-xs text-gray-500 leading-snug mt-0.5">Views & conversions</div>
+              </div>
             </Link>
-          </div>
-          <div className="mt-2">
+
+            {/* Broadcast */}
+            <Link href="/dashboard/broadcast"
+              className="flex flex-col gap-2 bg-white border border-gray-100 rounded-2xl p-3.5 hover:border-brand-green transition-colors">
+              <div className="w-9 h-9 bg-red-50 rounded-xl flex items-center justify-center">
+                <Megaphone size={17} className="text-red-500" />
+              </div>
+              <div>
+                <div className="font-semibold text-sm text-gray-800">Broadcast</div>
+                <div className="text-xs text-gray-500 leading-snug mt-0.5">Message all customers</div>
+              </div>
+            </Link>
+
+            {/* Discount Codes */}
             <Link href="/dashboard/discounts"
-              className="w-full flex items-center justify-center gap-1.5 bg-gray-50 text-gray-600 text-xs font-semibold py-2.5 rounded-xl border border-gray-200">
-              🏷️ Discount Codes
+              className="flex flex-col gap-2 bg-white border border-gray-100 rounded-2xl p-3.5 hover:border-brand-green transition-colors">
+              <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center">
+                <Tag size={17} className="text-blue-500" />
+              </div>
+              <div>
+                <div className="font-semibold text-sm text-gray-800">Discount Codes</div>
+                <div className="text-xs text-gray-500 leading-snug mt-0.5">Create promo offers</div>
+              </div>
             </Link>
-          </div>
-          {isService && (
-            <div className="mt-2">
+
+            {/* Refresh services — only for service merchants */}
+            {isService && (
               <button onClick={refreshServices} disabled={refreshingServices}
-                className="w-full flex items-center justify-center gap-1.5 bg-brand-light text-brand-green text-xs font-semibold py-2.5 rounded-xl border border-brand-green/20 disabled:opacity-50">
-                {refreshingServices ? <RefreshCw size={13} className="animate-spin" /> : <Sparkles size={13} />}
-                {refreshDone ? '✅ Services refreshed!' : refreshingServices ? 'Refreshing services...' : 'Refresh My Services'}
+                className="flex flex-col gap-2 bg-white border border-gray-100 rounded-2xl p-3.5 hover:border-brand-green transition-colors text-left disabled:opacity-50">
+                <div className="w-9 h-9 bg-brand-light rounded-xl flex items-center justify-center">
+                  {refreshingServices ? <RefreshCw size={17} className="text-brand-green animate-spin" /> : <Sparkles size={17} className="text-brand-green" />}
+                </div>
+                <div>
+                  <div className="font-semibold text-sm text-gray-800">
+                    {refreshDone ? '✅ Refreshed!' : 'Refresh Services'}
+                  </div>
+                  <div className="text-xs text-gray-500 leading-snug mt-0.5">AI-selected for your category</div>
+                </div>
               </button>
-              <p className="text-xs text-gray-400 text-center mt-1">Replace all services with fresh AI-selected ones</p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* Private placeholder notice for service businesses */}
-        {isService && products.length > 0 && products.some(p => p.image_url && p.image_url.includes('unsplash')) && (
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-5 flex items-start gap-3">
-            <span className="text-xl shrink-0">📸</span>
-            <div className="flex-1">
-              <p className="font-semibold text-amber-800 text-sm">Add your own photos</p>
-              <p className="text-amber-700 text-xs mt-0.5">Your services are using placeholder images. Tap any service below to upload your real photos — it builds much more trust with customers.</p>
-            </div>
-          </div>
-        )}
-
-        {/* Sample products nudge — products mode only */}
+        {/* Sample product nudge */}
         {!isService && products.length > 0 && products.some(p =>
           p.name.startsWith('My Product') ||
           ['Indomie Noodles', 'Golden Penny', 'Vegetable Oil', 'Pounded Yam', 'Ankara Print', 'Plain Cotton'].some(s => p.name.startsWith(s))
         ) && (
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-5 flex items-start gap-3">
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4 flex items-start gap-3">
             <div className="text-xl shrink-0">📸</div>
             <div>
               <p className="font-semibold text-amber-800 text-sm">Replace sample products with yours</p>
-              <p className="text-amber-700 text-xs mt-0.5">Your store has sample products. Add your real products with photos for a better customer experience.</p>
+              <p className="text-amber-700 text-xs mt-0.5">Add your real products with photos for a better customer experience.</p>
               <Link href="/dashboard/products/new" className="inline-block mt-2 text-xs font-bold text-amber-800 underline">
                 Add my real products →
               </Link>
@@ -430,16 +422,28 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Products / Services list */}
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden mb-5">
-          <div className="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
-            <h2 className="font-display font-bold text-brand-dark">
+        {/* Placeholder image nudge for services */}
+        {isService && products.length > 0 && products.some(p => p.image_url && p.image_url.includes('unsplash')) && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4 flex items-start gap-3">
+            <span className="text-xl shrink-0">📸</span>
+            <div className="flex-1">
+              <p className="font-semibold text-amber-800 text-sm">Add your own photos</p>
+              <p className="text-amber-700 text-xs mt-0.5">Your services are using placeholder images. Tap any service to upload real photos.</p>
+            </div>
+          </div>
+        )}
+
+        {/* ── PRODUCTS — 3-column grid ── */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
               {isService ? 'Your Services' : 'Your Products'}
-            </h2>
+            </p>
             <Link href="/dashboard/products/new" className="text-xs text-brand-green font-semibold">+ Add</Link>
           </div>
+
           {products.length === 0 ? (
-            <div className="text-center py-10 px-4">
+            <div className="bg-white rounded-2xl border border-gray-100 text-center py-10 px-4">
               <div className="text-3xl mb-2">{isService ? '🔧' : '📦'}</div>
               <p className="text-gray-500 text-sm mb-1">{isService ? 'No services yet' : 'No products yet'}</p>
               <Link href="/dashboard/products/new" className="inline-block bg-brand-green text-white text-xs font-bold px-5 py-2.5 rounded-xl mt-2">
@@ -447,39 +451,42 @@ export default function DashboardPage() {
               </Link>
             </div>
           ) : (
-            products.map((product, i) => (
-              <div key={product.id} className={`px-4 py-3 flex items-center gap-3 ${i < products.length - 1 ? 'border-b border-gray-50' : ''}`}>
-                <div className="w-9 h-9 bg-brand-light rounded-xl flex items-center justify-center font-bold text-brand-green shrink-0 text-sm">
-                  {product.name.charAt(0).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-sm text-gray-800 truncate">{product.name}</div>
-                  <div className="text-xs text-gray-500 flex items-center gap-1.5">
-                    <span className="font-medium text-brand-green">{formatPrice(product)}</span>
-                    <span>·</span>
-                    <span className={product.in_stock ? 'text-green-500' : 'text-red-400'}>
-                      {isService
-                        ? (product.in_stock ? 'Available' : 'Unavailable')
-                        : (product.in_stock ? 'In Stock' : 'Out of Stock')}
-                    </span>
-                  </div>
-                </div>
-                <Link href={`/dashboard/products/edit?id=${product.id}`}
-                  className="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-brand-light shrink-0">
-                  <Pencil size={13} className="text-gray-500" />
-                </Link>
+            <>
+              <div className="grid grid-cols-3 gap-2">
+                {visibleProducts.map(product => (
+                  <Link key={product.id} href={`/dashboard/products/edit?id=${product.id}`}
+                    className="bg-white rounded-2xl border border-gray-100 p-3 hover:border-brand-green transition-colors active:scale-[0.97]">
+                    <div className="w-8 h-8 bg-brand-light rounded-xl flex items-center justify-center font-bold text-brand-green text-sm mb-2">
+                      {product.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="font-semibold text-xs text-gray-800 leading-snug line-clamp-2 mb-1">{product.name}</div>
+                    <div className="text-xs text-brand-green font-medium">{formatPrice(product)}</div>
+                    <div className={`text-[10px] mt-0.5 ${product.in_stock ? 'text-green-500' : 'text-red-400'}`}>
+                      {isService ? (product.in_stock ? 'Available' : 'Unavailable') : (product.in_stock ? 'In Stock' : 'Out of Stock')}
+                    </div>
+                  </Link>
+                ))}
               </div>
-            ))
+
+              {products.length > GRID_PREVIEW && (
+                <button
+                  onClick={() => setShowAllProducts(v => !v)}
+                  className="w-full mt-3 flex items-center justify-center gap-1.5 text-xs text-brand-green font-semibold py-2.5 bg-white rounded-xl border border-brand-green/20 hover:bg-brand-light transition-colors">
+                  {showAllProducts
+                    ? <><ChevronUp size={14} /> Show fewer</>
+                    : <><ChevronDown size={14} /> Show all {products.length} {isService ? 'services' : 'products'}</>
+                  }
+                </button>
+              )}
+            </>
           )}
         </div>
 
-        {/* WhatsApp */}
+        {/* ── WHATSAPP CTA ── */}
         <div className="bg-[#075E54] text-white rounded-2xl p-4 flex items-center gap-3">
           <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-xl">💬</div>
           <div className="flex-1 min-w-0">
-            <div className="font-display font-bold text-sm">
-              WhatsApp {isService ? 'Bookings' : 'Orders'}
-            </div>
+            <div className="font-display font-bold text-sm">WhatsApp {isService ? 'Bookings' : 'Orders'}</div>
             <div className="text-xs text-white/70 truncate">+{merchant.whatsapp_number}</div>
           </div>
           <a href={`https://wa.me/${merchant.whatsapp_number?.replace(/\D/g, '')}`} target="_blank" rel="noreferrer"
@@ -487,9 +494,10 @@ export default function DashboardPage() {
             Open
           </a>
         </div>
+
       </div>
 
-      {/* Bottom nav */}
+      {/* ── BOTTOM NAV ── */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex max-w-lg mx-auto">
         {[
           { icon: TrendingUp, label: 'Dashboard', href: '/dashboard' },
@@ -508,4 +516,3 @@ export default function DashboardPage() {
     </div>
   )
 }
-
