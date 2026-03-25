@@ -17,7 +17,7 @@ function validateWhatsApp(raw: string, dialCode: string): { clean: string; error
   if (!raw.trim()) return { clean: '', error: null }
   const normalized = normalizeNumber(raw, dialCode)
   if (!normalized || normalized.length < 7) {
-    return { clean: '', error: 'Invalid number — check the digits and try again' }
+    return { clean: '', error: 'Please enter a valid WhatsApp number (e.g. +234 801 234 5678)' }
   }
   return { clean: normalized, error: null }
 }
@@ -173,7 +173,7 @@ export default function CashSalePage() {
     const { error } = await supabase.from('orders').insert(insertPayload)
     if (error) {
       console.error('Order insert error:', error)
-      setSaveError(error.message)
+      setSaveError('Could not save the sale. Please try again.')
       setSaving(false)
       return
     }
