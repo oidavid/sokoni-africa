@@ -237,8 +237,6 @@ export default function DashboardPage() {
                 /* ── PROMO — compact premium banner ── */
                 <div key={a.id} className="relative rounded-2xl mb-2 overflow-hidden"
                   style={{ background: 'linear-gradient(120deg, #1e2d6b 0%, #2d3a8c 100%)' }}>
-                  <button onClick={() => setDismissedIds(prev => { const next = new Set(Array.from(prev)); next.add(a.id); return next; })}
-                    className="absolute top-2.5 right-3 text-white/40 hover:text-white/80 text-base leading-none z-10">✕</button>
                   <div className="px-4 py-3 flex items-center gap-3">
                     <span className="text-lg shrink-0">⭐</span>
                     <div className="flex-1 min-w-0">
