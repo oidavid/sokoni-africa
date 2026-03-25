@@ -161,8 +161,8 @@ export default function DashboardPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* Pro pill in nav — no longer a full-width banner */}
-          {!proJoined && (
+          {/* Pro pill only shows if no promo announcement is active */}
+          {!proJoined && announcements.filter(a => a.type === 'promo' && !dismissedIds.has(a.id)).length === 0 && (
             <button
               disabled={joiningPro}
               onClick={async () => {
@@ -180,7 +180,7 @@ export default function DashboardPage() {
               {joiningPro ? '...' : '⭐ Pro'}
             </button>
           )}
-          {proJoined && (
+          {proJoined && announcements.filter(a => a.type === 'promo' && !dismissedIds.has(a.id)).length === 0 && (
             <span className="text-xs bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-1.5 rounded-xl font-semibold">
               ✅ Pro list
             </span>
@@ -233,19 +233,58 @@ export default function DashboardPage() {
         {announcements.filter(a => !dismissedIds.has(a.id)).length > 0 && (
           <div className="mb-4">
             {announcements.filter(a => !dismissedIds.has(a.id)).map(a => (
-              <div key={a.id} className={`flex items-start gap-3 rounded-2xl px-4 py-3.5 mb-2 border ${
-                a.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' :
-                a.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
-                a.type === 'promo'   ? 'bg-brand-light border-brand-green/30 text-brand-dark' :
-                'bg-sky-50 border-sky-200 text-sky-900'
-              }`}>
-                <span className="text-lg shrink-0">
-                  {a.type === 'warning' ? '⚠️' : a.type === 'success' ? '✅' : a.type === 'promo' ? '🎁' : '📢'}
-                </span>
-                <p className="text-sm flex-1 font-medium leading-snug">{a.message}</p>
-                <button onClick={() => setDismissedIds(prev => { const next = new Set(Array.from(prev)); next.add(a.id); return next; })}
-                  className="text-lg leading-none opacity-40 hover:opacity-80 shrink-0 mt-0.5">✕</button>
-              </div>
+              a.type === 'promo' ? (
+                /* ── PROMO — rich featured banner ── */
+                <div key={a.id} className="relative rounded-2xl mb-2 overflow-hidden"
+                  style={{ background: 'linear-gradient(135deg, #1a5c38 0%, #2d8a5e 60%, #1a4a6e 100%)' }}>
+                  {/* dismiss */}
+                  <button onClick={() => setDismissedIds(prev => { const next = new Set(Array.from(prev)); next.add(a.id); return next; })}
+                    className="absolute top-3 right-3 text-white/50 hover:text-white/90 text-lg leading-none z-10">✕</button>
+                  <div className="px-4 pt-4 pb-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xl">⭐</span>
+                      <span className="text-xs font-bold text-white/70 uppercase tracking-widest">Earket Pro</span>
+                    </div>
+                    <p className="text-white font-bold text-base leading-snug mb-3 pr-6">{a.message}</p>
+                    {!proJoined ? (
+                      <button
+                        disabled={joiningPro}
+                        onClick={async () => {
+                          if (!merchant) return
+                          setJoiningPro(true)
+                          await supabase.from('pro_waitlist').upsert({
+                            merchant_id: merchant.id,
+                            email: merchant.email,
+                            business_name: merchant.business_name,
+                          }, { onConflict: 'merchant_id' })
+                          setProJoined(true)
+                          setJoiningPro(false)
+                        }}
+                        className="inline-flex items-center gap-1.5 bg-white text-brand-dark text-xs font-bold px-4 py-2 rounded-xl hover:bg-gray-100 transition-colors disabled:opacity-50">
+                        {joiningPro ? 'Joining...' : '✨ Join the Waitlist — It\'s Free'}
+                      </button>
+                    ) : (
+                      <div className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-4 py-2 rounded-xl">
+                        ✅ You're on the waitlist!
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                /* ── OTHER TYPES — standard alert ── */
+                <div key={a.id} className={`flex items-start gap-3 rounded-2xl px-4 py-3.5 mb-2 border ${
+                  a.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' :
+                  a.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
+                  'bg-sky-50 border-sky-200 text-sky-900'
+                }`}>
+                  <span className="text-lg shrink-0">
+                    {a.type === 'warning' ? '⚠️' : a.type === 'success' ? '✅' : '📢'}
+                  </span>
+                  <p className="text-sm flex-1 font-medium leading-snug">{a.message}</p>
+                  <button onClick={() => setDismissedIds(prev => { const next = new Set(Array.from(prev)); next.add(a.id); return next; })}
+                    className="text-lg leading-none opacity-40 hover:opacity-80 shrink-0 mt-0.5">✕</button>
+                </div>
+              )
             ))}
           </div>
         )}
