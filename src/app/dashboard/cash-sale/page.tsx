@@ -79,7 +79,7 @@ export default function CashSalePage() {
     })
     // Update analytics
     const today = new Date().toISOString().split('T')[0]
-    await supabase.rpc('increment_analytics', { p_merchant_id: merchant.id, p_date: today, p_field: 'views' }).catch(() => {})
+    try { await supabase.rpc('increment_analytics', { p_merchant_id: merchant.id, p_date: today, p_field: 'views' }) } catch {}
     setCart([])
     setCustomerName('')
     setNote('')
