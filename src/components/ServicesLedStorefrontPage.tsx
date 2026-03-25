@@ -303,6 +303,11 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
   const themeStyle = theme ? getThemeStyle(theme) : { backgroundColor: store.theme_color || '#1A7A4A' }
   const color = theme?.primary || store.theme_color || '#1A7A4A'
   const contrast = theme?.textOnPrimary || getContrastColor(color)
+  const trackWhatsApp = () => {
+    if (!store?.id) return
+    fetch('/api/analytics/view', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ merchant_id: store.id, type: 'whatsapp_click' }) }).catch(() => {})
+  }
+
   const waNumber = store.whatsapp_number?.replace(/\D/g, '')
   const cfg = CATEGORY_CONFIG[store.category] || DEFAULT_CONFIG
   const heroImage = store.hero_image_url || cfg.hero_image
