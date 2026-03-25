@@ -1,357 +1,305 @@
 'use client'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, RefreshCw, MessageCircle, Check, X, Clock, Truck, ChevronDown, ChevronUp } from 'lucide-react'
+import { ArrowLeft, RefreshCw, ChevronDown, ChevronUp, ShoppingBag } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+
+type OrderStatus = 'new' | 'confirmed' | 'dispatched' | 'delivered' | 'cancelled' | 'completed'
+type TabKey = 'new' | 'confirmed' | 'dispatched' | 'delivered' | 'cancelled' | 'cash' | 'all'
 
 interface Order {
   id: string
-  created_at: string
-  order_number: string
-  customer_name: string
-  customer_phone: string
-  customer_address: string
-  customer_id?: string
-  items: Array<{ name: string; price: number; qty: number; product_id?: string }>
+  status: OrderStatus
+  source?: string
   subtotal: number
-  status: string
-  source: string
-  notes: string
+  items: any[]
+  created_at: string
+  customer_name?: string
+  customer_phone?: string
+  customer_email?: string
+  payment_method?: string
 }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; dot: string }> = {
-  new:       { label: 'New',       color: 'bg-blue-100 text-blue-700',   dot: 'bg-blue-500' },
-  confirmed: { label: 'Confirmed', color: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500' },
-  dispatched:{ label: 'Dispatched',color: 'bg-purple-100 text-purple-700',dot: 'bg-purple-500' },
-  delivered: { label: 'Delivered', color: 'bg-green-100 text-green-700', dot: 'bg-green-500' },
-  in_progress: { label: 'In Progress', color: 'bg-blue-100 text-blue-700', dot: 'bg-blue-500' },
-  completed: { label: 'Completed', color: 'bg-green-100 text-green-700', dot: 'bg-green-500' },
-  cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-600',     dot: 'bg-red-400' },
+interface Merchant {
+  id: string
+  business_name: string
+  currency: string
+  country: string
 }
 
-function formatNaira(kobo: number) { return `₦${(kobo / 100).toLocaleString()}` }
-
-function timeAgo(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime()
-  const mins = Math.floor(diff / 60000)
-  const hours = Math.floor(mins / 60)
-  const days = Math.floor(hours / 24)
-  if (days > 0) return `${days}d ago`
-  if (hours > 0) return `${hours}h ago`
-  if (mins > 0) return `${mins}m ago`
-  return 'Just now'
+const CURRENCY_MAP: Record<string, string> = {
+  'NG': '₦', 'GH': 'GH₵', 'KE': 'KSh', 'ZA': 'R', 'US': '$', 'GB': '£', 'TZ': 'TSh'
 }
+
+function formatRelative(iso: string): string {
+  const date = new Date(iso)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMins / 60)
+  const diffDays = Math.floor(diffHours / 24)
+  if (diffMins < 1) return 'Just now'
+  if (diffMins < 60) return `${diffMins}m ago`
+  if (diffHours < 24) return `${diffHours}h ago`
+  if (diffDays === 1) return 'Yesterday'
+  return `${diffDays}d ago`
+}
+
+function formatAbsolute(iso: string): string {
+  const date = new Date(iso)
+  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) +
+    ' at ' + date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+}
+
+// Returns urgency level for unresolved orders (new/confirmed/dispatched)
+function urgency(order: Order): 'none' | 'warn' | 'alert' {
+  if (order.source === 'cash_pos') return 'none'
+  if (!['new', 'confirmed', 'dispatched'].includes(order.status)) return 'none'
+  const diffHours = (Date.now() - new Date(order.created_at).getTime()) / 3600000
+  if (diffHours >= 4) return 'alert'   // red — 4+ hours unresolved
+  if (diffHours >= 2) return 'warn'    // amber — 2+ hours unresolved
+  return 'none'
+}
+
+function statusBadge(order: Order) {
+  if (order.source === 'cash_pos') {
+    return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">Completed</span>
+  }
+  const map: Record<string, string> = {
+    new: 'bg-blue-100 text-blue-700',
+    confirmed: 'bg-amber-100 text-amber-700',
+    dispatched: 'bg-purple-100 text-purple-700',
+    delivered: 'bg-green-100 text-green-700',
+    cancelled: 'bg-red-100 text-red-700',
+    completed: 'bg-green-100 text-green-700',
+  }
+  const label = order.status.charAt(0).toUpperCase() + order.status.slice(1)
+  return <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${map[order.status] || 'bg-gray-100 text-gray-600'}`}>{label}</span>
+}
+
+const TABS: { key: TabKey; label: string }[] = [
+  { key: 'new', label: 'New' },
+  { key: 'confirmed', label: 'Confirmed' },
+  { key: 'dispatched', label: 'Dispatched' },
+  { key: 'delivered', label: 'Delivered' },
+  { key: 'cash', label: 'Cash Sales' },
+  { key: 'cancelled', label: 'Cancelled' },
+  { key: 'all', label: 'All' },
+]
 
 export default function OrdersPage() {
   const router = useRouter()
+  const [merchant, setMerchant] = useState<Merchant | null>(null)
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
-  const [filter, setFilter] = useState<string>('new')
+  const [tab, setTab] = useState<TabKey>('new')
+  const [expanded, setExpanded] = useState<string | null>(null)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [loadError, setLoadError] = useState('')
 
-  const [merchantId, setMerchantId] = useState<string>('')
-  const [isService, setIsService] = useState(false)
+  async function load(showSpin = false) {
+    if (showSpin) setRefreshing(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    const email = user?.email || (typeof window !== 'undefined' ? localStorage.getItem('earket_merchant_email') : null)
+    if (!email) { router.push('/login'); return }
+    const { data: m } = await supabase.from('merchants').select('id, business_name, country').eq('email', email).single()
+    if (!m) { router.push('/onboarding'); return }
+    const currency = CURRENCY_MAP[m.country || 'NG'] || '₦'
+    setMerchant({ ...m, currency })
 
-  const loadOrders = useCallback(async (showRefresh = false) => {
-    if (showRefresh) setRefreshing(true)
-    setLoadError('')
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      const fallbackEmail = typeof window !== 'undefined' ? localStorage.getItem('earket_merchant_email') : null
-      const merchantEmail = user?.email || fallbackEmail
-      if (!merchantEmail) { router.push('/login'); return }
-
-      const { data: m, error: mError } = await supabase.from('merchants').select('id, whatsapp_number, business_type').eq('email', merchantEmail).single()
-      if (m) setIsService(m.business_type === 'services')
-      if (mError || !m) { router.push('/onboarding'); return }
-      setMerchantId(m.id)
-
-      const { data: orderData, error: oError } = await supabase
-        .from('orders')
-        .select('id, created_at, order_number, customer_name, customer_phone, customer_address, customer_id, items, subtotal, status, source, notes')
-        .eq('merchant_id', m.id)
-        .order('created_at', { ascending: false })
-
-      if (oError) { setLoadError('Could not load orders: ' + oError.message) }
-      setOrders(orderData || [])
-    } catch (e) {
-      setLoadError('Something went wrong.')
-    }
+    const { data: o } = await supabase
+      .from('orders')
+      .select('id, status, source, subtotal, items, created_at, customer_name, customer_phone, customer_email, payment_method')
+      .eq('merchant_id', m.id)
+      .order('created_at', { ascending: false })
+      .limit(200)
+    setOrders(o || [])
     setLoading(false)
     setRefreshing(false)
-  }, [router])
+  }
 
-  useEffect(() => { loadOrders() }, [loadOrders])
+  useEffect(() => { load() }, [])
 
-  async function updateStatus(orderId: string, status: string, order: Order) {
+  const fmt = (kobo: number) => `${merchant?.currency}${(kobo / 100).toLocaleString()}`
+
+  function filterOrders(): Order[] {
+    if (tab === 'cash') return orders.filter(o => o.source === 'cash_pos')
+    if (tab === 'all') return orders
+    return orders.filter(o => o.status === tab && o.source !== 'cash_pos')
+  }
+
+  function countTab(key: TabKey): number {
+    if (key === 'cash') return orders.filter(o => o.source === 'cash_pos').length
+    if (key === 'all') return orders.length
+    return orders.filter(o => o.status === key && o.source !== 'cash_pos').length
+  }
+
+  async function updateStatus(orderId: string, newStatus: string) {
     setUpdatingId(orderId)
-    await supabase.from('orders').update({ status }).eq('id', orderId)
-    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o))
-    const m = { id: merchantId }
-
-    if (status === 'delivered') {
-      for (const item of order.items || []) {
-        if (item.product_id) {
-          const { data: product } = await supabase.from('products').select('stock_qty').eq('id', item.product_id).single()
-          if (product?.stock_qty != null) {
-            const newQty = Math.max(0, product.stock_qty - item.qty)
-            await supabase.from('products').update({ stock_qty: newQty, in_stock: newQty > 0 }).eq('id', item.product_id)
-            // Low stock alert - notify merchant via WhatsApp if stock drops to 5 or below
-            const LOW_STOCK_THRESHOLD = 5
-            if (newQty <= LOW_STOCK_THRESHOLD && newQty > 0) {
-              const { data: prod } = await supabase.from('products').select('name').eq('id', item.product_id).single()
-              const { data: merch } = await supabase.from('merchants').select('whatsapp_number, business_name').eq('id', m.id).single()
-              if (merch?.whatsapp_number && prod?.name) {
-                const alertMsg = `⚠️ Low Stock Alert — ${merch.business_name}
-
-*${prod.name}* is running low!
-Only *${newQty} units* remaining.
-
-Please restock soon to avoid missing orders.`
-                window.open(`https://wa.me/${merch.whatsapp_number.replace(/\D/g, '')}?text=${encodeURIComponent(alertMsg)}`, '_blank')
-              }
-            }
-          }
-        }
-      }
-
-      // Award loyalty points to customer on delivery
-      if (order.customer_id) {
-        const pointsEarned = Math.floor((order.subtotal / 100) / 100) // 1 point per ₦100
-        if (pointsEarned > 0) {
-          const { data: existing } = await supabase.from('customer_points')
-            .select('id, points, lifetime_points')
-            .eq('customer_id', order.customer_id)
-            .eq('merchant_id', m.id)
-            .maybeSingle()
-
-          if (existing) {
-            await supabase.from('customer_points').update({
-              points: existing.points + pointsEarned,
-              lifetime_points: existing.lifetime_points + pointsEarned,
-            }).eq('id', existing.id)
-          } else {
-            await supabase.from('customer_points').insert({
-              customer_id: order.customer_id,
-              merchant_id: m.id,
-              points: pointsEarned,
-              lifetime_points: pointsEarned,
-            })
-          }
-
-          await supabase.from('points_transactions').insert({
-            customer_id: order.customer_id,
-            merchant_id: m.id,
-            order_id: orderId,
-            points: pointsEarned,
-            type: 'earn',
-            note: `Earned from order ${order.order_number}`,
-          })
-        }
-      }
-    }
-
-    const statusMessages: Record<string, string> = {
-      confirmed: `Hi ${order.customer_name}! Your order *${order.order_number}* has been confirmed. We'll prepare it shortly.`,
-      dispatched: `Hi ${order.customer_name}! Your order *${order.order_number}* is on its way! 🚚`,
-      delivered: `Hi ${order.customer_name}! Your order *${order.order_number}* has been delivered. Thank you! 🎉`,
-      cancelled: `Hi ${order.customer_name}! Your order *${order.order_number}* has been cancelled. Please contact us for more info.`,
-    }
-    if (statusMessages[status]) {
-      window.open(`https://wa.me/${order.customer_phone?.replace(/\D/g, '')}?text=${encodeURIComponent(statusMessages[status])}`, '_blank')
-    }
+    await supabase.from('orders').update({ status: newStatus }).eq('id', orderId)
+    await load()
     setUpdatingId(null)
   }
 
-  const allFilters = isService
-    ? ['new', 'confirmed', 'in_progress', 'completed', 'all', 'cancelled']
-    : ['new', 'confirmed', 'dispatched', 'delivered', 'all', 'cancelled']
-  const filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter)
-  const newCount = orders.filter(o => o.status === 'new').length
-  const counts = Object.fromEntries(allFilters.map(f => [f, f === 'all' ? orders.length : orders.filter(o => o.status === f).length]))
-
-  if (loading) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="w-10 h-10 border-4 border-brand-green border-t-transparent rounded-full animate-spin" /></div>
+  const STATUS_NEXT: Record<string, string> = {
+    new: 'confirmed',
+    confirmed: 'dispatched',
+    dispatched: 'delivered',
+  }
+  const STATUS_NEXT_LABEL: Record<string, string> = {
+    new: 'Confirm Order',
+    confirmed: 'Mark Dispatched',
+    dispatched: 'Mark Delivered',
   }
 
+  const filtered = filterOrders()
+
+  // Cash sales totals
+  const cashOrders = orders.filter(o => o.source === 'cash_pos')
+  const cashTotal = cashOrders.reduce((s, o) => s + (o.subtotal || 0), 0)
+
+  if (loading) return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="w-10 h-10 border-4 border-brand-green border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
+
   return (
-    <div className="min-h-screen bg-gray-50 max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3">
-        <Link href="/dashboard" className="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center">
-          <ArrowLeft size={16} className="text-gray-600" />
-        </Link>
-        <div className="flex-1">
-          <h1 className="font-display font-bold text-brand-dark">Orders</h1>
-          {newCount > 0 && <p className="text-xs text-brand-accent font-semibold">{newCount} new order{newCount > 1 ? 's' : ''} waiting</p>}
-        </div>
-        <button onClick={() => loadOrders(true)} disabled={refreshing} className="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center">
-          <RefreshCw size={14} className={`text-gray-500 ${refreshing ? 'animate-spin' : ''}`} />
-        </button>
-      </div>
-
-      {/* Filter tabs */}
-      <div className="bg-white border-b border-gray-100 px-4 py-2 flex gap-2 overflow-x-auto no-scrollbar">
-        {allFilters.map(f => {
-          const cfg = STATUS_CONFIG[f]
-          return (
-            <button key={f} onClick={() => setFilter(f)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
-                filter === f ? 'bg-brand-green text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-              }`}>
-              {cfg && filter !== f && <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />}
-              {f === 'all' ? 'All' : cfg?.label} ({counts[f]})
-            </button>
-          )
-        })}
-      </div>
-
-      {loadError && (
-        <div className="m-4 bg-red-50 border border-red-200 rounded-xl p-3">
-          <p className="text-red-600 text-xs">{loadError}</p>
-        </div>
-      )}
-
-      <div className="divide-y divide-gray-100">
-        {filtered.length === 0 ? (
-          <div className="text-center py-16 px-4">
-            <div className="text-4xl mb-3">{isService ? '📋' : '📦'}</div>
-            <p className="font-semibold text-gray-700 mb-1">No {filter === 'all' ? '' : filter} {isService ? 'bookings' : 'orders'}</p>
-            <p className="text-gray-400 text-sm">{isService ? 'Bookings will appear here' : 'Orders will appear here'}</p>
+      <div className="bg-white border-b border-gray-100 px-4 py-3 sticky top-0 z-10 shadow-sm">
+        <div className="flex items-center justify-between max-w-2xl mx-auto">
+          <div className="flex items-center gap-3">
+            <Link href="/dashboard" className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center">
+              <ArrowLeft size={18} className="text-gray-600" />
+            </Link>
+            <div>
+              <h1 className="font-display font-bold text-gray-900 text-base">Orders</h1>
+              {countTab('new') > 0 && (
+                <p className="text-xs text-amber-600 font-semibold">{countTab('new')} new order{countTab('new') !== 1 ? 's' : ''} waiting</p>
+              )}
+            </div>
           </div>
-        ) : filtered.map(order => {
-          const status = STATUS_CONFIG[order.status] || STATUS_CONFIG.new
-          const isExpanded = expandedId === order.id
-          const itemCount = (order.items || []).reduce((s, i) => s + i.qty, 0)
+          <button onClick={() => load(true)} disabled={refreshing}
+            className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center">
+            <RefreshCw size={16} className={`text-gray-600 ${refreshing ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
 
-          return (
-            <div key={order.id} className="bg-white">
-              {/* Compact row — always visible */}
-              <button onClick={() => setExpandedId(isExpanded ? null : order.id)}
-                className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left">
-                <div className={`w-2 h-2 rounded-full shrink-0 mt-1 ${status.dot}`} />
+        {/* Tabs — horizontally scrollable */}
+        <div className="flex gap-2 mt-3 max-w-2xl mx-auto overflow-x-auto pb-1 scrollbar-none">
+          {TABS.map(t => (
+            <button key={t.key} onClick={() => setTab(t.key)}
+              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                tab === t.key ? 'bg-brand-green text-white' : 'bg-gray-100 text-gray-500'
+              }`}>
+              {t.label} ({countTab(t.key)})
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="max-w-2xl mx-auto px-4 pt-4 pb-10 space-y-3">
+
+        {/* Cash sales summary banner */}
+        {tab === 'cash' && cashOrders.length > 0 && (
+          <div className="bg-brand-light border border-brand-green/30 rounded-2xl px-4 py-3 flex items-center justify-between">
+            <div>
+              <p className="text-xs text-gray-500 font-medium">Total Cash Sales</p>
+              <p className="font-display font-bold text-brand-green text-lg">{fmt(cashTotal)}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-gray-500 font-medium">Transactions</p>
+              <p className="font-bold text-gray-800">{cashOrders.length}</p>
+            </div>
+          </div>
+        )}
+
+        {filtered.length === 0 ? (
+          <div className="bg-white rounded-2xl p-8 text-center border border-gray-100">
+            <ShoppingBag size={32} className="text-gray-300 mx-auto mb-3" />
+            <p className="text-gray-500 text-sm">
+              {tab === 'cash' ? 'No cash sales recorded yet' : `No ${tab} orders`}
+            </p>
+            {tab === 'cash' && (
+              <Link href="/dashboard/cash-sale" className="mt-2 inline-block text-xs text-brand-green font-semibold">
+                Record a cash sale →
+              </Link>
+            )}
+          </div>
+        ) : (
+          filtered.map(order => {
+            const u = urgency(order)
+            const borderClass = u === 'alert' ? 'border-red-300 bg-red-50/30' : u === 'warn' ? 'border-amber-300 bg-amber-50/30' : 'border-gray-100'
+            return (
+            <div key={order.id} className={`bg-white rounded-2xl border overflow-hidden ${borderClass}`}>
+              <button
+                onClick={() => setExpanded(expanded === order.id ? null : order.id)}
+                className="w-full flex items-center justify-between p-4 text-left">
                 <div className="flex-1 min-w-0">
-                  {/* Row 1: Customer name + amount */}
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-display font-bold text-brand-dark text-sm truncate">
-                      {order.customer_name || 'Unknown Customer'}
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="font-bold text-gray-900 text-sm truncate">
+                      {order.customer_name || 'Walk-in Customer'}
+                    </p>
+                    {statusBadge(order)}
+                  </div>
+                  <p className="text-xs text-gray-400 flex items-center gap-1.5">
+                    <span>{order.source === 'cash_pos' ? `CASH-${order.id.slice(-8).toUpperCase()}` : `ORD-${order.id.slice(-4).toUpperCase()}`}</span>
+                    <span>·</span>
+                    <span>{(order.items || []).length} item{(order.items || []).length !== 1 ? 's' : ''}</span>
+                    <span>·</span>
+                    <span className={u === 'alert' ? 'text-red-500 font-semibold' : u === 'warn' ? 'text-amber-500 font-semibold' : ''}>
+                      {formatRelative(order.created_at)}
                     </span>
-                    <span className="font-display font-bold text-brand-dark text-sm shrink-0">{formatNaira(order.subtotal)}</span>
-                  </div>
-                  {/* Row 2: Order number + status + time */}
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-xs text-gray-400">{order.order_number}</span>
-                    <span className="text-gray-300">·</span>
-                    <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${status.color}`}>{status.label}</span>
-                    <span className="text-gray-300">·</span>
-                    <span className="text-xs text-gray-400">{itemCount} item{itemCount !== 1 ? 's' : ''}</span>
-                    <span className="text-gray-300">·</span>
-                    <span className="text-xs text-gray-400">{timeAgo(order.created_at)}</span>
-                  </div>
+                    {u === 'alert' && <span className="text-[10px] bg-red-100 text-red-600 font-bold px-1.5 py-0.5 rounded-full">Needs attention</span>}
+                    {u === 'warn' && <span className="text-[10px] bg-amber-100 text-amber-600 font-bold px-1.5 py-0.5 rounded-full">Waiting</span>}
+                  </p>
                 </div>
-                {isExpanded ? <ChevronUp size={14} className="text-gray-400 shrink-0" /> : <ChevronDown size={14} className="text-gray-400 shrink-0" />}
+                <div className="flex items-center gap-2 ml-2 shrink-0">
+                  <p className="font-bold text-gray-900">{fmt(order.subtotal || 0)}</p>
+                  {expanded === order.id ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+                </div>
               </button>
 
-              {/* Expanded details */}
-              {isExpanded && (
-                <div className="px-4 pb-4 space-y-3 border-t border-gray-50">
-                  {/* Customer */}
-                  <div className="flex items-start justify-between pt-3">
-                    <div>
-                      <p className="font-semibold text-gray-800 text-sm">{order.customer_name || 'Unknown'}</p>
-                      <p className="text-xs text-gray-500">{order.customer_phone}</p>
-                      {order.customer_address && order.customer_address !== 'PICKUP' && (
-                        <p className="text-xs text-gray-400 mt-0.5">📍 {order.customer_address}</p>
-                      )}
-                      {order.customer_address === 'PICKUP' && <p className="text-xs text-brand-green font-semibold mt-0.5">📦 Pickup</p>}
-                      {order.notes && (() => {
-                        const discountMatch = order.notes.match(/\[Discount code: ([^\]]+)\]/)
-                        const cleanNotes = order.notes.replace(/\[Discount code: [^\]]+\]\s*/g, '').replace(/PICKUP ORDER\.\s*/g, '').trim()
-                        return (
-                          <>
-                            {discountMatch && (
-                              <span className="inline-flex items-center gap-1 text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full mt-0.5">
-                                🏷️ {discountMatch[1]}
-                              </span>
-                            )}
-                            {cleanNotes && <p className="text-xs text-gray-400 mt-0.5 italic">"{cleanNotes}"</p>}
-                          </>
-                        )
-                      })()}
-                    </div>
-                    <a href={`https://wa.me/${order.customer_phone?.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi ${order.customer_name}! Regarding your order ${order.order_number}`)}`}
-                      target="_blank" rel="noreferrer"
-                      className="w-9 h-9 bg-[#25D366] rounded-xl flex items-center justify-center shrink-0">
-                      <MessageCircle size={16} className="text-white" />
-                    </a>
-                  </div>
-
+              {expanded === order.id && (
+                <div className="border-t border-gray-100 px-4 pb-4 pt-3 space-y-3">
                   {/* Items */}
-                  <div className="bg-gray-50 rounded-xl p-3 space-y-1">
-                    {(order.items || []).map((item, i) => (
-                      <div key={i} className="flex justify-between text-xs text-gray-600">
-                        <span>{item.name} × {item.qty}</span>
-                        <span className="font-medium">₦{(item.price * item.qty / 100).toLocaleString()}</span>
+                  <div className="space-y-1">
+                    {(order.items || []).map((item: any, i: number) => (
+                      <div key={i} className="flex justify-between text-sm">
+                        <span className="text-gray-700">{item.name} × {item.qty}</span>
+                        <span className="text-gray-600 font-medium">{fmt((item.price || 0) * item.qty)}</span>
                       </div>
                     ))}
-                    <div className="flex justify-between text-xs font-bold text-gray-800 pt-1 border-t border-gray-200 mt-1">
-                      <span>Total</span>
-                      <span>{formatNaira(order.subtotal)}</span>
-                    </div>
                   </div>
 
-                  {/* Actions */}
-                  {order.status !== 'delivered' && order.status !== 'completed' && order.status !== 'cancelled' && (
+                  {/* Customer info */}
+                  {(order.customer_phone || order.customer_email) && (
+                    <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-600 space-y-0.5">
+                      {order.customer_phone && <p>📱 {order.customer_phone}</p>}
+                      {order.customer_email && <p>✉️ {order.customer_email}</p>}
+                    </div>
+                  )}
+
+                  {/* Full timestamp */}
+                  <div className="text-xs text-gray-400 border-t border-gray-100 pt-2">
+                    📅 Placed: <span className="font-medium text-gray-600">{formatAbsolute(order.created_at)}</span>
+                  </div>
+
+                  {/* Action buttons — only for online orders */}
+                  {order.source !== 'cash_pos' && STATUS_NEXT[order.status] && (
                     <div className="flex gap-2">
-                      {isService ? (
-                        <>
-                          {order.status === 'new' && (
-                            <button onClick={() => updateStatus(order.id, 'confirmed', order)} disabled={updatingId === order.id}
-                              className="flex-1 bg-brand-green text-white text-xs font-bold py-2.5 rounded-xl disabled:opacity-50">
-                              ✓ Confirm Booking
-                            </button>
-                          )}
-                          {order.status === 'confirmed' && (
-                            <button onClick={() => updateStatus(order.id, 'in_progress', order)} disabled={updatingId === order.id}
-                              className="flex-1 bg-blue-500 text-white text-xs font-bold py-2.5 rounded-xl disabled:opacity-50">
-                              ▶ Start Service
-                            </button>
-                          )}
-                          {order.status === 'in_progress' && (
-                            <button onClick={() => updateStatus(order.id, 'completed', order)} disabled={updatingId === order.id}
-                              className="flex-1 bg-brand-green text-white text-xs font-bold py-2.5 rounded-xl disabled:opacity-50">
-                              ✓ Mark Completed
-                            </button>
-                          )}
-                        </>
-                      ) : (
-                        <>
-                          {order.status === 'new' && (
-                            <button onClick={() => updateStatus(order.id, 'confirmed', order)} disabled={updatingId === order.id}
-                              className="flex-1 bg-brand-green text-white text-xs font-bold py-2.5 rounded-xl disabled:opacity-50">
-                              ✓ Confirm Order
-                            </button>
-                          )}
-                          {order.status === 'confirmed' && (
-                            <button onClick={() => updateStatus(order.id, 'dispatched', order)} disabled={updatingId === order.id}
-                              className="flex-1 bg-purple-500 text-white text-xs font-bold py-2.5 rounded-xl disabled:opacity-50">
-                              🚚 Mark Dispatched
-                            </button>
-                          )}
-                          {order.status === 'dispatched' && (
-                            <button onClick={() => updateStatus(order.id, 'delivered', order)} disabled={updatingId === order.id}
-                              className="flex-1 bg-brand-green text-white text-xs font-bold py-2.5 rounded-xl disabled:opacity-50">
-                              ✓ Mark Delivered
-                            </button>
-                          )}
-                        </>
-                      )}
-                      <button onClick={() => updateStatus(order.id, 'cancelled', order)} disabled={updatingId === order.id}
-                        className="bg-red-50 text-red-500 text-xs font-bold py-2.5 px-4 rounded-xl disabled:opacity-50">
+                      <button
+                        onClick={() => updateStatus(order.id, STATUS_NEXT[order.status])}
+                        disabled={updatingId === order.id}
+                        className="flex-1 bg-brand-green text-white text-xs font-bold py-2.5 rounded-xl disabled:opacity-60">
+                        {updatingId === order.id ? 'Updating...' : STATUS_NEXT_LABEL[order.status]}
+                      </button>
+                      <button
+                        onClick={() => updateStatus(order.id, 'cancelled')}
+                        disabled={updatingId === order.id}
+                        className="px-4 bg-red-50 text-red-500 text-xs font-bold py-2.5 rounded-xl border border-red-200 disabled:opacity-60">
                         Cancel
                       </button>
                     </div>
@@ -359,8 +307,9 @@ Please restock soon to avoid missing orders.`
                 </div>
               )}
             </div>
-          )
-        })}
+            )
+          })
+        )}
       </div>
     </div>
   )
