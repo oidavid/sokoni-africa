@@ -363,11 +363,14 @@ export default function OnboardingPage() {
   const selectedCurrency = countryCurrencyMap[selectedCountry.dial] || {symbol: '$', rate: 0.00061}
   const sampleProducts = rawSampleItems.map(p => {
     if (selectedCurrency.symbol === '₦') return p
-    const converted = Math.round(p.price * selectedCurrency.rate)
-    const rounded = converted >= 1000 ? Math.floor(converted/500)*500 :
-                    converted >= 100 ? Math.floor(converted/50)*50 :
-                    Math.floor(converted/5)*5 || 1
-    return { ...p, price: rounded, price_display: `${selectedCurrency.symbol}${rounded.toLocaleString()}` }
+    // prices stored in kobo (smallest unit) — divide by 100 to get Naira, then convert
+    const nairaValue = p.price / 100
+    const converted = nairaValue * selectedCurrency.rate
+    const rounded = converted >= 1000 ? Math.round(converted/100)*100 :
+                    converted >= 100 ? Math.round(converted/10)*10 :
+                    converted >= 10 ? Math.round(converted) :
+                    Math.round(converted * 10) / 10 || 1
+    return { ...p, price: Math.round(converted), price_display: `${selectedCurrency.symbol}${rounded.toLocaleString()}` }
   })
   const normalizedWa = normalizeNumber(whatsappRaw, selectedCountry.dial)
 
