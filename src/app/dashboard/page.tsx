@@ -298,8 +298,8 @@ export default function DashboardPage() {
 
             {/* Cash Sale — primary featured card */}
             <Link href="/dashboard/cash-sale"
-              className="flex flex-col gap-2 bg-white border-2 border-brand-green rounded-2xl p-4 hover:bg-brand-light transition-colors active:scale-[0.98]">
-              <div className="w-10 h-10 bg-brand-green/10 rounded-xl flex items-center justify-center">
+              className="flex flex-col gap-2 bg-brand-light border-2 border-brand-green rounded-2xl p-4 hover:brightness-95 transition-all active:scale-[0.98] shadow-sm">
+              <div className="w-10 h-10 bg-brand-green/15 rounded-xl flex items-center justify-center">
                 <ShoppingBag size={20} className="text-brand-green" />
               </div>
               <div>
@@ -311,8 +311,8 @@ export default function DashboardPage() {
 
             {/* Credit Report — primary featured card */}
             <Link href="/dashboard/credit-report"
-              className="flex flex-col gap-2 bg-white border-2 border-slate-300 rounded-2xl p-4 hover:bg-slate-50 transition-colors active:scale-[0.98]">
-              <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
+              className="flex flex-col gap-2 bg-slate-50 border-2 border-slate-400 rounded-2xl p-4 hover:brightness-95 transition-all active:scale-[0.98] shadow-sm">
+              <div className="w-10 h-10 bg-slate-200 rounded-xl flex items-center justify-center">
                 <FileText size={20} className="text-slate-600" />
               </div>
               <div>
@@ -346,7 +346,7 @@ export default function DashboardPage() {
             {/* Enable Payments */}
             {!(merchant as any).paystack_subaccount && (
               <Link href="/dashboard/payments"
-                className="flex flex-col gap-2 bg-white border border-amber-200 rounded-2xl p-3.5 hover:bg-amber-50 transition-colors">
+                className="flex flex-col gap-2 bg-amber-50 border-2 border-amber-300 rounded-2xl p-3.5 hover:brightness-95 transition-all active:scale-[0.98] shadow-sm">
                 <div className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center">
                   <CreditCard size={17} className="text-amber-600" />
                 </div>
@@ -354,14 +354,14 @@ export default function DashboardPage() {
                   <div className="font-semibold text-sm text-gray-800">Online Payments</div>
                   <div className="text-xs text-gray-500 leading-snug mt-0.5">Connect bank account</div>
                 </div>
-                <span className="self-start text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">Setup needed</span>
+                <span className="self-start text-[10px] bg-amber-500 text-white px-2 py-0.5 rounded-full font-semibold">Setup needed</span>
               </Link>
             )}
 
             {/* Analytics */}
             <Link href="/dashboard/analytics"
-              className="flex flex-col gap-2 bg-white border border-gray-100 rounded-2xl p-3.5 hover:border-brand-green transition-colors">
-              <div className="w-9 h-9 bg-brand-light rounded-xl flex items-center justify-center">
+              className="flex flex-col gap-2 bg-brand-light border-2 border-brand-green/40 rounded-2xl p-3.5 hover:brightness-95 transition-all active:scale-[0.98] shadow-sm">
+              <div className="w-9 h-9 bg-brand-green/15 rounded-xl flex items-center justify-center">
                 <BarChart2 size={17} className="text-brand-green" />
               </div>
               <div>
@@ -372,9 +372,9 @@ export default function DashboardPage() {
 
             {/* Broadcast */}
             <Link href="/dashboard/broadcast"
-              className="flex flex-col gap-2 bg-white border border-gray-100 rounded-2xl p-3.5 hover:border-brand-green transition-colors">
-              <div className="w-9 h-9 bg-red-50 rounded-xl flex items-center justify-center">
-                <Megaphone size={17} className="text-red-500" />
+              className="flex flex-col gap-2 bg-sky-50 border-2 border-sky-300 rounded-2xl p-3.5 hover:brightness-95 transition-all active:scale-[0.98] shadow-sm">
+              <div className="w-9 h-9 bg-sky-100 rounded-xl flex items-center justify-center">
+                <Megaphone size={17} className="text-sky-600" />
               </div>
               <div>
                 <div className="font-semibold text-sm text-gray-800">Broadcast</div>
@@ -384,9 +384,9 @@ export default function DashboardPage() {
 
             {/* Discount Codes */}
             <Link href="/dashboard/discounts"
-              className="flex flex-col gap-2 bg-white border border-gray-100 rounded-2xl p-3.5 hover:border-brand-green transition-colors">
-              <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center">
-                <Tag size={17} className="text-blue-500" />
+              className="flex flex-col gap-2 bg-violet-50 border-2 border-violet-300 rounded-2xl p-3.5 hover:brightness-95 transition-all active:scale-[0.98] shadow-sm">
+              <div className="w-9 h-9 bg-violet-100 rounded-xl flex items-center justify-center">
+                <Tag size={17} className="text-violet-600" />
               </div>
               <div>
                 <div className="font-semibold text-sm text-gray-800">Discount Codes</div>
@@ -397,8 +397,8 @@ export default function DashboardPage() {
             {/* Refresh services — only for service merchants */}
             {isService && (
               <button onClick={refreshServices} disabled={refreshingServices}
-                className="flex flex-col gap-2 bg-white border border-gray-100 rounded-2xl p-3.5 hover:border-brand-green transition-colors text-left disabled:opacity-50">
-                <div className="w-9 h-9 bg-brand-light rounded-xl flex items-center justify-center">
+                className="flex flex-col gap-2 bg-brand-light border-2 border-brand-green/40 rounded-2xl p-3.5 hover:brightness-95 transition-all active:scale-[0.98] shadow-sm text-left disabled:opacity-50">
+                <div className="w-9 h-9 bg-brand-green/15 rounded-xl flex items-center justify-center">
                   {refreshingServices ? <RefreshCw size={17} className="text-brand-green animate-spin" /> : <Sparkles size={17} className="text-brand-green" />}
                 </div>
                 <div>
