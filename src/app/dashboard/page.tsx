@@ -234,18 +234,16 @@ export default function DashboardPage() {
           <div className="mb-4">
             {announcements.filter(a => !dismissedIds.has(a.id)).map(a => (
               a.type === 'promo' ? (
-                /* ── PROMO — rich featured banner ── */
+                /* ── PROMO — compact premium banner ── */
                 <div key={a.id} className="relative rounded-2xl mb-2 overflow-hidden"
-                  style={{ background: 'linear-gradient(135deg, #1a5c38 0%, #2d8a5e 60%, #1a4a6e 100%)' }}>
-                  {/* dismiss */}
+                  style={{ background: 'linear-gradient(120deg, #1e2d6b 0%, #2d3a8c 100%)' }}>
                   <button onClick={() => setDismissedIds(prev => { const next = new Set(Array.from(prev)); next.add(a.id); return next; })}
-                    className="absolute top-3 right-3 text-white/50 hover:text-white/90 text-lg leading-none z-10">✕</button>
-                  <div className="px-4 pt-4 pb-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xl">⭐</span>
-                      <span className="text-xs font-bold text-white/70 uppercase tracking-widest">Earket Pro</span>
+                    className="absolute top-2.5 right-3 text-white/40 hover:text-white/80 text-base leading-none z-10">✕</button>
+                  <div className="px-4 py-3 flex items-center gap-3">
+                    <span className="text-lg shrink-0">⭐</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-semibold text-xs leading-snug pr-4">{a.message}</p>
                     </div>
-                    <p className="text-white font-bold text-base leading-snug mb-3 pr-6">{a.message}</p>
                     {!proJoined ? (
                       <button
                         disabled={joiningPro}
@@ -260,13 +258,13 @@ export default function DashboardPage() {
                           setProJoined(true)
                           setJoiningPro(false)
                         }}
-                        className="inline-flex items-center gap-1.5 bg-white text-brand-dark text-xs font-bold px-4 py-2 rounded-xl hover:bg-gray-100 transition-colors disabled:opacity-50">
-                        {joiningPro ? 'Joining...' : '✨ Join the Waitlist — It\'s Free'}
+                        className="shrink-0 bg-white text-indigo-900 text-[11px] font-bold px-3 py-1.5 rounded-xl hover:bg-indigo-50 transition-colors disabled:opacity-50 whitespace-nowrap">
+                        {joiningPro ? '...' : 'Join Free →'}
                       </button>
                     ) : (
-                      <div className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-4 py-2 rounded-xl">
-                        ✅ You're on the waitlist!
-                      </div>
+                      <span className="shrink-0 bg-white/20 text-white text-[11px] font-semibold px-3 py-1.5 rounded-xl whitespace-nowrap">
+                        ✅ Joined
+                      </span>
                     )}
                   </div>
                 </div>
