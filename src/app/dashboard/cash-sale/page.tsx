@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase';
 interface Product {
   id: string;
   name: string;
-  price: number; // stored in kobo
+  price: number;
   stock_quantity: number;
   sku?: string;
 }
@@ -58,16 +58,16 @@ export default function CashSalePage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // Load merchant and products
   useEffect(() => {
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.push('/login'); return; }
+      const email = user?.email || (typeof window !== 'undefined' ? localStorage.getItem('earket_merchant_email') : null);
+      if (!email) { router.push('/login'); return; }
 
       const { data: merchant } = await supabase
         .from('merchants')
         .select('id, business_name')
-        .eq('user_id', user.id)
+        .eq('email', email)
         .single();
 
       if (!merchant) { router.push('/onboarding'); return; }
@@ -118,7 +118,6 @@ export default function CashSalePage() {
     }
   };
 
-  // Lookup customer by WhatsApp when number is entered
   const lookupCustomer = useCallback(async (number: string) => {
     if (!merchantId || number.length < 7) {
       setExistingCustomer(null);
@@ -193,7 +192,6 @@ export default function CashSalePage() {
     setErrorMessage('');
 
     try {
-      // Upsert customer if WhatsApp provided
       let customerId: string | null = null;
       if (customerWhatsApp && merchantId) {
         const { data: custData, error: custErr } = await supabase.rpc('upsert_customer', {
@@ -207,7 +205,6 @@ export default function CashSalePage() {
         if (!custErr && custData) customerId = custData;
       }
 
-      // Create order
       const { data: order, error: orderErr } = await supabase
         .from('orders')
         .insert({
@@ -226,7 +223,6 @@ export default function CashSalePage() {
 
       if (orderErr || !order) throw orderErr || new Error('Failed to create order');
 
-      // Insert order items
       const orderItems = cart.map(i => ({
         order_id: order.id,
         product_id: i.product.id,
@@ -238,7 +234,6 @@ export default function CashSalePage() {
       const { error: itemsErr } = await supabase.from('order_items').insert(orderItems);
       if (itemsErr) throw itemsErr;
 
-      // Update stock
       for (const item of cart) {
         await supabase
           .from('products')
@@ -246,7 +241,6 @@ export default function CashSalePage() {
           .eq('id', item.product.id);
       }
 
-      // Build WhatsApp receipt
       if (customerWhatsApp) {
         const lines = cart.map(i =>
           `• ${i.product.name} x${i.quantity} — ₦${((i.product.price * i.quantity) / 100).toLocaleString()}`
@@ -260,7 +254,6 @@ export default function CashSalePage() {
         window.open(`https://wa.me/${customerWhatsApp.replace(/\D/g, '')}?text=${msg}`, '_blank');
       }
 
-      // Reset
       setCart([]);
       setCustomerName('');
       setCustomerWhatsApp('');
@@ -270,7 +263,6 @@ export default function CashSalePage() {
       setTimeout(() => setSuccessMessage(''), 3000);
       if (merchantId) loadTodaySales(merchantId);
 
-      // Refresh product stock
       const { data: prods } = await supabase
         .from('products')
         .select('id, name, price, stock_quantity, sku')
@@ -298,7 +290,6 @@ export default function CashSalePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button onClick={() => router.push('/dashboard')} className="text-gray-500 hover:text-gray-700">
@@ -322,7 +313,6 @@ export default function CashSalePage() {
         </div>
       </div>
 
-      {/* Notifications */}
       {successMessage && (
         <div className="mx-4 mt-3 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">{successMessage}</div>
       )}
@@ -332,7 +322,6 @@ export default function CashSalePage() {
 
       {activeTab === 'sale' && (
         <div className="max-w-6xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Left: Product selection */}
           <div className="space-y-3">
             <div className="bg-white rounded-xl border border-gray-200 p-4">
               <h2 className="font-medium text-gray-900 mb-3">Products</h2>
@@ -367,9 +356,7 @@ export default function CashSalePage() {
             </div>
           </div>
 
-          {/* Right: Cart + customer */}
           <div className="space-y-3">
-            {/* Cart */}
             <div className="bg-white rounded-xl border border-gray-200 p-4">
               <h2 className="font-medium text-gray-900 mb-3">Cart</h2>
               {cart.length === 0 ? (
@@ -410,7 +397,6 @@ export default function CashSalePage() {
               )}
             </div>
 
-            {/* Customer details */}
             <div className="bg-white rounded-xl border border-gray-200 p-4">
               <h2 className="font-medium text-gray-900 mb-3">Customer <span className="text-gray-400 font-normal text-xs">(optional)</span></h2>
 
@@ -450,7 +436,6 @@ export default function CashSalePage() {
               </div>
             </div>
 
-            {/* Save button */}
             <button
               onClick={handleSaveSale}
               disabled={saving || cart.length === 0}
