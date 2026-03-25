@@ -42,6 +42,7 @@ export default function CashSalePage() {
   const [todayCount, setTodayCount] = useState(0)
   const [tab, setTab] = useState<'sale' | 'today'>('sale')
   const [todayOrders, setTodayOrders] = useState<any[]>([])
+  const [saveError, setSaveError] = useState<string | null>(null)
   const lookupTimer = useRef<NodeJS.Timeout>()
 
   async function loadData() {
@@ -120,10 +121,7 @@ export default function CashSalePage() {
     const lines = cart.map(i => `  • ${i.product.name} x${i.qty}  ${fmt(i.product.price * i.qty)}`)
     const currentPoints = (returningCustomer?.loyalty_points || 0) + pointsEarned
     const toReward = LOYALTY_REWARD_THRESHOLD - currentPoints
-    const loyaltyLine = `\n\n⭐ *Your loyalty points: ${currentPoints}*\n${toReward > 0
-      ? `${toReward} more points and you earn a reward from ${merchant.business_name}!`
-      : `🎉 You have earned a reward! Contact ${merchant.business_name} to redeem it.`
-    }`
+    const loyaltyLine = `\n\n⭐ *Loyalty points balance: ${currentPoints} pts*\nKeep shopping at ${merchant.business_name} to grow your points. Ask the store how to redeem them.`
     return encodeURIComponent(
       `🧾 *Receipt — ${merchant.business_name}*\n` +
       `📅 ${new Date().toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' })}\n\n` +
@@ -159,7 +157,7 @@ export default function CashSalePage() {
         customerId = cid
       } catch (e) { console.error('Customer upsert error:', e) }
     }
-    const { error } = await supabase.from('orders').insert({
+    const insertPayload: any = {
       merchant_id: merchant.id,
       status: 'completed',
       source: 'cash_pos',
@@ -169,15 +167,17 @@ export default function CashSalePage() {
       payment_status: 'cash',
       customer_name: customerName.trim() || 'Walk-in Customer',
       customer_id: customerId,
-      customer_phone: cleanWA || null,
       customer_email: customerEmail.trim() || null,
-    })
+    }
+    if (cleanWA) insertPayload.customer_phone = cleanWA
+    const { error } = await supabase.from('orders').insert(insertPayload)
     if (error) {
       console.error('Order insert error:', error)
-      alert(`Save failed: ${error.message}`)
+      setSaveError(error.message)
       setSaving(false)
       return
     }
+    setSaveError(null)
     const today = new Date().toISOString().split('T')[0]
     try { await supabase.rpc('increment_analytics', { p_merchant_id: merchant.id, p_date: today, p_field: 'views' }) } catch {}
     if (cleanWA) window.open(`https://wa.me/${cleanWA}?text=${buildReceipt(cleanWA)}`, '_blank')
@@ -187,6 +187,7 @@ export default function CashSalePage() {
     setCustomerEmail('')
     setReturningCustomer(null)
     setWaError(null)
+    setSaveError(null)
     setSaving(false)
     setSuccessMsg(cleanWA ? 'Sale recorded — receipt sent via WhatsApp!' : 'Sale recorded!')
     setSuccess(true)
@@ -300,7 +301,7 @@ export default function CashSalePage() {
                 <div className="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5 flex items-start gap-2">
                   <Star size={13} className="text-amber-500 shrink-0 mt-0.5" />
                   <p className="text-xs text-amber-800 leading-snug">
-                    <strong>Share your WhatsApp to earn {pointsEarned} loyalty point{pointsEarned !== 1 ? 's' : ''}!</strong> Collect {LOYALTY_REWARD_THRESHOLD} points and earn a reward from this store. 🎁
+                    Share your WhatsApp number to earn <strong>{pointsEarned} loyalty point{pointsEarned !== 1 ? 's' : ''}</strong> on this purchase. Points add up — ask the store how to redeem them. ⭐
                   </p>
                 </div>
                 {returningCustomer && (
@@ -334,6 +335,12 @@ export default function CashSalePage() {
                   className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-brand-green" />
               </div>
               <div className="border-t border-gray-100" />
+              {saveError && (
+                <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5">
+                  <AlertCircle size={14} className="text-red-500 shrink-0" />
+                  <p className="text-xs text-red-600">{saveError}</p>
+                </div>
+              )}
               <div className="flex items-center gap-3">
                 <div className="flex-1">
                   <p className="text-xs text-gray-500">Total</p>
