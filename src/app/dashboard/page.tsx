@@ -1,10 +1,10 @@
 'use client'
-import { useEffect, useState, useCallback } from 'react'
+import { ShoppingBag, FileText, useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { ShoppingBag, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil, ShoppingCart, TrendingUp, BarChart2, CreditCard, Sparkles, Inbox, Tag } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
-import { getThemeById, getThemeStyle, EARKET_THEMES, type EarketTheme } from '@/lib/themes'
+import { ShoppingBag, FileText, useRouter } from 'next/navigation'
+import { ShoppingBag, FileText, ShoppingBag, Package, Plus, ExternalLink, LogOut, RefreshCw, Settings, Pencil, ShoppingCart, TrendingUp, BarChart2, CreditCard, Sparkles, Inbox, Tag } from 'lucide-react'
+import { ShoppingBag, FileText, supabase } from '@/lib/supabase'
+import { ShoppingBag, FileText, getThemeById, getThemeStyle, EARKET_THEMES, type EarketTheme } from '@/lib/themes'
 
 interface Merchant {
   id: string
@@ -357,7 +357,29 @@ export default function DashboardPage() {
             </a>
           </div>
           <div className="mt-2">
-            <Link href="/dashboard/broadcast"
+            <Link href="/dashboard/cash-sale"
+            className="flex items-center gap-3 bg-white rounded-2xl p-3 border border-gray-100 hover:border-brand-green transition-colors">
+            <div className="w-10 h-10 bg-brand-green/10 rounded-xl flex items-center justify-center shrink-0">
+              <ShoppingBag size={18} className="text-brand-green" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-900">Cash Sale</p>
+              <p className="text-xs text-gray-500">Record a walk-in sale</p>
+            </div>
+          </Link>
+
+          <Link href="/dashboard/credit-report"
+            className="flex items-center gap-3 bg-white rounded-2xl p-3 border border-gray-100 hover:border-brand-green transition-colors">
+            <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center shrink-0">
+              <FileText size={18} className="text-purple-600" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-900">Credit Report</p>
+              <p className="text-xs text-gray-500">Generate sales report for loans</p>
+            </div>
+          </Link>
+
+          <Link href="/dashboard/broadcast"
               className="w-full flex items-center justify-center gap-1.5 bg-gray-50 text-gray-600 text-xs font-semibold py-2.5 rounded-xl border border-gray-200">
               📢 Broadcast to Customers
             </Link>
