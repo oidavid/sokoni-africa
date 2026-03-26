@@ -6,10 +6,10 @@ import { supabase } from '@/lib/supabase'
 import { COUNTRIES, formatMoney } from '@/lib/countries'
 import { getCart, saveCart, addToCart as addToLocalCart, clearCart, type CartItem as LocalCartItem } from '@/lib/cart'
 import { getThemeById, getThemeStyle } from '@/lib/themes'
+import { getPlaceholderImage } from '@/lib/placeholders'
 import ServiceStorefrontPage from '@/components/ServiceStorefrontPage'
 import ConsultationStorefrontPage from '@/components/ConsultationStorefrontPage'
 import ServicesLedStorefrontPage from '@/components/ServicesLedStorefrontPage'
-import { getPlaceholderImage } from '@/lib/placeholders'
 
 interface Merchant {
   id: string
@@ -350,7 +350,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                   <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-brand-light">
                     {item.product.image_url
                       ? <img src={item.product.image_url} alt={item.product.name} className="w-full h-full object-cover" />
-                      : <img src={getPlaceholderImage(item.product.name, store.category, store.country)} alt={item.product.name} className="w-full h-full object-cover" />
+                      : <img src={getPlaceholderImage(item.product.id, store.category, store.country)} alt={item.product.name} className="w-full h-full object-cover" />
                     }
                   </div>
                   <div className="flex-1 min-w-0">
@@ -499,7 +499,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
               {variantModal.image_url ? (
                 <img src={variantModal.image_url} alt={variantModal.name} className="w-16 h-16 rounded-2xl object-cover shrink-0" />
               ) : (
-                <img src={getPlaceholderImage(variantModal.name, store?.category, store?.country)} alt={variantModal.name} className="w-16 h-16 rounded-2xl object-cover shrink-0" />
+                <img src={getPlaceholderImage(variantModal.id, store?.category, store?.country)} alt={variantModal.name} className="w-16 h-16 rounded-2xl object-cover shrink-0" />
               )}
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-gray-800 text-sm leading-tight">{variantModal.name}</p>
@@ -802,9 +802,9 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                         loading="lazy" />
                     ) : (
                       <img
-                        src={getPlaceholderImage(product.name, store.category, store.country)}
+                        src={getPlaceholderImage(product.id, store.category, store.country)}
                         alt={product.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                         loading="lazy"
                       />
                     )}
