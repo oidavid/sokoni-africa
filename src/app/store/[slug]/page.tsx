@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Search, MapPin, Share2, ShoppingCart, Plus, Minus, X, ChevronDown, SlidersHorizontal, User, Star, MessageCircle, LogOut, Heart } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import { COUNTRIES } from '@/lib/countries'
+import { COUNTRIES, formatMoney } from '@/lib/countries'
 import { getCart, saveCart, addToCart as addToLocalCart, clearCart, type CartItem as LocalCartItem } from '@/lib/cart'
 import { getThemeById, getThemeStyle } from '@/lib/themes'
 import ServiceStorefrontPage from '@/components/ServiceStorefrontPage'
@@ -27,6 +27,7 @@ interface Merchant {
   holiday_message?: string
   business_hours?: Record<string, {open: string; close: string; closed: boolean}>
   theme_preset?: string
+  country?: string
 }
 
 interface Product {
@@ -69,9 +70,9 @@ const CATEGORY_EMOJI: Record<string, string> = {
   health: '💊', stationery: '📚', automobile: '🚗', other: '🏪'
 }
 
-function formatPrice(p: Product) {
+function formatPrice(p: Product, country?: string | null) {
   if (p.price_display) return p.price_display
-  return `₦${(p.price / 100).toLocaleString()}`
+  return formatMoney(p.price, country)
 }
 
 const PRODUCTS_PER_PAGE = 24
@@ -180,7 +181,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
         productId: i.product.id,
         productName: i.product.name,
         price: i.product.price,
-        priceDisplay: i.product.price_display || formatPrice(i.product),
+        priceDisplay: i.product.price_display || formatPrice(i.product, store?.country),
         imageUrl: i.product.image_url,
         qty: i.qty,
         variantName: null,
@@ -278,8 +279,8 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
       setDiscountError('This code has expired')
     } else if (data.max_uses && data.uses >= data.max_uses) {
       setDiscountError('This code has reached its usage limit')
-    } else if (data.min_order > 0 && cartTotal / 100 < data.min_order) {
-      setDiscountError(`Minimum order of ${data.min_order} required`)
+    } else if (data.min_order > 0 && cartTotal < data.min_order) {
+      setDiscountError(`Minimum order of ${formatMoney(data.min_order, store!.country)} required`)
     } else {
       setAppliedDiscount({ code: data.code, type: data.type, value: data.value, id: data.id })
       setDiscountError('')
@@ -290,7 +291,9 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
   function getDiscountAmount() {
     if (!appliedDiscount) return 0
     if (appliedDiscount.type === 'percent') return Math.round(cartTotal * appliedDiscount.value / 100)
-    return appliedDiscount.value * 100
+    // For subunit currencies (e.g. Nigeria kobo), flat discount is stored as whole units — convert to subunits
+    const { subunit } = formatMoney ? (() => { const c = COUNTRIES.find(c => c.code === store.country); return { subunit: c?.subunit ?? true } })() : { subunit: true }
+    return subunit ? appliedDiscount.value * 100 : appliedDiscount.value
   }
 
   const useWhatsApp = store.order_mode === 'whatsapp' || store.order_mode === 'both' || !store.order_mode
@@ -348,7 +351,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-800 text-xs truncate">{item.product.name}</p>
-                    <p className="font-bold text-sm" style={{ color: store.theme_color || '#1A7A4A' }}>{formatPrice(item.product)}</p>
+                    <p className="font-bold text-sm" style={{ color: store.theme_color || '#1A7A4A' }}>{formatPrice(item.product, store.country)}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <button onClick={() => updateQty(item.product.id, item.qty - 1)} className="w-6 h-6 bg-white border border-gray-200 rounded-lg flex items-center justify-center"><Minus size={10} /></button>
                       <span className="text-xs font-bold w-4 text-center">{item.qty}</span>
@@ -384,17 +387,17 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-500 text-sm">Subtotal</span>
-                  <span className="text-sm text-gray-700">₦{(cartTotal / 100).toLocaleString()}</span>
+                  <span className="text-sm text-gray-700">{formatMoney(cartTotal, store.country)}</span>
                 </div>
                 {appliedDiscount && (
                   <div className="flex justify-between items-center">
-                    <span className="text-green-600 text-sm">Discount ({appliedDiscount.type === 'percent' ? `${appliedDiscount.value}%` : `₦${appliedDiscount.value}`})</span>
-                    <span className="text-green-600 font-semibold text-sm">-₦{(getDiscountAmount() / 100).toLocaleString()}</span>
+                    <span className="text-green-600 text-sm">Discount ({appliedDiscount.type === 'percent' ? `${appliedDiscount.value}%` : formatMoney(appliedDiscount.value, store.country)})</span>
+                    <span className="text-green-600 font-semibold text-sm">-{formatMoney(getDiscountAmount(), store.country)}</span>
                   </div>
                 )}
                 <div className="flex justify-between items-center border-t border-gray-100 pt-2">
                   <span className="text-gray-500 text-sm font-semibold">Total</span>
-                  <span className="font-display font-bold text-lg" style={{ color: store.theme_color || '#1A7A4A' }}>₦{((cartTotal - getDiscountAmount()) / 100).toLocaleString()}</span>
+                  <span className="font-display font-bold text-lg" style={{ color: store.theme_color || '#1A7A4A' }}>{formatMoney(cartTotal - getDiscountAmount(), store.country)}</span>
                 </div>
                 <Link href={`/store/${store.slug}/checkout?cart=${encodeURIComponent(JSON.stringify(cart.map(i => ({ id: i.product.id, qty: i.qty }))))}&discount=${encodeURIComponent(JSON.stringify(appliedDiscount || null))}`}
                   onClick={() => setCartOpen(false)}
@@ -446,9 +449,9 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                           if (rawWaPhone.startsWith(waCountry.dial)) localWaDigits = rawWaPhone.slice(waCountry.dial.length)
                           else if (rawWaPhone.startsWith('0')) localWaDigits = rawWaPhone.slice(1)
                           if (!rawWaPhone || localWaDigits.length < 10) { setWaError('Please enter a valid 10-digit WhatsApp number'); return }
-                          const lines = cart.map(i => `• ${i.product.name} x${i.qty} — ${formatPrice(i.product)}`).join('\n')
-                          const merchantMsg = `Hi ${store.business_name}! I'd like to order:\n\n${lines}\n\nTotal: ₦${(cartTotal / 100).toLocaleString()}\n\nName: ${waName}\nWhatsApp: ${waPhone}\n\nPlease confirm. Thank you!`
-                          const customerMsg = `Hi ${waName || 'there'}! Here is your order summary from *${store.business_name}*:\n\n${lines}\n\nTotal: ₦${(cartTotal / 100).toLocaleString()}\n\nThe merchant will confirm your order shortly.`
+                          const lines = cart.map(i => `• ${i.product.name} x${i.qty} — ${formatPrice(i.product, store.country)}`).join('\n')
+                          const merchantMsg = `Hi ${store.business_name}! I'd like to order:\n\n${lines}\n\nTotal: ${formatMoney(cartTotal, store.country)}\n\nName: ${waName}\nWhatsApp: ${waPhone}\n\nPlease confirm. Thank you!`
+                          const customerMsg = `Hi ${waName || 'there'}! Here is your order summary from *${store.business_name}*:\n\n${lines}\n\nTotal: ${formatMoney(cartTotal, store.country)}\n\nThe merchant will confirm your order shortly.`
                           const merchantWa = store.whatsapp_number?.replace(/\D/g, '')
                           const rawPhone = waPhone.replace(/\D/g, '')
                           // Strip leading zero or country code if already included
@@ -498,8 +501,8 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                 <p className="font-semibold text-gray-800 text-sm leading-tight">{variantModal.name}</p>
                 <p className="font-bold text-sm mt-0.5" style={{ color: store?.theme_color || '#1A7A4A' }}>
                   {selectedVariantIndex !== null && variantModal.variants
-                    ? variantModal.variants[selectedVariantIndex].price_display || `₦${(variantModal.variants[selectedVariantIndex].price/100).toLocaleString()}`
-                    : (() => { const prices = variantModal.variants!.map(v => v.price); const min = Math.min(...prices); const max = Math.max(...prices); return min === max ? `₦${(min/100).toLocaleString()}` : `₦${(min/100).toLocaleString()} – ₦${(max/100).toLocaleString()}` })()
+                    ? variantModal.variants[selectedVariantIndex].price_display || formatMoney(variantModal.variants[selectedVariantIndex].price, store?.country)
+                    : (() => { const prices = variantModal.variants!.map(v => v.price); const min = Math.min(...prices); const max = Math.max(...prices); return min === max ? formatMoney(min, store?.country) : `${formatMoney(min, store?.country)} – ${formatMoney(max, store?.country)}` })()
                   }
                 </p>
               </div>
@@ -521,7 +524,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                       } ${v.stock_qty === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
                       style={selectedVariantIndex === i ? { backgroundColor: store?.theme_color || '#1A7A4A' } : {}}>
                       {v.name}
-                      <span className="ml-1.5 text-xs">{v.price_display || `₦${(v.price/100).toLocaleString()}`}</span>
+                      <span className="ml-1.5 text-xs">{v.price_display || formatMoney(v.price, store?.country)}</span>
                     </button>
                   ))}
                 </div>
@@ -554,7 +557,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                       ...variantModal,
                       name: `${variantModal.name} (${variant.name})`,
                       price: variant.price,
-                      price_display: variant.price_display || `₦${(variant.price/100).toLocaleString()}`,
+                      price_display: variant.price_display || formatMoney(variant.price, store?.country),
                     }
                     setCart(prev => {
                       const existing = prev.find(i => i.product.id === productWithVariant.id && i.product.name === productWithVariant.name)
@@ -658,7 +661,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
             style={{ backgroundColor: 'rgba(0,0,0,0.25)' }}
             className="flex items-center justify-center gap-2 py-3 text-sm font-semibold text-white flex-1">
             <ShoppingCart size={16} />
-            {cartCount > 0 ? `Cart (${cartCount}) · ₦${(cartTotal / 100).toLocaleString()}` : 'View Cart'}
+            {cartCount > 0 ? `Cart (${cartCount}) · ${formatMoney(cartTotal, store.country)}` : 'View Cart'}
           </button>
           <div className="relative">
             <button onClick={() => setAccountMenuOpen(!accountMenuOpen)}
@@ -820,7 +823,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                     <h3 className="font-semibold text-gray-800 text-sm leading-tight mb-1 line-clamp-2 hover:text-brand-green transition-colors">{product.name}</h3>
                   </Link>
                     <p className="font-display font-bold text-base mb-2" style={{ color: store.theme_color || '#1A7A4A' }}>
-                      {formatPrice(product)}
+                      {formatPrice(product, store.country)}
                     </p>
 
                     {product.in_stock ? (
@@ -866,7 +869,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
           style={{ backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') }}
         className="fixed bottom-6 right-6 font-bold px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 transition-colors z-40">
           <ShoppingCart size={18} />
-          {cartCount} item{cartCount > 1 ? 's' : ''} · ₦{(cartTotal / 100).toLocaleString()}
+          {cartCount} item{cartCount > 1 ? 's' : ''} · {formatMoney(cartTotal, store.country)}
         </button>
       )}
 
