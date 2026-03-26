@@ -291,9 +291,9 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
   function getDiscountAmount() {
     if (!appliedDiscount) return 0
     if (appliedDiscount.type === 'percent') return Math.round(cartTotal * appliedDiscount.value / 100)
-    // For subunit currencies (e.g. Nigeria kobo), flat discount is stored as whole units — convert to subunits
-    const { subunit } = formatMoney ? (() => { const c = COUNTRIES.find(c => c.code === store.country); return { subunit: c?.subunit ?? true } })() : { subunit: true }
-    return subunit ? appliedDiscount.value * 100 : appliedDiscount.value
+    const country = COUNTRIES.find(c => c.code === store.country)
+    const isSubunit = country?.subunit ?? true
+    return isSubunit ? appliedDiscount.value * 100 : appliedDiscount.value
   }
 
   const useWhatsApp = store.order_mode === 'whatsapp' || store.order_mode === 'both' || !store.order_mode
