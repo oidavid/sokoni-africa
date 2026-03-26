@@ -72,7 +72,6 @@ function CheckoutForm() {
   const [showWaCountryPicker, setShowWaCountryPicker] = useState(false)
   const [waError, setWaError] = useState('')
   const [payingOnline, setPayingOnline] = useState(false)
-  const [summaryExpanded, setSummaryExpanded] = useState(false)
   const [customerPoints, setCustomerPoints] = useState(0)
   const [applyPoints, setApplyPoints] = useState(false)
   const [pointsDiscount, setPointsDiscount] = useState(0)
@@ -382,34 +381,17 @@ function CheckoutForm() {
       <div className="p-4 space-y-4">
         {/* Order summary */}
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          {/* Header - tap to expand/collapse */}
-          <button onClick={() => setSummaryExpanded(p => !p)}
-            className="w-full px-4 py-3 flex items-center gap-2 border-b border-gray-50">
-            <ShoppingCart size={15} className="text-brand-green" />
-            <span className="font-display font-bold text-brand-dark text-sm flex-1 text-left">
-              {cart.length} item{cart.length !== 1 ? 's' : ''} · {fmt(rawSubtotal, store?.country)}
-            </span>
-            <span className="text-xs text-brand-green font-semibold">
-              {summaryExpanded ? 'Hide ▲' : 'Show ▼'}
-            </span>
-          </button>
-          {/* Collapsed preview */}
-          {!summaryExpanded && (
-            <div className="px-4 py-2 flex flex-wrap gap-1.5">
-              {cart.slice(0, 2).map(item => (
-                <span key={item.product.id} className="text-xs bg-gray-100 rounded-lg px-2 py-1 text-gray-600 truncate max-w-[160px]">
-                  {item.product.name} ×{item.qty}
-                </span>
-              ))}
-              {cart.length > 2 && (
-                <span className="text-xs bg-brand-light rounded-lg px-2 py-1 text-brand-green font-semibold">
-                  +{cart.length - 2} more
-                </span>
-              )}
+          <div className="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ShoppingCart size={15} className="text-brand-green" />
+              <span className="font-display font-bold text-brand-dark text-sm">Order Summary</span>
             </div>
-          )}
-          {/* Expanded item list */}
-          {summaryExpanded && cart.map((item, i) => (
+            <Link href={`/store/${slug}`}
+              className="text-xs font-semibold text-brand-green bg-brand-light px-3 py-1.5 rounded-xl hover:bg-green-100 transition-colors">
+              + Add items
+            </Link>
+          </div>
+          {cart.map((item, i) => (
             <div key={item.product.id}
               className={`px-4 py-3 flex items-center gap-3 ${i < cart.length - 1 ? 'border-b border-gray-50' : ''}`}>
               <div className="flex-1 min-w-0">
@@ -558,19 +540,13 @@ function CheckoutForm() {
           </div>
         </div>
 
-        {/* Place Order + Continue Shopping */}
-        <div className="flex gap-2">
-          <Link href={`/store/${slug}`}
-            className="flex items-center justify-center gap-1.5 border-2 border-gray-200 text-gray-500 font-semibold px-4 py-4 rounded-2xl hover:border-gray-300 hover:text-gray-700 transition-colors shrink-0 text-sm">
-            ← Shop
-          </Link>
-          <button onClick={handleSubmit} disabled={submitting || cart.length === 0}
-            className="flex-1 bg-brand-green text-white font-bold py-4 rounded-2xl hover:bg-brand-dark transition-colors disabled:opacity-40 flex items-center justify-center gap-2">
-            {submitting
-              ? <><Loader2 size={18} className="animate-spin" /> Placing Order...</>
-              : <><Check size={18} /> Place Order · {fmt(subtotal, store?.country)}</>}
-          </button>
-        </div>
+        {/* Place Order */}
+        <button onClick={handleSubmit} disabled={submitting || cart.length === 0}
+          className="w-full bg-brand-green text-white font-bold py-4 rounded-2xl hover:bg-brand-dark transition-colors disabled:opacity-40 flex items-center justify-center gap-2">
+          {submitting
+            ? <><Loader2 size={18} className="animate-spin" /> Placing Order...</>
+            : <><Check size={18} /> Place Order · {fmt(subtotal, store?.country)}</>}
+        </button>
 
         {/* Points Redemption */}
         {customerPoints > 0 && (
