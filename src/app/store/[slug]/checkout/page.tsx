@@ -84,6 +84,9 @@ function CheckoutForm() {
       const { data: merchant } = await supabase.from('merchants').select('*').eq('slug', slug).single()
       if (!merchant) return
       setStore(merchant)
+      // Default phone country pickers to merchant's country
+      const merchantCountry = COUNTRIES.find(c => c.code === merchant.country)
+      if (merchantCountry) { setPhoneCountry(merchantCountry); setWaCountry(merchantCountry) }
       // Load cart from localStorage
       const savedCart = getCart(slug)
       if (savedCart.length > 0) {
