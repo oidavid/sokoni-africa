@@ -4,7 +4,7 @@ import { useSearchParams, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Check, Loader2, ShoppingCart, MapPin, Phone, User } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { COUNTRIES } from '@/lib/countries'
+import { COUNTRIES, formatMoney } from '@/lib/countries'
 import { getCart, clearCart } from '@/lib/cart'
 
 interface Product {
@@ -40,8 +40,8 @@ interface Merchant {
   country?: string
 }
 
-function formatNaira(amount: number) {
-  return `₦${(amount / 100).toLocaleString()}`
+function fmt(amount: number, country?: string | null) {
+  return formatMoney(amount, country)
 }
 
 function CheckoutForm() {
@@ -172,8 +172,8 @@ function CheckoutForm() {
       setDiscountError('This code has expired')
     } else if (data.max_uses && data.uses >= data.max_uses) {
       setDiscountError('This code has reached its usage limit')
-    } else if (data.min_order > 0 && rawSubtotal / 100 < data.min_order) {
-      setDiscountError(`Minimum order of ₦${data.min_order.toLocaleString()} required`)
+    } else if (data.min_order > 0 && rawSubtotal < data.min_order) {
+      setDiscountError(`Minimum order of ${fmt(data.min_order, store?.country)} required`)
     } else {
       setAppliedDiscount({ code: data.code, type: data.type, value: data.value, id: data.id })
       setDiscountError('')
@@ -184,7 +184,8 @@ function CheckoutForm() {
   function getDiscountAmount() {
     if (!appliedDiscount) return 0
     if (appliedDiscount.type === 'percent') return Math.round(rawSubtotal * appliedDiscount.value / 100)
-    return appliedDiscount.value * 100
+    const country = COUNTRIES.find(c => c.code === store?.country)
+    return (country?.subunit ?? true) ? appliedDiscount.value * 100 : appliedDiscount.value
   }
 
   const subtotal = Math.max(0, rawSubtotal - (applyPoints ? pointsDiscount : 0) - getDiscountAmount())
@@ -232,7 +233,7 @@ function CheckoutForm() {
       subtotal,
       status: 'new',
       source: 'web',
-      notes: `${fulfillment === 'pickup' ? 'PICKUP ORDER. ' : ''}${applyPoints && pointsDiscount > 0 ? `[Points discount: -₦${(pointsDiscount/100).toLocaleString()}] ` : ''}${appliedDiscount ? `[Discount code: ${appliedDiscount.code} -${appliedDiscount.type === 'percent' ? appliedDiscount.value + '%' : '₦' + appliedDiscount.value}] ` : ''}${notes}`,
+      notes: `${fulfillment === 'pickup' ? 'PICKUP ORDER. ' : ''}${applyPoints && pointsDiscount > 0 ? `[Points discount: -${fmt(pointsDiscount, store?.country)}] ` : ''}${appliedDiscount ? `[Discount code: ${appliedDiscount.code} -${appliedDiscount.type === 'percent' ? appliedDiscount.value + '%' : fmt(appliedDiscount.value, store?.country)}] ` : ''}${notes}`,
       customer_id: (() => {
         try {
           const c = localStorage.getItem(`earket_customer_${slug}`)
@@ -240,13 +241,13 @@ function CheckoutForm() {
         } catch { return null }
       })(),
     })
-    const itemLines = cart.map(i => `• ${i.product.name} x${i.qty} — ${i.product.price_display || formatNaira(i.product.price)}`).join('\n')
+    const itemLines = cart.map(i => `• ${i.product.name} x${i.qty} — ${i.product.price_display || fmt(i.product.price, store?.country)}`).join('\n')
     const rawP = phone.replace(/\D/g, '')
     const localP = rawP.startsWith('0') ? rawP.slice(1) : rawP.startsWith(phoneCountry.dial) ? rawP.slice(phoneCountry.dial.length) : rawP
     const normalizedPhone = phoneCountry.dial + localP
     // Notify merchant via WhatsApp silently (non-blocking)
-    const discountLine = appliedDiscount ? `\n🏷️ Discount: ${appliedDiscount.code} (${appliedDiscount.type === 'percent' ? appliedDiscount.value + '% off' : '₦' + appliedDiscount.value + ' off'}) = -${formatNaira(getDiscountAmount())}` : ''
-    const msg = `🛍️ New Order ${orderNum} — ${store.business_name}!\n\n${itemLines}${discountLine}\n\nTotal: ${formatNaira(subtotal)}\n\nCustomer: ${name}\nPhone: +${normalizedPhone}\n${fulfillment === 'delivery' ? `Delivery to: ${address}` : '📦 PICKUP — customer will collect'}\n${notes ? `Notes: ${notes}` : ''}\n\nReply to confirm.\n\n📲 Tap to message customer: https://wa.me/${normalizedPhone}`
+    const discountLine = appliedDiscount ? `\n🏷️ Discount: ${appliedDiscount.code} (${appliedDiscount.type === 'percent' ? appliedDiscount.value + '% off' : fmt(appliedDiscount.value, store?.country) + ' off'}) = -${fmt(getDiscountAmount(), store?.country)}` : ''
+    const msg = `🛍️ New Order ${orderNum} — ${store.business_name}!\n\n${itemLines}${discountLine}\n\nTotal: ${fmt(subtotal, store?.country)}\n\nCustomer: ${name}\nPhone: +${normalizedPhone}\n${fulfillment === 'delivery' ? `Delivery to: ${address}` : '📦 PICKUP — customer will collect'}\n${notes ? `Notes: ${notes}` : ''}\n\nReply to confirm.\n\n📲 Tap to message customer: https://wa.me/${normalizedPhone}`
     // Open WhatsApp in background to notify merchant
     const waWindow = window.open(`https://wa.me/${store.whatsapp_number?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank')
     // Auto-close WhatsApp tab after 3 seconds if opened
@@ -264,7 +265,8 @@ function CheckoutForm() {
         const storedCustomer = localStorage.getItem(`earket_customer_${slug}`)
         if (storedCustomer && store) {
           const customer = JSON.parse(storedCustomer)
-          const pointsUsed = Math.ceil(pointsDiscount / 100)
+          const isSubunit = COUNTRIES.find(c => c.code === store?.country)?.subunit ?? true
+          const pointsUsed = Math.ceil(isSubunit ? pointsDiscount / 100 : pointsDiscount)
           const { data: existing } = await supabase.from('customer_points')
             .select('id, points').eq('customer_id', customer.id).eq('merchant_id', store.id).maybeSingle()
           if (existing) {
@@ -274,7 +276,7 @@ function CheckoutForm() {
             await supabase.from('points_transactions').insert({
               customer_id: customer.id, merchant_id: store.id,
               points: -pointsUsed, type: 'redeem',
-              note: `Redeemed at checkout for ₦${(pointsDiscount/100).toLocaleString()} discount`
+              note: `Redeemed at checkout for ${fmt(pointsDiscount, store?.country)} discount`
             })
           }
         }
@@ -302,10 +304,10 @@ function CheckoutForm() {
     const rawPhone = customerPhone.replace(/\D/g, '')
     const minLength = rawPhone.startsWith('0') ? 11 : 10
     if (!rawPhone || rawPhone.length < minLength) { setWaError('Please enter a valid WhatsApp number (e.g. 08037459899)'); return }
-    const itemLines = cart.map(i => `• ${i.product.name} x${i.qty} — ${i.product.price_display || formatNaira(i.product.price)}`).join('\n')
+    const itemLines = cart.map(i => `• ${i.product.name} x${i.qty} — ${i.product.price_display || fmt(i.product.price, store?.country)}`).join('\n')
     const localPhone = rawPhone.startsWith('0') ? rawPhone.slice(1) : rawPhone.startsWith(waCountry.dial) ? rawPhone.slice(waCountry.dial.length) : rawPhone
     const waPhone = waCountry.dial + localPhone
-    const msg = `Hi ${store.business_name}! I'd like to order:\n\n${itemLines}\n\nTotal: ${formatNaira(subtotal)}\n\nName: ${customerName}\nWhatsApp: ${customerPhone}\n${fulfillment === 'delivery' && address ? `Address: ${address}` : fulfillment === 'pickup' ? 'I will pick up' : ''}\n${notes ? `Notes: ${notes}` : ''}\n\nPlease confirm. Thank you!\n\n📲 Tap to message customer: https://wa.me/${waPhone}`
+    const msg = `Hi ${store.business_name}! I'd like to order:\n\n${itemLines}\n\nTotal: ${fmt(subtotal, store?.country)}\n\nName: ${customerName}\nWhatsApp: ${customerPhone}\n${fulfillment === 'delivery' && address ? `Address: ${address}` : fulfillment === 'pickup' ? 'I will pick up' : ''}\n${notes ? `Notes: ${notes}` : ''}\n\nPlease confirm. Thank you!\n\n📲 Tap to message customer: https://wa.me/${waPhone}`
     window.open(`https://wa.me/${store.whatsapp_number?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank')
     // Save to database
     const orderNum = 'ORD-' + Math.floor(1000 + Math.random() * 9000)
@@ -387,7 +389,7 @@ function CheckoutForm() {
                 <p className="text-xs text-gray-400">Qty: {item.qty}</p>
               </div>
               <p className="font-bold text-brand-green text-sm shrink-0">
-                {formatNaira(item.product.price * item.qty)}
+                {fmt(item.product.price * item.qty, store?.country)}
               </p>
             </div>
           ))}
@@ -413,17 +415,17 @@ function CheckoutForm() {
           <div className="px-4 pb-3 space-y-1 border-t border-gray-50">
             <div className="flex justify-between text-sm text-gray-500">
               <span>Subtotal</span>
-              <span>{formatNaira(rawSubtotal)}</span>
+              <span>{fmt(rawSubtotal, store?.country)}</span>
             </div>
             {appliedDiscount && (
               <div className="flex justify-between text-sm text-green-600">
-                <span>Discount ({appliedDiscount.type === 'percent' ? `${appliedDiscount.value}%` : `₦${appliedDiscount.value}`})</span>
-                <span>-{formatNaira(getDiscountAmount())}</span>
+                <span>Discount ({appliedDiscount.type === 'percent' ? `${appliedDiscount.value}%` : fmt(appliedDiscount.value, store?.country)})</span>
+                <span>-{fmt(getDiscountAmount(), store?.country)}</span>
               </div>
             )}
             <div className="flex justify-between">
               <span className="font-bold text-gray-800">Total</span>
-              <span className="font-display font-bold text-brand-dark text-lg">{formatNaira(subtotal)}</span>
+              <span className="font-display font-bold text-brand-dark text-lg">{fmt(subtotal, store?.country)}</span>
             </div>
           </div>
         </div>
@@ -533,7 +535,7 @@ function CheckoutForm() {
           className="w-full bg-brand-green text-white font-bold py-4 rounded-2xl hover:bg-brand-dark transition-colors disabled:opacity-40 flex items-center justify-center gap-2">
           {submitting
             ? <><Loader2 size={18} className="animate-spin" /> Placing Order...</>
-            : <><Check size={18} /> Place Order · {formatNaira(subtotal)}</>}
+            : <><Check size={18} /> Place Order · {fmt(subtotal, store?.country)}</>}
         </button>
 
         {/* Points Redemption */}
@@ -548,7 +550,8 @@ function CheckoutForm() {
                 </div>
               </div>
               <button onClick={() => {
-                const discount = Math.min(customerPoints * 100, rawSubtotal) // 1pt = ₦1 (100 kobo)
+                const isSubunit = COUNTRIES.find(c => c.code === store?.country)?.subunit ?? true
+                const discount = Math.min(isSubunit ? customerPoints * 100 : customerPoints, rawSubtotal) // 1pt = 1 currency unit
                 setPointsDiscount(discount)
                 setApplyPoints(!applyPoints)
               }} className={`relative w-12 h-6 rounded-full transition-colors ${applyPoints ? 'bg-amber-400' : 'bg-gray-200'}`}>
@@ -559,11 +562,11 @@ function CheckoutForm() {
               <div className="mt-3 pt-3 border-t border-amber-200">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Points discount</span>
-                  <span className="font-bold text-amber-600">- ₦{(pointsDiscount/100).toLocaleString()}</span>
+                  <span className="font-bold text-amber-600">- {fmt(pointsDiscount, store?.country)}</span>
                 </div>
                 <div className="flex justify-between text-sm mt-1">
                   <span className="font-semibold text-gray-800">New total</span>
-                  <span className="font-display font-bold text-brand-green">₦{(subtotal/100).toLocaleString()}</span>
+                  <span className="font-display font-bold text-brand-green">{fmt(subtotal, store?.country)}</span>
                 </div>
               </div>
             )}
