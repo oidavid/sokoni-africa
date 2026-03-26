@@ -291,7 +291,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
   function getDiscountAmount() {
     if (!appliedDiscount) return 0
     if (appliedDiscount.type === 'percent') return Math.round(cartTotal * appliedDiscount.value / 100)
-    const country = COUNTRIES.find(c => c.code === store.country)
+    const country = COUNTRIES.find(c => c.code === store?.country)
     const isSubunit = country?.subunit ?? true
     return isSubunit ? appliedDiscount.value * 100 : appliedDiscount.value
   }
