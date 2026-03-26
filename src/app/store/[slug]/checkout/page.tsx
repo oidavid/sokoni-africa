@@ -387,8 +387,8 @@ function CheckoutForm() {
               <span className="font-display font-bold text-brand-dark text-sm">Order Summary</span>
             </div>
             <Link href={`/store/${slug}`}
-              className="text-xs font-semibold text-brand-green bg-brand-light px-3 py-1.5 rounded-xl hover:bg-green-100 transition-colors">
-              + Add items
+              className="text-xs font-bold text-white bg-brand-green px-3 py-1.5 rounded-xl hover:bg-brand-dark transition-colors flex items-center gap-1">
+              + Add Items
             </Link>
           </div>
           {cart.map((item, i) => (
