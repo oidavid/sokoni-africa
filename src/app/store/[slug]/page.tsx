@@ -9,6 +9,7 @@ import { getThemeById, getThemeStyle } from '@/lib/themes'
 import ServiceStorefrontPage from '@/components/ServiceStorefrontPage'
 import ConsultationStorefrontPage from '@/components/ConsultationStorefrontPage'
 import ServicesLedStorefrontPage from '@/components/ServicesLedStorefrontPage'
+import { getPlaceholderImage } from '@/lib/placeholders'
 
 interface Merchant {
   id: string
@@ -123,6 +124,9 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
       const { data: merchant } = await supabase.from('merchants').select('*').eq('slug', params.slug).single()
       if (merchant) {
         setStore(merchant)
+        // Default phone country picker to merchant's country
+        const merchantCountry = COUNTRIES.find(c => c.code === merchant.country)
+        if (merchantCountry) setWaCountry(merchantCountry)
         const { data: prods } = await supabase.from('products').select('*').eq('merchant_id', merchant.id).order('created_at', { ascending: false })
         setProducts(prods || [])
         // Load customer session
@@ -346,7 +350,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                   <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-brand-light">
                     {item.product.image_url
                       ? <img src={item.product.image_url} alt={item.product.name} className="w-full h-full object-cover" />
-                      : <div className="w-full h-full flex items-center justify-center text-2xl">{categoryEmoji}</div>
+                      : <img src={getPlaceholderImage(item.product.name, store.category, store.country)} alt={item.product.name} className="w-full h-full object-cover" />
                     }
                   </div>
                   <div className="flex-1 min-w-0">
@@ -495,7 +499,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
               {variantModal.image_url ? (
                 <img src={variantModal.image_url} alt={variantModal.name} className="w-16 h-16 rounded-2xl object-cover shrink-0" />
               ) : (
-                <div className="w-16 h-16 bg-brand-light rounded-2xl flex items-center justify-center text-2xl shrink-0">{CATEGORY_EMOJI[store?.category || ''] || '🛍️'}</div>
+                <img src={getPlaceholderImage(variantModal.name, store?.category, store?.country)} alt={variantModal.name} className="w-16 h-16 rounded-2xl object-cover shrink-0" />
               )}
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-gray-800 text-sm leading-tight">{variantModal.name}</p>
@@ -797,9 +801,12 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                         loading="lazy" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-brand-light">
-                        <span className="text-4xl">{categoryEmoji}</span>
-                      </div>
+                      <img
+                        src={getPlaceholderImage(product.name, store.category, store.country)}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
                     )}
                     {!product.in_stock && (
                       <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
