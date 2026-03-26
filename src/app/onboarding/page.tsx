@@ -610,7 +610,23 @@ export default function OnboardingPage() {
   }
 
   function sendLoginWhatsApp() {
-    const msg = `Your Earket business page is live!\n\nPage: earket.com/store/${storeSlug}\n\nLogin to manage: ${window.location.origin}/login\n\nEmail: ${email}`
+    const storeUrl = `https://earket.com/store/${storeSlug}`
+    const dashboardUrl = `${window.location.origin}/dashboard`
+    const msg = [
+      `🎉 Your business is live on Earket!`,
+      ``,
+      `👉 Your store link:`,
+      storeUrl,
+      ``,
+      `📸 Your store is using sample product images for now.`,
+      `To upload your real photos and manage your store, tap here:`,
+      dashboardUrl,
+      ``,
+      `🔐 Login details:`,
+      `Email: ${email}`,
+      ``,
+      `Share your store with customers now! 🚀`,
+    ].join('\n')
     window.open(`https://wa.me/${normalizedWa}?text=${encodeURIComponent(msg)}`, '_blank')
     setLoginSent('whatsapp')
   }
