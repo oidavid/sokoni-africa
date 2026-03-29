@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Plus, Minus, ShoppingBag, Check, Search, TrendingUp, Star, Send, AlertCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { COUNTRIES, normalizeNumber } from '@/lib/countries'
+import { COUNTRIES, normalizeNumber, formatMoney, getCurrency } from '@/lib/countries'
 
 interface Product { id: string; name: string; price: number; price_display: string; image_url: string | null; in_stock: boolean }
 interface CartItem { product: Product; qty: number }
@@ -24,7 +24,7 @@ function validateWhatsApp(raw: string, dialCode: string): { clean: string; error
 
 export default function CashSalePage() {
   const router = useRouter()
-  const [merchant, setMerchant] = useState<{ id: string; business_name: string; currency: string; slug: string; dialCode: string } | null>(null)
+  const [merchant, setMerchant] = useState<{ id: string; business_name: string; currency: string; slug: string; dialCode: string; country: string } | null>(null)
   const [products, setProducts] = useState<Product[]>([])
   const [cart, setCart] = useState<CartItem[]>([])
   const [search, setSearch] = useState('')
@@ -51,9 +51,9 @@ export default function CashSalePage() {
     if (!email) { router.push('/login'); return }
     const { data: m } = await supabase.from('merchants').select('id, business_name, country, slug').eq('email', email).single()
     if (!m) { router.push('/onboarding'); return }
-    const currencyMap: Record<string, string> = { 'NG': '₦', 'GH': 'GH₵', 'KE': 'KSh', 'ZA': 'R', 'US': '$', 'GB': '£', 'TZ': 'TSh' }
     const countryEntry = COUNTRIES.find(c => c.code === (m.country || 'NG')) || COUNTRIES.find(c => c.code === 'NG')!
-    setMerchant({ id: m.id, business_name: m.business_name, currency: currencyMap[m.country || 'NG'] || '₦', slug: m.slug, dialCode: countryEntry.dial })
+    const { symbol: currencySymbol } = getCurrency(m.country)
+    setMerchant({ id: m.id, business_name: m.business_name, currency: currencySymbol, slug: m.slug, dialCode: countryEntry.dial, country: m.country })
     const { data: prods } = await supabase.from('products').select('id, name, price, price_display, image_url, in_stock').eq('merchant_id', m.id).eq('in_stock', true).order('name')
     setProducts(prods || [])
     const today = new Date().toISOString().split('T')[0]
@@ -112,8 +112,9 @@ export default function CashSalePage() {
   }
 
   const total = cart.reduce((s, i) => s + i.product.price * i.qty, 0)
-  const pointsEarned = Math.floor((total / 100) / 100) * POINTS_PER_100
-  const fmt = (kobo: number) => `${merchant?.currency}${(kobo / 100).toLocaleString()}`
+  const isSubunit = getCurrency(merchant?.country).subunit
+  const pointsEarned = Math.floor((isSubunit ? total / 100 : total) / 100) * POINTS_PER_100
+  const fmt = (amount: number) => formatMoney(amount, merchant?.country)
   const filtered = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
 
   function buildReceipt(cleanWA: string) {
