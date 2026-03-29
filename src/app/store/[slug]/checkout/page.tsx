@@ -615,6 +615,7 @@ function CheckoutForm() {
             body: JSON.stringify({
               email: name.replace(/\s/g, '').toLowerCase() + '@customer.earket.com',
               amount: subtotal,
+              merchant_id: store.id,
               callback_url: `${window.location.origin}/store/${store.slug}/payment`,
               metadata: {
                 order_id: order?.id,
