@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState, useRef } from 'react'
 import { ArrowRight, ArrowLeft, Loader2, Check, ShoppingBag, Mail, MessageCircle, Eye, EyeOff, Lock, Mic, MicOff, X, Plus } from 'lucide-react'
 import Link from 'next/link'
@@ -12,166 +12,166 @@ import { EARKET_THEMES, getThemeStyle, type EarketTheme } from '@/lib/themes'
 type Step = 'language' | 'business' | 'whatsapp' | 'email' | 'password' | 'biztype' | 'category' | 'subcategory' | 'location' | 'theme' | 'preview' | 'products' | 'generating' | 'done'
 
 const CATEGORIES = [
-  { id: 'food', label: 'Food & Drinks', emoji: '🍱', pidgin: 'Food & Drink' },
-  { id: 'groceries', label: 'Groceries & Provisions', emoji: '🛒', pidgin: 'Provisions & Groceries' },
-  { id: 'fashion', label: 'Fashion & Clothing', emoji: '👗', pidgin: 'Cloth & Fashion' },
-  { id: 'beauty', label: 'Beauty & Hair', emoji: '💄', pidgin: 'Beauty & Hair' },
-  { id: 'shoes', label: 'Shoes & Bags', emoji: '👟', pidgin: 'Shoes & Bags' },
-  { id: 'electronics', label: 'Electronics & Gadgets', emoji: '📱', pidgin: 'Electronics & Gadgets' },
-  { id: 'phones', label: 'Phones & Laptops', emoji: '💻', pidgin: 'Phone & Laptop' },
-  { id: 'furniture', label: 'Furniture & Home', emoji: '🪑', pidgin: 'Furniture & Home' },
-  { id: 'health', label: 'Health & Pharmacy', emoji: '💊', pidgin: 'Health & Pharmacy' },
-  { id: 'stationery', label: 'Stationery & Office', emoji: '📚', pidgin: 'Books & Office' },
-  { id: 'automobile', label: 'Auto Parts & Car', emoji: '🚗', pidgin: 'Car & Auto Parts' },
-  { id: 'other', label: 'Other Business', emoji: '🏪', pidgin: 'Other Business' },
+  { id: 'food', label: 'Food & Drinks', emoji: 'ðŸ±', pidgin: 'Food & Drink' },
+  { id: 'groceries', label: 'Groceries & Provisions', emoji: 'ðŸ›’', pidgin: 'Provisions & Groceries' },
+  { id: 'fashion', label: 'Fashion & Clothing', emoji: 'ðŸ‘—', pidgin: 'Cloth & Fashion' },
+  { id: 'beauty', label: 'Beauty & Hair', emoji: 'ðŸ’„', pidgin: 'Beauty & Hair' },
+  { id: 'shoes', label: 'Shoes & Bags', emoji: 'ðŸ‘Ÿ', pidgin: 'Shoes & Bags' },
+  { id: 'electronics', label: 'Electronics & Gadgets', emoji: 'ðŸ“±', pidgin: 'Electronics & Gadgets' },
+  { id: 'phones', label: 'Phones & Laptops', emoji: 'ðŸ’»', pidgin: 'Phone & Laptop' },
+  { id: 'furniture', label: 'Furniture & Home', emoji: 'ðŸª‘', pidgin: 'Furniture & Home' },
+  { id: 'health', label: 'Health & Pharmacy', emoji: 'ðŸ’Š', pidgin: 'Health & Pharmacy' },
+  { id: 'stationery', label: 'Stationery & Office', emoji: 'ðŸ“š', pidgin: 'Books & Office' },
+  { id: 'automobile', label: 'Auto Parts & Car', emoji: 'ðŸš—', pidgin: 'Car & Auto Parts' },
+  { id: 'other', label: 'Other Business', emoji: 'ðŸª', pidgin: 'Other Business' },
 ]
 
 const SERVICE_CATEGORIES = [
-  { id: 'home_services', label: 'Home & Technical', emoji: '🔧', pidgin: 'Home Repair & Technical' },
-  { id: 'auto_services', label: 'Auto & Vehicle', emoji: '🚗', pidgin: 'Car & Vehicle' },
-  { id: 'beauty_services', label: 'Beauty & Personal Care', emoji: '💄', pidgin: 'Beauty & Style' },
-  { id: 'education', label: 'Education & Tutoring', emoji: '📚', pidgin: 'Teaching & Tutoring' },
-  { id: 'coaching', label: 'Coaching & Mentoring', emoji: '🧠', pidgin: 'Coaching & Mentoring' },
-  { id: 'health_wellness', label: 'Health & Wellness', emoji: '🏥', pidgin: 'Health & Wellness' },
-  { id: 'mental_wellness', label: 'Mental Wellness', emoji: '💆', pidgin: 'Mental Wellness' },
-  { id: 'domestic', label: 'Domestic Services', emoji: '🏠', pidgin: 'House Help & Cleaning' },
-  { id: 'childcare', label: 'Childcare & Nanny', emoji: '👶', pidgin: 'Childcare & Nanny' },
-  { id: 'food_catering', label: 'Food & Catering', emoji: '🍽️', pidgin: 'Food & Catering' },
-  { id: 'events', label: 'Events & Occasions', emoji: '🎉', pidgin: 'Events & Party' },
-  { id: 'digital_services', label: 'Digital & Tech', emoji: '💻', pidgin: 'Digital & Tech' },
-  { id: 'transport', label: 'Transport & Delivery', emoji: '🚚', pidgin: 'Delivery & Transport' },
-  { id: 'agriculture', label: 'Agriculture', emoji: '🌱', pidgin: 'Farm & Agriculture' },
+  { id: 'home_services', label: 'Home & Technical', emoji: 'ðŸ”§', pidgin: 'Home Repair & Technical' },
+  { id: 'auto_services', label: 'Auto & Vehicle', emoji: 'ðŸš—', pidgin: 'Car & Vehicle' },
+  { id: 'beauty_services', label: 'Beauty & Personal Care', emoji: 'ðŸ’„', pidgin: 'Beauty & Style' },
+  { id: 'education', label: 'Education & Tutoring', emoji: 'ðŸ“š', pidgin: 'Teaching & Tutoring' },
+  { id: 'coaching', label: 'Coaching & Mentoring', emoji: 'ðŸ§ ', pidgin: 'Coaching & Mentoring' },
+  { id: 'health_wellness', label: 'Health & Wellness', emoji: 'ðŸ¥', pidgin: 'Health & Wellness' },
+  { id: 'mental_wellness', label: 'Mental Wellness', emoji: 'ðŸ’†', pidgin: 'Mental Wellness' },
+  { id: 'domestic', label: 'Domestic Services', emoji: 'ðŸ ', pidgin: 'House Help & Cleaning' },
+  { id: 'childcare', label: 'Childcare & Nanny', emoji: 'ðŸ‘¶', pidgin: 'Childcare & Nanny' },
+  { id: 'food_catering', label: 'Food & Catering', emoji: 'ðŸ½ï¸', pidgin: 'Food & Catering' },
+  { id: 'events', label: 'Events & Occasions', emoji: 'ðŸŽ‰', pidgin: 'Events & Party' },
+  { id: 'digital_services', label: 'Digital & Tech', emoji: 'ðŸ’»', pidgin: 'Digital & Tech' },
+  { id: 'transport', label: 'Transport & Delivery', emoji: 'ðŸšš', pidgin: 'Delivery & Transport' },
+  { id: 'agriculture', label: 'Agriculture', emoji: 'ðŸŒ±', pidgin: 'Farm & Agriculture' },
 ]
 
 const SERVICE_SUBCATEGORIES: Record<string, Array<{ id: string; label: string; emoji: string }>> = {
   home_services: [
-    { id: 'electrician', label: 'Electrician / House Wiring', emoji: '⚡' },
-    { id: 'plumber', label: 'Plumber', emoji: '🔧' },
-    { id: 'generator', label: 'Generator Repair', emoji: '🔌' },
-    { id: 'ac', label: 'AC / Air Conditioning', emoji: '❄️' },
-    { id: 'painter', label: 'Painter', emoji: '🖌️' },
-    { id: 'tiler', label: 'Tiling & Flooring', emoji: '🏠' },
-    { id: 'solar', label: 'Solar Installation', emoji: '☀️' },
-    { id: 'carpenter', label: 'Carpenter', emoji: '🪵' },
-    { id: 'welder', label: 'Welder / Metal Work', emoji: '⚙️' },
-    { id: 'general', label: 'General House Repairs', emoji: '🛠️' },
+    { id: 'electrician', label: 'Electrician / House Wiring', emoji: 'âš¡' },
+    { id: 'plumber', label: 'Plumber', emoji: 'ðŸ”§' },
+    { id: 'generator', label: 'Generator Repair', emoji: 'ðŸ”Œ' },
+    { id: 'ac', label: 'AC / Air Conditioning', emoji: 'â„ï¸' },
+    { id: 'painter', label: 'Painter', emoji: 'ðŸ–Œï¸' },
+    { id: 'tiler', label: 'Tiling & Flooring', emoji: 'ðŸ ' },
+    { id: 'solar', label: 'Solar Installation', emoji: 'â˜€ï¸' },
+    { id: 'carpenter', label: 'Carpenter', emoji: 'ðŸªµ' },
+    { id: 'welder', label: 'Welder / Metal Work', emoji: 'âš™ï¸' },
+    { id: 'general', label: 'General House Repairs', emoji: 'ðŸ› ï¸' },
   ],
   auto_services: [
-    { id: 'mechanic', label: 'Mechanic / Car Service', emoji: '🔩' },
-    { id: 'carwash', label: 'Car Wash', emoji: '🚿' },
-    { id: 'tyres', label: 'Tyre Repair / Vulcanizer', emoji: '🛞' },
-    { id: 'brakes', label: 'Brakes & Suspension', emoji: '🛑' },
-    { id: 'auto_electrician', label: 'Auto Electrician', emoji: '⚡' },
-    { id: 'panel_beater', label: 'Panel Beating / Body Repair', emoji: '🚘' },
-    { id: 'detailing', label: 'Car Detailing', emoji: '✨' },
-    { id: 'motorcycle', label: 'Motorcycle Repair', emoji: '🏍️' },
+    { id: 'mechanic', label: 'Mechanic / Car Service', emoji: 'ðŸ”©' },
+    { id: 'carwash', label: 'Car Wash', emoji: 'ðŸš¿' },
+    { id: 'tyres', label: 'Tyre Repair / Vulcanizer', emoji: 'ðŸ›ž' },
+    { id: 'brakes', label: 'Brakes & Suspension', emoji: 'ðŸ›‘' },
+    { id: 'auto_electrician', label: 'Auto Electrician', emoji: 'âš¡' },
+    { id: 'panel_beater', label: 'Panel Beating / Body Repair', emoji: 'ðŸš˜' },
+    { id: 'detailing', label: 'Car Detailing', emoji: 'âœ¨' },
+    { id: 'motorcycle', label: 'Motorcycle Repair', emoji: 'ðŸï¸' },
   ],
   beauty_services: [
-    { id: 'massage', label: 'Massage & Body Therapy', emoji: '💆' },
-    { id: 'braiding', label: 'Hair Braiding & Styling', emoji: '💇' },
-    { id: 'makeup', label: 'Makeup Artist', emoji: '💄' },
-    { id: 'nails', label: 'Nails & Manicure', emoji: '💅' },
-    { id: 'barber', label: "Barber / Men's Grooming", emoji: '✂️' },
-    { id: 'skincare', label: 'Skincare & Facial', emoji: '🧴' },
-    { id: 'wigs', label: 'Wig Making & Installation', emoji: '👱' },
-    { id: 'threading', label: 'Eyebrow Threading', emoji: '🪡' },
-    { id: 'relaxer', label: 'Hair Relaxer & Treatment', emoji: '🧪' },
+    { id: 'massage', label: 'Massage & Body Therapy', emoji: 'ðŸ’†' },
+    { id: 'braiding', label: 'Hair Braiding & Styling', emoji: 'ðŸ’‡' },
+    { id: 'makeup', label: 'Makeup Artist', emoji: 'ðŸ’„' },
+    { id: 'nails', label: 'Nails & Manicure', emoji: 'ðŸ’…' },
+    { id: 'barber', label: "Barber / Men's Grooming", emoji: 'âœ‚ï¸' },
+    { id: 'skincare', label: 'Skincare & Facial', emoji: 'ðŸ§´' },
+    { id: 'wigs', label: 'Wig Making & Installation', emoji: 'ðŸ‘±' },
+    { id: 'threading', label: 'Eyebrow Threading', emoji: 'ðŸª¡' },
+    { id: 'relaxer', label: 'Hair Relaxer & Treatment', emoji: 'ðŸ§ª' },
   ],
   education: [
-    { id: 'primary', label: 'Primary School Tutoring', emoji: '📖' },
-    { id: 'exam_prep', label: 'WAEC / JAMB Exam Prep', emoji: '📝' },
-    { id: 'computer', label: 'Computer Training', emoji: '💻' },
-    { id: 'music', label: 'Music Lessons', emoji: '🎵' },
-    { id: 'language', label: 'Language / English', emoji: '🗣️' },
-    { id: 'digital', label: 'Digital & Online Business', emoji: '📱' },
-    { id: 'coding', label: 'Coding & Programming', emoji: '👨‍💻' },
+    { id: 'primary', label: 'Primary School Tutoring', emoji: 'ðŸ“–' },
+    { id: 'exam_prep', label: 'WAEC / JAMB Exam Prep', emoji: 'ðŸ“' },
+    { id: 'computer', label: 'Computer Training', emoji: 'ðŸ’»' },
+    { id: 'music', label: 'Music Lessons', emoji: 'ðŸŽµ' },
+    { id: 'language', label: 'Language / English', emoji: 'ðŸ—£ï¸' },
+    { id: 'digital', label: 'Digital & Online Business', emoji: 'ðŸ“±' },
+    { id: 'coding', label: 'Coding & Programming', emoji: 'ðŸ‘¨â€ðŸ’»' },
   ],
   health_wellness: [
-    { id: 'physio', label: 'Physiotherapy', emoji: '🦴' },
-    { id: 'fitness', label: 'Personal Fitness Trainer', emoji: '🏋️' },
-    { id: 'nutrition', label: 'Nutrition & Diet', emoji: '🥗' },
-    { id: 'nanny', label: 'Childcare / Nanny', emoji: '👶' },
-    { id: 'elderly', label: 'Elderly Home Care', emoji: '👴' },
-    { id: 'nursing', label: 'Mobile Nursing', emoji: '🩺' },
+    { id: 'physio', label: 'Physiotherapy', emoji: 'ðŸ¦´' },
+    { id: 'fitness', label: 'Personal Fitness Trainer', emoji: 'ðŸ‹ï¸' },
+    { id: 'nutrition', label: 'Nutrition & Diet', emoji: 'ðŸ¥—' },
+    { id: 'nanny', label: 'Childcare / Nanny', emoji: 'ðŸ‘¶' },
+    { id: 'elderly', label: 'Elderly Home Care', emoji: 'ðŸ‘´' },
+    { id: 'nursing', label: 'Mobile Nursing', emoji: 'ðŸ©º' },
   ],
   domestic: [
-    { id: 'cleaning', label: 'House / Office Cleaning', emoji: '🧹' },
-    { id: 'laundry', label: 'Laundry & Ironing', emoji: '👕' },
-    { id: 'cooking', label: 'Home Cooking', emoji: '🍳' },
-    { id: 'pest', label: 'Pest Control', emoji: '🐛' },
-    { id: 'weekly', label: 'Weekly Cleaning Service', emoji: '🗓️' },
+    { id: 'cleaning', label: 'House / Office Cleaning', emoji: 'ðŸ§¹' },
+    { id: 'laundry', label: 'Laundry & Ironing', emoji: 'ðŸ‘•' },
+    { id: 'cooking', label: 'Home Cooking', emoji: 'ðŸ³' },
+    { id: 'pest', label: 'Pest Control', emoji: 'ðŸ›' },
+    { id: 'weekly', label: 'Weekly Cleaning Service', emoji: 'ðŸ—“ï¸' },
   ],
   events: [
-    { id: 'photography', label: 'Photography', emoji: '📸' },
-    { id: 'videography', label: 'Videography', emoji: '🎥' },
-    { id: 'catering', label: 'Catering', emoji: '🍽️' },
-    { id: 'decoration', label: 'Event Decoration', emoji: '🎊' },
-    { id: 'cake', label: 'Cake Making', emoji: '🎂' },
-    { id: 'dj', label: 'DJ Services', emoji: '🎧' },
-    { id: 'mc', label: 'MC / Event Host', emoji: '🎤' },
+    { id: 'photography', label: 'Photography', emoji: 'ðŸ“¸' },
+    { id: 'videography', label: 'Videography', emoji: 'ðŸŽ¥' },
+    { id: 'catering', label: 'Catering', emoji: 'ðŸ½ï¸' },
+    { id: 'decoration', label: 'Event Decoration', emoji: 'ðŸŽŠ' },
+    { id: 'cake', label: 'Cake Making', emoji: 'ðŸŽ‚' },
+    { id: 'dj', label: 'DJ Services', emoji: 'ðŸŽ§' },
+    { id: 'mc', label: 'MC / Event Host', emoji: 'ðŸŽ¤' },
   ],
   digital_services: [
-    { id: 'logo', label: 'Logo & Graphic Design', emoji: '🎨' },
-    { id: 'phone_repair', label: 'Phone Screen Repair', emoji: '📱' },
-    { id: 'laptop_repair', label: 'Laptop Repair', emoji: '💻' },
-    { id: 'social_media', label: 'Social Media Management', emoji: '📣' },
-    { id: 'cv', label: 'CV & Cover Letter Writing', emoji: '📄' },
-    { id: 'flyer', label: 'Flyer & Banner Design', emoji: '🖼️' },
-    { id: 'printing', label: 'Printing Services', emoji: '🖨️' },
+    { id: 'logo', label: 'Logo & Graphic Design', emoji: 'ðŸŽ¨' },
+    { id: 'phone_repair', label: 'Phone Screen Repair', emoji: 'ðŸ“±' },
+    { id: 'laptop_repair', label: 'Laptop Repair', emoji: 'ðŸ’»' },
+    { id: 'social_media', label: 'Social Media Management', emoji: 'ðŸ“£' },
+    { id: 'cv', label: 'CV & Cover Letter Writing', emoji: 'ðŸ“„' },
+    { id: 'flyer', label: 'Flyer & Banner Design', emoji: 'ðŸ–¼ï¸' },
+    { id: 'printing', label: 'Printing Services', emoji: 'ðŸ–¨ï¸' },
   ],
   transport: [
-    { id: 'delivery', label: 'Package Delivery', emoji: '📦' },
-    { id: 'driver', label: 'Driver for Hire', emoji: '🚗' },
-    { id: 'airport', label: 'Airport Pick-up & Drop-off', emoji: '✈️' },
-    { id: 'school_run', label: 'School Run Service', emoji: '🏫' },
-    { id: 'moving', label: 'Moving & Relocation', emoji: '🏠' },
-    { id: 'bike', label: 'Bike / Okada Delivery', emoji: '🏍️' },
+    { id: 'delivery', label: 'Package Delivery', emoji: 'ðŸ“¦' },
+    { id: 'driver', label: 'Driver for Hire', emoji: 'ðŸš—' },
+    { id: 'airport', label: 'Airport Pick-up & Drop-off', emoji: 'âœˆï¸' },
+    { id: 'school_run', label: 'School Run Service', emoji: 'ðŸ«' },
+    { id: 'moving', label: 'Moving & Relocation', emoji: 'ðŸ ' },
+    { id: 'bike', label: 'Bike / Okada Delivery', emoji: 'ðŸï¸' },
   ],
   coaching: [
-    { id: 'life_coach', label: 'Life Coaching', emoji: '🌟' },
-    { id: 'business_coach', label: 'Business Coaching', emoji: '💼' },
-    { id: 'career_coach', label: 'Career Coaching', emoji: '🎯' },
-    { id: 'womens_empowerment', label: "Women's Empowerment", emoji: '💪' },
-    { id: 'mindset_coach', label: 'Mindset & Confidence', emoji: '🧠' },
-    { id: 'teen_coach', label: 'Teen & Youth Coaching', emoji: '🌱' },
-    { id: 'relationship_coach', label: 'Relationship Coaching', emoji: '❤️' },
-    { id: 'executive_coach', label: 'Executive Coaching', emoji: '👔' },
-    { id: 'public_speaking', label: 'Public Speaking', emoji: '🎤' },
-    { id: 'leadership', label: 'Leadership Training', emoji: '🏆' },
+    { id: 'life_coach', label: 'Life Coaching', emoji: 'ðŸŒŸ' },
+    { id: 'business_coach', label: 'Business Coaching', emoji: 'ðŸ’¼' },
+    { id: 'career_coach', label: 'Career Coaching', emoji: 'ðŸŽ¯' },
+    { id: 'womens_empowerment', label: "Women's Empowerment", emoji: 'ðŸ’ª' },
+    { id: 'mindset_coach', label: 'Mindset & Confidence', emoji: 'ðŸ§ ' },
+    { id: 'teen_coach', label: 'Teen & Youth Coaching', emoji: 'ðŸŒ±' },
+    { id: 'relationship_coach', label: 'Relationship Coaching', emoji: 'â¤ï¸' },
+    { id: 'executive_coach', label: 'Executive Coaching', emoji: 'ðŸ‘”' },
+    { id: 'public_speaking', label: 'Public Speaking', emoji: 'ðŸŽ¤' },
+    { id: 'leadership', label: 'Leadership Training', emoji: 'ðŸ†' },
   ],
   mental_wellness: [
-    { id: 'counselling', label: 'Counselling & Therapy', emoji: '🛋️' },
-    { id: 'stress_mgmt', label: 'Stress Management', emoji: '🧘' },
-    { id: 'mindfulness', label: 'Mindfulness & Meditation', emoji: '🕯️' },
-    { id: 'grief_support', label: 'Grief & Loss Support', emoji: '🤍' },
-    { id: 'anxiety_coach', label: 'Anxiety Coaching', emoji: '🌊' },
-    { id: 'burnout', label: 'Burnout Recovery', emoji: '🔋' },
-    { id: 'self_esteem', label: 'Self-Esteem & Confidence', emoji: '💎' },
+    { id: 'counselling', label: 'Counselling & Therapy', emoji: 'ðŸ›‹ï¸' },
+    { id: 'stress_mgmt', label: 'Stress Management', emoji: 'ðŸ§˜' },
+    { id: 'mindfulness', label: 'Mindfulness & Meditation', emoji: 'ðŸ•¯ï¸' },
+    { id: 'grief_support', label: 'Grief & Loss Support', emoji: 'ðŸ¤' },
+    { id: 'anxiety_coach', label: 'Anxiety Coaching', emoji: 'ðŸŒŠ' },
+    { id: 'burnout', label: 'Burnout Recovery', emoji: 'ðŸ”‹' },
+    { id: 'self_esteem', label: 'Self-Esteem & Confidence', emoji: 'ðŸ’Ž' },
   ],
   childcare: [
-    { id: 'fulltime_nanny', label: 'Full-time Nanny', emoji: '👶' },
-    { id: 'afterschool', label: 'After-school Care', emoji: '🏫' },
-    { id: 'babysitting', label: 'Babysitting', emoji: '🧸' },
-    { id: 'homework_help', label: 'Homework Help', emoji: '📚' },
-    { id: 'special_needs', label: 'Special Needs Care', emoji: '💙' },
-    { id: 'holiday_care', label: 'Holiday & Weekend Care', emoji: '🎈' },
+    { id: 'fulltime_nanny', label: 'Full-time Nanny', emoji: 'ðŸ‘¶' },
+    { id: 'afterschool', label: 'After-school Care', emoji: 'ðŸ«' },
+    { id: 'babysitting', label: 'Babysitting', emoji: 'ðŸ§¸' },
+    { id: 'homework_help', label: 'Homework Help', emoji: 'ðŸ“š' },
+    { id: 'special_needs', label: 'Special Needs Care', emoji: 'ðŸ’™' },
+    { id: 'holiday_care', label: 'Holiday & Weekend Care', emoji: 'ðŸŽˆ' },
   ],
   food_catering: [
-    { id: 'home_cooked', label: 'Home-cooked Meals', emoji: '🍲' },
-    { id: 'meal_prep', label: 'Weekly Meal Prep', emoji: '📦' },
-    { id: 'office_catering', label: 'Office Catering', emoji: '🏢' },
-    { id: 'party_catering', label: 'Party & Event Catering', emoji: '🎉' },
-    { id: 'diet_meals', label: 'Diet & Healthy Meal Plans', emoji: '🥗' },
-    { id: 'baking', label: 'Baking & Pastries', emoji: '🧁' },
-    { id: 'chefs_table', label: "Private Chef / Chef's Table", emoji: '👨‍🍳' },
+    { id: 'home_cooked', label: 'Home-cooked Meals', emoji: 'ðŸ²' },
+    { id: 'meal_prep', label: 'Weekly Meal Prep', emoji: 'ðŸ“¦' },
+    { id: 'office_catering', label: 'Office Catering', emoji: 'ðŸ¢' },
+    { id: 'party_catering', label: 'Party & Event Catering', emoji: 'ðŸŽ‰' },
+    { id: 'diet_meals', label: 'Diet & Healthy Meal Plans', emoji: 'ðŸ¥—' },
+    { id: 'baking', label: 'Baking & Pastries', emoji: 'ðŸ§' },
+    { id: 'chefs_table', label: "Private Chef / Chef's Table", emoji: 'ðŸ‘¨â€ðŸ³' },
   ],
   agriculture: [
-    { id: 'poultry', label: 'Poultry Farm Consultation', emoji: '🐔' },
-    { id: 'farm_labour', label: 'Farm Labour', emoji: '👨‍🌾' },
-    { id: 'irrigation', label: 'Irrigation Installation', emoji: '💧' },
-    { id: 'tractor', label: 'Tractor / Ploughing', emoji: '🚜' },
-    { id: 'fish', label: 'Fish Farm Setup', emoji: '🐟' },
-    { id: 'produce', label: 'Produce Aggregation', emoji: '🌽' },
+    { id: 'poultry', label: 'Poultry Farm Consultation', emoji: 'ðŸ”' },
+    { id: 'farm_labour', label: 'Farm Labour', emoji: 'ðŸ‘¨â€ðŸŒ¾' },
+    { id: 'irrigation', label: 'Irrigation Installation', emoji: 'ðŸ’§' },
+    { id: 'tractor', label: 'Tractor / Ploughing', emoji: 'ðŸšœ' },
+    { id: 'fish', label: 'Fish Farm Setup', emoji: 'ðŸŸ' },
+    { id: 'produce', label: 'Produce Aggregation', emoji: 'ðŸŒ½' },
   ],
 }
 
@@ -331,26 +331,26 @@ export default function OnboardingPage() {
   const pid = lang === 'pid'
   const rawSampleItems = category ? (businessType === 'services' ? getSampleServices(category) : getSampleProducts(category)) : []
   const countryCurrencyMap: Record<string, {symbol: string; rate: number}> = {
-    '234': {symbol: '₦', rate: 1}, '233': {symbol: 'GH₵', rate: 0.0094},
+    '234': {symbol: 'â‚¦', rate: 1}, '233': {symbol: 'GHâ‚µ', rate: 0.0094},
     '254': {symbol: 'KSh', rate: 0.078}, '27': {symbol: 'R', rate: 0.011},
     '1': {symbol: '$', rate: 0.00061}, '1876': {symbol: 'J$', rate: 0.094},
     '1868': {symbol: 'TT$', rate: 0.0041}, '1809': {symbol: 'RD$', rate: 0.035},
-    '44': {symbol: '£', rate: 0.00048}, '353': {symbol: '€', rate: 0.00056},
-    '55': {symbol: 'R$', rate: 0.0031}, '92': {symbol: '₨', rate: 0.17},
-    '91': {symbol: '₹', rate: 0.051}, '60': {symbol: 'RM', rate: 0.0029},
-    '63': {symbol: '₱', rate: 0.034}, '62': {symbol: 'Rp', rate: 9.6},
-    '20': {symbol: 'E£', rate: 0.029}, '255': {symbol: 'TSh', rate: 1.53},
+    '44': {symbol: 'Â£', rate: 0.00048}, '353': {symbol: 'â‚¬', rate: 0.00056},
+    '55': {symbol: 'R$', rate: 0.0031}, '92': {symbol: 'â‚¨', rate: 0.17},
+    '91': {symbol: 'â‚¹', rate: 0.051}, '60': {symbol: 'RM', rate: 0.0029},
+    '63': {symbol: 'â‚±', rate: 0.034}, '62': {symbol: 'Rp', rate: 9.6},
+    '20': {symbol: 'EÂ£', rate: 0.029}, '255': {symbol: 'TSh', rate: 1.53},
     '256': {symbol: 'USh', rate: 2.29}, '251': {symbol: 'Br', rate: 0.034},
     '221': {symbol: 'CFA', rate: 0.37}, '237': {symbol: 'FCFA', rate: 0.37},
-    '33': {symbol: '€', rate: 0.00056}, '49': {symbol: '€', rate: 0.00056},
-    '34': {symbol: '€', rate: 0.00056}, '39': {symbol: '€', rate: 0.00056},
-    '31': {symbol: '€', rate: 0.00056}, '32': {symbol: '€', rate: 0.00056},
-    '351': {symbol: '€', rate: 0.00056}, '30': {symbol: '€', rate: 0.00056},
-    '43': {symbol: '€', rate: 0.00056}, '358': {symbol: '€', rate: 0.00056},
+    '33': {symbol: 'â‚¬', rate: 0.00056}, '49': {symbol: 'â‚¬', rate: 0.00056},
+    '34': {symbol: 'â‚¬', rate: 0.00056}, '39': {symbol: 'â‚¬', rate: 0.00056},
+    '31': {symbol: 'â‚¬', rate: 0.00056}, '32': {symbol: 'â‚¬', rate: 0.00056},
+    '351': {symbol: 'â‚¬', rate: 0.00056}, '30': {symbol: 'â‚¬', rate: 0.00056},
+    '43': {symbol: 'â‚¬', rate: 0.00056}, '358': {symbol: 'â‚¬', rate: 0.00056},
     '46': {symbol: 'kr', rate: 0.0064}, '47': {symbol: 'kr', rate: 0.0059},
     '45': {symbol: 'kr', rate: 0.0074}, '41': {symbol: 'CHF', rate: 0.00056},
-    '81': {symbol: '¥', rate: 0.092}, '82': {symbol: '₩', rate: 0.83},
-    '86': {symbol: '¥', rate: 0.0044}, '64': {symbol: 'NZ$', rate: 0.001},
+    '81': {symbol: 'Â¥', rate: 0.092}, '82': {symbol: 'â‚©', rate: 0.83},
+    '86': {symbol: 'Â¥', rate: 0.0044}, '64': {symbol: 'NZ$', rate: 0.001},
     '61': {symbol: 'A$', rate: 0.00093}, '65': {symbol: 'S$', rate: 0.00082},
     '971': {symbol: 'AED', rate: 0.0022}, '966': {symbol: 'SAR', rate: 0.0023},
     '974': {symbol: 'QAR', rate: 0.0022}, '965': {symbol: 'KWD', rate: 0.00019},
@@ -362,8 +362,8 @@ export default function OnboardingPage() {
   }
   const selectedCurrency = countryCurrencyMap[selectedCountry.dial] || {symbol: '$', rate: 0.00061}
   const sampleProducts = rawSampleItems.map(p => {
-    if (selectedCurrency.symbol === '₦') return p
-    // prices stored in kobo (smallest unit) — divide by 100 to get Naira, then convert
+    if (selectedCurrency.symbol === 'â‚¦') return p
+    // prices stored in kobo (smallest unit) â€” divide by 100 to get Naira, then convert
     const nairaValue = p.price / 100
     const converted = nairaValue * selectedCurrency.rate
     const rounded = converted >= 1000 ? Math.round(converted/100)*100 :
@@ -519,7 +519,7 @@ export default function OnboardingPage() {
       return allServices.slice(0, 8) // cap at 8 for a clean page
     }
 
-    // Pull from subcategory-specific libraries — take max 5 per subcategory
+    // Pull from subcategory-specific libraries â€” take max 5 per subcategory
     const subcatServices: typeof allServices = []
     selectedSubcategories.forEach(id => {
       const specific = getSampleServicesBySubcategory(id)
@@ -588,7 +588,7 @@ export default function OnboardingPage() {
         if (businessType === 'services') {
           const filtered = getFilteredServices()
           const items = filtered.map(s => {
-            if (selectedCurrency.symbol === '₦') return { ...s, merchant_id: newMerchant.id }
+            if (selectedCurrency.symbol === 'â‚¦') return { ...s, merchant_id: newMerchant.id }
             const converted = Math.round(s.price * selectedCurrency.rate)
             const rounded = converted >= 1000 ? Math.floor(converted/500)*500 : converted >= 100 ? Math.floor(converted/50)*50 : Math.floor(converted/5)*5 || 1
             return { ...s, price: rounded, price_display: `${selectedCurrency.symbol}${rounded.toLocaleString()}`, merchant_id: newMerchant.id }
@@ -613,19 +613,19 @@ export default function OnboardingPage() {
     const storeUrl = `https://earket.com/store/${storeSlug}`
     const dashboardUrl = `${window.location.origin}/dashboard`
     const msg = [
-      `🎉 Your business is live on Earket!`,
+      `ðŸŽ‰ Your business is live on Earket!`,
       ``,
-      `👉 Your store link:`,
+      `ðŸ‘‰ Your store link:`,
       storeUrl,
       ``,
-      `📸 Your store is using sample product images for now.`,
+      `ðŸ“¸ Your store is using sample product images for now.`,
       `To upload your real photos and manage your store, tap here:`,
       dashboardUrl,
       ``,
-      `🔐 Login details:`,
+      `ðŸ” Login details:`,
       `Email: ${email}`,
       ``,
-      `Share your store with customers now! 🚀`,
+      `Share your store with customers now! ðŸš€`,
     ].join('\n')
     window.open(`https://wa.me/${normalizedWa}?text=${encodeURIComponent(msg)}`, '_blank')
     setLoginSent('whatsapp')
@@ -652,7 +652,7 @@ export default function OnboardingPage() {
         '251': {min:9, max:10}, // Ethiopia
         '221': {min:9, max:9},  // Senegal
         '237': {min:9, max:9},  // Cameroon
-        '225': {min:10,max:10}, // Côte d'Ivoire
+        '225': {min:10,max:10}, // CÃ´te d'Ivoire
         '20':  {min:10,max:11}, // Egypt
         '212': {min:9, max:10}, // Morocco
         '91':  {min:10,max:10}, // India
@@ -750,7 +750,7 @@ export default function OnboardingPage() {
               <div className="space-y-3">
                 {([
                   { code: 'en' as const, label: 'English', sub: 'Continue in English' },
-                  { code: 'pid' as const, label: '🌍 Pidgin English', sub: 'I wan use Pidgin' },
+                  { code: 'pid' as const, label: 'ðŸŒ Pidgin English', sub: 'I wan use Pidgin' },
                 ]).map(l => (
                   <button key={l.code} onClick={() => { setLang(l.code); setStep('business') }}
                     className="w-full flex items-center justify-between bg-white border-2 border-gray-200 hover:border-brand-green rounded-2xl p-4 transition-all group">
@@ -761,7 +761,7 @@ export default function OnboardingPage() {
                     <ArrowRight size={18} className="text-gray-300 group-hover:text-brand-green transition-colors" />
                   </button>
                 ))}
-                <p className="text-xs text-gray-400 text-center pt-2">More languages coming soon · French, Spanish, Arabic, Swahili</p>
+                <p className="text-xs text-gray-400 text-center pt-2">More languages coming soon Â· French, Spanish, Arabic, Swahili</p>
               </div>
             </div>
           )}
@@ -842,7 +842,7 @@ export default function OnboardingPage() {
                 </div>
               )}
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
-              <p className="text-xs text-gray-400 mt-2">⚠️ Make sure this number is active on WhatsApp</p>
+              <p className="text-xs text-gray-400 mt-2">âš ï¸ Make sure this number is active on WhatsApp</p>
             </div>
           )}
 
@@ -874,7 +874,7 @@ export default function OnboardingPage() {
                 </button>
               </div>
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
-              <p className="text-xs text-gray-400 mt-3">🔒 {pid ? 'Minimum 4 characters. Save am well well.' : 'Minimum 4 characters. Keep it safe.'}</p>
+              <p className="text-xs text-gray-400 mt-3">ðŸ”’ {pid ? 'Minimum 4 characters. Save am well well.' : 'Minimum 4 characters. Keep it safe.'}</p>
             </div>
           )}
 
@@ -887,7 +887,7 @@ export default function OnboardingPage() {
               <div className="space-y-3">
                 <button onClick={() => setBusinessType('products')}
                   className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${businessType === 'products' ? 'border-brand-green bg-brand-light' : 'border-gray-200 bg-white'}`}>
-                  <span className="text-3xl">🛍️</span>
+                  <span className="text-3xl">ðŸ›ï¸</span>
                   <div className="text-left">
                     <p className="font-display font-bold text-brand-dark">{pid ? 'I dey sell products' : 'I sell products'}</p>
                     <p className="text-xs text-gray-500">Food, clothing, electronics, groceries etc.</p>
@@ -895,7 +895,7 @@ export default function OnboardingPage() {
                 </button>
                 <button onClick={() => setBusinessType('services')}
                   className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${businessType === 'services' ? 'border-brand-green bg-brand-light' : 'border-gray-200 bg-white'}`}>
-                  <span className="text-3xl">🔧</span>
+                  <span className="text-3xl">ðŸ”§</span>
                   <div className="text-left">
                     <p className="font-display font-bold text-brand-dark">{pid ? 'I dey offer service' : 'I offer a service'}</p>
                     <p className="text-xs text-gray-500">Repairs, beauty, tutoring, events, delivery etc.</p>
@@ -951,7 +951,7 @@ export default function OnboardingPage() {
 
               {(SERVICE_SUBCATEGORIES[category] || []).length > 4 && (
                 <p className="text-xs text-gray-400 text-center -mt-2 mb-3 flex items-center justify-center gap-1">
-                  <span>↕</span> Scroll to see all options
+                  <span>â†•</span> Scroll to see all options
                 </p>
               )}
               {customServices.length > 0 && (
@@ -967,7 +967,7 @@ export default function OnboardingPage() {
 
               <div className="border-2 border-dashed border-gray-200 rounded-xl p-3">
                 <p className="text-xs font-semibold text-gray-500 mb-2">
-                  {pid ? '➕ Add service wey no dey above' : '➕ Add a service not listed above'}
+                  {pid ? 'âž• Add service wey no dey above' : 'âž• Add a service not listed above'}
                 </p>
                 <div className="relative">
                   <div className="flex gap-2">
@@ -976,7 +976,7 @@ export default function OnboardingPage() {
                       onFocus={() => { setSuggestions(getServiceSuggestions(customServiceInput)); setShowSuggestions(true) }}
                       onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
                       onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomService() } }}
-                      placeholder="e.g. Hot Stone Massage — or pick below"
+                      placeholder="e.g. Hot Stone Massage â€” or pick below"
                       className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-brand-green" />
                     <button onClick={isListening ? stopVoice : startVoice}
                       className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-100 text-gray-500 hover:bg-brand-light hover:text-brand-green'}`}>
@@ -993,7 +993,7 @@ export default function OnboardingPage() {
                       {suggestions.map(sugg => (
                         <button key={sugg} onMouseDown={() => addCustomServiceWithDescription(sugg)}
                           className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-brand-light hover:text-brand-green flex items-center gap-2 transition-colors">
-                          <span className="text-base">✨</span>
+                          <span className="text-base">âœ¨</span>
                           {sugg}
                         </button>
                       ))}
@@ -1029,7 +1029,7 @@ export default function OnboardingPage() {
                   alt={selectedCountry.name} className="w-5 h-4 object-cover rounded-sm" />
                 <p className="text-xs text-gray-500">
                   {location && !showOtherCity
-                    ? <><span className="font-semibold text-gray-700">{location}, {selectedCountry.name}</span> — tap another city to change</>
+                    ? <><span className="font-semibold text-gray-700">{location}, {selectedCountry.name}</span> â€” tap another city to change</>
                     : <>Showing cities in <span className="font-semibold text-gray-700">{selectedCountry.name}</span></>}
                 </p>
               </div>
@@ -1046,7 +1046,7 @@ export default function OnboardingPage() {
                   onChange={e => setCustomCity(e.target.value)}
                   onBlur={e => setLocation(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') { setLocation((e.target as HTMLInputElement).value); (e.target as HTMLInputElement).blur() } }}
-                  placeholder="Type your city or town — press Enter when done"
+                  placeholder="Type your city or town â€” press Enter when done"
                   className="mt-3 w-full border-2 border-brand-green rounded-xl px-4 py-3 text-sm focus:outline-none" />
               )}
             </div>
@@ -1086,7 +1086,7 @@ export default function OnboardingPage() {
               {/* Selected theme preview */}
               <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
                 <div className="h-16 flex items-center px-4 gap-3" style={getThemeStyle(selectedTheme)}>
-                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl">💼</div>
+                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl">ðŸ’¼</div>
                   <div>
                     <p className="font-display font-bold text-sm" style={{ color: selectedTheme.textOnPrimary }}>{businessName || 'Your Business'}</p>
                     <p className="text-xs opacity-70" style={{ color: selectedTheme.textOnPrimary }}>{location || 'Your City'}</p>
@@ -1119,10 +1119,10 @@ export default function OnboardingPage() {
                     backgroundImage: 'radial-gradient(circle at 30% 50%, white 1px, transparent 1px)',
                     backgroundSize: '20px 20px'
                   }} />
-                  <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shrink-0 shadow-lg relative z-10">💼</div>
+                  <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shrink-0 shadow-lg relative z-10">ðŸ’¼</div>
                   <div className="relative z-10">
                     <p className="font-display font-bold text-base leading-tight" style={{ color: selectedTheme.textOnPrimary }}>{businessName}</p>
-                    <p className="text-xs opacity-70 mt-0.5" style={{ color: selectedTheme.textOnPrimary }}>{location} · {selectedTheme.name} theme</p>
+                    <p className="text-xs opacity-70 mt-0.5" style={{ color: selectedTheme.textOnPrimary }}>{location} Â· {selectedTheme.name} theme</p>
                     <div className="flex items-center gap-1 mt-1">
                       <div className="w-1.5 h-1.5 bg-green-300 rounded-full animate-pulse" />
                       <span className="text-xs opacity-80" style={{ color: selectedTheme.textOnPrimary }}>Open for bookings</span>
@@ -1157,16 +1157,16 @@ export default function OnboardingPage() {
               <div className="grid grid-cols-2 gap-2 mb-4">
                 <button onClick={() => setStep('theme')}
                   className="flex items-center justify-center gap-1.5 bg-gray-50 border border-gray-200 rounded-xl py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-100">
-                  🎨 Change Theme
+                  ðŸŽ¨ Change Theme
                 </button>
                 <button onClick={() => setStep(businessType === 'services' ? 'subcategory' : 'products')}
                   className="flex items-center justify-center gap-1.5 bg-gray-50 border border-gray-200 rounded-xl py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-100">
-                  ✏️ Edit Services
+                  âœï¸ Edit Services
                 </button>
               </div>
 
               <p className="text-xs text-gray-400 text-center mb-2">
-                📸 Images are placeholders — you can upload your own photos after publishing
+                ðŸ“¸ Images are placeholders â€” you can upload your own photos after publishing
               </p>
             </div>
           )}
@@ -1232,12 +1232,12 @@ export default function OnboardingPage() {
               </div>
               {alreadyExists && (
                 <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-5 text-left">
-                  <p className="font-semibold text-amber-800 text-sm mb-1">{pid ? '⚠️ You don already get shop!' : '⚠️ You already have a business page!'}</p>
+                  <p className="font-semibold text-amber-800 text-sm mb-1">{pid ? 'âš ï¸ You don already get shop!' : 'âš ï¸ You already have a business page!'}</p>
                   <p className="text-amber-700 text-xs">{pid ? 'This email or WhatsApp don already use.' : 'This email or WhatsApp is already linked to a business.'}</p>
                 </div>
               )}
               <h2 className="font-display text-2xl font-bold text-brand-dark mb-2">
-                {alreadyExists ? (pid ? 'Your shop dey here! 👋' : 'Welcome back! 👋') : (pid ? 'Your shop don go live! 🎉' : 'Your business is live! 🎉')}
+                {alreadyExists ? (pid ? 'Your shop dey here! ðŸ‘‹' : 'Welcome back! ðŸ‘‹') : (pid ? 'Your shop don go live! ðŸŽ‰' : 'Your business is live! ðŸŽ‰')}
               </h2>
               <div className="bg-brand-light border-2 border-brand-green/20 rounded-2xl p-4 mb-6">
                 <p className="text-xs text-gray-500 mb-1">{pid ? 'Your shop link:' : 'Your business link:'}</p>
@@ -1281,7 +1281,7 @@ export default function OnboardingPage() {
               </Link>
               <a href={`https://wa.me/?text=${encodeURIComponent('Check out my business page: https://earket.com/store/' + storeSlug)}`}
                 target="_blank" rel="noreferrer" className="btn-whatsapp w-full justify-center">
-                📲 {pid ? 'Share for WhatsApp' : 'Share on WhatsApp'}
+                ðŸ“² {pid ? 'Share for WhatsApp' : 'Share on WhatsApp'}
               </a>
             </div>
           )}
@@ -1298,9 +1298,9 @@ export default function OnboardingPage() {
                 {step === 'subcategory'
                   ? (totalSelected > 0
                     ? `Continue with ${totalSelected} service${totalSelected !== 1 ? 's' : ''} selected`
-                    : 'Continue — add all services')
+                    : 'Continue â€” add all services')
                   : step === 'preview'
-                  ? <>🚀 {pid ? 'Publish My Business!' : 'Publish My Business!'}</>
+                  ? <>ðŸš€ {pid ? 'Publish My Business!' : 'Publish My Business!'}</>
                   : <>Continue <ArrowRight size={18} /></>
                 }
               </button>
