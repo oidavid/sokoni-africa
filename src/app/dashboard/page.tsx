@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -29,12 +29,12 @@ interface Product {
 }
 
 const CATEGORY_EMOJI: Record<string, string> = {
-  fashion: '👗', food: '🍱', electronics: '📱', beauty: '💄',
-  groceries: '🛒', furniture: '🪑', shoes: '👟', phones: '💻',
-  health: '💊', stationery: '📚', automobile: '🚗', other: '🏪',
-  home_services: '🔧', auto_services: '🚗', beauty_services: '💄',
-  education: '📚', health_wellness: '🏥', domestic: '🏠',
-  events: '🎉', digital_services: '💻', transport: '🚚', agriculture: '🌱',
+  fashion: 'ðŸ‘—', food: 'ðŸ±', electronics: 'ðŸ“±', beauty: 'ðŸ’„',
+  groceries: 'ðŸ›’', furniture: 'ðŸª‘', shoes: 'ðŸ‘Ÿ', phones: 'ðŸ’»',
+  health: 'ðŸ’Š', stationery: 'ðŸ“š', automobile: 'ðŸš—', other: 'ðŸª',
+  home_services: 'ðŸ”§', auto_services: 'ðŸš—', beauty_services: 'ðŸ’„',
+  education: 'ðŸ“š', health_wellness: 'ðŸ¥', domestic: 'ðŸ ',
+  events: 'ðŸŽ‰', digital_services: 'ðŸ’»', transport: 'ðŸšš', agriculture: 'ðŸŒ±',
 }
 
 const GRID_PREVIEW = 9 // products visible before "show all"
@@ -112,7 +112,7 @@ export default function DashboardPage() {
 
   function formatPrice(p: Product) {
     if (p.price_display) return p.price_display
-    return `₦${(p.price / 100).toLocaleString()}`
+    return `â‚¦${(p.price / 100).toLocaleString()}`
   }
 
   async function saveTheme(theme: EarketTheme) {
@@ -142,14 +142,14 @@ export default function DashboardPage() {
 
   const isService = merchant.business_type === 'services'
   const inStockCount = products.filter(p => p.in_stock).length
-  const categoryEmoji = CATEGORY_EMOJI[merchant.category] || '🏪'
+  const categoryEmoji = CATEGORY_EMOJI[merchant.category] || 'ðŸª'
   const storeUrl = typeof window !== 'undefined' ? `${window.location.origin}/store/${merchant.slug}` : ''
   const visibleProducts = showAllProducts ? products : products.slice(0, GRID_PREVIEW)
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
 
-      {/* ── TOP NAV ── */}
+      {/* â”€â”€ TOP NAV â”€â”€ */}
       <nav className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 bg-brand-green rounded-lg flex items-center justify-center">
@@ -177,12 +177,12 @@ export default function DashboardPage() {
                 setJoiningPro(false)
               }}
               className="text-xs bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-1.5 rounded-xl font-semibold hover:bg-purple-100 transition-colors disabled:opacity-50">
-              {joiningPro ? '...' : '⭐ Pro'}
+              {joiningPro ? '...' : 'â­ Pro'}
             </button>
           )}
           {proJoined && announcements.filter(a => a.type === 'promo' && !dismissedIds.has(a.id)).length === 0 && (
             <span className="text-xs bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-1.5 rounded-xl font-semibold">
-              ✅ Pro list
+              âœ… Pro list
             </span>
           )}
           <Link href={`/store/${merchant.slug}`} target="_blank"
@@ -196,7 +196,7 @@ export default function DashboardPage() {
         </div>
       </nav>
 
-      {/* Theme picker modal — unchanged */}
+      {/* Theme picker modal â€” unchanged */}
       {showThemePicker && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60" onClick={() => setShowThemePicker(false)} />
@@ -229,16 +229,16 @@ export default function DashboardPage() {
 
       <div className="max-w-lg mx-auto px-4 py-4">
 
-        {/* ── PLATFORM ANNOUNCEMENTS — top priority, above everything ── */}
+        {/* â”€â”€ PLATFORM ANNOUNCEMENTS â€” top priority, above everything â”€â”€ */}
         {announcements.filter(a => !dismissedIds.has(a.id)).length > 0 && (
           <div className="mb-4">
             {announcements.filter(a => !dismissedIds.has(a.id)).map(a => (
               a.type === 'promo' ? (
-                /* ── PROMO — compact premium banner ── */
+                /* â”€â”€ PROMO â€” compact premium banner â”€â”€ */
                 <div key={a.id} className="relative rounded-2xl mb-2 overflow-hidden"
                   style={{ background: 'linear-gradient(120deg, #1e2d6b 0%, #2d3a8c 100%)' }}>
                   <div className="px-4 py-3 flex items-center gap-3">
-                    <span className="text-lg shrink-0">⭐</span>
+                    <span className="text-lg shrink-0">â­</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-white font-semibold text-xs leading-snug pr-4">{a.message}</p>
                     </div>
@@ -257,35 +257,35 @@ export default function DashboardPage() {
                           setJoiningPro(false)
                         }}
                         className="shrink-0 bg-white text-indigo-900 text-[11px] font-bold px-3 py-1.5 rounded-xl hover:bg-indigo-50 transition-colors disabled:opacity-50 whitespace-nowrap">
-                        {joiningPro ? '...' : 'Join Free →'}
+                        {joiningPro ? '...' : 'Join Free â†’'}
                       </button>
                     ) : (
                       <span className="shrink-0 bg-white/20 text-white text-[11px] font-semibold px-3 py-1.5 rounded-xl whitespace-nowrap">
-                        ✅ Joined
+                        âœ… Joined
                       </span>
                     )}
                   </div>
                 </div>
               ) : (
-                /* ── OTHER TYPES — standard alert ── */
+                /* â”€â”€ OTHER TYPES â€” standard alert â”€â”€ */
                 <div key={a.id} className={`flex items-start gap-3 rounded-2xl px-4 py-3.5 mb-2 border ${
                   a.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' :
                   a.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
                   'bg-sky-50 border-sky-200 text-sky-900'
                 }`}>
                   <span className="text-lg shrink-0">
-                    {a.type === 'warning' ? '⚠️' : a.type === 'success' ? '✅' : '📢'}
+                    {a.type === 'warning' ? 'âš ï¸' : a.type === 'success' ? 'âœ…' : 'ðŸ“¢'}
                   </span>
                   <p className="text-sm flex-1 font-medium leading-snug">{a.message}</p>
                   <button onClick={() => setDismissedIds(prev => { const next = new Set(Array.from(prev)); next.add(a.id); return next; })}
-                    className="text-lg leading-none opacity-40 hover:opacity-80 shrink-0 mt-0.5">✕</button>
+                    className="text-lg leading-none opacity-40 hover:opacity-80 shrink-0 mt-0.5">âœ•</button>
                 </div>
               )
             ))}
           </div>
         )}
 
-        {/* ── STATS ROW ── */}
+        {/* â”€â”€ STATS ROW â”€â”€ */}
         <div className="grid grid-cols-4 gap-2 mb-4">
           <div className="bg-white rounded-2xl p-3 border border-gray-100 text-center">
             <div className="font-display font-bold text-xl text-brand-dark">{products.length}</div>
@@ -308,14 +308,14 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        {/* ── STORE URL BAR ── */}
+        {/* â”€â”€ STORE URL BAR â”€â”€ */}
         <div className="bg-white rounded-2xl border border-gray-100 px-3 py-2.5 flex items-center gap-2 mb-4">
           <div className="flex-1 text-xs font-medium text-brand-green truncate">earket.com/store/{merchant.slug}</div>
           <button onClick={() => setShowThemePicker(true)}
             className="text-xs text-brand-green font-semibold bg-brand-light px-2 py-1 rounded-lg border border-brand-green/20 shrink-0">
-            🎨
+            ðŸŽ¨
           </button>
-          <a href={`https://wa.me/?text=${encodeURIComponent(`🛍️ Shop at *${merchant.business_name}*!\n\nearket.com/store/${merchant.slug}`)}`}
+          <a href={`https://wa.me/?text=${encodeURIComponent(`ðŸ›ï¸ Shop at *${merchant.business_name}*!\n\nearket.com/store/${merchant.slug}`)}`}
             target="_blank" rel="noreferrer"
             className="text-xs bg-[#25D366] text-white font-semibold px-2.5 py-1 rounded-lg shrink-0">
             Share
@@ -326,12 +326,12 @@ export default function DashboardPage() {
           </a>
         </div>
 
-        {/* ── HERO ACTION: CASH SALE + CREDIT REPORT ── */}
+        {/* â”€â”€ HERO ACTION: CASH SALE + CREDIT REPORT â”€â”€ */}
         <div className="mb-1">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Record & Build Credit</p>
           <div className="grid grid-cols-2 gap-3 mb-3">
 
-            {/* Cash Sale — primary featured card */}
+            {/* Cash Sale â€” primary featured card */}
             <Link href="/dashboard/cash-sale"
               className="flex flex-col gap-2 bg-brand-light border-2 border-brand-green rounded-2xl p-4 hover:brightness-95 transition-all active:scale-[0.98] shadow-sm">
               <div className="w-10 h-10 bg-brand-green/15 rounded-xl flex items-center justify-center">
@@ -341,10 +341,10 @@ export default function DashboardPage() {
                 <div className="font-display font-bold text-sm text-brand-dark">Cash Sale</div>
                 <div className="text-xs text-gray-500 leading-snug mt-0.5">Record a walk-in sale</div>
               </div>
-              <span className="self-start text-[10px] bg-brand-green text-white px-2 py-0.5 rounded-full font-semibold">Record now →</span>
+              <span className="self-start text-[10px] bg-brand-green text-white px-2 py-0.5 rounded-full font-semibold">Record now â†’</span>
             </Link>
 
-            {/* Sales Report — primary featured card */}
+            {/* Sales Report â€” primary featured card */}
             <Link href="/dashboard/cash-sale?tab=today"
               className="flex flex-col gap-2 bg-indigo-50 border-2 border-indigo-400 rounded-2xl p-4 hover:brightness-95 transition-all active:scale-[0.98] shadow-sm">
               <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
@@ -354,12 +354,12 @@ export default function DashboardPage() {
                 <div className="font-display font-bold text-sm text-brand-dark">Sales Report</div>
                 <div className="text-xs text-gray-500 leading-snug mt-0.5">Today's cash sales</div>
               </div>
-              <span className="self-start text-[10px] bg-indigo-600 text-white px-2 py-0.5 rounded-full font-semibold">View →</span>
+              <span className="self-start text-[10px] bg-indigo-600 text-white px-2 py-0.5 rounded-full font-semibold">View â†’</span>
             </Link>
           </div>
         </div>
 
-        {/* ── ADD PRODUCT CTA ── */}
+        {/* â”€â”€ ADD PRODUCT CTA â”€â”€ */}
         <Link href="/dashboard/products/new"
           className="flex items-center gap-3 bg-brand-green text-white rounded-2xl p-4 mb-4 hover:bg-brand-dark transition-colors active:scale-[0.98]">
           <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
@@ -368,12 +368,12 @@ export default function DashboardPage() {
           <div>
             <div className="font-display font-bold">{isService ? 'Add New Service' : 'Add New Product'}</div>
             <div className="text-xs text-white/70">
-              {isService ? 'Add a service with description and pricing ✨' : 'AI writes the description for you ✨'}
+              {isService ? 'Add a service with description and pricing âœ¨' : 'AI writes the description for you âœ¨'}
             </div>
           </div>
         </Link>
 
-        {/* ── SECONDARY ACTIONS — 2x2 grid ── */}
+        {/* â”€â”€ SECONDARY ACTIONS â€” 2x2 grid â”€â”€ */}
         <div className="mb-4">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Manage</p>
           <div className="grid grid-cols-2 gap-3">
@@ -453,7 +453,7 @@ export default function DashboardPage() {
               </div>
             </Link>
 
-            {/* Refresh services — only for service merchants */}
+            {/* Refresh services â€” only for service merchants */}
             {isService && (
               <button onClick={refreshServices} disabled={refreshingServices}
                 className="flex flex-col gap-2 bg-brand-light border-2 border-brand-green/40 rounded-2xl p-3.5 hover:brightness-95 transition-all active:scale-[0.98] shadow-sm text-left disabled:opacity-50">
@@ -462,7 +462,7 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <div className="font-semibold text-sm text-gray-800">
-                    {refreshDone ? '✅ Refreshed!' : 'Refresh Services'}
+                    {refreshDone ? 'âœ… Refreshed!' : 'Refresh Services'}
                   </div>
                   <div className="text-xs text-gray-500 leading-snug mt-0.5">AI-selected for your category</div>
                 </div>
@@ -477,12 +477,12 @@ export default function DashboardPage() {
           ['Indomie Noodles', 'Golden Penny', 'Vegetable Oil', 'Pounded Yam', 'Ankara Print', 'Plain Cotton'].some(s => p.name.startsWith(s))
         ) && (
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4 flex items-start gap-3">
-            <div className="text-xl shrink-0">📸</div>
+            <div className="text-xl shrink-0">ðŸ“¸</div>
             <div>
               <p className="font-semibold text-amber-800 text-sm">Replace sample products with yours</p>
               <p className="text-amber-700 text-xs mt-0.5">Add your real products with photos for a better customer experience.</p>
               <Link href="/dashboard/products/new" className="inline-block mt-2 text-xs font-bold text-amber-800 underline">
-                Add my real products →
+                Add my real products â†’
               </Link>
             </div>
           </div>
@@ -491,7 +491,7 @@ export default function DashboardPage() {
         {/* Placeholder image nudge for services */}
         {isService && products.length > 0 && products.some(p => p.image_url && p.image_url.includes('unsplash')) && (
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4 flex items-start gap-3">
-            <span className="text-xl shrink-0">📸</span>
+            <span className="text-xl shrink-0">ðŸ“¸</span>
             <div className="flex-1">
               <p className="font-semibold text-amber-800 text-sm">Add your own photos</p>
               <p className="text-amber-700 text-xs mt-0.5">Your services are using placeholder images. Tap any service to upload real photos.</p>
@@ -499,7 +499,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* ── PRODUCTS — 3-column grid ── */}
+        {/* â”€â”€ PRODUCTS â€” 3-column grid â”€â”€ */}
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
@@ -510,7 +510,7 @@ export default function DashboardPage() {
 
           {products.length === 0 ? (
             <div className="bg-white rounded-2xl border border-gray-100 text-center py-10 px-4">
-              <div className="text-3xl mb-2">{isService ? '🔧' : '📦'}</div>
+              <div className="text-3xl mb-2">{isService ? 'ðŸ”§' : 'ðŸ“¦'}</div>
               <p className="text-gray-500 text-sm mb-1">{isService ? 'No services yet' : 'No products yet'}</p>
               <Link href="/dashboard/products/new" className="inline-block bg-brand-green text-white text-xs font-bold px-5 py-2.5 rounded-xl mt-2">
                 {isService ? 'Add First Service' : 'Add First Product'}
@@ -548,9 +548,9 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* ── WHATSAPP CTA ── */}
+        {/* â”€â”€ WHATSAPP CTA â”€â”€ */}
         <div className="bg-[#075E54] text-white rounded-2xl p-4 flex items-center gap-3">
-          <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-xl">💬</div>
+          <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-xl">ðŸ’¬</div>
           <div className="flex-1 min-w-0">
             <div className="font-display font-bold text-sm">WhatsApp {isService ? 'Bookings' : 'Orders'}</div>
             <div className="text-xs text-white/70 truncate">+{merchant.whatsapp_number}</div>
@@ -563,7 +563,7 @@ export default function DashboardPage() {
 
       </div>
 
-      {/* ── BOTTOM NAV ── */}
+      {/* â”€â”€ BOTTOM NAV â”€â”€ */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex max-w-lg mx-auto">
         {[
           { icon: TrendingUp, label: 'Dashboard', href: '/dashboard' },
