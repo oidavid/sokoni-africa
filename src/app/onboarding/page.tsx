@@ -698,7 +698,7 @@ export default function OnboardingPage() {
       if (existingWa) { setError(pid ? 'This WhatsApp number don already dey. Abeg use another number.' : 'This WhatsApp number is already registered. Please use a different number.'); return }
       setStep('email')
     } else if (step === 'email') {
-      if (!email.trim() || !email.includes('@')) { setError(pid ? 'Abeg enter valid email' : 'Please enter a valid email'); return }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/; if (!email.trim() || !emailRegex.test(email.trim())) { setError(pid ? 'Abeg enter valid email (e.g. name@gmail.com)' : 'Please enter a valid email address (e.g. name@gmail.com)'); return }
       const { data: existing } = await supabase.from('merchants').select('id, slug').eq('email', email.toLowerCase()).maybeSingle()
       if (existing) { setError(pid ? 'This email don already dey. Abeg use another email.' : 'This email is already registered. Please use a different email.'); return }
       setStep('password')
@@ -909,7 +909,7 @@ export default function OnboardingPage() {
               <div className="space-y-3">
                 <button onClick={() => setBusinessType('products')}
                   className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${businessType === 'products' ? 'border-brand-green bg-brand-light' : 'border-gray-200 bg-white'}`}>
-                  <span className="text-3xl">ðŸ›ï¸</span>
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${businessType === 'products' ? 'bg-brand-green/15' : 'bg-gray-100'}`}><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={businessType === 'products' ? '#1a7a4a' : '#6b7280'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div>
                   <div className="text-left">
                     <p className="font-display font-bold text-brand-dark">{pid ? 'I dey sell products' : 'I sell products'}</p>
                     <p className="text-xs text-gray-500">Food, clothing, electronics, groceries etc.</p>
