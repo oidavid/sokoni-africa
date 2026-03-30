@@ -77,7 +77,11 @@ const CATEGORY_HEADLINE: Record<string, string> = {
   food_catering: 'Exceptional food, crafted with passion.',
   womens_empowerment: 'Rise into the powerful woman you were built to be.',
   business_coach: 'Build a business that matches your ambition.',
-  mental_wellness: 'Your mind matters. You deserve real support.',
+  fitness: 'Your strongest self starts here.',
+  photography: 'Every moment deserves to be remembered beautifully.',
+  hair_salon: 'Where great hair days happen every day.',
+  fashion_design: 'Style that tells your story.',
+  printing: 'Your brand, beautifully brought to life.',
 }
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -114,6 +118,11 @@ const CATEGORY_TAGLINE: Record<string, string> = {
   food_catering: 'Fresh, flavourful and beautifully presented.',
   womens_empowerment: 'Breaking barriers. Building unstoppable women.',
   business_coach: 'Strategy, clarity and accountability to grow.',
+  fitness: 'Personalised training that delivers real results.',
+  photography: 'Professional photography that captures every memory.',
+  hair_salon: 'Expert cuts, colour and styling for every look.',
+  fashion_design: 'Custom tailoring and fashion design excellence.',
+  printing: 'High-quality printing for brands that mean business.',
 }
 
 function getDuration(name: string): string | null {
