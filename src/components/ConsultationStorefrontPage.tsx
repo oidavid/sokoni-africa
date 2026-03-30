@@ -46,26 +46,50 @@ const CATEGORY_HERO: Record<string, string> = {
 
 const CATEGORY_HEADLINE: Record<string, string> = {
   coaching: 'Transform your life. Unlock your full potential.',
-  mental_wellness: 'Your mind matters. You deserve support.',
-  education: 'Knowledge that opens doors.',
-  digital_services: 'Smart solutions for your business.',
-  health_wellness: 'Your health and wellbeing, our priority.',
+  mental_wellness: 'Your mind matters. You deserve real support.',
+  education: 'Knowledge that opens every door.',
+  digital_services: 'Smart, results-driven solutions for your business.',
+  health_wellness: 'Your health and wellbeing, our highest priority.',
+  womens_empowerment: 'Rise into the powerful woman you were built to be.',
+  business_coach: 'Build a business that matches your ambition.',
+  childcare: 'Trusted care for your most precious people.',
+  food_catering: 'Exceptional food, created with care and skill.',
+  events: 'Every occasion, made unforgettable.',
+  domestic: 'Your home, immaculate. Your time, yours again.',
+  transport: 'Professional, reliable and always on time.',
+  agriculture: 'Grow more. Earn more. Farm smarter.',
 }
 
 const CATEGORY_SUBHEADLINE: Record<string, string> = {
-  coaching: 'Book a free discovery call and take the first step toward the life you want.',
-  mental_wellness: 'A safe, confidential space to heal, grow and find your balance.',
-  education: 'Qualified, passionate and committed to your success.',
-  digital_services: 'From branding to digital marketing — we help your business grow online.',
-  health_wellness: 'Evidence-based care, delivered with compassion.',
+  coaching: 'Book a free discovery call and take the first step toward the life you truly want.',
+  mental_wellness: 'A safe, confidential space to heal, grow and find your balance again.',
+  education: 'Qualified, passionate and deeply committed to your success.',
+  digital_services: 'From branding to digital strategy — professional solutions that grow your business.',
+  health_wellness: 'Evidence-based care and wellness support, delivered with genuine compassion.',
+  womens_empowerment: 'A powerful, confidential space to break barriers and step fully into your potential.',
+  business_coach: 'Strategy, clarity and accountability — everything you need to grow with confidence.',
+  childcare: 'Experienced, background-checked and genuinely caring. Because your family deserves the best.',
+  food_catering: 'From intimate dinners to large events — fresh, flavourful and beautifully presented.',
+  events: 'Professional planning and execution so you can enjoy every moment without worry.',
+  domestic: 'Reliable, thorough and discreet. A cleaner home without lifting a finger.',
+  transport: 'Safe, punctual and professional — whether across town or across the city.',
+  agriculture: 'Expert agricultural services to maximise your yields and grow a profitable farm.',
 }
 
 const CATEGORY_LABEL: Record<string, string> = {
-  coaching: 'Coaching & Mentoring',
+  coaching: 'Life Coaching & Mentoring',
   mental_wellness: 'Mental Wellness & Counselling',
   education: 'Education & Tutoring',
   digital_services: 'Digital & Tech Services',
   health_wellness: 'Health & Wellness',
+  womens_empowerment: "Women's Empowerment Coaching",
+  business_coach: 'Business Coaching & Strategy',
+  childcare: 'Childcare & Nanny Services',
+  food_catering: 'Food & Catering',
+  events: 'Events & Entertainment',
+  domestic: 'Home & Cleaning Services',
+  transport: 'Transport & Logistics',
+  agriculture: 'Agricultural Services',
 }
 
 const HOW_I_WORK: Record<string, Array<{ icon: string; title: string; desc: string }>> = {
