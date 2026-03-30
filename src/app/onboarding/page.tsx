@@ -329,7 +329,7 @@ export default function OnboardingPage() {
   const [showSuggestions, setShowSuggestions] = useState(false)
 
   const pid = lang === 'pid'
-  const rawSampleItems = category ? (businessType === 'services' ? getSampleServices(category) : getSampleProducts(category)) : []
+  const rawSampleItems = category ? (businessType === 'services' ? getSampleServices(category, selectedCountry.code) : getSampleProducts(category, selectedCountry.code)) : []
   const countryCurrencyMap: Record<string, {symbol: string; rate: number}> = {
     '234': {symbol: 'â‚¦', rate: 1}, '233': {symbol: 'GHâ‚µ', rate: 0.0094},
     '254': {symbol: 'KSh', rate: 0.078}, '27': {symbol: 'R', rate: 0.011},
@@ -503,7 +503,7 @@ export default function OnboardingPage() {
   }
 
   function getFilteredServices() {
-    const allServices = getSampleServices(category)
+    const allServices = getSampleServices(category, selectedCountry.code)
 
     // Build custom entries first so we can dedup against them too
     const customEntries = customServices.map(s => ({
@@ -522,7 +522,7 @@ export default function OnboardingPage() {
     // Pull from subcategory-specific libraries â€” take max 5 per subcategory
     const subcatServices: typeof allServices = []
     selectedSubcategories.forEach(id => {
-      const specific = getSampleServicesBySubcategory(id)
+      const specific = getSampleServicesBySubcategory(id, selectedCountry.code)
       if (specific.length > 0) {
         subcatServices.push(...specific.slice(0, 5))
       } else {
@@ -674,6 +674,9 @@ export default function OnboardingPage() {
       const rule = PHONE_RULES[selectedCountry.dial] || {min:7, max:15}
       if (digits.length < rule.min) { setError(`Please enter a valid ${selectedCountry.name} number (${rule.min} digits)`); return }
       if (digits.length > rule.max) { setError(`Too many digits for ${selectedCountry.name} (max ${rule.max})`); return }
+      // Check if WhatsApp number already registered
+      const { data: existingWa } = await supabase.from('merchants').select('id').eq('phone', normalizedWa).maybeSingle()
+      if (existingWa) { setError(pid ? 'This WhatsApp number don already dey. Abeg use another number.' : 'This WhatsApp number is already registered. Please use a different number.'); return }
       setStep('email')
     } else if (step === 'email') {
       if (!email.trim() || !email.includes('@')) { setError(pid ? 'Abeg enter valid email' : 'Please enter a valid email'); return }
@@ -705,7 +708,7 @@ export default function OnboardingPage() {
     } else if (step === 'theme') {
       // Always preview before generating
       if (businessType !== 'services') {
-        setSelectedProducts(new Set(getSampleProducts(category).map((_, i) => i)))
+        setSelectedProducts(new Set(getSampleProducts(category, selectedCountry.code).map((_, i) => i)))
       }
       setStep('preview')
     } else if (step === 'preview') {
@@ -803,8 +806,8 @@ export default function OnboardingPage() {
                     onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                   <span className="text-gray-600 text-sm font-semibold">+{selectedCountry.dial}</span>
                 </button>
-                <input type="tel" placeholder="Phone number" value={whatsappRaw}
-                  onChange={e => { setWhatsappRaw(e.target.value); setError('') }}
+                <input type="tel" inputMode="numeric" placeholder="Phone number" value={whatsappRaw}
+                  onChange={e => { setWhatsappRaw(e.target.value.replace(/[^0-9+]/g, '')); setError('') }}
                   onKeyDown={e => e.key === 'Enter' && handleNext()} autoFocus
                   className="flex-1 border-2 border-gray-200 focus:border-brand-green rounded-2xl px-4 py-4 text-brand-dark font-display font-bold text-lg outline-none transition-colors" />
               </div>
