@@ -1,231 +1,953 @@
-export const SAMPLE_SERVICES_BY_SUBCATEGORY: Record<string, Array<{
-  name: string; description: string; price: number; price_display: string; in_stock: boolean; image_url: string
-}>> = {
+/**
+ * Earket Regional Sample Services
+ * All service subcategories with real market pricing per region.
+ * Services are presented with executive-level descriptions.
+ *
+ * Usage: getSampleServices(subcategory, countryCode)
+ *        getRegionalServices(category, countryCode)
+ */
 
-  // ── BEAUTY: MASSAGE ──────────────────────────────────────────────────────
-  massage: [
-    { name: 'Swedish Relaxation Massage (60 min)', description: 'Gentle full-body Swedish massage to melt away stress and tension. Warm oils, soft music, private room. Perfect for first-timers.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&q=80' },
-    { name: 'Deep Tissue Massage (60 min)', description: 'Firm pressure targeting deep muscle layers and chronic tension. Ideal for back pain, stiff neck and muscle knots. Licensed therapist.', price: 2000000, price_display: '₦20,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=400&q=80' },
-    { name: 'Hot Stone Massage (75 min)', description: 'Smooth heated basalt stones placed along the spine and used in the massage. Deeply relaxing and warming. A true luxury experience.', price: 2500000, price_display: '₦25,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=400&q=80' },
-    { name: 'Prenatal / Pregnancy Massage', description: 'Safe and soothing massage for expectant mothers. Relieves back pain, swollen feet and pregnancy tension. Side-lying position.', price: 2000000, price_display: '₦20,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&q=80' },
-    { name: 'Couples Massage (2 persons)', description: 'Side-by-side massage for two people in the same room. Perfect for date nights, anniversaries and special occasions.', price: 3500000, price_display: '₦35,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&q=80' },
-    { name: 'Sports & Recovery Massage', description: 'Targeted massage for athletes and active people. Reduces muscle soreness, improves flexibility and speeds up recovery.', price: 2000000, price_display: '₦20,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&q=80' },
-    { name: 'Aromatherapy Massage (90 min)', description: 'Full body massage using therapeutic essential oils. Balances the mind and body deeply.', price: 2500000, price_display: '₦25,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=400&q=80' },
-    { name: 'Reflexology (Foot Massage)', description: 'Pressure applied to specific points on the feet. Promotes healing, reduces stress and improves sleep.', price: 1000000, price_display: '₦10,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=400&q=80' },
-    { name: 'Chair Massage (30 min)', description: 'Quick seated massage targeting neck, shoulders and upper back. Great for office visits and busy clients.', price: 700000, price_display: '₦7,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=400&q=80' },
-    { name: 'Back, Neck & Shoulder Massage', description: 'Focused 45-minute session on the most common tension areas. Relieves headaches, stiffness and upper body pain.', price: 1200000, price_display: '₦12,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=400&q=80' },
-  ],
-
-  // ── BEAUTY: BRAIDING ─────────────────────────────────────────────────────
-  braiding: [
-    { name: 'Knotless Box Braids (Full Head)', description: 'Lightweight knotless box braids with no tension on the scalp. Natural-looking roots, lasts 6-8 weeks.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80' },
-    { name: 'Cornrows (Simple & Feed-in)', description: 'Classic and feed-in cornrows in various styles. Straight back, side parts and creative patterns.', price: 500000, price_display: '₦5,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80' },
-    { name: 'Senegalese Twists', description: 'Rope twists using Kanekalon or human hair. Sleek, elegant and low-maintenance. Lasts up to 8 weeks.', price: 1200000, price_display: '₦12,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80' },
-    { name: 'Passion Twists', description: 'Bohemian-style passion twists using wavy hair. Full, fluffy and gorgeous.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80' },
-    { name: 'Ghana Weave (Braids)', description: 'Flat feed-in braids lying close to the scalp in elegant patterns. Very neat and versatile.', price: 800000, price_display: '₦8,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80' },
-  ],
-
-  // ── BEAUTY: MAKEUP ────────────────────────────────────────────────────────
-  makeup: [
-    { name: 'Bridal Makeup (Full Glam)', description: 'Complete bridal makeup for your special day. Trial session included. Flawless, long-lasting and camera-ready.', price: 5000000, price_display: '₦50,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=400&q=80' },
-    { name: 'Event Makeup (Full Face)', description: 'Full face glam for parties, birthdays and ceremonies. Natural or dramatic looks available. Lashes included.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=400&q=80' },
-    { name: 'Natural / No-Makeup Look', description: 'Soft, enhanced natural look perfect for everyday and work. Buildable coverage with a flawless finish.', price: 800000, price_display: '₦8,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=400&q=80' },
-    { name: 'Gele Tying (Head Tie)', description: 'Expert gele tying for weddings, parties and ceremonies. Fan, turban and classic styles available.', price: 500000, price_display: '₦5,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400&q=80' },
-    { name: 'Makeup Lesson (1-on-1)', description: 'Personal makeup tutorial tailored to your face shape and skin tone. Learn techniques for everyday use.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=400&q=80' },
-  ],
-
-  // ── BEAUTY: NAILS ─────────────────────────────────────────────────────────
-  nails: [
-    { name: 'Gel Manicure', description: 'Long-lasting gel polish manicure. Chip-resistant, high-shine finish that lasts 2-3 weeks.', price: 600000, price_display: '₦6,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&q=80' },
-    { name: 'Acrylic Nails (Full Set)', description: 'Acrylic nail extensions in your preferred length and shape. Coffin, almond, square or stiletto.', price: 1000000, price_display: '₦10,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&q=80' },
-    { name: 'Nail Art Design', description: 'Creative nail art — ombre, French tips, 3D designs, gems and stamping. Instagram-worthy results.', price: 800000, price_display: '₦8,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&q=80' },
-    { name: 'Pedicure & Foot Care', description: 'Full pedicure with soak, scrub, cuticle care, nail trim and polish. Leaves feet soft and beautiful.', price: 500000, price_display: '₦5,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=400&q=80' },
-    { name: 'Nail Infill / Refill', description: 'Maintenance fill for grown-out acrylic or gel nails. Keeps your set looking fresh. Every 2-3 weeks.', price: 500000, price_display: '₦5,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&q=80' },
-    { name: 'Nail Removal & Prep', description: 'Safe removal of old gel or acrylic. Nails soaked off properly with no damage to the natural nail.', price: 300000, price_display: '₦3,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&q=80' },
-  ],
-
-  // ── BEAUTY: BARBER ────────────────────────────────────────────────────────
-  barber: [
-    { name: 'Haircut & Styling', description: 'Precision haircut and styling. Fade, taper, afro shaping and more. Clean lines, sharp finish every time.', price: 300000, price_display: '₦3,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&q=80' },
-    { name: 'Beard Trim & Shape', description: 'Expert beard trimming, shaping and lining. Clean, groomed look.', price: 150000, price_display: '₦1,500', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&q=80' },
-    { name: 'Hot Towel Shave', description: 'Classic straight razor hot towel shave. Softens the beard and gives the closest, most comfortable shave.', price: 200000, price_display: '₦2,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&q=80' },
-    { name: 'Kids Haircut', description: 'Gentle and patient haircuts for boys. We make it fun and stress-free. All styles available.', price: 200000, price_display: '₦2,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&q=80' },
-    { name: 'Full Groom Package', description: 'Haircut, beard trim, hot towel and face wash in one session. The complete grooming experience.', price: 500000, price_display: '₦5,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&q=80' },
-  ],
-
-  // ── BEAUTY: SKINCARE ──────────────────────────────────────────────────────
-  skincare: [
-    { name: 'Deep Cleansing Facial', description: 'Thorough facial cleanse, steam, exfoliation and extraction. Removes blackheads and leaves skin glowing.', price: 1000000, price_display: '₦10,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80' },
-    { name: 'Brightening & Glow Facial', description: 'Vitamin C-based treatment targeting dark spots and dull skin. Leaves the complexion bright and even.', price: 1200000, price_display: '₦12,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80' },
-    { name: 'Acne Treatment Facial', description: 'Targeted facial for acne-prone skin. Anti-bacterial cleanse, clay mask and spot treatment.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80' },
-    { name: 'Body Scrub & Exfoliation', description: 'Full body exfoliation using sugar or salt scrub. Removes dead skin and softens all over.', price: 800000, price_display: '₦8,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80' },
-    { name: 'Skin Consultation', description: 'One-on-one skin assessment with a skincare specialist. Get a personalised routine for your skin type.', price: 500000, price_display: '₦5,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80' },
-  ],
-
-  // ── BEAUTY: WIGS ──────────────────────────────────────────────────────────
-  wigs: [
-    { name: 'Custom Wig Making (Human Hair)', description: 'Full custom wig made with quality human hair. Your choice of length, texture and density.', price: 5000000, price_display: '₦50,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1560066984-138daaa4e4e1?w=400&q=80' },
-    { name: 'Frontal Wig Installation', description: 'Lace frontal wig install — glued, sewn or glueless. Seamless hairline blend. Looks completely natural.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1560066984-138daaa4e4e1?w=400&q=80' },
-    { name: 'Wig Customisation & Styling', description: 'Take a store-bought wig and make it look custom. Bleach knots, pluck hairline, cut and style.', price: 1000000, price_display: '₦10,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1560066984-138daaa4e4e1?w=400&q=80' },
-    { name: 'Wig Repair & Revamp', description: 'Restore a tangled or damaged wig. Deep condition, detangle, restitch and restyle.', price: 700000, price_display: '₦7,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1560066984-138daaa4e4e1?w=400&q=80' },
-  ],
-
-  // ── COACHING: LIFE COACH ─────────────────────────────────────────────────
-  life_coach: [
-    { name: 'Life Coaching Discovery Session', description: 'Your first step. A 60-minute session to explore where you are, where you want to be and what is holding you back.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80' },
-    { name: '90-Day Life Transformation Package', description: 'A full coaching journey with bi-weekly sessions, action plans and accountability. Real change in 90 days.', price: 15000000, price_display: '₦150,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&q=80' },
-    { name: 'Values & Purpose Clarity Session', description: 'Deep coaching to uncover your core values, discover your true purpose and align your life choices with what matters most.', price: 2000000, price_display: '₦20,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80' },
-    { name: 'Work-Life Balance Coaching', description: 'For busy professionals feeling stretched thin. Create boundaries, reclaim your time and love your life again.', price: 2000000, price_display: '₦20,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80' },
-    { name: 'Monthly Accountability Coaching', description: 'Monthly sessions with goal tracking, progress reviews and ongoing support to keep you moving forward.', price: 3000000, price_display: '₦30,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&q=80' },
-  ],
-
-  // ── COACHING: WOMEN'S EMPOWERMENT ────────────────────────────────────────
-  womens_empowerment: [
-    { name: "Women's Empowerment 1-on-1 Session", description: "Private coaching for women ready to break barriers, own their power and build the life they deserve. Safe, affirming and transformational.", price: 2500000, price_display: '₦25,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&q=80' },
-    { name: "Women in Business Coaching", description: "Strategic coaching for female entrepreneurs. Build your brand, grow your income and lead with confidence.", price: 3500000, price_display: '₦35,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80' },
-    { name: "Vision Board & Goal-Setting Workshop", description: "Guided workshop to clarify your vision, set powerful goals and create a roadmap to the life you want.", price: 2000000, price_display: '₦20,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&q=80' },
-    { name: "Finding Your Voice Workshop", description: "For women who hold back. Learn to speak up, set boundaries and express yourself with power and grace.", price: 2000000, price_display: '₦20,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&q=80' },
-    { name: "Healing & Rising Programme (4 Sessions)", description: "A 4-session coaching journey for women healing from trauma, toxic relationships or major life transitions.", price: 8000000, price_display: '₦80,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80' },
-  ],
-
-  // ── COACHING: BUSINESS COACH ─────────────────────────────────────────────
-  business_coach: [
-    { name: 'Business Strategy & Clarity Session', description: 'A focused session to define your business direction, identify key priorities and create a clear action plan.', price: 3500000, price_display: '₦35,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&q=80' },
-    { name: 'Small Business Growth Coaching', description: 'Practical coaching for small business owners ready to grow. Marketing, systems, pricing and scaling all covered.', price: 3000000, price_display: '₦30,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80' },
-    { name: 'Pricing & Revenue Strategy Session', description: 'Stop undercharging. Learn how to price confidently, create packages and build sustainable revenue.', price: 2500000, price_display: '₦25,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=400&q=80' },
-    { name: 'Brand & Positioning Workshop', description: 'Define your unique brand, target audience and positioning. Leave with a message that attracts the right clients.', price: 4000000, price_display: '₦40,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=400&q=80' },
-  ],
+type SampleService = {
+  name: string
+  description: string
+  price: number
+  price_display: string
+  in_stock: boolean
+  image_url: string
 }
 
-export const SAMPLE_SERVICES: Record<string, Array<{
-  name: string; description: string; price: number; price_display: string; in_stock: boolean; image_url: string
-}>> = {
-  home_services: [
-    { name: 'House Wiring & Electrical Installation', description: 'Professional electrical wiring for new buildings and renovations. Certified electrician. Safe, clean work.', price: 2500000, price_display: '₦25,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&q=80' },
-    { name: 'Generator Repair & Servicing', description: 'Full generator servicing, fault diagnosis and repair. All brands covered. Fast turnaround.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400&q=80' },
-    { name: 'Plumbing — Leaks, Pipes & Taps', description: 'Fix leaking pipes, blocked drains, burst taps and toilet faults. Emergency callouts available.', price: 1000000, price_display: '₦10,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80' },
-    { name: 'AC Installation & Servicing', description: 'Air conditioner installation, gas recharge and deep cleaning. All brands. Same-day service available.', price: 2000000, price_display: '₦20,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1629774631753-43b8c4b29f2e?w=400&q=80' },
-    { name: 'Painting — Interior & Exterior', description: 'Professional painting for homes, offices and shops. Quality emulsion and gloss paint.', price: 5000000, price_display: '₦50,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=400&q=80' },
-    { name: 'Tiling & Flooring', description: 'Floor and wall tiling for bathrooms, kitchens and living areas. Neat grout lines and precision finish.', price: 3500000, price_display: '₦35,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=400&q=80' },
-    { name: 'Solar Panel Installation', description: 'Solar inverter and panel installation for homes and offices. Free site assessment.', price: 15000000, price_display: '₦150,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=400&q=80' },
-    { name: 'Carpentry — Doors, Furniture & Repairs', description: 'Custom carpentry work. Quality wood. Measured and fitted on-site.', price: 4000000, price_display: '₦40,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400&q=80' },
-  ],
-  auto_services: [
-    { name: 'Full Car Service & Oil Change', description: 'Complete car service. All car brands. Genuine parts available.', price: 2500000, price_display: '₦25,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=400&q=80' },
-    { name: 'Car Wash & Interior Cleaning', description: 'Full exterior wash, wax polish and interior vacuum. Your car will shine like new.', price: 500000, price_display: '₦5,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=400&q=80' },
-    { name: 'Tyre Repair & Replacement', description: 'Puncture repair, tyre balancing, wheel alignment. Mobile vulcanizer available.', price: 300000, price_display: '₦3,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=400&q=80' },
-    { name: 'Brake Pad Replacement', description: 'Quality OEM and aftermarket pads. Test drive after every job.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=400&q=80' },
-    { name: 'Auto Electrical & Diagnostics', description: 'Car electrical faults, battery replacement and computer diagnostics. All makes welcome.', price: 2000000, price_display: '₦20,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1596731498067-64116a3c1e87?w=400&q=80' },
-    { name: 'Panel Beating & Body Repair', description: 'Dent removal, accident repair and spray painting to original colour.', price: 5000000, price_display: '₦50,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1486006920555-c77dcf18193c?w=400&q=80' },
-    { name: 'Car Detailing', description: 'Paint correction, clay bar, wax and interior deep clean. Looks brand new.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&q=80' },
-  ],
-  beauty_services: [
-    { name: 'Hair Braiding (Full Head)', description: 'Professional braiding — box braids, cornrows, knotless braids and twists. Neat parts, clean finish.', price: 800000, price_display: '₦8,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80' },
-    { name: 'Makeup — Full Face', description: 'Full face makeup for events, occasions and photoshoots. Natural and glam looks available.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=400&q=80' },
-    { name: 'Gel Nails & Nail Art', description: 'Gel manicure, acrylic nails and nail art designs. Long-lasting finish.', price: 600000, price_display: '₦6,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&q=80' },
-    { name: "Men's Haircut & Styling", description: 'Fresh cuts, fades, beard trims and hot towel shaves. Clean and precise.', price: 300000, price_display: '₦3,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&q=80' },
-    { name: 'Wig Making & Installation', description: 'Custom human hair and synthetic wigs made to order. Also closure sew-ins and frontal installs.', price: 2500000, price_display: '₦25,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1560066984-138daaa4e4e1?w=400&q=80' },
-    { name: 'Body Massage (60 mins)', description: 'Relaxing full body massage. Swedish, deep tissue and hot stone options. Professional therapist.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&q=80' },
-    { name: 'Facial & Skin Treatment', description: 'Deep cleansing facial, exfoliation and brightening treatment. Addresses acne and dark spots.', price: 1000000, price_display: '₦10,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80' },
-    { name: 'Eyebrow Threading & Shaping', description: 'Precise threading, shaping and tinting. Clean arches that frame your face perfectly.', price: 200000, price_display: '₦2,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1512207736890-6ffed8a84e8d?w=400&q=80' },
-  ],
-  education: [
-    { name: 'Primary School Home Tutoring', description: 'One-on-one tutoring for primary school pupils. English, Maths, Basic Science. Results guaranteed.', price: 500000, price_display: '₦5,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1588072432836-e10032774350?w=400&q=80' },
-    { name: 'WAEC & JAMB Exam Prep', description: 'Intensive exam preparation for WAEC, NECO and JAMB. Past question practice included.', price: 800000, price_display: '₦8,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1456735190827-d1262f71b8a3?w=400&q=80' },
-    { name: 'SAT / ACT Exam Prep', description: 'Structured SAT and ACT preparation with practice tests, strategy and score improvement guarantee.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&q=80' },
-    { name: 'Computer & Microsoft Office Training', description: 'Learn Word, Excel, PowerPoint and basic computer skills. Certificate on completion.', price: 600000, price_display: '₦6,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&q=80' },
-    { name: 'English Language & Communication', description: 'Spoken and written English. Build confidence in speaking, writing and business communication.', price: 500000, price_display: '₦5,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&q=80' },
-    { name: 'Coding for Beginners', description: 'Introduction to programming using Python or web development. Project-based. No experience needed.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&q=80' },
-    { name: 'Maths Tutoring', description: 'One-on-one maths tutoring from basic arithmetic to calculus. Build confidence and improve grades.', price: 600000, price_display: '₦6,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=400&q=80' },
-    { name: 'Science Tutoring', description: 'Biology, Chemistry and Physics tutoring for secondary and university students. Exam-focused.', price: 700000, price_display: '₦7,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1532094349884-543559b8f7d8?w=400&q=80' },
-  ],
-  coaching: [
-    { name: 'Life Coaching Session (60 min)', description: 'One-on-one life coaching to help you gain clarity, set meaningful goals and create a life you love.', price: 2500000, price_display: '₦25,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80' },
-    { name: "Women's Empowerment Coaching", description: "Coaching for women ready to step into their power. Build confidence, break limiting beliefs and own your story.", price: 2500000, price_display: '₦25,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&q=80' },
-    { name: 'Business Strategy Session', description: 'Clarity session for entrepreneurs. Define your direction, identify opportunities and create an action plan.', price: 3500000, price_display: '₦35,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&q=80' },
-    { name: 'Career Coaching & Clarity', description: 'For professionals wanting to level up. Discover your strengths, refine your path and land your next role.', price: 2000000, price_display: '₦20,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80' },
-    { name: 'Mindset & Confidence Coaching', description: 'Break through fear and self-doubt. Build the confidence to pursue your biggest goals without holding back.', price: 2000000, price_display: '₦20,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80' },
-    { name: 'Group Coaching Workshop', description: 'Interactive group coaching for up to 10 people. Shared learning, peer support and guided transformation.', price: 5000000, price_display: '₦50,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&q=80' },
-    { name: 'Teen & Youth Mentorship', description: 'Mentorship programme for teenagers navigating school, identity and future choices. Supportive and empowering.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&q=80' },
-    { name: 'Public Speaking & Presentation Training', description: 'Overcome fear of speaking and communicate with impact. Practical techniques for presentations and life.', price: 2500000, price_display: '₦25,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=400&q=80' },
-  ],
-  mental_wellness: [
-    { name: '1-on-1 Counselling Session (50 min)', description: 'Safe, confidential counselling with a trained professional. A space to talk, process and heal.', price: 2000000, price_display: '₦20,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&q=80' },
-    { name: 'Stress & Burnout Recovery', description: 'Structured support for people experiencing chronic stress or emotional exhaustion. Practical tools to restore balance.', price: 2000000, price_display: '₦20,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&q=80' },
-    { name: 'Mindfulness & Meditation Session', description: 'Guided mindfulness and meditation to calm the mind, reduce anxiety and cultivate present-moment awareness.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&q=80' },
-    { name: 'Anxiety Coaching Programme', description: 'Evidence-based coaching to understand and manage anxiety. Learn practical tools to rebuild calm.', price: 2500000, price_display: '₦25,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&q=80' },
-    { name: 'Self-Esteem & Confidence Building', description: 'Therapeutic coaching to rebuild self-worth from the inside out. For anyone who struggles with feeling enough.', price: 2000000, price_display: '₦20,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80' },
-    { name: 'Grief & Loss Support Session', description: 'Compassionate support through grief or major life loss. A gentle, non-judgemental space to process and begin healing.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&q=80' },
-  ],
-  childcare: [
-    { name: 'Full-time Nanny Service (Daily)', description: 'Experienced, trusted nanny for full-time daily childcare. Background checked, CPR certified. Warm and reliable.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&q=80' },
-    { name: 'After-school Care & Pickup', description: 'Safe after-school pickup and supervision until parents return. Homework help, snacks and activities included.', price: 800000, price_display: '₦8,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&q=80' },
-    { name: 'Babysitting (Evening / Weekend)', description: 'Reliable babysitting for evenings, date nights and weekends. Caring, fun and experienced. All ages welcome.', price: 500000, price_display: '₦5,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&q=80' },
-    { name: 'Homework Help & Study Support', description: 'Patient one-on-one homework assistance for primary and secondary school children. All subjects covered.', price: 500000, price_display: '₦5,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&q=80' },
-    { name: 'Special Needs Childcare', description: 'Experienced carer for children with additional needs. Patient, trained and fully supportive.', price: 2000000, price_display: '₦20,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&q=80' },
-    { name: 'Holiday & Weekend Care', description: 'Fun, safe childcare during school holidays and weekends. Activities, outdoor play and creative learning included.', price: 800000, price_display: '₦8,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&q=80' },
-  ],
-  food_catering: [
-    { name: 'Weekly Meal Prep Service', description: 'Freshly cooked meals prepared and portioned for the whole week. You choose the menu — just reheat and eat.', price: 2500000, price_display: '₦25,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&q=80' },
-    { name: 'Home-cooked Meal Delivery', description: 'Nigerian and continental meals cooked fresh and delivered to your door. Order daily or weekly.', price: 500000, price_display: '₦5,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80' },
-    { name: 'Office & Corporate Catering', description: 'Professional catering for offices, meetings and corporate events. Hot buffet and packed lunches. Minimum 10 people.', price: 300000, price_display: '₦3,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80' },
-    { name: 'Party & Event Catering', description: 'Full catering for birthdays, weddings and celebrations. Menu planning, cooking, serving and cleanup.', price: 300000, price_display: '₦3,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80' },
-    { name: 'Diet & Healthy Meal Plan (Weekly)', description: 'Nutritionist-guided healthy meals for weight loss, muscle gain or clean eating. Fresh, balanced and delicious.', price: 3000000, price_display: '₦30,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&q=80' },
-    { name: 'Private Chef for Dinner', description: 'An experienced chef comes to your home to cook a restaurant-quality dinner for you and your guests.', price: 5000000, price_display: '₦50,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&q=80' },
-    { name: 'Custom Cakes & Pastries', description: 'Beautifully crafted custom cakes for birthdays, weddings and celebrations. Fondant and buttercream designs.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&q=80' },
-  ],
-  health_wellness: [
-    { name: 'Home Physiotherapy Visit', description: 'Physiotherapy at your home for pain relief, stroke recovery and injury rehabilitation. Licensed therapist.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&q=80' },
-    { name: 'Personal Fitness Training', description: 'One-on-one fitness coaching at home or gym. Weight loss, muscle building and general fitness.', price: 1000000, price_display: '₦10,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&q=80' },
-    { name: 'Nutrition & Diet Consultation', description: 'Professional nutrition advice for weight management and general wellness. Personalised meal plans.', price: 800000, price_display: '₦8,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&q=80' },
-    { name: 'Childcare & Nanny Services', description: 'Experienced nanny and childcare. Full day, half day and occasional care. Background-checked.', price: 1200000, price_display: '₦12,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&q=80' },
-    { name: 'Elderly Home Care', description: 'Compassionate home care for elderly family members. Daily check-ins, medication reminders and companionship.', price: 2000000, price_display: '₦20,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80' },
-    { name: 'Mobile Nursing Services', description: 'Wound dressing, injections, drips and post-surgery care at home. Registered nurse. Prompt and professional.', price: 1000000, price_display: '₦10,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80' },
-  ],
-  domestic: [
-    { name: 'Home Deep Cleaning', description: 'Thorough deep cleaning of your entire home. We bring all equipment and supplies.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80' },
-    { name: 'Laundry & Ironing Service', description: 'Wash, dry and iron your clothes. Pick-up and delivery available. 24-hour turnaround.', price: 500000, price_display: '₦5,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=400&q=80' },
-    { name: 'Home Cooking Service', description: 'Fresh home-cooked meals prepared in your kitchen. Soups, stews and full meals.', price: 1000000, price_display: '₦10,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80' },
-    { name: 'Pest Control Treatment', description: 'Cockroach, rat, termite and mosquito treatment. Safe chemicals, effective results.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80' },
-    { name: 'Weekly House Cleaning', description: 'Regular weekly cleaning to keep your home spotless. Consistent cleaner. Flexible scheduling.', price: 800000, price_display: '₦8,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=400&q=80' },
-  ],
-  events: [
-    { name: 'Event Photography', description: 'Professional photography for weddings, birthdays and corporate events. Edited photos within 48 hours.', price: 5000000, price_display: '₦50,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=400&q=80' },
-    { name: 'Event Videography', description: 'Full event video coverage with cinematic editing. Drone shots available.', price: 7000000, price_display: '₦70,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&q=80' },
-    { name: 'Catering — Per Head', description: 'Event catering per head. Jollof rice, fried rice, peppersoup and full buffet options. Minimum 20 guests.', price: 300000, price_display: '₦3,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1555244162-803834f70033?w=400&q=80' },
-    { name: 'Event Decoration', description: 'Full event decoration including hall draping, floral arrangements, backdrop and centrepieces.', price: 10000000, price_display: '₦100,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=400&q=80' },
-    { name: 'Custom Cake — 2 Tier', description: 'Beautiful custom celebration cakes. Fondant or buttercream. Birthday, wedding and corporate cakes.', price: 2500000, price_display: '₦25,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&q=80' },
-    { name: 'DJ Services (4 hours)', description: 'Professional DJ for parties, weddings and corporate events. Quality sound system included.', price: 5000000, price_display: '₦50,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=400&q=80' },
-    { name: 'MC & Hosting', description: 'Charismatic MC for weddings, birthdays and corporate events. Keeps the crowd alive all night.', price: 3000000, price_display: '₦30,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&q=80' },
-  ],
-  digital_services: [
-    { name: 'Logo Design', description: 'Professional logo design. 3 concepts, unlimited revisions. PNG, JPG and vector formats.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=400&q=80' },
-    { name: 'Phone Screen Repair', description: 'Screen replacement for iPhone, Samsung, Tecno, Infinix. Same-day repair. Genuine parts.', price: 1000000, price_display: '₦10,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=400&q=80' },
-    { name: 'Laptop Repair & Maintenance', description: 'Screen, battery, keyboard, overheating and software repairs. All brands. Free diagnosis.', price: 2000000, price_display: '₦20,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&q=80' },
-    { name: 'Social Media Management (Monthly)', description: 'Monthly management for Instagram and Facebook. 12 posts, stories and engagement.', price: 3000000, price_display: '₦30,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&q=80' },
-    { name: 'CV & Cover Letter Writing', description: 'Professional CV design and cover letter. ATS-optimised. Word and PDF formats. 24-hour turnaround.', price: 500000, price_display: '₦5,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=400&q=80' },
-    { name: 'Flyer & Banner Design', description: 'Eye-catching designs for events, promos and businesses. Print and digital formats.', price: 500000, price_display: '₦5,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&q=80' },
-  ],
-  transport: [
-    { name: 'Package Delivery — Same Day', description: 'Same-day delivery of documents and parcels within the city. Fast and reliable.', price: 300000, price_display: '₦3,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=400&q=80' },
-    { name: 'Driver for Hire (Daily)', description: 'Professional driver for personal or corporate use. Full day hire. Your car or ours.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=400&q=80' },
-    { name: 'Airport Pick-up & Drop-off', description: 'Reliable airport pick-up and drop-off. Flight tracking and meet and greet. Book 24 hours ahead.', price: 1000000, price_display: '₦10,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400&q=80' },
-    { name: 'School Run Service', description: 'Daily school run for children. Morning pick-up and afternoon drop-off. Safe and punctual.', price: 800000, price_display: '₦8,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&q=80' },
-    { name: 'Moving & Relocation Service', description: 'House and office moving. Packing, loading and delivery. Careful handling of valuables.', price: 5000000, price_display: '₦50,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80' },
-  ],
-  agriculture: [
-    { name: 'Poultry Farm Consultation', description: 'Expert advice on broiler and layer farming. Farm setup, feed management and disease prevention.', price: 2000000, price_display: '₦20,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=400&q=80' },
-    { name: 'Farm Labour Supply (Daily)', description: 'Experienced farm workers for planting, weeding and harvesting.', price: 300000, price_display: '₦3,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=400&q=80' },
-    { name: 'Drip Irrigation Installation', description: 'Design and installation of drip irrigation systems. Water-saving and efficient.', price: 5000000, price_display: '₦50,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&q=80' },
-    { name: 'Tractor Ploughing Service', description: 'Land clearing and ploughing using tractor. Priced per acre. Available for small and large farms.', price: 1500000, price_display: '₦15,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=400&q=80' },
-    { name: 'Fish Farm Setup & Management', description: 'Catfish pond construction, stocking, feed management and harvest planning.', price: 10000000, price_display: '₦100,000', in_stock: true, image_url: 'https://images.unsplash.com/photo-1534483509719-3feaee7c30da?w=400&q=80' },
-  ],
+const PH = 'https://watdsaazzjcsyvnpdthe.supabase.co/storage/v1/object/public/placeholders'
+
+// ─── COUNTRY → REGION MAPPING ─────────────────────────────────────────────
+const COUNTRY_REGION: Record<string, string> = {
+  NG: 'west_africa', GH: 'west_africa', CI: 'west_africa', SN: 'west_africa',
+  GM: 'west_africa', GN: 'west_africa', SL: 'west_africa', LR: 'west_africa',
+  TG: 'west_africa', BJ: 'west_africa', BF: 'west_africa', ML: 'west_africa',
+  NE: 'west_africa', CM: 'west_africa', CV: 'west_africa', GW: 'west_africa',
+  KE: 'east_africa', TZ: 'east_africa', UG: 'east_africa', ET: 'east_africa',
+  RW: 'east_africa', BI: 'east_africa', SS: 'east_africa', SO: 'east_africa',
+  ER: 'east_africa', MG: 'east_africa', MU: 'east_africa',
+  ZA: 'southern_africa', ZW: 'southern_africa', ZM: 'southern_africa',
+  MZ: 'southern_africa', BW: 'southern_africa', NA: 'southern_africa',
+  LS: 'southern_africa', SZ: 'southern_africa', AO: 'southern_africa',
+  EG: 'north_africa', MA: 'north_africa', TN: 'north_africa', DZ: 'north_africa',
+  LY: 'north_africa', SD: 'north_africa',
+  JM: 'caribbean', TT: 'caribbean', HT: 'caribbean', BB: 'caribbean',
+  GY: 'caribbean', SR: 'caribbean', BS: 'caribbean', LC: 'caribbean',
+  VC: 'caribbean', GD: 'caribbean', AG: 'caribbean', DM: 'caribbean',
+  MX: 'latin_america', BR: 'latin_america', CO: 'latin_america', PE: 'latin_america',
+  AR: 'latin_america', CL: 'latin_america', EC: 'latin_america', BO: 'latin_america',
+  PY: 'latin_america', UY: 'latin_america', VE: 'latin_america', CR: 'latin_america',
+  PA: 'latin_america', GT: 'latin_america', HN: 'latin_america', NI: 'latin_america',
+  SV: 'latin_america', DO: 'latin_america', CU: 'latin_america',
+  AE: 'middle_east', SA: 'middle_east', KW: 'middle_east', QA: 'middle_east',
+  OM: 'middle_east', JO: 'middle_east', LB: 'middle_east', IQ: 'middle_east',
+  YE: 'middle_east', BH: 'middle_east',
+  IN: 'south_asia', PK: 'south_asia', BD: 'south_asia', LK: 'south_asia',
+  NP: 'south_asia',
+  ID: 'southeast_asia', PH: 'southeast_asia', VN: 'southeast_asia',
+  MY: 'southeast_asia', TH: 'southeast_asia', MM: 'southeast_asia',
+  KH: 'southeast_asia', SG: 'southeast_asia',
+  GB: 'uk_europe', FR: 'uk_europe', DE: 'uk_europe', NL: 'uk_europe',
+  BE: 'uk_europe', IT: 'uk_europe', ES: 'uk_europe', PT: 'uk_europe',
+  IE: 'uk_europe', SE: 'uk_europe', NO: 'uk_europe', DK: 'uk_europe',
+  FI: 'uk_europe', AT: 'uk_europe', CH: 'uk_europe', PL: 'uk_europe',
+  US: 'north_america', CA: 'north_america', AU: 'north_america', NZ: 'north_america',
 }
 
-export function getSampleServices(category: string) {
-  return SAMPLE_SERVICES[category] || []
+// ─── PRICING CONFIGS BY REGION ────────────────────────────────────────────
+// Each region has a price multiplier relative to Nigeria (1x) and its symbol
+const REGION_CONFIG: Record<string, { sym: string; fmt: (n: number) => string }> = {
+  west_africa:    { sym: '₦', fmt: n => `₦${n.toLocaleString()}` },
+  east_africa:    { sym: 'KSh', fmt: n => `KSh ${n.toLocaleString()}` },
+  southern_africa:{ sym: 'R', fmt: n => `R${n}` },
+  north_africa:   { sym: 'EGP', fmt: n => `EGP ${n}` },
+  caribbean:      { sym: '$', fmt: n => `$${n}` },
+  latin_america:  { sym: '$', fmt: n => `$${n}` },
+  middle_east:    { sym: 'AED', fmt: n => `AED ${n}` },
+  south_asia:     { sym: '₹', fmt: n => `₹${n}` },
+  southeast_asia: { sym: 'Rp', fmt: n => `Rp ${n.toLocaleString()}` },
+  uk_europe:      { sym: '£', fmt: n => `£${n}` },
+  north_america:  { sym: '$', fmt: n => `$${n}` },
 }
 
-export function getSampleServicesBySubcategory(subcategoryId: string) {
-  return SAMPLE_SERVICES_BY_SUBCATEGORY[subcategoryId] || []
+// ─── SERVICE CATALOGUE BUILDER ─────────────────────────────────────────────
+// Each service defined once with prices per region
+type ServiceDef = {
+  name: string
+  description: string
+  image_url: string
+  prices: Partial<Record<string, number>>
 }
+
+// ─── MASSAGE ──────────────────────────────────────────────────────────────
+const MASSAGE_SERVICES: ServiceDef[] = [
+  {
+    name: 'Swedish Relaxation Massage (60 min)',
+    description: 'Gentle full-body massage to release tension and restore calm. Warm oils, professional technique. The perfect reset for body and mind.',
+    image_url: `${PH}/massage.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 450, north_africa: 400, caribbean: 65, latin_america: 35, middle_east: 180, south_asia: 1200, southeast_asia: 150000, uk_europe: 65, north_america: 90 },
+  },
+  {
+    name: 'Deep Tissue Massage (60 min)',
+    description: 'Firm therapeutic pressure targeting deep muscle layers and chronic tension. Ideal for back pain, stiff neck and overworked muscles.',
+    image_url: `${PH}/deep-tissue.jpg`,
+    prices: { west_africa: 20000, east_africa: 3500, southern_africa: 550, north_africa: 500, caribbean: 80, latin_america: 45, middle_east: 220, south_asia: 1500, southeast_asia: 200000, uk_europe: 75, north_america: 110 },
+  },
+  {
+    name: 'Hot Stone Massage (75 min)',
+    description: 'Smooth heated basalt stones combined with expert massage technique. Deeply relaxing, warming and luxurious. A true premium experience.',
+    image_url: `${PH}/deep-tissue.jpg`,
+    prices: { west_africa: 25000, east_africa: 4500, southern_africa: 680, north_africa: 600, caribbean: 95, latin_america: 55, middle_east: 280, south_asia: 2000, southeast_asia: 250000, uk_europe: 95, north_america: 130 },
+  },
+  {
+    name: 'Couples Massage (2 persons)',
+    description: 'Side-by-side massage for two people. Perfect for date nights, anniversaries and special occasions. Champagne on request.',
+    image_url: `${PH}/massage.jpg`,
+    prices: { west_africa: 35000, east_africa: 6500, southern_africa: 950, north_africa: 900, caribbean: 140, latin_america: 80, middle_east: 420, south_asia: 3000, southeast_asia: 380000, uk_europe: 140, north_america: 180 },
+  },
+  {
+    name: 'Sports & Recovery Massage',
+    description: 'Targeted therapy for athletes and active individuals. Reduces soreness, improves flexibility and accelerates post-workout recovery.',
+    image_url: `${PH}/sports-massage.jpg`,
+    prices: { west_africa: 20000, east_africa: 3500, southern_africa: 550, north_africa: 480, caribbean: 80, latin_america: 45, middle_east: 220, south_asia: 1500, southeast_asia: 200000, uk_europe: 75, north_america: 110 },
+  },
+  {
+    name: 'Aromatherapy Massage (90 min)',
+    description: 'Full body massage using therapeutic essential oils tailored to your needs. Deeply relaxing, balancing and restorative.',
+    image_url: `${PH}/aromatherapy.jpg`,
+    prices: { west_africa: 25000, east_africa: 4000, southern_africa: 620, north_africa: 550, caribbean: 90, latin_america: 50, middle_east: 260, south_asia: 1800, southeast_asia: 230000, uk_europe: 85, north_america: 120 },
+  },
+  {
+    name: 'Reflexology (Foot Massage)',
+    description: 'Specialised pressure applied to reflex points on the feet. Promotes healing, reduces stress and improves sleep quality.',
+    image_url: `${PH}/massage.jpg`,
+    prices: { west_africa: 10000, east_africa: 1800, southern_africa: 320, north_africa: 280, caribbean: 50, latin_america: 28, middle_east: 130, south_asia: 900, southeast_asia: 120000, uk_europe: 45, north_america: 65 },
+  },
+  {
+    name: 'Prenatal Massage (60 min)',
+    description: 'Safe and soothing massage for expectant mothers. Relieves back pain, swelling and pregnancy tension. Side-lying position with bolster support.',
+    image_url: `${PH}/massage.jpg`,
+    prices: { west_africa: 20000, east_africa: 3500, southern_africa: 520, north_africa: 460, caribbean: 80, latin_america: 45, middle_east: 220, south_asia: 1500, southeast_asia: 200000, uk_europe: 75, north_america: 105 },
+  },
+  {
+    name: 'Chair Massage (30 min)',
+    description: 'Quick and effective seated massage targeting the neck, shoulders and upper back. Great for office visits and corporate wellness days.',
+    image_url: `${PH}/massage.jpg`,
+    prices: { west_africa: 7000, east_africa: 1200, southern_africa: 220, north_africa: 200, caribbean: 35, latin_america: 20, middle_east: 95, south_asia: 650, southeast_asia: 80000, uk_europe: 35, north_america: 50 },
+  },
+  {
+    name: 'Back, Neck & Shoulder Massage (45 min)',
+    description: 'Focused session on the most common tension areas. Relieves headaches, stiffness and upper body pain. Perfect for desk workers.',
+    image_url: `${PH}/deep-tissue.jpg`,
+    prices: { west_africa: 12000, east_africa: 2000, southern_africa: 350, north_africa: 320, caribbean: 55, latin_america: 30, middle_east: 150, south_asia: 1000, southeast_asia: 130000, uk_europe: 50, north_america: 70 },
+  },
+]
+
+// ─── BRAIDING ─────────────────────────────────────────────────────────────
+const BRAIDING_SERVICES: ServiceDef[] = [
+  {
+    name: 'Knotless Box Braids (Full Head)',
+    description: 'Lightweight knotless braids with no tension on the scalp. Natural-looking roots, versatile styling. Lasts 6–8 weeks.',
+    image_url: `${PH}/hair-braiding-service.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 450, north_africa: 400, caribbean: 150, latin_america: 80, middle_east: 300, south_asia: 2000, southeast_asia: 200000, uk_europe: 180, north_america: 220 },
+  },
+  {
+    name: 'Cornrows (Classic & Feed-in)',
+    description: 'Neat cornrows in various styles — straight back, side parts, zigzag and creative patterns. Protective and low-maintenance.',
+    image_url: `${PH}/hair-braiding-service.jpg`,
+    prices: { west_africa: 5000, east_africa: 900, southern_africa: 180, north_africa: 150, caribbean: 60, latin_america: 35, middle_east: 120, south_asia: 800, southeast_asia: 80000, uk_europe: 70, north_america: 90 },
+  },
+  {
+    name: 'Senegalese Twists (Full Head)',
+    description: 'Elegant rope twists using quality hair extensions. Sleek, sophisticated and protective. Lasts up to 8 weeks.',
+    image_url: `${PH}/hair-braiding-service.jpg`,
+    prices: { west_africa: 12000, east_africa: 2000, southern_africa: 380, north_africa: 340, caribbean: 130, latin_america: 70, middle_east: 250, south_asia: 1800, southeast_asia: 180000, uk_europe: 160, north_america: 190 },
+  },
+  {
+    name: 'Passion Twists (Full Head)',
+    description: 'Bohemian-style passion twists using wavy hair. Full, textured and beautiful. A stunning protective style.',
+    image_url: `${PH}/hair-braiding-service.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 450, north_africa: 400, caribbean: 150, latin_america: 80, middle_east: 300, south_asia: 2000, southeast_asia: 200000, uk_europe: 180, north_america: 220 },
+  },
+  {
+    name: 'Ghana Weave (Feed-in Braids)',
+    description: 'Flat feed-in braids lying close to the scalp in elegant patterns. Neat, versatile and long-lasting.',
+    image_url: `${PH}/hair-braiding-service.jpg`,
+    prices: { west_africa: 8000, east_africa: 1400, southern_africa: 280, north_africa: 250, caribbean: 90, latin_america: 50, middle_east: 180, south_asia: 1200, southeast_asia: 120000, uk_europe: 110, north_america: 140 },
+  },
+  {
+    name: 'Hair Braiding (Children)',
+    description: "Gentle, patient braiding for children. Simple styles done with care to keep little ones comfortable.",
+    image_url: `${PH}/hair-braiding-service.jpg`,
+    prices: { west_africa: 3000, east_africa: 500, southern_africa: 120, north_africa: 100, caribbean: 45, latin_america: 25, middle_east: 90, south_asia: 600, southeast_asia: 60000, uk_europe: 55, north_america: 70 },
+  },
+]
+
+// ─── MAKEUP ───────────────────────────────────────────────────────────────
+const MAKEUP_SERVICES: ServiceDef[] = [
+  {
+    name: 'Bridal Makeup (Full Glam)',
+    description: 'Complete bridal makeup for your wedding day. Trial session included. Camera-ready, long-lasting and flawlessly executed.',
+    image_url: `${PH}/makeup-full.jpg`,
+    prices: { west_africa: 50000, east_africa: 8500, southern_africa: 1500, north_africa: 1200, caribbean: 350, latin_america: 200, middle_east: 800, south_asia: 6000, southeast_asia: 600000, uk_europe: 350, north_america: 450 },
+  },
+  {
+    name: 'Event Makeup (Full Face)',
+    description: 'Full glam for parties, birthdays and celebrations. Natural or dramatic looks. Professional products, lashes included.',
+    image_url: `${PH}/makeup-full.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 480, north_africa: 420, caribbean: 120, latin_america: 65, middle_east: 250, south_asia: 1800, southeast_asia: 200000, uk_europe: 120, north_america: 150 },
+  },
+  {
+    name: 'Natural / No-Makeup Look',
+    description: 'Soft, enhanced and effortlessly glowing. Perfect for everyday, work and daytime occasions. Buildable coverage, flawless finish.',
+    image_url: `${PH}/makeup-full.jpg`,
+    prices: { west_africa: 8000, east_africa: 1400, southern_africa: 280, north_africa: 240, caribbean: 70, latin_america: 40, middle_east: 150, south_asia: 1000, southeast_asia: 120000, uk_europe: 75, north_america: 95 },
+  },
+  {
+    name: 'Gele Tying (Head Tie Styling)',
+    description: 'Expert gele tying for weddings, parties and ceremonies. Fan, turban and classic styles available. You will look stunning.',
+    image_url: `${PH}/hair-braiding-service.jpg`,
+    prices: { west_africa: 5000, east_africa: 850, southern_africa: 180, north_africa: 150, caribbean: 50, latin_america: 30, middle_east: 110, south_asia: 700, southeast_asia: 80000, uk_europe: 60, north_america: 75 },
+  },
+  {
+    name: 'Makeup Lesson (1-on-1)',
+    description: 'Personal makeup tutorial tailored to your face, skin tone and lifestyle. Learn techniques that work for you every day.',
+    image_url: `${PH}/makeup-full.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 480, north_africa: 420, caribbean: 100, latin_america: 60, middle_east: 250, south_asia: 1800, southeast_asia: 180000, uk_europe: 120, north_america: 150 },
+  },
+]
+
+// ─── NAILS ────────────────────────────────────────────────────────────────
+const NAILS_SERVICES: ServiceDef[] = [
+  {
+    name: 'Gel Manicure',
+    description: 'Long-lasting gel polish manicure. Chip-resistant, high-shine finish that stays perfect for 2–3 weeks. Your hands deserve this.',
+    image_url: `${PH}/acrylic-nails.jpg`,
+    prices: { west_africa: 6000, east_africa: 1000, southern_africa: 200, north_africa: 180, caribbean: 45, latin_america: 25, middle_east: 100, south_asia: 700, southeast_asia: 80000, uk_europe: 35, north_america: 45 },
+  },
+  {
+    name: 'Acrylic Nails (Full Set)',
+    description: 'Acrylic nail extensions in your preferred length and shape — coffin, almond, square or stiletto. Flawless every time.',
+    image_url: `${PH}/acrylic-nails.jpg`,
+    prices: { west_africa: 10000, east_africa: 1700, southern_africa: 320, north_africa: 280, caribbean: 65, latin_america: 38, middle_east: 150, south_asia: 1100, southeast_asia: 130000, uk_europe: 55, north_america: 70 },
+  },
+  {
+    name: 'Nail Art Design',
+    description: 'Creative nail art — ombre gradients, French tips, 3D gems, chrome and stamping designs. Instagram-worthy, guaranteed.',
+    image_url: `${PH}/acrylic-nails.jpg`,
+    prices: { west_africa: 8000, east_africa: 1400, southern_africa: 260, north_africa: 240, caribbean: 55, latin_america: 32, middle_east: 130, south_asia: 950, southeast_asia: 110000, uk_europe: 45, north_america: 60 },
+  },
+  {
+    name: 'Pedicure & Foot Care',
+    description: 'Complete pedicure with soak, scrub, callus removal, cuticle care and polish. Leave with soft, beautiful feet.',
+    image_url: `${PH}/acrylic-nails.jpg`,
+    prices: { west_africa: 5000, east_africa: 850, southern_africa: 180, north_africa: 160, caribbean: 40, latin_america: 22, middle_east: 90, south_asia: 650, southeast_asia: 75000, uk_europe: 30, north_america: 40 },
+  },
+  {
+    name: 'Nail Infill / Refill',
+    description: 'Maintenance fill for grown-out acrylic or gel nails. Keeps your set looking fresh and polished. Recommended every 2–3 weeks.',
+    image_url: `${PH}/acrylic-nails.jpg`,
+    prices: { west_africa: 5000, east_africa: 850, southern_africa: 180, north_africa: 160, caribbean: 40, latin_america: 22, middle_east: 90, south_asia: 650, southeast_asia: 75000, uk_europe: 30, north_america: 40 },
+  },
+  {
+    name: 'Nail Removal & Prep',
+    description: 'Safe, professional removal of old gel or acrylic. Nails soaked off gently with zero damage to the natural nail.',
+    image_url: `${PH}/acrylic-nails.jpg`,
+    prices: { west_africa: 3000, east_africa: 500, southern_africa: 110, north_africa: 100, caribbean: 25, latin_america: 15, middle_east: 60, south_asia: 400, southeast_asia: 45000, uk_europe: 20, north_america: 25 },
+  },
+]
+
+// ─── BARBER ───────────────────────────────────────────────────────────────
+const BARBER_SERVICES: ServiceDef[] = [
+  {
+    name: 'Haircut & Styling',
+    description: 'Precision haircut and styling by a skilled barber. Fade, taper, afro shape and more. Clean lines, sharp finish every single time.',
+    image_url: `${PH}/mens-haircut.jpg`,
+    prices: { west_africa: 3000, east_africa: 500, southern_africa: 100, north_africa: 90, caribbean: 25, latin_america: 12, middle_east: 45, south_asia: 300, southeast_asia: 35000, uk_europe: 20, north_america: 28 },
+  },
+  {
+    name: 'Beard Trim & Shape',
+    description: 'Expert beard trimming, shaping and lining. Clean, defined and groomed to perfection.',
+    image_url: `${PH}/mens-haircut.jpg`,
+    prices: { west_africa: 1500, east_africa: 250, southern_africa: 50, north_africa: 45, caribbean: 15, latin_america: 8, middle_east: 30, south_asia: 180, southeast_asia: 20000, uk_europe: 12, north_america: 18 },
+  },
+  {
+    name: 'Hot Towel Shave',
+    description: 'Classic straight razor hot towel shave. Softens the beard for the closest, most comfortable and luxurious shave you will ever experience.',
+    image_url: `${PH}/mens-haircut.jpg`,
+    prices: { west_africa: 2000, east_africa: 350, southern_africa: 65, north_africa: 60, caribbean: 20, latin_america: 12, middle_east: 40, south_asia: 250, southeast_asia: 28000, uk_europe: 18, north_america: 25 },
+  },
+  {
+    name: "Kids' Haircut",
+    description: 'Gentle and patient haircuts for boys. We make it fun and comfortable. All styles done with care.',
+    image_url: `${PH}/mens-haircut.jpg`,
+    prices: { west_africa: 2000, east_africa: 350, southern_africa: 70, north_africa: 60, caribbean: 18, latin_america: 10, middle_east: 35, south_asia: 220, southeast_asia: 25000, uk_europe: 14, north_america: 20 },
+  },
+  {
+    name: 'Full Groom Package',
+    description: 'The complete experience — haircut, beard trim, hot towel and face wash in one session. Walk out looking your absolute best.',
+    image_url: `${PH}/mens-haircut.jpg`,
+    prices: { west_africa: 5000, east_africa: 850, southern_africa: 160, north_africa: 140, caribbean: 45, latin_america: 25, middle_east: 90, south_asia: 600, southeast_asia: 70000, uk_europe: 40, north_america: 55 },
+  },
+]
+
+// ─── SKINCARE ─────────────────────────────────────────────────────────────
+const SKINCARE_SERVICES: ServiceDef[] = [
+  {
+    name: 'Deep Cleansing Facial',
+    description: 'Thorough facial cleanse, steam, exfoliation and extractions. Removes impurities, unclogs pores and leaves skin visibly clear and glowing.',
+    image_url: `${PH}/facial.jpg`,
+    prices: { west_africa: 10000, east_africa: 1700, southern_africa: 320, north_africa: 280, caribbean: 70, latin_america: 40, middle_east: 160, south_asia: 1100, southeast_asia: 130000, uk_europe: 65, north_america: 85 },
+  },
+  {
+    name: 'Brightening & Glow Facial',
+    description: 'Vitamin C-based treatment targeting dark spots and dullness. Leaves the complexion visibly brighter, even and radiant.',
+    image_url: `${PH}/facial.jpg`,
+    prices: { west_africa: 12000, east_africa: 2000, southern_africa: 380, north_africa: 340, caribbean: 85, latin_america: 48, middle_east: 190, south_asia: 1300, southeast_asia: 160000, uk_europe: 75, north_america: 100 },
+  },
+  {
+    name: 'Acne Treatment Facial',
+    description: 'Targeted treatment for acne-prone and breakout skin. Anti-bacterial cleanse, clay mask and soothing spot treatment.',
+    image_url: `${PH}/facial.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 460, north_africa: 400, caribbean: 95, latin_america: 55, middle_east: 220, south_asia: 1600, southeast_asia: 190000, uk_europe: 90, north_america: 115 },
+  },
+  {
+    name: 'Anti-Ageing Facial',
+    description: 'Premium anti-ageing treatment to firm, smooth and rejuvenate mature skin. Reduces fine lines and restores youthful radiance.',
+    image_url: `${PH}/facial.jpg`,
+    prices: { west_africa: 18000, east_africa: 3000, southern_africa: 550, north_africa: 480, caribbean: 110, latin_america: 65, middle_east: 260, south_asia: 1900, southeast_asia: 220000, uk_europe: 110, north_america: 140 },
+  },
+  {
+    name: 'Body Scrub & Exfoliation',
+    description: 'Full body exfoliation using sugar or salt scrub. Removes dead skin cells, smooths texture and leaves skin silky soft all over.',
+    image_url: `${PH}/facial.jpg`,
+    prices: { west_africa: 8000, east_africa: 1400, southern_africa: 260, north_africa: 230, caribbean: 60, latin_america: 35, middle_east: 140, south_asia: 950, southeast_asia: 110000, uk_europe: 55, north_america: 75 },
+  },
+  {
+    name: 'Skin Consultation',
+    description: 'One-on-one skin assessment with a qualified skincare specialist. Walk away with a personalised routine and clear action plan.',
+    image_url: `${PH}/facial.jpg`,
+    prices: { west_africa: 5000, east_africa: 850, southern_africa: 170, north_africa: 150, caribbean: 40, latin_america: 22, middle_east: 95, south_asia: 650, southeast_asia: 75000, uk_europe: 40, north_america: 55 },
+  },
+]
+
+// ─── WIGS ─────────────────────────────────────────────────────────────────
+const WIGS_SERVICES: ServiceDef[] = [
+  {
+    name: 'Custom Wig Making (Human Hair)',
+    description: 'Full custom wig crafted with premium human hair. Your choice of length, texture and density. Designed to look completely natural.',
+    image_url: `${PH}/wig-install.jpg`,
+    prices: { west_africa: 50000, east_africa: 8500, southern_africa: 1600, north_africa: 1400, caribbean: 300, latin_america: 180, middle_east: 700, south_asia: 5000, southeast_asia: 550000, uk_europe: 320, north_america: 400 },
+  },
+  {
+    name: 'Frontal Wig Installation',
+    description: 'Lace frontal wig install — glued, sewn or glueless method. Seamless hairline blend. Undetectable and stunning.',
+    image_url: `${PH}/wig-install.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 480, north_africa: 420, caribbean: 100, latin_america: 60, middle_east: 250, south_asia: 1800, southeast_asia: 200000, uk_europe: 120, north_america: 150 },
+  },
+  {
+    name: 'Wig Customisation & Styling',
+    description: 'Transform a store-bought wig into a custom masterpiece. Bleach knots, pluck hairline, cut and style to your preference.',
+    image_url: `${PH}/wig-install.jpg`,
+    prices: { west_africa: 10000, east_africa: 1700, southern_africa: 320, north_africa: 280, caribbean: 70, latin_america: 40, middle_east: 170, south_asia: 1200, southeast_asia: 140000, uk_europe: 80, north_america: 100 },
+  },
+  {
+    name: 'Wig Repair & Revamp',
+    description: 'Restore a tangled or damaged wig to its former glory. Deep condition, detangle, restitch and restyle.',
+    image_url: `${PH}/wig-install.jpg`,
+    prices: { west_africa: 7000, east_africa: 1200, southern_africa: 230, north_africa: 200, caribbean: 55, latin_america: 30, middle_east: 130, south_asia: 900, southeast_asia: 100000, uk_europe: 60, north_america: 75 },
+  },
+]
+
+// ─── LIFE COACHING ────────────────────────────────────────────────────────
+const COACHING_SERVICES: ServiceDef[] = [
+  {
+    name: 'Life Coaching Discovery Session (60 min)',
+    description: 'Your first step. A focused session to explore where you are, where you want to go and what is truly holding you back. Clarity guaranteed.',
+    image_url: `${PH}/coaching-woman.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 480, north_africa: 400, caribbean: 80, latin_america: 45, middle_east: 220, south_asia: 1500, southeast_asia: 180000, uk_europe: 85, north_america: 120 },
+  },
+  {
+    name: '90-Day Life Transformation Programme',
+    description: 'A complete coaching journey — bi-weekly sessions, personalised action plans and powerful accountability. Real, measurable change in 90 days.',
+    image_url: `${PH}/coaching-woman.jpg`,
+    prices: { west_africa: 150000, east_africa: 25000, southern_africa: 4800, north_africa: 4200, caribbean: 850, latin_america: 480, middle_east: 2200, south_asia: 15000, southeast_asia: 1800000, uk_europe: 900, north_america: 1200 },
+  },
+  {
+    name: 'Values & Purpose Clarity Session',
+    description: 'Deep coaching to uncover your core values, discover your purpose and align every life decision with what truly matters to you.',
+    image_url: `${PH}/coaching-woman.jpg`,
+    prices: { west_africa: 20000, east_africa: 3500, southern_africa: 650, north_africa: 550, caribbean: 110, latin_america: 60, middle_east: 290, south_asia: 2000, southeast_asia: 230000, uk_europe: 110, north_america: 150 },
+  },
+  {
+    name: 'Work-Life Balance Coaching',
+    description: 'For driven professionals feeling stretched thin. Create clear boundaries, reclaim your time and build a life you genuinely love.',
+    image_url: `${PH}/coaching-man.jpg`,
+    prices: { west_africa: 20000, east_africa: 3500, southern_africa: 650, north_africa: 550, caribbean: 110, latin_america: 60, middle_east: 290, south_asia: 2000, southeast_asia: 230000, uk_europe: 110, north_america: 150 },
+  },
+  {
+    name: 'Monthly Accountability Coaching',
+    description: 'Monthly goal-setting sessions with progress reviews, challenge-solving and the ongoing support to keep you moving forward consistently.',
+    image_url: `${PH}/coaching-session.jpg`,
+    prices: { west_africa: 30000, east_africa: 5000, southern_africa: 950, north_africa: 820, caribbean: 160, latin_america: 90, middle_east: 420, south_asia: 3000, southeast_asia: 350000, uk_europe: 160, north_america: 220 },
+  },
+  {
+    name: 'Mindset & Confidence Coaching',
+    description: 'Therapeutic coaching to rebuild your self-belief, eliminate limiting beliefs and step into the confident version of yourself.',
+    image_url: `${PH}/coaching-woman.jpg`,
+    prices: { west_africa: 20000, east_africa: 3500, southern_africa: 650, north_africa: 550, caribbean: 110, latin_america: 60, middle_east: 290, south_asia: 2000, southeast_asia: 230000, uk_europe: 110, north_america: 150 },
+  },
+]
+
+// ─── WOMEN'S EMPOWERMENT ──────────────────────────────────────────────────
+const WOMENS_EMPOWERMENT_SERVICES: ServiceDef[] = [
+  {
+    name: "Women's Empowerment 1-on-1 Session",
+    description: 'A powerful, confidential session for women ready to rise. Overcome barriers, own your story and step fully into your power.',
+    image_url: `${PH}/womens-empowerment.jpg`,
+    prices: { west_africa: 20000, east_africa: 3500, southern_africa: 650, north_africa: 550, caribbean: 110, latin_america: 60, middle_east: 290, south_asia: 2000, southeast_asia: 230000, uk_europe: 110, north_america: 150 },
+  },
+  {
+    name: 'Women in Business Coaching',
+    description: 'Strategic coaching for women entrepreneurs. Build confidence, close deals, attract clients and grow a business that reflects your worth.',
+    image_url: `${PH}/womens-empowerment.jpg`,
+    prices: { west_africa: 25000, east_africa: 4200, southern_africa: 800, north_africa: 700, caribbean: 140, latin_america: 78, middle_east: 360, south_asia: 2500, southeast_asia: 290000, uk_europe: 140, north_america: 185 },
+  },
+  {
+    name: "Women's Leadership Group Programme",
+    description: 'Monthly group coaching for ambitious women. Community, accountability and powerful content to accelerate your leadership journey.',
+    image_url: `${PH}/womens-empowerment.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 480, north_africa: 420, caribbean: 85, latin_america: 48, middle_east: 220, south_asia: 1500, southeast_asia: 180000, uk_europe: 90, north_america: 120 },
+  },
+  {
+    name: 'Relationship & Boundaries Coaching',
+    description: 'Coaching to help you build healthier relationships, set firm boundaries and communicate your needs with clarity and confidence.',
+    image_url: `${PH}/coaching-woman.jpg`,
+    prices: { west_africa: 20000, east_africa: 3500, southern_africa: 650, north_africa: 550, caribbean: 110, latin_america: 60, middle_east: 290, south_asia: 2000, southeast_asia: 230000, uk_europe: 110, north_america: 150 },
+  },
+]
+
+// ─── BUSINESS COACHING ────────────────────────────────────────────────────
+const BUSINESS_COACHING_SERVICES: ServiceDef[] = [
+  {
+    name: 'Business Strategy Session (90 min)',
+    description: 'Deep-dive strategy session for business owners and entrepreneurs. Walk away with a clear roadmap, prioritised actions and renewed focus.',
+    image_url: `${PH}/coaching-man.jpg`,
+    prices: { west_africa: 25000, east_africa: 4200, southern_africa: 800, north_africa: 700, caribbean: 140, latin_america: 80, middle_east: 360, south_asia: 2500, southeast_asia: 290000, uk_europe: 150, north_america: 200 },
+  },
+  {
+    name: 'Brand & Positioning Workshop',
+    description: 'Define your brand voice, ideal client and positioning. Leave with a clear identity that attracts the right customers consistently.',
+    image_url: `${PH}/brand-workshop.jpg`,
+    prices: { west_africa: 30000, east_africa: 5000, southern_africa: 950, north_africa: 840, caribbean: 170, latin_america: 95, middle_east: 430, south_asia: 3000, southeast_asia: 350000, uk_europe: 175, north_america: 240 },
+  },
+  {
+    name: 'Pricing & Revenue Strategy Session',
+    description: 'Stop undercharging. Learn how to price your offers confidently, package your services and build a sustainable revenue model.',
+    image_url: `${PH}/revenue-strategy.jpg`,
+    prices: { west_africa: 25000, east_africa: 4200, southern_africa: 800, north_africa: 700, caribbean: 140, latin_america: 78, middle_east: 360, south_asia: 2500, southeast_asia: 290000, uk_europe: 150, north_america: 200 },
+  },
+  {
+    name: 'Small Business Growth Coaching (Monthly)',
+    description: 'Monthly coaching for growing businesses. Sales, operations, team and mindset — everything you need to scale with confidence.',
+    image_url: `${PH}/coaching-man.jpg`,
+    prices: { west_africa: 50000, east_africa: 8500, southern_africa: 1600, north_africa: 1400, caribbean: 280, latin_america: 160, middle_east: 720, south_asia: 5000, southeast_asia: 580000, uk_europe: 300, north_america: 400 },
+  },
+]
+
+// ─── PUBLIC SPEAKING / EDUCATION ──────────────────────────────────────────
+const EDUCATION_SERVICES: ServiceDef[] = [
+  {
+    name: 'Public Speaking & Presentation Training',
+    description: 'Overcome fear, find your voice and communicate with genuine impact. Practical, confidence-building techniques for life and business.',
+    image_url: `${PH}/public-speaking.jpg`,
+    prices: { west_africa: 25000, east_africa: 4200, southern_africa: 800, north_africa: 700, caribbean: 140, latin_america: 78, middle_east: 360, south_asia: 2500, southeast_asia: 290000, uk_europe: 150, north_america: 200 },
+  },
+  {
+    name: 'Primary School Home Tutoring',
+    description: 'Patient, qualified tutoring for primary school children. All subjects, at the student\'s pace. Real improvement, real confidence.',
+    image_url: `${PH}/tutoring.jpg`,
+    prices: { west_africa: 5000, east_africa: 850, southern_africa: 180, north_africa: 150, caribbean: 35, latin_america: 20, middle_east: 90, south_asia: 600, southeast_asia: 70000, uk_europe: 35, north_america: 50 },
+  },
+  {
+    name: 'WAEC & JAMB Exam Preparation',
+    description: 'Intensive exam coaching to maximise results in WAEC and JAMB. Past questions, strategies and mock tests. Pass with confidence.',
+    image_url: `${PH}/exam-prep.jpg`,
+    prices: { west_africa: 8000, east_africa: 1400, southern_africa: 260, north_africa: 230, caribbean: 50, latin_america: 28, middle_east: 140, south_asia: 950, southeast_asia: 110000, uk_europe: 55, north_america: 70 },
+  },
+  {
+    name: 'SAT / ACT Prep (University Entrance)',
+    description: 'Strategic coaching for SAT and ACT exams. Proven techniques, practice tests and targeted improvement in every section.',
+    image_url: `${PH}/exam-prep.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 480, north_africa: 420, caribbean: 80, latin_america: 45, middle_east: 220, south_asia: 1500, southeast_asia: 180000, uk_europe: 80, north_america: 110 },
+  },
+  {
+    name: 'English Language & Communication (Adults)',
+    description: 'Conversational English, business communication and professional writing coaching. Build fluency and confidence in English.',
+    image_url: `${PH}/english.jpg`,
+    prices: { west_africa: 5000, east_africa: 850, southern_africa: 180, north_africa: 150, caribbean: 35, latin_america: 20, middle_east: 100, south_asia: 650, southeast_asia: 75000, uk_europe: 40, north_america: 55 },
+  },
+  {
+    name: 'Coding for Beginners (8-week course)',
+    description: 'Introduction to programming from absolute zero. Learn web basics, logic and build your first real project. Online or in-person.',
+    image_url: `${PH}/coding.jpg`,
+    prices: { west_africa: 30000, east_africa: 5000, southern_africa: 950, north_africa: 840, caribbean: 160, latin_america: 90, middle_east: 430, south_asia: 3000, southeast_asia: 350000, uk_europe: 180, north_america: 250 },
+  },
+  {
+    name: 'Piano & Music Lessons (Monthly)',
+    description: 'Piano, keyboard and music theory lessons for all ages and levels. Patient, qualified teacher. Monthly package of 4 sessions.',
+    image_url: `${PH}/music.jpg`,
+    prices: { west_africa: 20000, east_africa: 3500, southern_africa: 650, north_africa: 550, caribbean: 110, latin_america: 60, middle_east: 290, south_asia: 2000, southeast_asia: 230000, uk_europe: 120, north_america: 160 },
+  },
+]
+
+// ─── MENTAL WELLNESS ──────────────────────────────────────────────────────
+const MENTAL_WELLNESS_SERVICES: ServiceDef[] = [
+  {
+    name: '1-on-1 Counselling Session (50 min)',
+    description: 'A safe, confidential space to talk, process and begin healing. Trained counsellor, non-judgemental and deeply supportive.',
+    image_url: `${PH}/coaching-woman.jpg`,
+    prices: { west_africa: 20000, east_africa: 3500, southern_africa: 650, north_africa: 550, caribbean: 110, latin_america: 60, middle_east: 290, south_asia: 2000, southeast_asia: 230000, uk_europe: 80, north_america: 120 },
+  },
+  {
+    name: 'Stress & Burnout Recovery Programme',
+    description: 'Structured support for chronic stress and emotional exhaustion. Practical tools to restore your energy, clarity and sense of self.',
+    image_url: `${PH}/coaching-woman.jpg`,
+    prices: { west_africa: 20000, east_africa: 3500, southern_africa: 650, north_africa: 550, caribbean: 110, latin_america: 60, middle_east: 290, south_asia: 2000, southeast_asia: 230000, uk_europe: 90, north_america: 130 },
+  },
+  {
+    name: 'Mindfulness & Meditation Session',
+    description: 'Guided mindfulness practice to calm the mind, reduce anxiety and cultivate present-moment awareness. Beginners welcome.',
+    image_url: `${PH}/aromatherapy.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 480, north_africa: 420, caribbean: 80, latin_america: 45, middle_east: 220, south_asia: 1500, southeast_asia: 180000, uk_europe: 60, north_america: 90 },
+  },
+  {
+    name: 'Anxiety Coaching Programme (4 sessions)',
+    description: 'Evidence-based coaching to understand, manage and reduce anxiety. Learn practical tools to rebuild calm and take back control.',
+    image_url: `${PH}/coaching-woman.jpg`,
+    prices: { west_africa: 25000, east_africa: 4200, southern_africa: 800, north_africa: 700, caribbean: 140, latin_america: 78, middle_east: 360, south_asia: 2500, southeast_asia: 290000, uk_europe: 120, north_america: 180 },
+  },
+  {
+    name: 'Grief & Loss Support Session',
+    description: 'Compassionate, professional support through grief or major life loss. A gentle space to process and begin the journey toward healing.',
+    image_url: `${PH}/coaching-woman.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 480, north_africa: 420, caribbean: 85, latin_america: 48, middle_east: 220, south_asia: 1500, southeast_asia: 180000, uk_europe: 70, north_america: 110 },
+  },
+]
+
+// ─── CHILDCARE ────────────────────────────────────────────────────────────
+const CHILDCARE_SERVICES: ServiceDef[] = [
+  {
+    name: 'Full-time Nanny Service (Daily)',
+    description: 'Experienced, trustworthy nanny for complete daily childcare. Background checked, warm, reliable and excellent with children of all ages.',
+    image_url: `${PH}/childcare.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 480, north_africa: 420, caribbean: 100, latin_america: 55, middle_east: 280, south_asia: 1800, southeast_asia: 200000, uk_europe: 100, north_america: 150 },
+  },
+  {
+    name: 'After-school Care & Pickup',
+    description: 'Safe after-school pickup, supervision and homework support until parents return. Snacks, activities and a nurturing environment.',
+    image_url: `${PH}/childcare.jpg`,
+    prices: { west_africa: 8000, east_africa: 1400, southern_africa: 260, north_africa: 230, caribbean: 55, latin_america: 30, middle_east: 150, south_asia: 1000, southeast_asia: 120000, uk_europe: 55, north_america: 80 },
+  },
+  {
+    name: 'Babysitting (Evening or Weekend)',
+    description: 'Reliable babysitting for evenings and weekends. Caring, fun and experienced. All ages welcome. References available.',
+    image_url: `${PH}/childcare.jpg`,
+    prices: { west_africa: 5000, east_africa: 850, southern_africa: 170, north_africa: 150, caribbean: 40, latin_america: 22, middle_east: 100, south_asia: 700, southeast_asia: 80000, uk_europe: 15, north_america: 20 },
+  },
+  {
+    name: 'Special Needs Childcare',
+    description: 'Specialised, patient care for children with additional needs. Trained, compassionate and committed to each child\'s wellbeing.',
+    image_url: `${PH}/childcare.jpg`,
+    prices: { west_africa: 20000, east_africa: 3500, southern_africa: 650, north_africa: 550, caribbean: 130, latin_america: 72, middle_east: 350, south_asia: 2500, southeast_asia: 280000, uk_europe: 140, north_america: 200 },
+  },
+  {
+    name: 'Homework Help & Study Support',
+    description: 'Patient one-on-one homework assistance for primary and secondary school children. All subjects, clear explanations, real results.',
+    image_url: `${PH}/tutoring.jpg`,
+    prices: { west_africa: 5000, east_africa: 850, southern_africa: 170, north_africa: 150, caribbean: 35, latin_america: 20, middle_east: 95, south_asia: 650, southeast_asia: 75000, uk_europe: 30, north_america: 45 },
+  },
+]
+
+// ─── FOOD & CATERING ──────────────────────────────────────────────────────
+const FOOD_CATERING_SERVICES: ServiceDef[] = [
+  {
+    name: 'Weekly Meal Prep Service',
+    description: 'Freshly cooked meals planned, prepared and portioned for the entire week. You choose the menu — just reheat and enjoy. Life made simpler.',
+    image_url: `${PH}/private-chef.jpg`,
+    prices: { west_africa: 25000, east_africa: 4200, southern_africa: 800, north_africa: 700, caribbean: 160, latin_america: 90, middle_east: 420, south_asia: 3000, southeast_asia: 350000, uk_europe: 180, north_america: 250 },
+  },
+  {
+    name: 'Home-cooked Meal Delivery',
+    description: 'Freshly cooked local and continental meals delivered to your door. Order daily or weekly. Real food, real flavour.',
+    image_url: `${PH}/meal-delivery.jpg`,
+    prices: { west_africa: 5000, east_africa: 850, southern_africa: 170, north_africa: 150, caribbean: 35, latin_america: 18, middle_east: 100, south_asia: 700, southeast_asia: 80000, uk_europe: 18, north_america: 25 },
+  },
+  {
+    name: 'Party & Event Catering (per head)',
+    description: 'Professional event catering for birthdays, weddings and celebrations. Full buffet, menu planning, cooking, serving and cleanup included.',
+    image_url: `${PH}/meal-delivery.jpg`,
+    prices: { west_africa: 3000, east_africa: 500, southern_africa: 100, north_africa: 90, caribbean: 22, latin_america: 12, middle_east: 65, south_asia: 450, southeast_asia: 50000, uk_europe: 25, north_america: 35 },
+  },
+  {
+    name: 'Private Chef for Dinner',
+    description: 'An experienced chef comes to your home and creates a restaurant-quality dinner. For date nights, family occasions and private entertaining.',
+    image_url: `${PH}/private-chef.jpg`,
+    prices: { west_africa: 50000, east_africa: 8500, southern_africa: 1600, north_africa: 1400, caribbean: 280, latin_america: 160, middle_east: 750, south_asia: 5500, southeast_asia: 600000, uk_europe: 300, north_america: 400 },
+  },
+  {
+    name: 'Custom Cakes & Pastries',
+    description: 'Beautifully crafted custom celebration cakes for birthdays, weddings and events. Fondant and buttercream, designed to your exact vision.',
+    image_url: `${PH}/custom-cake.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 480, north_africa: 420, caribbean: 80, latin_america: 45, middle_east: 220, south_asia: 1500, southeast_asia: 180000, uk_europe: 100, north_america: 130 },
+  },
+  {
+    name: 'Diet & Healthy Meal Plan (Weekly)',
+    description: 'Nutritionist-guided clean eating programme. Balanced, delicious meals for weight loss, muscle gain or general wellbeing.',
+    image_url: `${PH}/healthy-meal.jpg`,
+    prices: { west_africa: 30000, east_africa: 5000, southern_africa: 950, north_africa: 840, caribbean: 180, latin_america: 100, middle_east: 480, south_asia: 3500, southeast_asia: 400000, uk_europe: 200, north_america: 280 },
+  },
+]
+
+// ─── HEALTH & WELLNESS ────────────────────────────────────────────────────
+const HEALTH_WELLNESS_SERVICES: ServiceDef[] = [
+  {
+    name: 'Home Physiotherapy Visit',
+    description: 'Professional physiotherapy at your home for pain relief, injury recovery and rehabilitation. Licensed therapist, personalised treatment plan.',
+    image_url: `${PH}/health-products.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 480, north_africa: 420, caribbean: 90, latin_america: 50, middle_east: 250, south_asia: 1800, southeast_asia: 200000, uk_europe: 80, north_america: 120 },
+  },
+  {
+    name: 'Personal Fitness Training (Per Session)',
+    description: 'One-on-one fitness coaching at home or gym. Tailored programme for weight loss, muscle building or general fitness. No fluff, real results.',
+    image_url: `${PH}/fitness.jpg`,
+    prices: { west_africa: 10000, east_africa: 1700, southern_africa: 320, north_africa: 280, caribbean: 60, latin_america: 35, middle_east: 170, south_asia: 1200, southeast_asia: 140000, uk_europe: 55, north_america: 80 },
+  },
+  {
+    name: 'Nutrition & Diet Consultation',
+    description: 'Professional nutritional assessment with a personalised meal plan. Evidence-based advice for sustainable weight management and wellness.',
+    image_url: `${PH}/healthy-meal.jpg`,
+    prices: { west_africa: 8000, east_africa: 1400, southern_africa: 260, north_africa: 230, caribbean: 55, latin_america: 30, middle_east: 150, south_asia: 1000, southeast_asia: 120000, uk_europe: 60, north_america: 85 },
+  },
+  {
+    name: 'Elderly Home Care (Daily)',
+    description: 'Compassionate, dignified care for elderly family members. Daily assistance, medication reminders, companionship and safety monitoring.',
+    image_url: `${PH}/elderly-care.jpg`,
+    prices: { west_africa: 20000, east_africa: 3500, southern_africa: 650, north_africa: 550, caribbean: 120, latin_america: 65, middle_east: 350, south_asia: 2500, southeast_asia: 280000, uk_europe: 130, north_america: 180 },
+  },
+  {
+    name: 'Mobile Nursing Services',
+    description: 'Professional nursing at home — wound care, injections, drips and post-surgery support. Registered nurse, prompt and fully equipped.',
+    image_url: `${PH}/health-products.jpg`,
+    prices: { west_africa: 10000, east_africa: 1700, southern_africa: 320, north_africa: 280, caribbean: 65, latin_america: 38, middle_east: 180, south_asia: 1300, southeast_asia: 150000, uk_europe: 70, north_america: 100 },
+  },
+]
+
+// ─── DOMESTIC SERVICES ────────────────────────────────────────────────────
+const DOMESTIC_SERVICES: ServiceDef[] = [
+  {
+    name: 'Home Deep Cleaning',
+    description: 'Comprehensive deep cleaning of your entire home. We bring all professional equipment and supplies. Leave it to us completely.',
+    image_url: `${PH}/deep-cleaning.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 480, north_africa: 420, caribbean: 90, latin_america: 50, middle_east: 250, south_asia: 1800, southeast_asia: 200000, uk_europe: 120, north_america: 180 },
+  },
+  {
+    name: 'Weekly House Cleaning',
+    description: 'Regular weekly cleaning to keep your home consistently spotless. Same reliable cleaner every visit. Flexible scheduling.',
+    image_url: `${PH}/house-cleaning.jpg`,
+    prices: { west_africa: 8000, east_africa: 1400, southern_africa: 260, north_africa: 230, caribbean: 55, latin_america: 30, middle_east: 150, south_asia: 1000, southeast_asia: 120000, uk_europe: 75, north_america: 110 },
+  },
+  {
+    name: 'Laundry & Ironing Service',
+    description: 'Wash, dry and perfectly iron your clothes. Pick-up and delivery available. 24-hour turnaround. Fresh, crisp and ready to wear.',
+    image_url: `${PH}/house-cleaning.jpg`,
+    prices: { west_africa: 5000, east_africa: 850, southern_africa: 170, north_africa: 150, caribbean: 35, latin_america: 18, middle_east: 95, south_asia: 650, southeast_asia: 75000, uk_europe: 25, north_america: 35 },
+  },
+  {
+    name: 'Home Cooking Service',
+    description: 'A skilled cook comes to your home and prepares fresh meals in your kitchen. Soups, stews and full local meals. Tailored to your preferences.',
+    image_url: `${PH}/home-cooking.jpg`,
+    prices: { west_africa: 10000, east_africa: 1700, southern_africa: 320, north_africa: 280, caribbean: 60, latin_america: 35, middle_east: 170, south_asia: 1200, southeast_asia: 140000, uk_europe: 80, north_america: 110 },
+  },
+  {
+    name: 'Pest Control Treatment',
+    description: 'Professional treatment for cockroaches, rats, termites, ants and mosquitoes. Safe, effective products. Certificate provided.',
+    image_url: `${PH}/electrical.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 480, north_africa: 420, caribbean: 90, latin_america: 50, middle_east: 250, south_asia: 1800, southeast_asia: 200000, uk_europe: 120, north_america: 175 },
+  },
+]
+
+// ─── DIGITAL SERVICES ─────────────────────────────────────────────────────
+const DIGITAL_SERVICES: ServiceDef[] = [
+  {
+    name: 'Logo Design',
+    description: 'Professional logo design that captures your brand essence. 3 distinct concepts, unlimited revisions. PNG, JPG and vector formats delivered.',
+    image_url: `${PH}/logo-design.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 480, north_africa: 420, caribbean: 120, latin_america: 65, middle_east: 320, south_asia: 2500, southeast_asia: 280000, uk_europe: 200, north_america: 300 },
+  },
+  {
+    name: 'Phone Screen Repair',
+    description: 'Professional screen replacement for iPhone, Samsung, Tecno and Infinix. Same-day repair. Genuine parts. Warranty included.',
+    image_url: `${PH}/phone-repair.jpg`,
+    prices: { west_africa: 10000, east_africa: 1700, southern_africa: 320, north_africa: 280, caribbean: 65, latin_america: 38, middle_east: 180, south_asia: 1300, southeast_asia: 150000, uk_europe: 80, north_america: 120 },
+  },
+  {
+    name: 'Laptop Repair & Maintenance',
+    description: 'Expert repairs for screen, battery, keyboard and software issues. All major brands. Free diagnosis. Fast, reliable turnaround.',
+    image_url: `${PH}/laptop-repair.jpg`,
+    prices: { west_africa: 20000, east_africa: 3500, southern_africa: 650, north_africa: 560, caribbean: 120, latin_america: 70, middle_east: 330, south_asia: 2400, southeast_asia: 280000, uk_europe: 120, north_america: 180 },
+  },
+  {
+    name: 'Social Media Management (Monthly)',
+    description: 'Complete monthly management of your Instagram and Facebook. Content creation, scheduling, engagement and growth strategy included.',
+    image_url: `${PH}/social-media.jpg`,
+    prices: { west_africa: 30000, east_africa: 5000, southern_africa: 950, north_africa: 840, caribbean: 200, latin_america: 110, middle_east: 540, south_asia: 4000, southeast_asia: 460000, uk_europe: 400, north_america: 550 },
+  },
+  {
+    name: 'CV & Cover Letter Writing',
+    description: 'Professional, ATS-optimised CV design and compelling cover letter. Stand out from the competition. Word and PDF delivered in 24 hours.',
+    image_url: `${PH}/cv-writing.jpg`,
+    prices: { west_africa: 5000, east_africa: 850, southern_africa: 170, north_africa: 150, caribbean: 45, latin_america: 25, middle_east: 130, south_asia: 900, southeast_asia: 100000, uk_europe: 80, north_america: 120 },
+  },
+  {
+    name: 'Flyer & Banner Design',
+    description: 'Eye-catching, professional designs for events, promotions and businesses. Print and digital formats. Fast turnaround, unlimited revisions.',
+    image_url: `${PH}/flyer-design.jpg`,
+    prices: { west_africa: 5000, east_africa: 850, southern_africa: 170, north_africa: 150, caribbean: 40, latin_america: 22, middle_east: 110, south_asia: 800, southeast_asia: 90000, uk_europe: 70, north_america: 100 },
+  },
+]
+
+// ─── TRANSPORT ────────────────────────────────────────────────────────────
+const TRANSPORT_SERVICES: ServiceDef[] = [
+  {
+    name: 'Package Delivery — Same Day',
+    description: 'Reliable same-day delivery of documents and parcels within the city. Fast, trackable and handled with care.',
+    image_url: `${PH}/package-delivery.jpg`,
+    prices: { west_africa: 3000, east_africa: 500, southern_africa: 100, north_africa: 90, caribbean: 20, latin_america: 10, middle_east: 55, south_asia: 400, southeast_asia: 45000, uk_europe: 15, north_america: 20 },
+  },
+  {
+    name: 'Driver for Hire (Full Day)',
+    description: 'Professional, courteous driver for personal or corporate use. Full-day hire. Your car or ours. Punctual and discreet.',
+    image_url: `${PH}/driver-hire.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 480, north_africa: 420, caribbean: 100, latin_america: 55, middle_east: 280, south_asia: 2000, southeast_asia: 230000, uk_europe: 180, north_america: 250 },
+  },
+  {
+    name: 'Airport Pick-up & Drop-off',
+    description: 'Reliable airport transfers with flight tracking and meet and greet. Punctual, comfortable and stress-free. Book 24 hours in advance.',
+    image_url: `${PH}/airport-pickup.jpg`,
+    prices: { west_africa: 10000, east_africa: 1700, southern_africa: 320, north_africa: 280, caribbean: 55, latin_america: 30, middle_east: 180, south_asia: 1300, southeast_asia: 150000, uk_europe: 60, north_america: 85 },
+  },
+  {
+    name: 'School Run Service (Daily)',
+    description: 'Dependable daily school run for children. Morning pickup, safe drop-off, afternoon collection. Trusted, vetted and punctual.',
+    image_url: `${PH}/bike-courier.jpg`,
+    prices: { west_africa: 8000, east_africa: 1400, southern_africa: 260, north_africa: 230, caribbean: 50, latin_america: 28, middle_east: 150, south_asia: 1000, southeast_asia: 120000, uk_europe: 80, north_america: 110 },
+  },
+  {
+    name: 'Moving & Relocation Service',
+    description: 'Professional house and office moving. Careful packing, loading and delivery. Fragile items handled with expert care.',
+    image_url: `${PH}/driver-hire.jpg`,
+    prices: { west_africa: 50000, east_africa: 8500, southern_africa: 1600, north_africa: 1400, caribbean: 300, latin_america: 170, middle_east: 800, south_asia: 6000, southeast_asia: 680000, uk_europe: 400, north_america: 550 },
+  },
+]
+
+// ─── HOME SERVICES ────────────────────────────────────────────────────────
+const HOME_SERVICES: ServiceDef[] = [
+  {
+    name: 'House Wiring & Electrical Installation',
+    description: 'Professional electrical wiring, installation and repairs by a certified electrician. Safe, code-compliant and fully guaranteed.',
+    image_url: `${PH}/electrical.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 480, north_africa: 420, caribbean: 100, latin_america: 55, middle_east: 280, south_asia: 2000, southeast_asia: 230000, uk_europe: 120, north_america: 180 },
+  },
+  {
+    name: 'Solar Panel Installation',
+    description: 'Professional solar panel installation for homes and offices. Quality panels, certified installer. Full system with inverter and batteries.',
+    image_url: `${PH}/solar-install.jpg`,
+    prices: { west_africa: 150000, east_africa: 25000, southern_africa: 4800, north_africa: 4200, caribbean: 900, latin_america: 500, middle_east: 2400, south_asia: 18000, southeast_asia: 2000000, uk_europe: 1500, north_america: 2200 },
+  },
+  {
+    name: 'Plumbing Repairs',
+    description: 'Expert plumbing repair and installation. Burst pipes, leaking taps, blocked drains and bathroom fitting. Fast response, quality work.',
+    image_url: `${PH}/electrical.jpg`,
+    prices: { west_africa: 8000, east_africa: 1400, southern_africa: 260, north_africa: 230, caribbean: 65, latin_america: 36, middle_east: 180, south_asia: 1300, southeast_asia: 150000, uk_europe: 80, north_america: 120 },
+  },
+  {
+    name: 'Air Conditioning Service & Repair',
+    description: 'AC installation, servicing and repair for all major brands. Gas refill, cleaning and troubleshooting. Keeps you cool all year.',
+    image_url: `${PH}/electrical.jpg`,
+    prices: { west_africa: 10000, east_africa: 1700, southern_africa: 320, north_africa: 280, caribbean: 80, latin_america: 45, middle_east: 220, south_asia: 1600, southeast_asia: 180000, uk_europe: 100, north_america: 150 },
+  },
+  {
+    name: 'Painting & Decorating',
+    description: 'Professional interior and exterior painting. Clean finish, quality paints. Rooms, full houses and commercial spaces.',
+    image_url: `${PH}/house-cleaning.jpg`,
+    prices: { west_africa: 20000, east_africa: 3500, southern_africa: 650, north_africa: 550, caribbean: 120, latin_america: 65, middle_east: 340, south_asia: 2500, southeast_asia: 280000, uk_europe: 200, north_america: 280 },
+  },
+]
+
+// ─── EVENTS ───────────────────────────────────────────────────────────────
+const EVENTS_SERVICES: ServiceDef[] = [
+  {
+    name: 'Event Photography (Full Day)',
+    description: 'Professional photography for weddings, birthdays and corporate events. Beautifully edited photos delivered within 48 hours.',
+    image_url: `${PH}/coaching-session.jpg`,
+    prices: { west_africa: 50000, east_africa: 8500, southern_africa: 1600, north_africa: 1400, caribbean: 350, latin_america: 200, middle_east: 900, south_asia: 7000, southeast_asia: 800000, uk_europe: 600, north_america: 900 },
+  },
+  {
+    name: 'Event Videography (Full Day)',
+    description: 'Cinematic full event video coverage with professional editing. Highlight reel and full footage delivered. Drone shots available.',
+    image_url: `${PH}/coaching-session.jpg`,
+    prices: { west_africa: 70000, east_africa: 12000, southern_africa: 2200, north_africa: 2000, caribbean: 480, latin_america: 275, middle_east: 1250, south_asia: 9500, southeast_asia: 1100000, uk_europe: 800, north_america: 1200 },
+  },
+  {
+    name: 'Event Decoration',
+    description: 'Full event decoration service — draping, floral arrangements, centrepieces, lighting and backdrop. Transform any space beautifully.',
+    image_url: `${PH}/coaching-session.jpg`,
+    prices: { west_africa: 100000, east_africa: 17000, southern_africa: 3200, north_africa: 2800, caribbean: 650, latin_america: 380, middle_east: 1800, south_asia: 13000, southeast_asia: 1500000, uk_europe: 1000, north_america: 1500 },
+  },
+  {
+    name: 'DJ Services (4 hours)',
+    description: 'Professional DJ for parties, weddings and corporate events. Quality sound and lighting system included. Makes every event unforgettable.',
+    image_url: `${PH}/music.jpg`,
+    prices: { west_africa: 50000, east_africa: 8500, southern_africa: 1600, north_africa: 1400, caribbean: 350, latin_america: 200, middle_east: 900, south_asia: 7000, southeast_asia: 800000, uk_europe: 500, north_america: 750 },
+  },
+  {
+    name: 'MC & Event Hosting',
+    description: 'Charismatic, professional MC for weddings, birthdays and corporate events. Keeps the programme on track and the crowd energised all night.',
+    image_url: `${PH}/public-speaking.jpg`,
+    prices: { west_africa: 30000, east_africa: 5000, southern_africa: 950, north_africa: 840, caribbean: 200, latin_america: 115, middle_east: 550, south_asia: 4200, southeast_asia: 480000, uk_europe: 400, north_america: 600 },
+  },
+  {
+    name: 'Custom Cake (2-tier)',
+    description: 'Beautifully crafted 2-tier custom celebration cake. Fondant or buttercream. Birthday, wedding and corporate designs tailored to your vision.',
+    image_url: `${PH}/custom-cake.jpg`,
+    prices: { west_africa: 25000, east_africa: 4200, southern_africa: 800, north_africa: 700, caribbean: 150, latin_america: 85, middle_east: 400, south_asia: 3000, southeast_asia: 350000, uk_europe: 200, north_america: 280 },
+  },
+]
+
+// ─── AGRICULTURE ──────────────────────────────────────────────────────────
+const AGRICULTURE_SERVICES: ServiceDef[] = [
+  {
+    name: 'Poultry Farm Consultation',
+    description: 'Expert guidance on broiler and layer farming. Farm setup, feed management, disease prevention and profitability planning.',
+    image_url: `${PH}/basmati-rice.jpg`,
+    prices: { west_africa: 20000, east_africa: 3500, southern_africa: 650, north_africa: 550, caribbean: 100, latin_america: 55, middle_east: 280, south_asia: 2000, southeast_asia: 230000, uk_europe: 150, north_america: 200 },
+  },
+  {
+    name: 'Farm Labour Supply (Daily)',
+    description: 'Experienced farm workers for planting, weeding, harvesting and general farm work. Reliable and hardworking. Priced per day.',
+    image_url: `${PH}/basmati-rice.jpg`,
+    prices: { west_africa: 3000, east_africa: 500, southern_africa: 100, north_africa: 90, caribbean: 30, latin_america: 15, middle_east: 80, south_asia: 500, southeast_asia: 60000, uk_europe: 80, north_america: 120 },
+  },
+  {
+    name: 'Drip Irrigation Installation',
+    description: 'Professional design and installation of drip irrigation systems. Water-saving, efficient and customised to your farm layout.',
+    image_url: `${PH}/solar-install.jpg`,
+    prices: { west_africa: 50000, east_africa: 8500, southern_africa: 1600, north_africa: 1400, caribbean: 300, latin_america: 170, middle_east: 800, south_asia: 6000, southeast_asia: 680000, uk_europe: 500, north_america: 700 },
+  },
+  {
+    name: 'Tractor Ploughing (per acre)',
+    description: 'Land clearing and ploughing using tractor. Priced per acre. Available for small and large farms. Fast and thorough.',
+    image_url: `${PH}/basmati-rice.jpg`,
+    prices: { west_africa: 15000, east_africa: 2500, southern_africa: 480, north_africa: 420, caribbean: 90, latin_america: 50, middle_east: 250, south_asia: 1800, southeast_asia: 200000, uk_europe: 150, north_america: 220 },
+  },
+  {
+    name: 'Fish Farm Setup & Management',
+    description: 'Complete catfish pond construction, stocking, feed management and harvest planning. From concept to first harvest.',
+    image_url: `${PH}/stockfish.jpg`,
+    prices: { west_africa: 100000, east_africa: 17000, southern_africa: 3200, north_africa: 2800, caribbean: 600, latin_america: 340, middle_east: 1600, south_asia: 12000, southeast_asia: 1400000, uk_europe: 800, north_america: 1100 },
+  },
+]
+
+// ─── MASTER LOOKUP ─────────────────────────────────────────────────────────
+const SUBCATEGORY_SERVICES: Record<string, ServiceDef[]> = {
+  massage: MASSAGE_SERVICES,
+  braiding: BRAIDING_SERVICES,
+  makeup: MAKEUP_SERVICES,
+  nails: NAILS_SERVICES,
+  barber: BARBER_SERVICES,
+  skincare: SKINCARE_SERVICES,
+  wigs: WIGS_SERVICES,
+  life_coach: COACHING_SERVICES,
+  business_coach: BUSINESS_COACHING_SERVICES,
+  womens_empowerment: WOMENS_EMPOWERMENT_SERVICES,
+  education: EDUCATION_SERVICES,
+  mental_wellness: MENTAL_WELLNESS_SERVICES,
+  childcare: CHILDCARE_SERVICES,
+  food_catering: FOOD_CATERING_SERVICES,
+  health_wellness: HEALTH_WELLNESS_SERVICES,
+  domestic: DOMESTIC_SERVICES,
+  digital_services: DIGITAL_SERVICES,
+  transport: TRANSPORT_SERVICES,
+  home_services: HOME_SERVICES,
+  events: EVENTS_SERVICES,
+  agriculture: AGRICULTURE_SERVICES,
+}
+
+// ─── CATEGORY → SUBCATEGORIES FALLBACK ────────────────────────────────────
+const CATEGORY_SUBCATEGORY_MAP: Record<string, string[]> = {
+  beauty_services: ['massage', 'braiding', 'makeup', 'nails', 'barber', 'skincare', 'wigs'],
+  coaching: ['life_coach', 'business_coach', 'womens_empowerment'],
+  education: ['education'],
+  mental_wellness: ['mental_wellness'],
+  childcare: ['childcare'],
+  food_catering: ['food_catering'],
+  health_wellness: ['health_wellness'],
+  domestic: ['domestic'],
+  digital_services: ['digital_services'],
+  transport: ['transport'],
+  home_services: ['home_services'],
+  events: ['events'],
+  agriculture: ['agriculture'],
+}
+
+/**
+ * Get sample services for a specific subcategory and country.
+ * Returns services with accurate local pricing for the merchant's region.
+ */
+export function getSampleServicesBySubcategory(subcategoryId: string, countryCode?: string | null): SampleService[] {
+  const region = COUNTRY_REGION[countryCode || 'NG'] || 'west_africa'
+  const config = REGION_CONFIG[region] || REGION_CONFIG['west_africa']
+  const defs = SUBCATEGORY_SERVICES[subcategoryId] || []
+
+  return defs.map(def => {
+    const price = def.prices[region] || def.prices['west_africa'] || 5000
+    return {
+      name: def.name,
+      description: def.description,
+      price,
+      price_display: config.fmt(price),
+      in_stock: true,
+      image_url: def.image_url,
+    }
+  })
+}
+
+/**
+ * Get sample services for a category (uses first matching subcategory).
+ * Falls back gracefully.
+ */
+export function getSampleServices(category: string, countryCode?: string | null): SampleService[] {
+  const subcats = CATEGORY_SUBCATEGORY_MAP[category] || []
+  if (subcats.length === 0) return []
+  // Return first subcategory's services as the category default
+  return getSampleServicesBySubcategory(subcats[0], countryCode)
+}
+
+/**
+ * Get all services for a category (combines all subcategories).
+ * Useful for seeding a services merchant with a full catalogue.
+ */
+export function getAllCategoryServices(category: string, countryCode?: string | null): SampleService[] {
+  const subcats = CATEGORY_SUBCATEGORY_MAP[category] || []
+  const all: SampleService[] = []
+  for (const sub of subcats) {
+    all.push(...getSampleServicesBySubcategory(sub, countryCode))
+  }
+  return all
+}
+
+// Legacy export for backward compatibility
+export const SAMPLE_SERVICES_BY_SUBCATEGORY = SUBCATEGORY_SERVICES
+export const SAMPLE_SERVICES: Record<string, SampleService[]> = {}
