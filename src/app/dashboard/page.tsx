@@ -81,6 +81,8 @@ export default function DashboardPage() {
     const { data: waitlist } = await supabase.from('pro_waitlist').select('id').eq('merchant_id', m.id).maybeSingle()
     if (waitlist) setProJoined(true)
     await supabase.from('merchants').update({ last_login_at: new Date().toISOString() }).eq('id', m.id)
+    const welcomeDismissed = typeof window !== 'undefined' ? localStorage.getItem(`earket_welcome_${m.id}`) : null
+    if (!welcomeDismissed) setShowWelcome(true)
     setLoading(false)
     setRefreshing(false)
   }, [router])
