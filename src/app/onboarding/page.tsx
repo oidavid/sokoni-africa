@@ -1423,7 +1423,7 @@ export default function OnboardingPage() {
                       <div className="text-xs text-amber-700 mt-0.5 space-y-1">
                         <p>{pid ? 'The photos wey dey your shop now na sample photos. You fit get better photo by:' : 'The images shown are samples. You can get better photos by:'}</p>
                         <p>📸 {pid ? 'Take photo of your real product with your phone' : 'Taking a photo of your real product with your phone'}</p>
-                        <p>🌐 {pid ? 'Download am from the manufacturer website (e.g. nestle.com)' : 'Downloading from the manufacturer's website (e.g. nestle.com, unilever.com)'}</p>
+                        <p>🌐 {pid ? 'Download am from the manufacturer website (e.g. nestle.com)' : "Downloading from the manufacturer's website (e.g. nestle.com, unilever.com)"}</p>
                         <p>🔍 {pid ? 'Search Google for the product and save the image' : 'Searching Google for your product and saving a clear image'}</p>
                         <p>💾 {pid ? 'Find any good quality image online wey fit your product' : 'Finding any good quality image online that represents your product'}</p>
                         <p className="mt-1 font-semibold">{pid ? 'Then go dashboard → tap product → Edit → upload.' : 'Then: Dashboard → tap any product → Edit → upload your image.'}</p>
@@ -1458,7 +1458,7 @@ export default function OnboardingPage() {
               {!alreadyExists && (
               <div className="mt-4 bg-brand-light border border-brand-green/20 rounded-2xl p-4 text-left">
                 <p className="font-bold text-brand-dark text-sm mb-2">
-                  {pid ? '🚀 More things you fit do for your dashboard:' : '🚀 There's much more inside your dashboard:'}
+                  {pid ? '🚀 More things you fit do for your dashboard:' : "🚀 There's much more inside your dashboard:"}
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   {[
@@ -1468,7 +1468,7 @@ export default function OnboardingPage() {
                     { icon: '📣', title: pid ? 'Broadcast' : 'Broadcast', desc: pid ? 'Send message to all your customers' : 'Message all your customers at once' },
                     { icon: '🏷', title: pid ? 'Discounts' : 'Discounts', desc: pid ? 'Create promo and discount codes' : 'Create promo codes and offers' },
                     { icon: '👥', title: pid ? 'Customers' : 'Customers', desc: pid ? 'See who don buy from you' : 'View and manage your customers' },
-                    { icon: '🌈', title: pid ? 'Change Theme' : 'Change Theme', desc: pid ? 'Change how your shop dey look' : 'Customise your store's look and feel' },
+                    { icon: '🌈', title: pid ? 'Change Theme' : 'Change Theme', desc: pid ? 'Change how your shop dey look' : "Customise your store's look and feel" },
                     { icon: '📝', title: pid ? 'Orders' : 'Orders', desc: pid ? 'Track all your online orders' : 'Manage all your online orders' },
                   ].map((f, i) => (
                     <div key={i} className="bg-white rounded-xl p-2.5 flex items-start gap-2">
