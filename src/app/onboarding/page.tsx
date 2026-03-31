@@ -631,7 +631,7 @@ export default function OnboardingPage() {
   function sendLoginWhatsApp() {
     const storeUrl = `https://earket.com/store/${storeSlug}`
     const dashboardUrl = `${window.location.origin}/dashboard`
-    const isPidgin = language === 'pidgin'
+    const isPidgin = lang === 'pid'
     const msg = isPidgin ? [
       `🎉 Your Earket shop don go live!`,
       ``,
