@@ -371,7 +371,7 @@ export default function OnboardingPage() {
     '81': {symbol: '¥', rate: 0.092}, '82': {symbol: '₩', rate: 0.83},
     '971': {symbol: 'AED', rate: 0.0022}, '966': {symbol: 'SAR', rate: 0.0023},
     '965': {symbol: 'KWD', rate: 0.00019}, '974': {symbol: 'QAR', rate: 0.0022},
-    '966': {symbol: 'SAR', rate: 0.0023}, '880': {symbol: '৳', rate: 0.067},
+    '880': {symbol: '৳', rate: 0.067},
     '94': {symbol: '₨', rate: 0.17}, '977': {symbol: 'NPR', rate: 0.082},
     '66': {symbol: '฿', rate: 0.021}, '84': {symbol: '₫', rate: 15.5},
     '95': {symbol: 'K', rate: 1.29}, '65': {symbol: 'S$', rate: 0.00082},
