@@ -1250,7 +1250,7 @@ export default function OnboardingPage() {
                 </button>
                 <button onClick={() => setStep(businessType === 'services' ? 'subcategory' : 'products')}
                   className="flex items-center justify-center gap-1.5 bg-gray-50 border border-gray-200 rounded-xl py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-100">
-                  �✏️ Edit Services
+                  ✏️ Edit Services
                 </button>
               </div>
 
