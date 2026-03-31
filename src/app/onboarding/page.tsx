@@ -631,20 +631,71 @@ export default function OnboardingPage() {
   function sendLoginWhatsApp() {
     const storeUrl = `https://earket.com/store/${storeSlug}`
     const dashboardUrl = `${window.location.origin}/dashboard`
-    const msg = [
-      `ðŸŽ‰ Your business is live on Earket!`,
+    const isPidgin = language === 'pidgin'
+    const msg = isPidgin ? [
+      `🎉 Your Earket shop don go live!`,
       ``,
-      `ðŸ‘‰ Your store link:`,
+      `🔗 Your shop link:`,
       storeUrl,
       ``,
-      `ðŸ“¸ Your store is using sample product images for now.`,
-      `To upload your real photos and manage your store, tap here:`,
+      `——— DO THESE 3 THINGS NOW ———`,
+      ``,
+      `1️⃣ UPLOAD YOUR REAL PHOTOS`,
+      `The photos wey dey for your shop now na sample only.`,
+      `How to change am:`,
+      `• Open your dashboard (link below)`,
+      `• Tap any product`,
+      `• Tap “Edit”`,
+      `• Tap the image → Upload your photo`,
+      `• Tap Save`,
+      ``,
+      `2️⃣ FIX YOUR PRICES`,
+      `Check say all your prices correct.`,
+      `How to change am:`,
+      `• Tap any product → Edit`,
+      `• Change the price`,
+      `• Tap Save`,
+      ``,
+      `3️⃣ SHARE YOUR SHOP LINK`,
+      `Copy your shop link and send am to your customers on WhatsApp:`,
+      storeUrl,
+      ``,
+      `———————————————————`,
+      `🔑 Your dashboard (manage your shop):`,
       dashboardUrl,
+      `Login email: ${email}`,
+    ].join('\n') : [
+      `🎉 Your Earket store is now live!`,
       ``,
-      `ðŸ” Login details:`,
-      `Email: ${email}`,
+      `🔗 Your store link:`,
+      storeUrl,
       ``,
-      `Share your store with customers now! ðŸš€`,
+      `——— 3 IMPORTANT NEXT STEPS ———`,
+      ``,
+      `1️⃣ UPLOAD YOUR OWN PRODUCT PHOTOS`,
+      `The images in your store are sample placeholders.`,
+      `Here is how to replace them:`,
+      `• Open your dashboard (link below)`,
+      `• Tap any product`,
+      `• Tap “Edit”`,
+      `• Tap the image → Upload your photo`,
+      `• Tap Save`,
+      ``,
+      `2️⃣ UPDATE YOUR PRICES`,
+      `Check that all prices are correct for your market.`,
+      `How to update:`,
+      `• Tap any product → Edit`,
+      `• Change the price`,
+      `• Tap Save`,
+      ``,
+      `3️⃣ SHARE YOUR STORE WITH CUSTOMERS`,
+      `Copy your store link and send it to customers on WhatsApp:`,
+      storeUrl,
+      ``,
+      `———————————————————`,
+      `🔑 Your dashboard (manage your store):`,
+      dashboardUrl,
+      `Login email: ${email}`,
     ].join('\n')
     window.open(`https://wa.me/${normalizedWa}?text=${encodeURIComponent(msg)}`, '_blank')
     setLoginSent('whatsapp')
@@ -1264,7 +1315,59 @@ export default function OnboardingPage() {
               <div className="bg-brand-light border-2 border-brand-green/20 rounded-2xl p-4 mb-6">
                 <p className="text-xs text-gray-500 mb-1">{pid ? 'Your shop link:' : 'Your business link:'}</p>
                 <p className="font-display font-bold text-brand-green text-sm">earket.com/store/{storeSlug}</p>
+                <p className="text-xs text-gray-400 mt-1">{pid ? 'This na your unique shop link — no be your name, na your shop unique address.' : 'This is your unique store address — not your name. This is your store\'s unique link on Earket.'}</p>
               </div>
+
+              {/* Next Steps - shown only for new stores */}
+              {!alreadyExists && (
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4 text-left">
+                  <p className="font-bold text-amber-900 text-sm mb-3">
+                    {pid ? '📸 Do these 3 things first:' : '📸 3 important next steps:'}
+                  </p>
+                  <div className="space-y-3">
+                    <div className="flex gap-3">
+                      <div className="w-6 h-6 rounded-full bg-amber-200 flex items-center justify-center shrink-0 mt-0.5">
+                        <span className="text-amber-900 font-bold text-xs">1</span>
+                      </div>
+                      <div>
+                        <p className="text-amber-900 font-semibold text-xs">
+                          {pid ? 'Upload your real product photos' : 'Upload your own product photos'}
+                        </p>
+                        <p className="text-amber-700 text-xs mt-0.5">
+                          {pid ? 'The photos wey dey now na sample. Go dashboard \u2192 tap product \u2192 Edit \u2192 upload your real photo.' : 'Photos shown are samples only. Go to dashboard \u2192 tap any product \u2192 Edit \u2192 upload your real photo.'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="w-6 h-6 rounded-full bg-amber-200 flex items-center justify-center shrink-0 mt-0.5">
+                        <span className="text-amber-900 font-bold text-xs">2</span>
+                      </div>
+                      <div>
+                        <p className="text-amber-900 font-semibold text-xs">
+                          {pid ? 'Check and fix your prices' : 'Review and update your prices'}
+                        </p>
+                        <p className="text-amber-700 text-xs mt-0.5">
+                          {pid ? 'Make sure say your prices correct for your market. Dashboard \u2192 tap product \u2192 Edit price.' : 'Confirm all prices match your real selling prices. Dashboard \u2192 tap product \u2192 Edit.'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="w-6 h-6 rounded-full bg-amber-200 flex items-center justify-center shrink-0 mt-0.5">
+                        <span className="text-amber-900 font-bold text-xs">3</span>
+                      </div>
+                      <div>
+                        <p className="text-amber-900 font-semibold text-xs">
+                          {pid ? 'Share your shop link' : 'Share your store link with customers'}
+                        </p>
+                        <p className="text-amber-700 text-xs mt-0.5">
+                          {pid ? 'Copy your earket link and share am for WhatsApp. Your customers go fit order from you direct!' : 'Copy your earket.com link and share on WhatsApp. Customers can order directly from you!'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {!loginSent ? (
                 <>
                   <p className="text-sm font-semibold text-gray-700 mb-3">
@@ -1305,6 +1408,83 @@ export default function OnboardingPage() {
                 target="_blank" rel="noreferrer" className="btn-whatsapp w-full justify-center">
                 ðŸ“² {pid ? 'Share for WhatsApp' : 'Share on WhatsApp'}
               </a>
+
+              {/* Next Steps — placeholder notice */}
+              {!alreadyExists && (
+              <div className="mt-6 bg-amber-50 border border-amber-200 rounded-2xl p-4 text-left">
+                <p className="font-bold text-amber-800 text-sm mb-3">
+                  {pid ? '3 things wey you need do next:' : '3 important things to do next:'}
+                </p>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">1</div>
+                    <div>
+                      <p className="text-xs font-bold text-amber-900">{pid ? 'Change your product photos' : 'Replace the placeholder photos'}</p>
+                      <div className="text-xs text-amber-700 mt-0.5 space-y-1">
+                        <p>{pid ? 'The photos wey dey your shop now na sample photos. You fit get better photo by:' : 'The images shown are samples. You can get better photos by:'}</p>
+                        <p>📸 {pid ? 'Take photo of your real product with your phone' : 'Taking a photo of your real product with your phone'}</p>
+                        <p>🌐 {pid ? 'Download am from the manufacturer website (e.g. nestle.com)' : 'Downloading from the manufacturer's website (e.g. nestle.com, unilever.com)'}</p>
+                        <p>🔍 {pid ? 'Search Google for the product and save the image' : 'Searching Google for your product and saving a clear image'}</p>
+                        <p>💾 {pid ? 'Find any good quality image online wey fit your product' : 'Finding any good quality image online that represents your product'}</p>
+                        <p className="mt-1 font-semibold">{pid ? 'Then go dashboard → tap product → Edit → upload.' : 'Then: Dashboard → tap any product → Edit → upload your image.'}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">2</div>
+                    <div>
+                      <p className="text-xs font-bold text-amber-900">{pid ? 'Fix your prices' : 'Update your prices'}</p>
+                      <p className="text-xs text-amber-700 mt-0.5">{pid ? 'Check each product price and update am to match your real price.' : 'Review every product and set the correct price for what you actually charge.'}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">3</div>
+                    <div>
+                      <p className="text-xs font-bold text-amber-900">{pid ? 'Add your real products' : 'Add your actual products'}</p>
+                      <p className="text-xs text-amber-700 mt-0.5">{pid ? 'Remove products wey you no sell and add the ones wey you really get.' : "Remove products you don't stock and add the ones you actually sell."}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-amber-200 flex items-start gap-2">
+                  <span className="text-amber-600 text-xs shrink-0">&#128273;</span>
+                  <p className="text-xs text-amber-600">
+                    {pid ? 'UTo login anytime, go to earket.com/login — enter the email and password wey you use set up your shop.' : 'To log in anytime, go to earket.com/login and enter the email and password you used when setting up your store.'}
+                  </p>
+                </div>
+              </div>
+              )}
+
+              {/* Dashboard features teaser */}
+              {!alreadyExists && (
+              <div className="mt-4 bg-brand-light border border-brand-green/20 rounded-2xl p-4 text-left">
+                <p className="font-bold text-brand-dark text-sm mb-2">
+                  {pid ? '🚀 More things you fit do for your dashboard:' : '🚀 There's much more inside your dashboard:'}
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { icon: '💵', title: pid ? 'Cash Sale' : 'Cash Sale', desc: pid ? 'Record sales you make in person' : 'Record in-person sales instantly' },
+                    { icon: '📦', title: pid ? 'Inventory' : 'Inventory', desc: pid ? 'Track how many products you get' : 'Track your stock levels' },
+                    { icon: '📊', title: pid ? 'Analytics' : 'Analytics', desc: pid ? 'See how your shop dey perform' : 'See how your store is performing' },
+                    { icon: '📣', title: pid ? 'Broadcast' : 'Broadcast', desc: pid ? 'Send message to all your customers' : 'Message all your customers at once' },
+                    { icon: '🏷', title: pid ? 'Discounts' : 'Discounts', desc: pid ? 'Create promo and discount codes' : 'Create promo codes and offers' },
+                    { icon: '👥', title: pid ? 'Customers' : 'Customers', desc: pid ? 'See who don buy from you' : 'View and manage your customers' },
+                    { icon: '🌈', title: pid ? 'Change Theme' : 'Change Theme', desc: pid ? 'Change how your shop dey look' : 'Customise your store's look and feel' },
+                    { icon: '📝', title: pid ? 'Orders' : 'Orders', desc: pid ? 'Track all your online orders' : 'Manage all your online orders' },
+                  ].map((f, i) => (
+                    <div key={i} className="bg-white rounded-xl p-2.5 flex items-start gap-2">
+                      <span className="text-lg shrink-0">{f.icon}</span>
+                      <div>
+                        <p className="text-xs font-bold text-brand-dark">{f.title}</p>
+                        <p className="text-xs text-gray-500 leading-snug">{f.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-brand-green font-semibold mt-3 text-center">
+                  {pid ? 'Login to earket.com/login to explore everything →' : 'Log in at earket.com/login to explore everything →'}
+                </p>
+              </div>
+              )}
             </div>
           )}
 

@@ -57,6 +57,7 @@ export default function DashboardPage() {
   const [proJoined, setProJoined] = useState(false)
   const [joiningPro, setJoiningPro] = useState(false)
   const [showAllProducts, setShowAllProducts] = useState(false)
+  const [showWelcome, setShowWelcome] = useState(false)
 
   const loadData = useCallback(async (showRefresh = false) => {
     if (showRefresh) setRefreshing(true)
@@ -80,6 +81,10 @@ export default function DashboardPage() {
     const { data: waitlist } = await supabase.from('pro_waitlist').select('id').eq('merchant_id', m.id).maybeSingle()
     if (waitlist) setProJoined(true)
     await supabase.from('merchants').update({ last_login_at: new Date().toISOString() }).eq('id', m.id)
+    const createdAt = new Date(m.created_at || Date.now())
+    const hoursSince = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60)
+    const dismissed = typeof window !== 'undefined' ? localStorage.getItem(`earket_welcome_${m.id}`) : null
+    if (hoursSince < 72 && !dismissed) setShowWelcome(true)
     setLoading(false)
     setRefreshing(false)
   }, [router])
@@ -282,6 +287,48 @@ export default function DashboardPage() {
                 </div>
               )
             ))}
+          </div>
+        )}
+
+                {/* WELCOME BANNER */}
+        {showWelcome && merchant && (
+          <div className="mb-4 rounded-2xl overflow-hidden border border-brand-green/30"
+            style={{ background: 'linear-gradient(135deg, #f0faf4 0%, #e8f5ed 100%)' }}>
+            <div className="px-4 pt-4 pb-3">
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <p className="font-display font-bold text-brand-dark text-base">Welcome to your dashboard! 🎉</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Here’s everything you can do from here:</p>
+                </div>
+                <button onClick={() => { setShowWelcome(false); if (typeof window !== 'undefined') localStorage.setItem(`earket_welcome_${merchant.id}`, '1') }}
+                  className="text-gray-400 hover:text-gray-600 text-xl leading-none shrink-0 ml-2">×</button>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                {[
+                  { icon: '💵', title: 'Cash Sale', desc: 'Record every in-person sale instantly', href: '/dashboard/cash-sale' },
+                  { icon: '📦', title: 'Add Products', desc: 'Add, edit or remove products', href: '/dashboard/products/new' },
+                  { icon: '📊', title: 'Analytics', desc: 'Track your sales performance', href: '/dashboard/analytics' },
+                  { icon: '📣', title: 'Broadcast', desc: 'Message all your customers at once', href: '/dashboard/broadcast' },
+                  { icon: '🏷', title: 'Discounts', desc: 'Create promo codes and offers', href: '/dashboard/discounts' },
+                  { icon: '👥', title: 'Customers', desc: 'See everyone who bought from you', href: '/dashboard/customers' },
+                  { icon: '📝', title: 'Orders', desc: 'Manage all your online orders', href: '/dashboard/orders' },
+                  { icon: '🌈', title: 'Change Theme', desc: 'Customise how your store looks', href: '#' },
+                ].map((f, i) => (
+                  <a key={i} href={f.href}
+                    className="bg-white rounded-xl p-2.5 flex items-start gap-2 hover:border-brand-green border border-transparent transition-colors">
+                    <span className="text-base shrink-0">{f.icon}</span>
+                    <div>
+                      <p className="text-xs font-bold text-brand-dark">{f.title}</p>
+                      <p className="text-xs text-gray-500 leading-snug">{f.desc}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+              <button onClick={() => { setShowWelcome(false); if (typeof window !== 'undefined') localStorage.setItem(`earket_welcome_${merchant.id}`, '1') }}
+                className="w-full text-xs font-semibold text-brand-green py-2 hover:text-brand-dark transition-colors">
+                Got it — close this ×
+              </button>
+            </div>
           </div>
         )}
 
