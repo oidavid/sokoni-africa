@@ -850,7 +850,7 @@ export default function OnboardingPage() {
                     <ArrowRight size={18} className="text-gray-300 group-hover:text-brand-green transition-colors" />
                   </button>
                 ))}
-                <p className="text-xs text-gray-400 text-center pt-2">More languages coming soon Â· French, Spanish, Arabic, Swahili</p>
+                <p className="text-xs text-gray-400 text-center pt-2">More languages coming soon · French, Spanish, Arabic, Swahili</p>
               </div>
             </div>
           )}
@@ -880,9 +880,9 @@ export default function OnboardingPage() {
 
           {step === 'whatsapp' && (
             <div className="animate-fade-in">
-              <h2 className="font-display text-xl font-bold text-brand-dark mb-1">Your WhatsApp business number?</h2>
+              <h2 className="font-display text-xl font-bold text-brand-dark mb-1">{pid ? 'Your WhatsApp number?' : 'Your WhatsApp number?'}</h2>
               <p className="text-gray-500 text-sm mb-6">
-                {pid ? 'Customers go contact you on this number' : 'Customers will contact you on this number'}
+                {pid ? 'Enter the WhatsApp number wey you dey use. Personal number dey perfectly fine — you no need WhatsApp Business account.' : 'Enter the WhatsApp number you use every day. Your personal number is perfectly fine — no WhatsApp Business account needed.'}
               </p>
               <div className="flex gap-2 mb-2">
                 <button onClick={() => setShowCountryPicker(!showCountryPicker)}
@@ -931,7 +931,7 @@ export default function OnboardingPage() {
                 </div>
               )}
               {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
-              <p className="text-xs text-gray-400 mt-2">âš ï¸ Make sure this number is active on WhatsApp</p>
+              <p className="text-xs text-gray-400 mt-2">{pid ? 'Any number works — personal or business' : 'Any number works — personal or business'}</p>
             </div>
           )}
 
@@ -1175,7 +1175,7 @@ export default function OnboardingPage() {
               {/* Selected theme preview */}
               <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
                 <div className="h-16 flex items-center px-4 gap-3" style={getThemeStyle(selectedTheme)}>
-                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl">🛍</div>
+                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{color: selectedTheme.textOnPrimary, opacity: 0.9}}><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div>
                   <div>
                     <p className="font-display font-bold text-sm" style={{ color: selectedTheme.textOnPrimary }}>{businessName || 'Your Business'}</p>
                     <p className="text-xs opacity-70" style={{ color: selectedTheme.textOnPrimary }}>{location || 'Your City'}</p>
@@ -1208,10 +1208,10 @@ export default function OnboardingPage() {
                     backgroundImage: 'radial-gradient(circle at 30% 50%, white 1px, transparent 1px)',
                     backgroundSize: '20px 20px'
                   }} />
-                  <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shrink-0 shadow-lg relative z-10">🛍</div>
+                  <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shrink-0 shadow-lg relative z-10"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{color: selectedTheme.primary}}><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div>
                   <div className="relative z-10">
                     <p className="font-display font-bold text-base leading-tight" style={{ color: selectedTheme.textOnPrimary }}>{businessName}</p>
-                    <p className="text-xs opacity-70 mt-0.5" style={{ color: selectedTheme.textOnPrimary }}>{location} Â· {selectedTheme.name} theme</p>
+                    <p className="text-xs opacity-70 mt-0.5" style={{ color: selectedTheme.textOnPrimary }}>{location} · {selectedTheme.name} theme</p>
                     <div className="flex items-center gap-1 mt-1">
                       <div className="w-1.5 h-1.5 bg-green-300 rounded-full animate-pulse" />
                       <span className="text-xs opacity-80" style={{ color: selectedTheme.textOnPrimary }}>Open for bookings</span>
