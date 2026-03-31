@@ -355,7 +355,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-800 text-xs truncate">{item.product.name}</p>
-                    <p className="font-bold text-sm" style={{ color: store.theme_color || '#1A7A4A' }}>{formatPrice(item.product, store.country)}</p>
+                    <p className="font-bold text-sm" style={{ color: getContrastColor(store.theme_color || '#1A7A4A') === '#111827' ? store.theme_color || '#1A7A4A' : '#1A7A4A' }}>{formatPrice(item.product, store.country)}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <button onClick={() => updateQty(item.product.id, item.qty - 1)} className="w-6 h-6 bg-white border border-gray-200 rounded-lg flex items-center justify-center"><Minus size={10} /></button>
                       <span className="text-xs font-bold w-4 text-center">{item.qty}</span>
@@ -503,7 +503,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
               )}
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-gray-800 text-sm leading-tight">{variantModal.name}</p>
-                <p className="font-bold text-sm mt-0.5" style={{ color: store?.theme_color || '#1A7A4A' }}>
+                <p className="font-bold text-sm mt-0.5" style={{ color: getContrastColor(store?.theme_color || '#1A7A4A') === '#111827' ? store?.theme_color || '#1A7A4A' : '#1A7A4A' }}>
                   {selectedVariantIndex !== null && variantModal.variants
                     ? variantModal.variants[selectedVariantIndex].price_display || formatMoney(variantModal.variants[selectedVariantIndex].price, store?.country)
                     : (() => { const prices = variantModal.variants!.map(v => v.price); const min = Math.min(...prices); const max = Math.max(...prices); return min === max ? formatMoney(min, store?.country) : `${formatMoney(min, store?.country)} – ${formatMoney(max, store?.country)}` })()
@@ -588,7 +588,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                 </button>
                 <button onClick={() => { setVariantModal(null); setCartOpen(true) }}
                   className="w-full text-sm font-semibold py-2 border border-gray-200 rounded-2xl"
-                  style={{ color: store?.theme_color || '#1A7A4A' }}>
+                  style={{ color: getContrastColor(store?.theme_color || '#1A7A4A') === '#111827' ? store?.theme_color || '#1A7A4A' : '#1A7A4A' }}>
                   View Cart & Checkout
                 </button>
                 <button onClick={() => setVariantModal(null)}
@@ -829,7 +829,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                     <Link href={`/store/${store.slug}/product/${product.id}`} className="block">
                     <h3 className="font-semibold text-gray-800 text-sm leading-tight mb-1 line-clamp-2 hover:text-brand-green transition-colors">{product.name}</h3>
                   </Link>
-                    <p className="font-display font-bold text-base mb-2" style={{ color: store.theme_color || '#1A7A4A' }}>
+                    <p className="font-display font-bold text-base mb-2" style={{ color: getContrastColor(store.theme_color || '#1A7A4A') === '#111827' ? store.theme_color || '#1A7A4A' : '#1A7A4A' }}>
                       {formatPrice(product, store.country)}
                     </p>
 
