@@ -29,12 +29,12 @@ interface Product {
 }
 
 const CATEGORY_EMOJI: Record<string, string> = {
-  fashion: 'ðŸ‘—', food: 'ðŸ±', electronics: 'ðŸ“±', beauty: 'ðŸ’„',
-  groceries: 'ðŸ›’', furniture: 'ðŸª‘', shoes: 'ðŸ‘Ÿ', phones: 'ðŸ’»',
-  health: 'ðŸ’Š', stationery: 'ðŸ“š', automobile: 'ðŸš—', other: 'ðŸª',
-  home_services: 'ðŸ”§', auto_services: 'ðŸš—', beauty_services: 'ðŸ’„',
-  education: 'ðŸ“š', health_wellness: 'ðŸ¥', domestic: 'ðŸ ',
-  events: 'ðŸŽ‰', digital_services: 'ðŸ’»', transport: 'ðŸšš', agriculture: 'ðŸŒ±',
+  fashion: '', food: '', electronics: '', beauty: '',
+  groceries: '', furniture: '', shoes: '', phones: '',
+  health: '', stationery: '', automobile: '', other: '',
+  home_services: '', auto_services: '', beauty_services: '',
+  education: '', health_wellness: '', domestic: '',
+  events: '', digital_services: '', transport: '', agriculture: '',
 }
 
 const GRID_PREVIEW = 9 // products visible before "show all"
@@ -81,10 +81,6 @@ export default function DashboardPage() {
     const { data: waitlist } = await supabase.from('pro_waitlist').select('id').eq('merchant_id', m.id).maybeSingle()
     if (waitlist) setProJoined(true)
     await supabase.from('merchants').update({ last_login_at: new Date().toISOString() }).eq('id', m.id)
-    const createdAt = new Date(m.created_at || Date.now())
-    const hoursSince = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60)
-    const dismissed = typeof window !== 'undefined' ? localStorage.getItem(`earket_welcome_${m.id}`) : null
-    if (hoursSince < 72 && !dismissed) setShowWelcome(true)
     setLoading(false)
     setRefreshing(false)
   }, [router])
@@ -117,7 +113,7 @@ export default function DashboardPage() {
 
   function formatPrice(p: Product) {
     if (p.price_display) return p.price_display
-    return `â‚¦${(p.price / 100).toLocaleString()}`
+    return `₦${(p.price / 100).toLocaleString()}`
   }
 
   async function saveTheme(theme: EarketTheme) {
@@ -147,7 +143,7 @@ export default function DashboardPage() {
 
   const isService = merchant.business_type === 'services'
   const inStockCount = products.filter(p => p.in_stock).length
-  const categoryEmoji = CATEGORY_EMOJI[merchant.category] || 'ðŸª'
+  const categoryEmoji = CATEGORY_EMOJI[merchant.category] || ''
   const storeUrl = typeof window !== 'undefined' ? `${window.location.origin}/store/${merchant.slug}` : ''
   const visibleProducts = showAllProducts ? products : products.slice(0, GRID_PREVIEW)
 
@@ -182,12 +178,12 @@ export default function DashboardPage() {
                 setJoiningPro(false)
               }}
               className="text-xs bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-1.5 rounded-xl font-semibold hover:bg-purple-100 transition-colors disabled:opacity-50">
-              {joiningPro ? '...' : 'â­ Pro'}
+              {joiningPro ? '...' : '⭐ Pro'}
             </button>
           )}
           {proJoined && announcements.filter(a => a.type === 'promo' && !dismissedIds.has(a.id)).length === 0 && (
             <span className="text-xs bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-1.5 rounded-xl font-semibold">
-              âœ… Pro list
+              ✨ Pro list
             </span>
           )}
           <Link href={`/store/${merchant.slug}`} target="_blank"
@@ -243,7 +239,7 @@ export default function DashboardPage() {
                 <div key={a.id} className="relative rounded-2xl mb-2 overflow-hidden"
                   style={{ background: 'linear-gradient(120deg, #1e2d6b 0%, #2d3a8c 100%)' }}>
                   <div className="px-4 py-3 flex items-center gap-3">
-                    <span className="text-lg shrink-0">â­</span>
+                    <span className="text-lg shrink-0">⭐</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-white font-semibold text-xs leading-snug pr-4">{a.message}</p>
                     </div>
@@ -262,11 +258,11 @@ export default function DashboardPage() {
                           setJoiningPro(false)
                         }}
                         className="shrink-0 bg-white text-indigo-900 text-[11px] font-bold px-3 py-1.5 rounded-xl hover:bg-indigo-50 transition-colors disabled:opacity-50 whitespace-nowrap">
-                        {joiningPro ? '...' : 'Join Free â†’'}
+                        {joiningPro ? '...' : 'Join Free →'}
                       </button>
                     ) : (
                       <span className="shrink-0 bg-white/20 text-white text-[11px] font-semibold px-3 py-1.5 rounded-xl whitespace-nowrap">
-                        âœ… Joined
+                        ✨ Joined
                       </span>
                     )}
                   </div>
@@ -279,7 +275,7 @@ export default function DashboardPage() {
                   'bg-sky-50 border-sky-200 text-sky-900'
                 }`}>
                   <span className="text-lg shrink-0">
-                    {a.type === 'warning' ? 'âš ï¸' : a.type === 'success' ? 'âœ…' : 'ðŸ“¢'}
+                    {a.type === 'warning' ? '✅' : a.type === 'success' ? '✨' : ''}
                   </span>
                   <p className="text-sm flex-1 font-medium leading-snug">{a.message}</p>
                   <button onClick={() => setDismissedIds(prev => { const next = new Set(Array.from(prev)); next.add(a.id); return next; })}
@@ -312,10 +308,11 @@ export default function DashboardPage() {
                   { icon: '🏷', title: 'Discounts', desc: 'Create promo codes and offers', href: '/dashboard/discounts' },
                   { icon: '👥', title: 'Customers', desc: 'See everyone who bought from you', href: '/dashboard/customers' },
                   { icon: '📝', title: 'Orders', desc: 'Manage all your online orders', href: '/dashboard/orders' },
-                  { icon: '🌈', title: 'Change Theme', desc: 'Customise how your store looks', href: '#' },
+                  { icon: '🎨', title: 'Change Theme', desc: 'Customise how your store looks', href: '#theme' },
                 ].map((f, i) => (
-                  <a key={i} href={f.href}
-                    className="bg-white rounded-xl p-2.5 flex items-start gap-2 hover:border-brand-green border border-transparent transition-colors">
+                  <a key={i} href={f.href === '#theme' ? '#' : f.href}
+                    onClick={f.href === '#theme' ? (e) => { e.preventDefault(); setShowThemePicker(true); setShowWelcome(false); if (typeof window !== 'undefined') localStorage.setItem(`earket_welcome_${merchant.id}`, '1') } : undefined}
+                    className="bg-white rounded-xl p-2.5 flex items-start gap-2 hover:border-brand-green border border-transparent transition-colors cursor-pointer">
                     <span className="text-base shrink-0">{f.icon}</span>
                     <div>
                       <p className="text-xs font-bold text-brand-dark">{f.title}</p>
@@ -360,9 +357,9 @@ export default function DashboardPage() {
           <div className="flex-1 text-xs font-medium text-brand-green truncate">earket.com/store/{merchant.slug}</div>
           <button onClick={() => setShowThemePicker(true)}
             className="text-xs text-brand-green font-semibold bg-brand-light px-2 py-1 rounded-lg border border-brand-green/20 shrink-0">
-            ðŸŽ¨
+            🎨
           </button>
-          <a href={`https://wa.me/?text=${encodeURIComponent(`ðŸ›ï¸ Shop at *${merchant.business_name}*!\n\nearket.com/store/${merchant.slug}`)}`}
+          <a href={`https://wa.me/?text=${encodeURIComponent(`🔗 Shop at *${merchant.business_name}*!\n\nearket.com/store/${merchant.slug}`)}`}
             target="_blank" rel="noreferrer"
             className="text-xs bg-[#25D366] text-white font-semibold px-2.5 py-1 rounded-lg shrink-0">
             Share
@@ -388,7 +385,7 @@ export default function DashboardPage() {
                 <div className="font-display font-bold text-sm text-brand-dark">Cash Sale</div>
                 <div className="text-xs text-gray-500 leading-snug mt-0.5">Record a walk-in sale</div>
               </div>
-              <span className="self-start text-[10px] bg-brand-green text-white px-2 py-0.5 rounded-full font-semibold">Record now â†’</span>
+              <span className="self-start text-[10px] bg-brand-green text-white px-2 py-0.5 rounded-full font-semibold">Record now →</span>
             </Link>
 
             {/* Sales Report â€” primary featured card */}
@@ -401,7 +398,7 @@ export default function DashboardPage() {
                 <div className="font-display font-bold text-sm text-brand-dark">Sales Report</div>
                 <div className="text-xs text-gray-500 leading-snug mt-0.5">Today's cash sales</div>
               </div>
-              <span className="self-start text-[10px] bg-indigo-600 text-white px-2 py-0.5 rounded-full font-semibold">View â†’</span>
+              <span className="self-start text-[10px] bg-indigo-600 text-white px-2 py-0.5 rounded-full font-semibold">View →</span>
             </Link>
           </div>
         </div>
@@ -415,7 +412,7 @@ export default function DashboardPage() {
           <div>
             <div className="font-display font-bold">{isService ? 'Add New Service' : 'Add New Product'}</div>
             <div className="text-xs text-white/70">
-              {isService ? 'Add a service with description and pricing âœ¨' : 'AI writes the description for you âœ¨'}
+              {isService ? 'Add a service with description and pricing ✨' : 'AI writes the description for you ✨'}
             </div>
           </div>
         </Link>
@@ -509,7 +506,7 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <div className="font-semibold text-sm text-gray-800">
-                    {refreshDone ? 'âœ… Refreshed!' : 'Refresh Services'}
+                    {refreshDone ? '✨ Refreshed!' : 'Refresh Services'}
                   </div>
                   <div className="text-xs text-gray-500 leading-snug mt-0.5">AI-selected for your category</div>
                 </div>
@@ -524,12 +521,12 @@ export default function DashboardPage() {
           ['Indomie Noodles', 'Golden Penny', 'Vegetable Oil', 'Pounded Yam', 'Ankara Print', 'Plain Cotton'].some(s => p.name.startsWith(s))
         ) && (
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4 flex items-start gap-3">
-            <div className="text-xl shrink-0">ðŸ“¸</div>
+            <div className="text-xl shrink-0">📸</div>
             <div>
               <p className="font-semibold text-amber-800 text-sm">Replace sample products with yours</p>
               <p className="text-amber-700 text-xs mt-0.5">Add your real products with photos for a better customer experience.</p>
               <Link href="/dashboard/products/new" className="inline-block mt-2 text-xs font-bold text-amber-800 underline">
-                Add my real products â†’
+                Add my real products →
               </Link>
             </div>
           </div>
@@ -538,7 +535,7 @@ export default function DashboardPage() {
         {/* Placeholder image nudge for services */}
         {isService && products.length > 0 && products.some(p => p.image_url && p.image_url.includes('unsplash')) && (
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4 flex items-start gap-3">
-            <span className="text-xl shrink-0">ðŸ“¸</span>
+            <span className="text-xl shrink-0">📸</span>
             <div className="flex-1">
               <p className="font-semibold text-amber-800 text-sm">Add your own photos</p>
               <p className="text-amber-700 text-xs mt-0.5">Your services are using placeholder images. Tap any service to upload real photos.</p>
@@ -557,7 +554,7 @@ export default function DashboardPage() {
 
           {products.length === 0 ? (
             <div className="bg-white rounded-2xl border border-gray-100 text-center py-10 px-4">
-              <div className="text-3xl mb-2">{isService ? 'ðŸ”§' : 'ðŸ“¦'}</div>
+              <div className="text-3xl mb-2">{isService ? '' : ''}</div>
               <p className="text-gray-500 text-sm mb-1">{isService ? 'No services yet' : 'No products yet'}</p>
               <Link href="/dashboard/products/new" className="inline-block bg-brand-green text-white text-xs font-bold px-5 py-2.5 rounded-xl mt-2">
                 {isService ? 'Add First Service' : 'Add First Product'}
@@ -597,7 +594,7 @@ export default function DashboardPage() {
 
         {/* â”€â”€ WHATSAPP CTA â”€â”€ */}
         <div className="bg-[#075E54] text-white rounded-2xl p-4 flex items-center gap-3">
-          <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-xl">ðŸ’¬</div>
+          <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-xl">💬</div>
           <div className="flex-1 min-w-0">
             <div className="font-display font-bold text-sm">WhatsApp {isService ? 'Bookings' : 'Orders'}</div>
             <div className="text-xs text-white/70 truncate">+{merchant.whatsapp_number}</div>
