@@ -706,14 +706,140 @@ export default function OnboardingPage() {
 
   function getCustomServiceImage(name: string): string {
     const n = name.toLowerCase()
+
+    // ── AUTO & VEHICLE ──────────────────────────────────────────────────
+    if (n.includes('mechanic') || n.includes('car service') || n.includes('oil change')) return 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=400&q=80'
+    if (n.includes('car wash') || n.includes('carwash') || n.includes('valet')) return 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=400&q=80'
+    if (n.includes('tyre') || n.includes('tire') || n.includes('vulcaniz')) return 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80'
+    if (n.includes('brake') || n.includes('suspension')) return 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=400&q=80'
+    if (n.includes('panel beat') || n.includes('body repair') || n.includes('dent')) return 'https://images.unsplash.com/photo-1609630875171-b1321377ee65?w=400&q=80'
+    if (n.includes('detail') || n.includes('polish') || n.includes('wrap')) return 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=400&q=80'
+    if (n.includes('tint') || n.includes('window film')) return 'https://images.unsplash.com/photo-1617704548623-340376564e68?w=400&q=80'
+    if (n.includes('wheel align') || n.includes('alignment') || n.includes('balancing')) return 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80'
+    if (n.includes('radiator') || n.includes('engine') || n.includes('diagnostic') || n.includes('gearbox')) return 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=400&q=80'
+    if (n.includes('ac gas') || n.includes('regas') || n.includes('air con')) return 'https://images.unsplash.com/photo-1614027164847-1b28cfe1df60?w=400&q=80'
+    if (n.includes('battery') || n.includes('auto elec')) return 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=400&q=80'
+    if (n.includes('motorcycle') || n.includes('bike repair')) return 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80'
+    if (n.includes('clutch') || n.includes('upholstery') || n.includes('seat')) return 'https://images.unsplash.com/photo-1609630875171-b1321377ee65?w=400&q=80'
+
+    // ── BEAUTY & HAIR ────────────────────────────────────────────────────
+    if (n.includes('massage') || n.includes('tissue') || n.includes('stone') || n.includes('reflexo') || n.includes('aromather')) return 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&q=80'
     if (n.includes('wax') || n.includes('brazilian') || n.includes('bikini')) return 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80'
-    if (n.includes('massage') || n.includes('tissue') || n.includes('stone')) return 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&q=80'
-    if (n.includes('facial') || n.includes('skin') || n.includes('glow')) return 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80'
-    if (n.includes('nail') || n.includes('manicure') || n.includes('pedicure')) return 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&q=80'
-    if (n.includes('hair') || n.includes('braid') || n.includes('wig')) return 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80'
-    if (n.includes('makeup') || n.includes('lash') || n.includes('brow')) return 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=400&q=80'
-    if (n.includes('barber') || n.includes('cut') || n.includes('shave')) return 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&q=80'
-    return 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&q=80'
+    if (n.includes('facial') || n.includes('skin') || n.includes('glow') || n.includes('skincare')) return 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80'
+    if (n.includes('nail') || n.includes('manicure') || n.includes('pedicure') || n.includes('gel polish') || n.includes('acrylic')) return 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&q=80'
+    if (n.includes('braid') || n.includes('locs') || n.includes('twist') || n.includes('cornrow') || n.includes('weav') || n.includes('knotless') || n.includes('faux') || n.includes('senegalese') || n.includes('crochet')) return 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80'
+    if (n.includes('wig') || n.includes('hair install') || n.includes('silk press') || n.includes('blow dry') || n.includes('relaxer') || n.includes('colour') || n.includes('highlights') || n.includes('keratin')) return 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80'
+    if (n.includes('makeup') || n.includes('lash') || n.includes('brow') || n.includes('microblade') || n.includes('gele')) return 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=400&q=80'
+    if (n.includes('barber') || n.includes("men's haircut") || n.includes('shape-up') || n.includes('shave') || n.includes('beard')) return 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&q=80'
+    if (n.includes('hair') && (n.includes('salon') || n.includes('wash') || n.includes('treatment') || n.includes('steam'))) return 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80'
+
+    // ── HOME REPAIRS & TECHNICAL ─────────────────────────────────────────
+    if (n.includes('electric') || n.includes('wiring') || n.includes('power')) return 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80'
+    if (n.includes('plumb') || n.includes('pipe') || n.includes('water')) return 'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=400&q=80'
+    if (n.includes('generator') || n.includes('inverter')) return 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&q=80'
+    if (n.includes('solar') || n.includes('panel')) return 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=400&q=80'
+    if (n.includes('paint') || n.includes('decorator')) return 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400&q=80'
+    if (n.includes('til') || n.includes('floor') || n.includes('marble')) return 'https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=400&q=80'
+    if (n.includes('carpent') || n.includes('furniture') || n.includes('woodwork')) return 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400&q=80'
+    if (n.includes('weld') || n.includes('metal') || n.includes('iron')) return 'https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=400&q=80'
+    if (n.includes('cctv') || n.includes('security cam') || n.includes('surveillance')) return 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?w=400&q=80'
+    if (n.includes('ac') || n.includes('air condition') || n.includes('hvac')) return 'https://images.unsplash.com/photo-1614027164847-1b28cfe1df60?w=400&q=80'
+    if (n.includes('roof') || n.includes('ceiling') || n.includes('pop')) return 'https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=400&q=80'
+    if (n.includes('general') || n.includes('handyman') || n.includes('repair')) return 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80'
+
+    // ── SECURITY ─────────────────────────────────────────────────────────
+    if (n.includes('guard') || n.includes('patrol') || n.includes('k9') || n.includes('dog')) return 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?w=400&q=80'
+    if (n.includes('alarm') || n.includes('burglar') || n.includes('electric fence') || n.includes('access control') || n.includes('smart lock')) return 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?w=400&q=80'
+
+    // ── FASHION & TAILORING ──────────────────────────────────────────────
+    if (n.includes('suit') || n.includes('agbada') || n.includes('kaftan') || n.includes('ankara') || n.includes('aso-ebi') || n.includes('gown') || n.includes('dress') || n.includes('tailor') || n.includes('sew') || n.includes('alterat') || n.includes('uniform') || n.includes('bridal') || n.includes('wedding wear')) return 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80'
+
+    // ── PHOTOGRAPHY & VIDEO ──────────────────────────────────────────────
+    if (n.includes('photo') || n.includes('portrait') || n.includes('shoot') || n.includes('headshot') || n.includes('passport') || n.includes('id photo')) return 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80'
+    if (n.includes('video') || n.includes('film') || n.includes('drone') || n.includes('aerial') || n.includes('youtube')) return 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&q=80'
+
+    // ── LEGAL & FINANCE ──────────────────────────────────────────────────
+    if (n.includes('legal') || n.includes('law') || n.includes('contract') || n.includes('notari') || n.includes('affidavit') || n.includes('trademark') || n.includes('incorporat') || n.includes('registration') || n.includes('memorandum')) return 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=400&q=80'
+    if (n.includes('tax') || n.includes('bookkeep') || n.includes('account') || n.includes('financial') || n.includes('vat') || n.includes('returns') || n.includes('business plan')) return 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&q=80'
+
+    // ── REAL ESTATE ──────────────────────────────────────────────────────
+    if (n.includes('property') || n.includes('real estate') || n.includes('land') || n.includes('tenant') || n.includes('lease') || n.includes('rent') || n.includes('valuat') || n.includes('short-let') || n.includes('house')) return 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&q=80'
+
+    // ── PRINTING & BRANDING ──────────────────────────────────────────────
+    if (n.includes('print') || n.includes('business card') || n.includes('flyer') || n.includes('poster') || n.includes('banner') || n.includes('stationery') || n.includes('branded') || n.includes('t-shirt print') || n.includes('rollup') || n.includes('wristband') || n.includes('lanyard')) return 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=400&q=80'
+
+    // ── FITNESS & GYM ────────────────────────────────────────────────────
+    if (n.includes('personal train') || n.includes('fitness') || n.includes('gym') || n.includes('workout') || n.includes('boot camp') || n.includes('weight loss') || n.includes('muscle') || n.includes('yoga') || n.includes('pilates') || n.includes('athletic')) return 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&q=80'
+    if (n.includes('nutrition') || n.includes('diet') || n.includes('meal plan')) return 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&q=80'
+
+    // ── MUSIC ────────────────────────────────────────────────────────────
+    if (n.includes('music lesson') || n.includes('piano') || n.includes('guitar') || n.includes('drum') || n.includes('vocal') || n.includes('singing')) return 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&q=80'
+    if (n.includes('studio') || n.includes('recording') || n.includes('mixing') || n.includes('mastering') || n.includes('beat') || n.includes('production') || n.includes('sound engineer')) return 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=400&q=80'
+    if (n.includes('dj') || n.includes('live band') || n.includes('saxophone') || n.includes('perform') || n.includes('concert')) return 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&q=80'
+
+    // ── FOOD & CATERING ──────────────────────────────────────────────────
+    if (n.includes('cater') || n.includes('chef') || n.includes('cook') || n.includes('meal') || n.includes('food') || n.includes('bak') || n.includes('cake') || n.includes('pastry')) return 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80'
+
+    // ── EDUCATION & COACHING ─────────────────────────────────────────────
+    if (n.includes('tutor') || n.includes('lesson') || n.includes('teach') || n.includes('exam') || n.includes('waec') || n.includes('jamb') || n.includes('ielts') || n.includes('sat')) return 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&q=80'
+    if (n.includes('coach') || n.includes('mentor') || n.includes('workshop') || n.includes('masterclass') || n.includes('leadership') || n.includes('speaking')) return 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&q=80'
+
+    // ── DIGITAL & TECH ───────────────────────────────────────────────────
+    if (n.includes('logo') || n.includes('graphic') || n.includes('design') || n.includes('branding')) return 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=400&q=80'
+    if (n.includes('website') || n.includes('web') || n.includes('app') || n.includes('coding') || n.includes('programming')) return 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80'
+    if (n.includes('phone repair') || n.includes('screen repair') || n.includes('laptop repair')) return 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&q=80'
+    if (n.includes('social media') || n.includes('content') || n.includes('seo') || n.includes('digital market')) return 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&q=80'
+
+    // ── TRANSPORT & DELIVERY ─────────────────────────────────────────────
+    if (n.includes('deliver') || n.includes('dispatch') || n.includes('courier')) return 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=400&q=80'
+    if (n.includes('driver') || n.includes('airport') || n.includes('charter') || n.includes('shuttle') || n.includes('school run') || n.includes('moving') || n.includes('reloc')) return 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=400&q=80'
+
+    // ── CLEANING & DOMESTIC ──────────────────────────────────────────────
+    if (n.includes('clean') || n.includes('laundry') || n.includes('iron') || n.includes('pest') || n.includes('fumig') || n.includes('carpet') || n.includes('window clean')) return 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80'
+
+    // ── CHILDCARE & NANNY ────────────────────────────────────────────────
+    if (n.includes('nanny') || n.includes('babysit') || n.includes('childcare') || n.includes('after-school') || n.includes('homework help')) return 'https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?w=400&q=80'
+
+    // ── HEALTH & WELLNESS ────────────────────────────────────────────────
+    if (n.includes('physio') || n.includes('therapy') || n.includes('counsell') || n.includes('mental') || n.includes('wellness') || n.includes('mindful') || n.includes('meditat') || n.includes('anxiety') || n.includes('grief')) return 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80'
+    if (n.includes('nursing') || n.includes('antenatal') || n.includes('blood') || n.includes('medical') || n.includes('pharmacy')) return 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&q=80'
+
+    // ── EVENTS ───────────────────────────────────────────────────────────
+    if (n.includes('decor') || n.includes('balloon') || n.includes('event') || n.includes('wedding') || n.includes('party') || n.includes('mc ') || n.includes(' mc') || n.includes('usher')) return 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&q=80'
+
+    // ── AGRICULTURE ──────────────────────────────────────────────────────
+    if (n.includes('farm') || n.includes('poultry') || n.includes('crop') || n.includes('irrigat') || n.includes('tractor') || n.includes('fish farm') || n.includes('soil') || n.includes('harvest') || n.includes('agric')) return 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=400&q=80'
+
+    // ── CATEGORY-LEVEL FALLBACKS ─────────────────────────────────────────
+    const catFallbacks: Record<string, string> = {
+      auto_services: 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=400&q=80',
+      home_services: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80',
+      beauty_services: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80',
+      hair_salon: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80',
+      fashion_design: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80',
+      photography: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80',
+      legal_finance: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=400&q=80',
+      real_estate: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&q=80',
+      printing: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=400&q=80',
+      security: 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?w=400&q=80',
+      fitness: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&q=80',
+      music: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&q=80',
+      education: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&q=80',
+      coaching: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&q=80',
+      transport: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=400&q=80',
+      domestic: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80',
+      food_catering: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80',
+      events: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&q=80',
+      agriculture: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=400&q=80',
+      digital_services: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80',
+      health_wellness: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80',
+      mental_wellness: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80',
+      childcare: 'https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?w=400&q=80',
+    }
+    if (catFallbacks[category]) return catFallbacks[category]
+
+    // Final fallback — generic professional services
+    return 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&q=80'
   }
 
   async function handleGenerate() {
