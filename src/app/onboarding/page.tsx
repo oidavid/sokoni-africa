@@ -185,12 +185,12 @@ const SERVICE_SUBCATEGORIES: Record<string, Array<{ id: string; label: string; e
     { id: 'chefs_table', label: "Private Chef / Chef's Table", emoji: '' },
   ],
   agriculture: [
-    { id: 'poultry', label: 'Poultry Farm Consultation', emoji: '' },
-    { id: 'farm_labour', label: 'Farm Labour', emoji: '' },
-    { id: 'irrigation', label: 'Irrigation Installation', emoji: '' },
-    { id: 'tractor', label: 'Tractor / Ploughing', emoji: '' },
-    { id: 'fish', label: 'Fish Farm Setup', emoji: '' },
-    { id: 'produce', label: 'Produce Aggregation', emoji: '' },
+    { id: 'poultry', label: 'Poultry Farm Consultation', emoji: '🐔' },
+    { id: 'farm_labour', label: 'Farm Labour', emoji: '🌾' },
+    { id: 'irrigation', label: 'Irrigation Installation', emoji: '💧' },
+    { id: 'tractor', label: 'Tractor / Ploughing', emoji: '🚜' },
+    { id: 'fish', label: 'Fish Farm Setup', emoji: '🐟' },
+    { id: 'produce', label: 'Produce Aggregation', emoji: '🥬' },
   ],
   fashion_design: [
     { id: 'custom_dress', label: 'Custom Dress (Made to Measure)', emoji: '👗' },
@@ -568,6 +568,15 @@ export default function OnboardingPage() {
     mental_wellness: ['1-on-1 Counselling Session', 'Stress Management Consultation', 'Mindfulness & Meditation Session', 'Grief Support Session', 'Anxiety Coaching', 'Burnout Recovery Programme', 'Self-Esteem Coaching', 'CBT Session', 'Emotional Wellbeing Check-in', 'Sleep Coaching'],
     childcare: ['Full-time Nanny Service', 'After-school Pickup & Care', 'Weekend Babysitting', 'Homework Help Sessions', 'Special Needs Childcare', 'Holiday Camp Care', 'Overnight Babysitting', 'Summer Holiday Care'],
     food_catering: ['Weekly Meal Prep', 'Home-cooked Meal Delivery', 'Office Lunch Catering', 'Birthday Party Catering', 'Diet Meal Plan (Weekly)', 'Custom Cake & Pastries', 'Private Chef for Dinner', 'Meal Subscription Service', 'Wedding Catering', 'Corporate Event Catering'],
+    fashion_design: ['Aso-Ebi Outfit', 'Bridesmaid Dress', 'Maternity Dress', 'Two-Piece Co-ord Set', 'Jumpsuit (Made to Measure)', 'Traditional Wedding Attire', 'Lace Blouse & Skirt', 'Corporate Wear', 'Embroidered Kaftan', 'Agbada (Full Set)', 'Rush Order Alteration', 'Zip & Button Repair'],
+    photography: ['Birthday Shoot', 'Maternity Shoot', 'Newborn Photography', 'Corporate Headshots', 'Real Estate Photography', 'Food Photography', 'YouTube Thumbnail Shoot', 'Music Video Shoot', 'Same-Day Photo Editing', 'Photo Album Design'],
+    legal_finance: ['Company Incorporation', 'Memorandum & Articles', 'Employment Contract', 'NDA Drafting', 'VAT Registration', 'Annual Returns Filing', 'Business Name Registration', 'Property Sale Agreement', 'Stamp Duty Processing', 'Financial Statement Preparation'],
+    real_estate: ['Property Search & Shortlisting', 'Buy vs Rent Consultation', 'Commercial Property Listing', 'Short-Let Management', 'Estate Agency Commission', 'Title Document Verification', 'Property Purchase Advisory', 'Rent Collection Service'],
+    printing: ['Wedding Invitation Cards', 'Compliment Slips', 'Notepads & Jotters', 'Branded Envelopes', 'Vehicle Wrap / Car Branding', 'Wristbands & Lanyards', 'Branded Face Caps', 'Logo Design + Print Bundle'],
+    security: ['Home Security Audit', 'Smart Lock Installation', 'Panic Button Setup', 'Razor Wire Installation', 'Security Lighting', 'Remote Monitoring Setup', 'Security Personnel Vetting'],
+    fitness: ['Weight Loss Programme', 'Muscle Building Plan', 'Postpartum Fitness', 'Early Morning Boot Camp', 'Home Workout Plan', 'Corporate Wellness Session', 'Athletics Conditioning', 'Kids Fitness Class'],
+    music: ['Piano Lessons', 'Guitar Lessons', 'Drum Lessons', 'Vocal Coaching', 'Song Writing Workshop', 'School Concert Performance', 'Church Band Performance', 'Event Saxophone Performance', 'Sound Engineering', 'Music Mixing & Mastering'],
+    hair_salon: ['Senegalese Twists', 'Passion Twists', 'Crochet Braids', 'Sisterlocks', 'Ghana Weaving', 'Hair Extensions', 'Steam Treatment', 'Scalp Treatment', 'Kids Braiding', 'Loctician Services', 'Silk Press', 'Protective Styles'],
   }
 
   function getServiceSuggestions(input: string): string[] {
@@ -624,7 +633,7 @@ export default function OnboardingPage() {
   function getFilteredServices() {
     const allServices = getSampleServices(category, selectedCountry.code)
 
-    // Build custom entries first so we can dedup against them too
+    // Build custom entries
     const customEntries = customServices.map(s => ({
       name: s.name,
       description: s.description,
@@ -635,7 +644,19 @@ export default function OnboardingPage() {
     }))
 
     if (selectedSubcategories.size === 0 && customServices.length === 0) {
-      return allServices.slice(0, 8) // cap at 8 for a clean page
+      // If no sample services exist for this category, build from subcategory list
+      if (allServices.length === 0) {
+        const currentSubs = SERVICE_SUBCATEGORIES[category] || []
+        return currentSubs.slice(0, 8).map(sub => ({
+          name: sub.label,
+          description: `Professional ${sub.label} service. Contact us via WhatsApp to book.`,
+          price: 1000000,
+          price_display: `${selectedCurrency.symbol}${Math.round(1000000 * selectedCurrency.rate).toLocaleString()}`,
+          in_stock: true,
+          image_url: getCustomServiceImage(sub.label),
+        }))
+      }
+      return allServices.slice(0, 8)
     }
 
     // Pull from subcategory-specific libraries — take max 5 per subcategory
@@ -645,12 +666,27 @@ export default function OnboardingPage() {
       if (specific.length > 0) {
         subcatServices.push(...specific.slice(0, 5))
       } else {
-        // Fallback: keyword filter from category library
+        // Fallback 1: keyword filter from category library
         const keywords = SUBCATEGORY_SERVICE_MAP[id] || []
-        allServices
+        const matched = allServices
           .filter(s => keywords.some(kw => s.name.toLowerCase().includes(kw.toLowerCase())))
           .slice(0, 5)
-          .forEach(s => subcatServices.push(s))
+        if (matched.length > 0) {
+          matched.forEach(s => subcatServices.push(s))
+        } else {
+          // Fallback 2: use the subcategory label itself as a named service entry
+          const sub = (SERVICE_SUBCATEGORIES[category] || []).find(s => s.id === id)
+          if (sub) {
+            subcatServices.push({
+              name: sub.label,
+              description: `Professional ${sub.label} service. Contact us via WhatsApp to book.`,
+              price: 1000000,
+              price_display: `${selectedCurrency.symbol}${Math.round(1000000 * selectedCurrency.rate).toLocaleString()}`,
+              in_stock: true,
+              image_url: getCustomServiceImage(sub.label),
+            })
+          }
+        }
       }
     })
 
@@ -1098,6 +1134,9 @@ export default function OnboardingPage() {
 
           {step === 'subcategory' && (
             <div className="animate-fade-in">
+              <div className="flex items-center gap-2 mb-2">
+                {(() => { const cat = SERVICE_CATEGORIES.find(c => c.id === category); return cat ? <span className="inline-flex items-center gap-1.5 bg-brand-green/10 text-brand-green text-xs font-bold px-3 py-1 rounded-full border border-brand-green/20"><span>{cat.emoji}</span>{pid ? cat.pidgin : cat.label}</span> : null })()}
+              </div>
               <h2 className="font-display text-xl font-bold text-brand-dark mb-1">
                 {pid ? 'Which service you dey offer?' : 'What specifically do you offer?'}
               </h2>
@@ -1156,8 +1195,8 @@ export default function OnboardingPage() {
                       {isListening ? <MicOff size={16} /> : <Mic size={16} />}
                     </button>
                     <button onClick={addCustomService} disabled={!customServiceInput.trim() || isDescribing}
-                      className="w-9 h-9 rounded-xl bg-brand-green text-white flex items-center justify-center shrink-0 disabled:opacity-30">
-                      {isDescribing ? <Loader2 size={14} className="animate-spin" /> : <Plus size={16} />}
+                      className="flex items-center gap-1 px-3 h-9 rounded-xl bg-brand-green text-white text-xs font-bold shrink-0 disabled:opacity-30">
+                      {isDescribing ? <Loader2 size={14} className="animate-spin" /> : <><Plus size={14} /> Add</>}
                     </button>
                   </div>
                   {/* Smart suggestions dropdown */}
@@ -1166,7 +1205,7 @@ export default function OnboardingPage() {
                       {suggestions.map(sugg => (
                         <button key={sugg} onMouseDown={() => addCustomServiceWithDescription(sugg)}
                           className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-brand-light hover:text-brand-green flex items-center gap-2 transition-colors">
-                          <span className="text-base">🎤</span>
+                          <span className="text-base">✨</span>
                           {sugg}
                         </button>
                       ))}
