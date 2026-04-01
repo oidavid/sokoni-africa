@@ -64,33 +64,33 @@ const SERVICE_CATEGORIES = [
 
 const SERVICE_SUBCATEGORIES: Record<string, Array<{ id: string; label: string; emoji: string }>> = {
   home_services: [
-    { id: 'electrician', label: 'Electrician / House Wiring', emoji: 'âš¡' },
+    { id: 'electrician', label: 'Electrician / House Wiring', emoji: '⚡' },
     { id: 'plumber', label: 'Plumber', emoji: '' },
     { id: 'generator', label: 'Generator Repair', emoji: '📍' },
-    { id: 'ac', label: 'AC / Air Conditioning', emoji: 'â„ï¸' },
+    { id: 'ac', label: 'AC / Air Conditioning', emoji: '❄️' },
     { id: 'painter', label: 'Painter', emoji: '' },
     { id: 'tiler', label: 'Tiling & Flooring', emoji: '' },
-    { id: 'solar', label: 'Solar Installation', emoji: 'â˜€ï¸' },
+    { id: 'solar', label: 'Solar Installation', emoji: '☀️' },
     { id: 'carpenter', label: 'Carpenter', emoji: '' },
-    { id: 'welder', label: 'Welder / Metal Work', emoji: 'âš™ï¸' },
+    { id: 'welder', label: 'Welder / Metal Work', emoji: '⚙️' },
     { id: 'general', label: 'General House Repairs', emoji: '' },
   ],
   auto_services: [
-    { id: 'mechanic', label: 'Mechanic / Car Service', emoji: '' },
-    { id: 'carwash', label: 'Car Wash', emoji: '✨' },
-    { id: 'tyres', label: 'Tyre Repair / Vulcanizer', emoji: '' },
-    { id: 'brakes', label: 'Brakes & Suspension', emoji: '' },
-    { id: 'auto_electrician', label: 'Auto Electrician', emoji: 'âš¡' },
-    { id: 'panel_beater', label: 'Panel Beating / Body Repair', emoji: '' },
-    { id: 'detailing', label: 'Car Detailing', emoji: 'âœ¨' },
-    { id: 'motorcycle', label: 'Motorcycle Repair', emoji: '' },
+    { id: 'mechanic', label: 'Mechanic / Car Service', emoji: '🔧' },
+    { id: 'carwash', label: 'Car Wash', emoji: '🚿' },
+    { id: 'tyres', label: 'Tyre Repair / Vulcanizer', emoji: '🛞' },
+    { id: 'brakes', label: 'Brakes & Suspension', emoji: '🛑' },
+    { id: 'auto_electrician', label: 'Auto Electrician', emoji: '⚡' },
+    { id: 'panel_beater', label: 'Panel Beating / Body Repair', emoji: '🔨' },
+    { id: 'detailing', label: 'Car Detailing', emoji: '✨' },
+    { id: 'motorcycle', label: 'Motorcycle Repair', emoji: '🏍️' },
   ],
   beauty_services: [
     { id: 'massage', label: 'Massage & Body Therapy', emoji: '' },
     { id: 'braiding', label: 'Hair Braiding & Styling', emoji: '' },
     { id: 'makeup', label: 'Makeup Artist', emoji: '' },
     { id: 'nails', label: 'Nails & Manicure', emoji: '' },
-    { id: 'barber', label: "Barber / Men's Grooming", emoji: 'âœ‚ï¸' },
+    { id: 'barber', label: "Barber / Men's Grooming", emoji: '✂️' },
     { id: 'skincare', label: 'Skincare & Facial', emoji: '' },
     { id: 'wigs', label: 'Wig Making & Installation', emoji: '' },
     { id: 'threading', label: 'Eyebrow Threading', emoji: '' },
@@ -141,7 +141,7 @@ const SERVICE_SUBCATEGORIES: Record<string, Array<{ id: string; label: string; e
   transport: [
     { id: 'delivery', label: 'Package Delivery', emoji: '' },
     { id: 'driver', label: 'Driver for Hire', emoji: '' },
-    { id: 'airport', label: 'Airport Pick-up & Drop-off', emoji: 'âœˆï¸' },
+    { id: 'airport', label: 'Airport Pick-up & Drop-off', emoji: '✈️' },
     { id: 'school_run', label: 'School Run Service', emoji: '' },
     { id: 'moving', label: 'Moving & Relocation', emoji: '' },
     { id: 'bike', label: 'Bike / Okada Delivery', emoji: '' },
@@ -153,7 +153,7 @@ const SERVICE_SUBCATEGORIES: Record<string, Array<{ id: string; label: string; e
     { id: 'womens_empowerment', label: "Women's Empowerment", emoji: '' },
     { id: 'mindset_coach', label: 'Mindset & Confidence', emoji: '' },
     { id: 'teen_coach', label: 'Teen & Youth Coaching', emoji: '🏱' },
-    { id: 'relationship_coach', label: 'Relationship Coaching', emoji: 'â¤ï¸' },
+    { id: 'relationship_coach', label: 'Relationship Coaching', emoji: '❤️' },
     { id: 'executive_coach', label: 'Executive Coaching', emoji: '' },
     { id: 'public_speaking', label: 'Public Speaking', emoji: '' },
     { id: 'leadership', label: 'Leadership Training', emoji: '' },
@@ -191,6 +191,90 @@ const SERVICE_SUBCATEGORIES: Record<string, Array<{ id: string; label: string; e
     { id: 'tractor', label: 'Tractor / Ploughing', emoji: '' },
     { id: 'fish', label: 'Fish Farm Setup', emoji: '' },
     { id: 'produce', label: 'Produce Aggregation', emoji: '' },
+  ],
+  fashion_design: [
+    { id: 'custom_dress', label: 'Custom Dress (Made to Measure)', emoji: '👗' },
+    { id: 'mens_suit', label: "Men's Suit", emoji: '🤵' },
+    { id: 'ankara', label: 'Ankara Outfit', emoji: '🎨' },
+    { id: 'alterations', label: 'Clothing Alterations', emoji: '✂️' },
+    { id: 'school_uniform', label: 'School Uniform', emoji: '🎒' },
+    { id: 'agbada', label: 'Agbada / Kaftan', emoji: '👘' },
+    { id: 'bridal', label: 'Bridal & Wedding Wear', emoji: '💍' },
+    { id: 'children_clothing', label: "Children's Clothing", emoji: '👶' },
+  ],
+  photography: [
+    { id: 'portrait', label: 'Portrait Photography Session', emoji: '📸' },
+    { id: 'event_photo', label: 'Event Photography', emoji: '🎉' },
+    { id: 'product_photo', label: 'Product Photography', emoji: '📦' },
+    { id: 'passport', label: 'Passport & ID Photos', emoji: '🪪' },
+    { id: 'event_video', label: 'Event Videography', emoji: '🎬' },
+    { id: 'social_content', label: 'Social Media Content Shoot', emoji: '📱' },
+    { id: 'drone', label: 'Drone / Aerial Photography', emoji: '🚁' },
+  ],
+  legal_finance: [
+    { id: 'biz_reg', label: 'Business Registration', emoji: '📋' },
+    { id: 'contracts', label: 'Contract Drafting & Review', emoji: '📝' },
+    { id: 'tax_filing', label: 'Tax Filing & Returns', emoji: '💰' },
+    { id: 'bookkeeping', label: 'Bookkeeping (Monthly)', emoji: '📊' },
+    { id: 'notarisation', label: 'Notarisation & Affidavit', emoji: '⚖️' },
+    { id: 'biz_plan', label: 'Business Plan Writing', emoji: '📈' },
+    { id: 'trademark', label: 'Trademark Registration', emoji: '™️' },
+    { id: 'legal_consult', label: 'Legal Consultation', emoji: '🏛️' },
+  ],
+  real_estate: [
+    { id: 'property_listing', label: 'Property Listing & Marketing', emoji: '🏡' },
+    { id: 'valuation', label: 'Property Valuation', emoji: '💲' },
+    { id: 'tenant_search', label: 'Tenant Search & Verification', emoji: '🔍' },
+    { id: 'inspection', label: 'Property Inspection', emoji: '🔎' },
+    { id: 'lease', label: 'Lease Agreement Preparation', emoji: '📄' },
+    { id: 'property_mgmt', label: 'Property Management', emoji: '🏢' },
+    { id: 'land_survey', label: 'Land Survey & Documentation', emoji: '🗺️' },
+  ],
+  printing: [
+    { id: 'business_cards', label: 'Business Cards', emoji: '💳' },
+    { id: 'flyers', label: 'Flyers & Posters', emoji: '📄' },
+    { id: 'rollup', label: 'Roll-Up Banners', emoji: '🪧' },
+    { id: 'tshirt_print', label: 'T-Shirt Printing', emoji: '👕' },
+    { id: 'stationery', label: 'Branded Stationery', emoji: '📎' },
+    { id: 'flex_banner', label: 'Large Format Flex Banner', emoji: '🖨️' },
+    { id: 'branded_merch', label: 'Branded Merchandise', emoji: '🎁' },
+  ],
+  security: [
+    { id: 'cctv', label: 'CCTV Installation', emoji: '📹' },
+    { id: 'guard', label: 'Security Guard Service', emoji: '💂' },
+    { id: 'alarm', label: 'Burglar Alarm Installation', emoji: '🚨' },
+    { id: 'electric_fence', label: 'Electric Fence', emoji: '⚡' },
+    { id: 'security_consult', label: 'Security Consultation', emoji: '🛡️' },
+    { id: 'access_control', label: 'Access Control System', emoji: '🔐' },
+    { id: 'dog_patrol', label: 'Guard Dog / K9 Patrol', emoji: '🐕' },
+  ],
+  fitness: [
+    { id: 'personal_training', label: 'Personal Training Session', emoji: '💪' },
+    { id: 'group_fitness', label: 'Group Fitness Classes', emoji: '🏋️' },
+    { id: 'nutrition_plan', label: 'Nutrition & Meal Plan', emoji: '🥗' },
+    { id: 'transformation', label: '4-Week Transformation Programme', emoji: '🔥' },
+    { id: 'monthly_training', label: 'Monthly Training Package', emoji: '📅' },
+    { id: 'online_coaching', label: 'Online Fitness Coaching', emoji: '📱' },
+    { id: 'yoga', label: 'Yoga & Flexibility', emoji: '🧘' },
+  ],
+  music: [
+    { id: 'music_lessons', label: 'Music Lessons (Per Session)', emoji: '🎵' },
+    { id: 'studio_recording', label: 'Studio Recording Session', emoji: '🎙️' },
+    { id: 'dj_services', label: 'DJ Services', emoji: '🎧' },
+    { id: 'live_band', label: 'Live Band Performance', emoji: '🎸' },
+    { id: 'music_production', label: 'Music Production & Beat Making', emoji: '🎛️' },
+    { id: 'monthly_lessons', label: 'Monthly Music Lessons', emoji: '📆' },
+    { id: 'choir', label: 'Choir & Vocal Training', emoji: '🎤' },
+  ],
+  hair_salon: [
+    { id: 'box_braids', label: 'Knotless Box Braids', emoji: '💆' },
+    { id: 'mens_haircut', label: "Men's Haircut & Shape-up", emoji: '💈' },
+    { id: 'relaxer', label: 'Hair Relaxer & Treatment', emoji: '🧴' },
+    { id: 'faux_locs', label: 'Faux Locs', emoji: '✨' },
+    { id: 'wig_install', label: 'Wig Installation & Styling', emoji: '👑' },
+    { id: 'cornrows', label: 'Cornrows', emoji: '🌀' },
+    { id: 'wash_blowdry', label: 'Wash, Blow Dry & Style', emoji: '💨' },
+    { id: 'colour', label: 'Colour & Highlights', emoji: '🎨' },
   ],
 }
 
@@ -1040,7 +1124,7 @@ export default function OnboardingPage() {
 
               {(SERVICE_SUBCATEGORIES[category] || []).length > 4 && (
                 <p className="text-xs text-gray-400 text-center -mt-2 mb-3 flex items-center justify-center gap-1">
-                  <span>â†•</span> Scroll to see all options
+                  <span>→</span> Scroll to see all options
                 </p>
               )}
               {customServices.length > 0 && (
@@ -1056,7 +1140,7 @@ export default function OnboardingPage() {
 
               <div className="border-2 border-dashed border-gray-200 rounded-xl p-3">
                 <p className="text-xs font-semibold text-gray-500 mb-2">
-                  {pid ? 'âž• Add service wey no dey above' : 'âž• Add a service not listed above'}
+                  {pid ? '➕ Add service wey no dey above' : '➕ Add a service not listed above'}
                 </p>
                 <div className="relative">
                   <div className="flex gap-2">
@@ -1082,7 +1166,7 @@ export default function OnboardingPage() {
                       {suggestions.map(sugg => (
                         <button key={sugg} onMouseDown={() => addCustomServiceWithDescription(sugg)}
                           className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-brand-light hover:text-brand-green flex items-center gap-2 transition-colors">
-                          <span className="text-base">âœ¨</span>
+                          <span className="text-base">🎤</span>
                           {sugg}
                         </button>
                       ))}
@@ -1321,7 +1405,7 @@ export default function OnboardingPage() {
               </div>
               {alreadyExists && (
                 <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-5 text-left">
-                  <p className="font-semibold text-amber-800 text-sm mb-1">{pid ? 'âš ï¸ You don already get shop!' : 'âš ï¸ You already have a business page!'}</p>
+                  <p className="font-semibold text-amber-800 text-sm mb-1">{pid ? '⚠️ You don already get shop!' : '⚠️ You already have a business page!'}</p>
                   <p className="text-amber-700 text-xs">{pid ? 'This email or WhatsApp don already use.' : 'This email or WhatsApp is already linked to a business.'}</p>
                 </div>
               )}
