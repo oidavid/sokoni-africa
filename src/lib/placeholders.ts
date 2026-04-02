@@ -33,6 +33,30 @@ type Category =
   | 'automobile'
   | 'stationery'
   | 'other'
+  // Service categories
+  | 'beauty_services'
+  | 'hair_salon'
+  | 'auto_services'
+  | 'home_services'
+  | 'digital_services'
+  | 'education'
+  | 'health_wellness'
+  | 'mental_wellness'
+  | 'coaching'
+  | 'food_catering'
+  | 'domestic'
+  | 'events'
+  | 'transport'
+  | 'childcare'
+  | 'agriculture'
+  | 'fashion_design'
+  | 'photography'
+  | 'legal_finance'
+  | 'real_estate'
+  | 'printing'
+  | 'security'
+  | 'fitness'
+  | 'music'
 
 type Region =
   | 'west_africa'
@@ -1404,6 +1428,191 @@ const PLACEHOLDER_IMAGES: Record<Region, Partial<Record<Category, string[]>>> = 
       'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80',
       'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80',
     ],
+    // ── SERVICE CATEGORIES (global, used across all regions) ────────────────
+    beauty_services: [
+      'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&q=80',
+      'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&q=80',
+      'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=800&q=80',
+      'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=800&q=80',
+      'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=80',
+      'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800&q=80',
+    ],
+    hair_salon: [
+      'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=80',
+      'https://images.unsplash.com/photo-1562322140-8baeececf3df?w=800&q=80',
+      'https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=800&q=80',
+      'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=800&q=80',
+      'https://images.unsplash.com/photo-1559599101-f09722fb4948?w=800&q=80',
+      'https://images.unsplash.com/photo-1634449571010-02389ed0f9b0?w=800&q=80',
+    ],
+    auto_services: [
+      'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=800&q=80',
+      'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&q=80',
+      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
+      'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800&q=80',
+      'https://images.unsplash.com/photo-1609630875171-b1321377ee65?w=800&q=80',
+      'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=800&q=80',
+    ],
+    home_services: [
+      'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=800&q=80',
+      'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&q=80',
+      'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=800&q=80',
+      'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=800&q=80',
+      'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&q=80',
+      'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800&q=80',
+    ],
+    digital_services: [
+      'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80',
+      'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800&q=80',
+      'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800&q=80',
+      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
+      'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&q=80',
+      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',
+    ],
+    education: [
+      'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80',
+      'https://images.unsplash.com/photo-1588072432836-e10032774350?w=800&q=80',
+      'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=80',
+      'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800&q=80',
+      'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&q=80',
+      'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80',
+    ],
+    health_wellness: [
+      'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&q=80',
+      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80',
+      'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80',
+      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80',
+      'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80',
+      'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&q=80',
+    ],
+    mental_wellness: [
+      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80',
+      'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&q=80',
+      'https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=800&q=80',
+      'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=800&q=80',
+      'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=800&q=80',
+      'https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?w=800&q=80',
+    ],
+    coaching: [
+      'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80',
+      'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80',
+      'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&q=80',
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80',
+      'https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?w=800&q=80',
+      'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&q=80',
+    ],
+    food_catering: [
+      'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80',
+      'https://images.unsplash.com/photo-1555244162-803834f70033?w=800&q=80',
+      'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800&q=80',
+      'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80',
+      'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80',
+      'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=800&q=80',
+    ],
+    domestic: [
+      'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&q=80',
+      'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=800&q=80',
+      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
+      'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800&q=80',
+      'https://images.unsplash.com/photo-1563453392212-326f5e854473?w=800&q=80',
+      'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=800&q=80',
+    ],
+    events: [
+      'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&q=80',
+      'https://images.unsplash.com/photo-1478146896981-b80fe463b330?w=800&q=80',
+      'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80',
+      'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&q=80',
+      'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&q=80',
+      'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80',
+    ],
+    transport: [
+      'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&q=80',
+      'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=800&q=80',
+      'https://images.unsplash.com/photo-1494515843206-f3117d3f51b7?w=800&q=80',
+      'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80',
+      'https://images.unsplash.com/photo-1530521954074-e64f6810b32d?w=800&q=80',
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80',
+    ],
+    childcare: [
+      'https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?w=800&q=80',
+      'https://images.unsplash.com/photo-1567705323043-dce7c5d78a83?w=800&q=80',
+      'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=800&q=80',
+      'https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?w=800&q=80',
+      'https://images.unsplash.com/photo-1545558014-8692077e9b5c?w=800&q=80',
+      'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=800&q=80',
+    ],
+    agriculture: [
+      'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=800&q=80',
+      'https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=800&q=80',
+      'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=800&q=80',
+      'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&q=80',
+      'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800&q=80',
+      'https://images.unsplash.com/photo-1592982537447-6f2a6a0a7b2b?w=800&q=80',
+    ],
+    fashion_design: [
+      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
+      'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&q=80',
+      'https://images.unsplash.com/photo-1590735213920-68192a487bc2?w=800&q=80',
+      'https://images.unsplash.com/photo-1603400521630-9f2de124b33b?w=800&q=80',
+      'https://images.unsplash.com/photo-1542060748-10c28b62716f?w=800&q=80',
+      'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=800&q=80',
+    ],
+    photography: [
+      'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&q=80',
+      'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?w=800&q=80',
+      'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800&q=80',
+      'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=800&q=80',
+      'https://images.unsplash.com/photo-1471341971476-ae15196e2a7a?w=800&q=80',
+      'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&q=80',
+    ],
+    legal_finance: [
+      'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=800&q=80',
+      'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80',
+      'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80',
+      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&q=80',
+      'https://images.unsplash.com/photo-1521791055366-0d553872952f?w=800&q=80',
+      'https://images.unsplash.com/photo-1434626881859-194d67b2b86f?w=800&q=80',
+    ],
+    real_estate: [
+      'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80',
+      'https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=800&q=80',
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80',
+      'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800&q=80',
+      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80',
+      'https://images.unsplash.com/photo-1448630360428-65456885c650?w=800&q=80',
+    ],
+    printing: [
+      'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800&q=80',
+      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
+      'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=800&q=80',
+      'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=800&q=80',
+      'https://images.unsplash.com/photo-1562654501-a0ccc0fc3fb1?w=800&q=80',
+      'https://images.unsplash.com/photo-1533929736458-ca588d08c8be?w=800&q=80',
+    ],
+    security: [
+      'https://images.unsplash.com/photo-1557597774-9d273605dfa9?w=800&q=80',
+      'https://images.unsplash.com/photo-1582139329536-e7284fece509?w=800&q=80',
+      'https://images.unsplash.com/photo-1618060932014-4deda4932554?w=800&q=80',
+      'https://images.unsplash.com/photo-1564636030-0a6d75ccab79?w=800&q=80',
+      'https://images.unsplash.com/photo-1551703599-6b3e8379aa8c?w=800&q=80',
+      'https://images.unsplash.com/photo-1605732562742-3023a888e56e?w=800&q=80',
+    ],
+    fitness: [
+      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80',
+      'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80',
+      'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80',
+      'https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=800&q=80',
+      'https://images.unsplash.com/photo-1548690312-e3b507d8c110?w=800&q=80',
+      'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80',
+    ],
+    music: [
+      'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=800&q=80',
+      'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80',
+      'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80',
+      'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80',
+      'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&q=80',
+      'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800&q=80',
+    ],
   },
 }
 
@@ -1416,18 +1625,29 @@ const PLACEHOLDER_IMAGES: Record<Region, Partial<Record<Category, string[]>>> = 
  * @param category   - merchant store category
  * @param countryCode - merchant ISO country code (e.g. 'GH', 'NG')
  */
+const SERVICE_CATEGORIES = new Set([
+  'beauty_services', 'hair_salon', 'auto_services', 'home_services',
+  'digital_services', 'education', 'health_wellness', 'mental_wellness',
+  'coaching', 'food_catering', 'domestic', 'events', 'transport',
+  'childcare', 'agriculture', 'fashion_design', 'photography',
+  'legal_finance', 'real_estate', 'printing', 'security', 'fitness', 'music',
+])
+
 export function getPlaceholderImage(
   productId: string,
   category: string | undefined | null,
   countryCode: string | undefined | null
 ): string {
-  const region: Region = COUNTRY_REGION[countryCode || ''] || 'global'
   const cat = (category || 'other') as Category
+
+  // Service categories use the global pool (not region-specific)
+  const isService = SERVICE_CATEGORIES.has(cat)
+  const region: Region = isService ? 'global' : (COUNTRY_REGION[countryCode || ''] || 'global')
+
   const regionImages = PLACEHOLDER_IMAGES[region]
   const images =
     regionImages[cat] ||
-    regionImages['other'] ||
-    PLACEHOLDER_IMAGES.global.other!
+    (isService ? PLACEHOLDER_IMAGES.global.other! : (regionImages['other'] || PLACEHOLDER_IMAGES.global.other!))
 
   // Use last char of product ID to pick consistently (same product = same image)
   const lastChar = productId ? productId.charCodeAt(productId.length - 1) : 0
