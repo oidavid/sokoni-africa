@@ -481,8 +481,10 @@ export default function OnboardingPage() {
   }
   const selectedCurrency = countryCurrencyMap[selectedCountry.dial] || {symbol: '$', rate: 0.00061}
   const sampleProducts = rawSampleItems.map(p => {
+    // If product already has local pricing (non-₦ price_display), use it directly
+    if (!p.price_display.startsWith('₦')) return p
+    // Nigerian products: prices in kobo — divide by 100 to get Naira, then convert
     if (selectedCurrency.symbol === '₦') return p
-    // prices stored in kobo (smallest unit) — divide by 100 to get Naira, then convert
     const nairaValue = p.price / 100
     const converted = nairaValue * selectedCurrency.rate
     const rounded = converted >= 1000 ? Math.round(converted/100)*100 :
