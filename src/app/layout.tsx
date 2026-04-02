@@ -15,17 +15,19 @@ const dmSans = DM_Sans({
 })
 
 export const metadata: Metadata = {
-  title: 'Earket — Your Business, Online',
-  description: 'Build your free business page in 5 minutes. Sell products or offer services. Customers order and book via WhatsApp. Works on any phone, anywhere in the world.',
+  title: 'Earket — Any Business. Any Country. Online Today.',
+  description: 'Create your free professional business store in minutes. No tech skills. No cost. AI-powered. Works in 134 countries. A product of IntelSys Technologies.',
   keywords: [
-    'online store Nigeria', 'service business online Africa', 'WhatsApp shop',
-    'sell online Nigeria', 'book services online Kenya', 'free business page Africa',
-    'WhatsApp ordering', 'service provider online', 'emerging markets ecommerce',
+    'free online store', 'free business page', 'sell online free',
+    'WhatsApp shop', 'online store Nigeria', 'service business online Africa',
+    'sell online Kenya', 'free business website', 'emerging markets ecommerce',
+    'AI business page', 'online store no cost', 'IntelSys Technologies',
   ],
   openGraph: {
-    title: 'Earket — Your Business, Online',
-    description: 'Sell products or offer services. Free forever. Live in 5 minutes.',
+    title: 'Earket — Any Business. Any Country. Online Today.',
+    description: 'The fastest way for any business, anywhere in the world, to get online. Free forever. AI-powered. Live in minutes.',
     type: 'website',
+    url: 'https://earket.com',
   },
 }
 
