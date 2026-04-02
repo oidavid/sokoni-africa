@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import {
-  ShoppingBag, Zap, Smartphone, MessageCircle,
+  Zap, Smartphone, MessageCircle,
   ChevronRight, Star, Check, Globe, ArrowRight
 } from 'lucide-react'
 
@@ -94,30 +94,57 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Top bar — IntelSys attribution */}
+      <div className="bg-brand-dark border-b border-white/10">
+        <div className="max-w-5xl mx-auto px-4 h-8 flex items-center justify-between">
+          <span className="text-xs text-white/40 font-medium">
+            A product of{' '}
+            <a href="https://intelsystechnology.com" target="_blank" rel="noopener noreferrer"
+               className="text-white/65 hover:text-brand-accent transition-colors font-semibold">
+              IntelSys Technologies
+            </a>
+          </span>
+          <span className="hidden sm:block text-xs text-white/25 tracking-wide">
+            AI-Powered &nbsp;·&nbsp; Free Forever &nbsp;·&nbsp; 134 Countries
+          </span>
+        </div>
+      </div>
+
       {/* Nav */}
-      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-brand-green rounded-lg flex items-center justify-center">
-              <ShoppingBag size={16} className="text-white" />
-            </div>
-            <span className="font-display font-bold text-brand-dark text-lg">Earket</span>
+      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
+        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+          {/* Wordmark */}
+          <Link href="/" className="flex items-center gap-3 group">
+            <span className="font-display font-bold text-brand-dark text-xl tracking-tight group-hover:text-brand-green transition-colors">
+              earket
+            </span>
+            <span className="hidden sm:inline-flex text-xs font-semibold text-brand-green bg-brand-light border border-brand-green/20 px-2.5 py-0.5 rounded-full">
+              Free Forever
+            </span>
+          </Link>
+
+          {/* Desktop links */}
+          <div className="hidden md:flex items-center gap-6">
+            <a href="#how-it-works" className="text-sm font-medium text-gray-500 hover:text-brand-green transition-colors">How It Works</a>
+            <a href="#features" className="text-sm font-medium text-gray-500 hover:text-brand-green transition-colors">Features</a>
+            <a href="#pricing" className="text-sm font-medium text-gray-500 hover:text-brand-green transition-colors">Pricing</a>
           </div>
-          <div className="flex items-center gap-3">
+
+          <div className="flex items-center gap-2.5">
             <button
               onClick={() => setLang(lang === 'en' ? 'pid' : 'en')}
-              className="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-brand-green 
+              className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-brand-green
                          border border-gray-200 rounded-full px-3 py-1.5 transition-colors">
-              <Globe size={12} />
+              <Globe size={11} />
               {lang === 'en' ? 'Pidgin' : 'English'}
             </button>
-            <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-brand-green transition-colors">
+            <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-brand-green transition-colors px-1">
               Login
             </Link>
             <Link href="/onboarding"
-              className="bg-brand-green text-white text-sm font-semibold px-4 py-2 rounded-xl 
-                         hover:bg-brand-dark transition-colors active:scale-95 duration-100">
-              Start Free
+              className="bg-brand-green text-white text-sm font-bold px-5 py-2.5 rounded-full
+                         hover:bg-brand-dark transition-all active:scale-95 shadow-md shadow-brand-green/20">
+              Start Free →
             </Link>
           </div>
         </div>
@@ -386,18 +413,69 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-4 text-center text-xs text-gray-400 border-t border-gray-100">
-        <div className="flex items-center justify-center gap-2 mb-3">
-          <div className="w-6 h-6 bg-brand-green rounded-md flex items-center justify-center">
-            <ShoppingBag size={12} className="text-white" />
+      <footer className="bg-brand-dark text-white">
+        <div className="max-w-5xl mx-auto px-4 py-14">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
+
+            {/* Brand */}
+            <div className="md:col-span-2">
+              <div className="text-2xl font-display font-bold text-white tracking-tight mb-2">earket</div>
+              <p className="text-white/45 text-sm leading-relaxed mb-5 max-w-xs">
+                The fastest way for any business, anywhere in the world, to get online. Free forever. AI-powered. Live in minutes.
+              </p>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-white/30">A product of</span>
+                <a href="https://intelsystechnology.com" target="_blank" rel="noopener noreferrer"
+                   className="text-xs font-bold text-white/55 hover:text-brand-accent transition-colors tracking-wide uppercase">
+                  IntelSys Technologies
+                </a>
+              </div>
+            </div>
+
+            {/* Product */}
+            <div>
+              <div className="text-xs font-bold text-white/25 uppercase tracking-widest mb-4">Product</div>
+              <ul className="space-y-3">
+                <li><Link href="/onboarding" className="text-sm text-white/50 hover:text-white transition-colors">Start Free</Link></li>
+                <li><Link href="/login" className="text-sm text-white/50 hover:text-white transition-colors">Login</Link></li>
+                <li><Link href="/dashboard" className="text-sm text-white/50 hover:text-white transition-colors">Dashboard</Link></li>
+                <li><a href="#features" className="text-sm text-white/50 hover:text-white transition-colors">Features</a></li>
+                <li><a href="#pricing" className="text-sm text-white/50 hover:text-white transition-colors">Pricing</a></li>
+              </ul>
+            </div>
+
+            {/* Company */}
+            <div>
+              <div className="text-xs font-bold text-white/25 uppercase tracking-widest mb-4">Company</div>
+              <ul className="space-y-3">
+                <li>
+                  <a href="https://intelsystechnology.com" target="_blank" rel="noopener noreferrer"
+                     className="text-sm text-white/50 hover:text-white transition-colors">
+                    IntelSys Technologies
+                  </a>
+                </li>
+                <li><Link href="/contact" className="text-sm text-white/50 hover:text-white transition-colors">Contact</Link></li>
+                <li><Link href="/privacy" className="text-sm text-white/50 hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="text-sm text-white/50 hover:text-white transition-colors">Terms of Service</Link></li>
+              </ul>
+            </div>
           </div>
-          <span className="font-display font-bold text-brand-dark text-sm">Earket</span>
         </div>
-        <p className="mb-3">© 2025 Earket. Free online business pages for emerging market entrepreneurs.</p>
-        <div className="flex justify-center gap-4">
-          <Link href="/privacy" className="hover:text-brand-green">Privacy</Link>
-          <Link href="/terms" className="hover:text-brand-green">Terms</Link>
-          <Link href="/contact" className="hover:text-brand-green">Contact</Link>
+
+        {/* Bottom bar */}
+        <div className="border-t border-white/8">
+          <div className="max-w-5xl mx-auto px-4 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-xs text-white/22">
+              © 2025 IntelSys Technologies. All rights reserved.
+            </p>
+            <div className="flex items-center gap-3 text-xs text-white/18">
+              <span>AI-Powered</span>
+              <span className="text-white/10">·</span>
+              <span>Free Forever</span>
+              <span className="text-white/10">·</span>
+              <span>134 Countries</span>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
