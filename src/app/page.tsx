@@ -69,6 +69,255 @@ const businessTypes = [
   { emoji: "🚚", label: "Delivery & Logistics" },
 ]
 
+const dashboardFeatures = [
+  {
+    id: 'overview',
+    icon: '📊',
+    label: 'Overview',
+    title: 'Your business at a glance',
+    desc: 'See today\'s orders, revenue, and top products the moment you log in. No spreadsheets, no guesswork.',
+    preview: (
+      <div className="space-y-3">
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { label: 'Orders Today', val: '12', color: 'text-brand-green' },
+            { label: 'Revenue', val: '₦48,500', color: 'text-brand-accent' },
+            { label: 'In Stock', val: '94%', color: 'text-blue-500' },
+          ].map((s, i) => (
+            <div key={i} className="bg-brand-light rounded-xl p-3 text-center">
+              <div className={`text-lg font-bold ${s.color} font-display`}>{s.val}</div>
+              <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
+            </div>
+          ))}
+        </div>
+        <div className="bg-gray-50 rounded-xl p-3">
+          <div className="text-xs font-semibold text-gray-500 mb-2">Recent Orders</div>
+          {[
+            { name: 'Adaeze O.', item: 'Basmati Rice 5kg', status: 'Pending', color: 'bg-yellow-100 text-yellow-700' },
+            { name: 'Chidi M.', item: 'Palm Oil 4L', status: 'Confirmed', color: 'bg-green-100 text-green-700' },
+            { name: 'Funmi A.', item: 'Semolina 2kg', status: 'Delivered', color: 'bg-gray-100 text-gray-500' },
+          ].map((o, i) => (
+            <div key={i} className="flex items-center justify-between py-1.5 border-b border-gray-100 last:border-0">
+              <div>
+                <div className="text-xs font-semibold text-gray-800">{o.name}</div>
+                <div className="text-xs text-gray-400">{o.item}</div>
+              </div>
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${o.color}`}>{o.status}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 'cash',
+    icon: '💵',
+    label: 'Cash Sale',
+    title: 'Record in-person sales instantly',
+    desc: 'Sold something face-to-face? Log it in seconds. Your inventory updates automatically and the sale appears in your reports.',
+    preview: (
+      <div className="space-y-3">
+        <div className="bg-brand-light rounded-xl p-4 border-2 border-brand-green/20">
+          <div className="text-xs font-bold text-brand-dark mb-3">New Cash Sale</div>
+          <div className="space-y-2">
+            <div className="bg-white rounded-lg p-2 flex items-center justify-between">
+              <span className="text-xs text-gray-700">Fresh Tomatoes (1kg)</span>
+              <span className="text-xs font-bold text-brand-green">₦3,500</span>
+            </div>
+            <div className="bg-white rounded-lg p-2 flex items-center justify-between">
+              <span className="text-xs text-gray-700">Palm Oil (4L)</span>
+              <span className="text-xs font-bold text-brand-green">₦5,200</span>
+            </div>
+          </div>
+          <div className="mt-3 pt-3 border-t border-brand-green/20 flex items-center justify-between">
+            <span className="text-sm font-bold text-brand-dark">Total</span>
+            <span className="text-sm font-bold text-brand-green">₦8,700</span>
+          </div>
+          <button className="mt-3 w-full bg-brand-green text-white text-xs font-bold py-2.5 rounded-lg">
+            ✓ Record Sale
+          </button>
+        </div>
+        <div className="text-xs text-gray-400 text-center">Inventory updates automatically</div>
+      </div>
+    ),
+  },
+  {
+    id: 'inventory',
+    icon: '📦',
+    label: 'Inventory',
+    title: 'Always know what you have in stock',
+    desc: 'Track every product. Set low-stock alerts. Never accidentally sell something you don\'t have. Updates in real time with every sale.',
+    preview: (
+      <div className="space-y-2">
+        <div className="text-xs font-bold text-gray-500 mb-3">Stock Levels</div>
+        {[
+          { name: 'Basmati Rice (5kg)', stock: 18, max: 30, warning: false },
+          { name: 'Palm Oil (4L)', stock: 4, max: 20, warning: true },
+          { name: 'Indomie Noodles (40pk)', stock: 12, max: 25, warning: false },
+          { name: 'Milo (400g)', stock: 2, max: 15, warning: true },
+        ].map((item, i) => (
+          <div key={i} className="bg-gray-50 rounded-xl p-3">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-semibold text-gray-800">{item.name}</span>
+              <span className={`text-xs font-bold ${item.warning ? 'text-red-500' : 'text-gray-600'}`}>
+                {item.stock} left {item.warning && '⚠️'}
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-1.5">
+              <div
+                className={`h-1.5 rounded-full ${item.warning ? 'bg-red-400' : 'bg-brand-green'}`}
+                style={{ width: `${(item.stock / item.max) * 100}%` }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    ),
+  },
+  {
+    id: 'broadcast',
+    icon: '📣',
+    label: 'Broadcast',
+    title: 'Message all your customers at once',
+    desc: 'Running a promo? New stock arrived? Send a WhatsApp broadcast to every customer who\'s ever ordered from you — in one tap.',
+    preview: (
+      <div className="space-y-3">
+        <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm">💬</div>
+            <div>
+              <div className="text-xs font-bold text-gray-800">WhatsApp Broadcast</div>
+              <div className="text-xs text-gray-500">Sending to 247 customers</div>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg p-3 text-xs text-gray-700 leading-relaxed border border-green-100">
+            🎉 <strong>Weekend Special!</strong> Fresh stock just arrived. Get 10% off all groceries this Saturday. Order now: earket.com/jb-mart
+          </div>
+          <div className="flex gap-2 mt-3">
+            <button className="flex-1 bg-green-500 text-white text-xs font-bold py-2 rounded-lg">Send Now</button>
+            <button className="px-3 bg-gray-100 text-gray-600 text-xs font-medium py-2 rounded-lg">Preview</button>
+          </div>
+        </div>
+        <div className="text-xs text-gray-400 text-center">Last broadcast: 3 days ago · 89% open rate</div>
+      </div>
+    ),
+  },
+  {
+    id: 'analytics',
+    icon: '📈',
+    label: 'Analytics',
+    title: 'See how your store is performing',
+    desc: 'Track visits, orders, top-selling products, and customer growth over time. Know exactly what\'s working and what isn\'t.',
+    preview: (
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { label: 'Store Visits', val: '1,284', change: '+18%', up: true },
+            { label: 'Conversion', val: '6.2%', change: '+1.4%', up: true },
+            { label: 'Avg Order', val: '₦6,500', change: '+₦800', up: true },
+            { label: 'Customers', val: '247', change: '+32', up: true },
+          ].map((s, i) => (
+            <div key={i} className="bg-brand-light rounded-xl p-3">
+              <div className="text-base font-bold text-brand-dark font-display">{s.val}</div>
+              <div className="text-xs text-gray-500">{s.label}</div>
+              <div className="text-xs text-brand-green font-semibold mt-0.5">{s.change} this week</div>
+            </div>
+          ))}
+        </div>
+        <div className="bg-gray-50 rounded-xl p-3">
+          <div className="text-xs font-bold text-gray-500 mb-2">Top Products</div>
+          {[
+            { name: 'Basmati Rice', pct: 28 },
+            { name: 'Palm Oil', pct: 19 },
+            { name: 'Indomie Noodles', pct: 15 },
+          ].map((p, i) => (
+            <div key={i} className="flex items-center gap-2 mb-2">
+              <div className="text-xs text-gray-700 w-28 truncate">{p.name}</div>
+              <div className="flex-1 bg-gray-200 rounded-full h-1.5">
+                <div className="h-1.5 rounded-full bg-brand-green" style={{ width: `${p.pct * 2.5}%` }} />
+              </div>
+              <div className="text-xs text-gray-500 w-8 text-right">{p.pct}%</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 'customers',
+    icon: '👥',
+    label: 'Customers',
+    title: 'Know who\'s buying from you',
+    desc: 'See every customer, their order history, and how much they\'ve spent. Build real relationships, not just transactions.',
+    preview: (
+      <div className="space-y-2">
+        <div className="text-xs font-bold text-gray-500 mb-3">Customer Directory</div>
+        {[
+          { name: 'Adaeze Okafor', orders: 8, total: '₦52,400', last: '2 days ago' },
+          { name: 'Chidi Mensah', orders: 5, total: '₦31,000', last: '1 week ago' },
+          { name: 'Funmi Adeyemi', orders: 12, total: '₦78,600', last: 'Today' },
+          { name: 'Emeka Nwosu', orders: 3, total: '₦19,500', last: '2 weeks ago' },
+        ].map((c, i) => (
+          <div key={i} className="bg-gray-50 rounded-xl p-3 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-brand-green flex items-center justify-center text-white text-xs font-bold shrink-0">
+              {c.name[0]}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-semibold text-gray-800">{c.name}</div>
+              <div className="text-xs text-gray-400">{c.orders} orders · {c.total}</div>
+            </div>
+            <div className="text-xs text-gray-400 shrink-0">{c.last}</div>
+          </div>
+        ))}
+      </div>
+    ),
+  },
+]
+
+function DashboardDemo() {
+  const [active, setActive] = useState('overview')
+  const current = dashboardFeatures.find(f => f.id === active)!
+  return (
+    <>
+      {/* Sidebar */}
+      <div className="w-14 sm:w-48 bg-brand-dark border-r border-white/8 flex flex-col py-3 gap-1 shrink-0">
+        {dashboardFeatures.map(f => (
+          <button
+            key={f.id}
+            onClick={() => setActive(f.id)}
+            className={`flex items-center gap-2.5 px-3 py-2.5 mx-2 rounded-xl text-left transition-all ${
+              active === f.id
+                ? 'bg-brand-green text-white'
+                : 'text-white/50 hover:text-white hover:bg-white/8'
+            }`}
+          >
+            <span className="text-base shrink-0">{f.icon}</span>
+            <span className="text-xs font-semibold hidden sm:block truncate">{f.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 overflow-hidden flex flex-col sm:flex-row">
+        {/* Panel info */}
+        <div className="sm:w-48 lg:w-56 border-b sm:border-b-0 sm:border-r border-gray-100 p-4 bg-gray-50/50 shrink-0">
+          <div className="text-sm font-display font-bold text-brand-dark mb-1">{current.title}</div>
+          <p className="text-xs text-gray-500 leading-relaxed">{current.desc}</p>
+          <Link href="/onboarding"
+            className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand-green hover:text-brand-dark transition-colors">
+            Get this free →
+          </Link>
+        </div>
+
+        {/* Live preview */}
+        <div className="flex-1 p-4 overflow-y-auto">
+          {current.preview}
+        </div>
+      </div>
+    </>
+  )
+}
+
 export default function HomePage() {
   const [lang, setLang] = useState<'en' | 'pid'>('en')
   const [currency, setCurrency] = useState<{ symbol: string; rate: number; name: string; code: string }>({ symbol: '$', rate: 1, name: 'US Dollar', code: 'USD' })
@@ -256,7 +505,7 @@ export default function HomePage() {
       </section>
 
       {/* How it works */}
-      <section className="py-16 px-4 max-w-5xl mx-auto">
+      <section id="how-it-works" className="py-16 px-4 max-w-5xl mx-auto">
         <h2 className="font-display text-3xl font-bold text-center text-brand-dark mb-3">How it works</h2>
         <p className="text-center text-gray-400 text-sm mb-12">Same simple process — whether you sell products or offer services</p>
         <div className="grid sm:grid-cols-3 gap-6">
@@ -279,29 +528,54 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-16 px-4 bg-brand-dark">
+      {/* Dashboard Demo — Interactive Features Section */}
+      <section id="features" className="py-20 px-4 bg-brand-dark">
         <div className="max-w-5xl mx-auto">
-          <h2 className="font-display text-3xl font-bold text-center text-white mb-4">
-            Everything you need. Nothing you don't.
-          </h2>
-          <p className="text-center text-white/50 text-sm mb-12 max-w-xl mx-auto">
-            Built for businesses in emerging markets — where internet is slow, phones are basic, and WhatsApp is how business gets done.
-          </p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {features.map((f, i) => (
-              <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors">
-                <div className="text-3xl mb-3">{f.icon}</div>
-                <h3 className="font-display font-bold text-white mb-1.5">{f.title}</h3>
-                <p className="text-gray-400 text-sm">{f.body}</p>
-              </div>
-            ))}
+          <div className="text-center mb-12">
+            <p className="text-brand-accent text-xs font-bold uppercase tracking-widest mb-3">Your Business Dashboard</p>
+            <h2 className="font-display text-3xl sm:text-4xl font-bold text-white mb-4">
+              Everything you need. Nothing you don't.
+            </h2>
+            <p className="text-white/50 text-sm max-w-xl mx-auto">
+              A complete business operating system — built for real entrepreneurs. Click each feature to see it in action.
+            </p>
           </div>
+
+          {/* Dashboard Shell */}
+          <div className="bg-white rounded-2xl overflow-hidden shadow-2xl shadow-black/40">
+
+            {/* Dashboard top bar */}
+            <div className="bg-brand-dark border-b border-white/10 px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-500/70"></div>
+                  <div className="w-3 h-3 rounded-full bg-yellow-500/70"></div>
+                  <div className="w-3 h-3 rounded-full bg-green-500/70"></div>
+                </div>
+                <span className="text-white/40 text-xs font-mono">earket.com/dashboard</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-brand-green flex items-center justify-center text-white text-xs font-bold">J</div>
+                <span className="text-white/60 text-xs font-medium hidden sm:block">JB Mart</span>
+              </div>
+            </div>
+
+            <div className="flex min-h-[420px]">
+
+              {/* Sidebar */}
+              <DashboardDemo />
+
+            </div>
+          </div>
+
+          <p className="text-center text-white/30 text-xs mt-6">
+            This is your actual dashboard — available the moment you publish your store.
+          </p>
         </div>
       </section>
 
       {/* Pricing */}
-      <section className="py-16 px-4 max-w-5xl mx-auto">
+      <section id="pricing" className="py-16 px-4 max-w-5xl mx-auto">
         <h2 className="font-display text-3xl font-bold text-center text-brand-dark mb-3">Simple pricing</h2>
         <p className="text-center text-gray-500 mb-2 text-sm">No hidden fees. No surprises.</p>
         {currencyLoaded && currency.code !== 'USD' && (
