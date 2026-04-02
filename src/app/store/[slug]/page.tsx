@@ -991,9 +991,18 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
       {/* Viral Footer */}
       <div className="max-w-6xl mx-auto px-4 mb-6 mt-4">
         <div className="bg-brand-dark rounded-2xl p-5 text-center">
-          <p className="text-white/60 text-xs mb-1">Powered by</p>
-          <p className="font-display font-bold text-white text-lg mb-1">Earket 🛒</p>
-          <p className="text-white/70 text-xs mb-4">Build your own free online store in 5 minutes</p>
+          <p className="text-white/40 text-xs mb-1">Powered by</p>
+          <Link href="/" className="font-display font-bold text-white text-lg mb-1 hover:text-brand-accent transition-colors inline-block">
+            earket
+          </Link>
+          <p className="text-white/50 text-xs mb-0.5">Build your own free online store in 5 minutes</p>
+          <p className="text-white/25 text-xs mb-4">
+            A product of{' '}
+            <a href="https://intelsystechnology.com" target="_blank" rel="noopener noreferrer"
+               className="text-white/40 hover:text-white/70 transition-colors font-semibold">
+              IntelSys Technologies
+            </a>
+          </p>
           <Link href="/onboarding" className="inline-block font-bold text-sm px-6 py-2.5 rounded-xl transition-colors" style={{ backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') }}>
             Start Free — earket.com
           </Link>
