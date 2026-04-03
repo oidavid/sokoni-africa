@@ -128,6 +128,34 @@ const HOW_I_WORK: Record<string, Array<{ icon: string; title: string; desc: stri
   ],
 }
 
+
+function buildSocialLink(platform: string, value: string): string {
+  const v = value.trim().replace(/\/+$/, '')
+  if (!v) return ''
+  const domains: Record<string, string[]> = {
+    instagram: ['instagram.com'],
+    facebook:  ['facebook.com'],
+    linkedin:  ['linkedin.com'],
+    twitter_x: ['x.com', 'twitter.com'],
+    youtube:   ['youtube.com'],
+    tiktok:    ['tiktok.com'],
+  }
+  const platformDomains = domains[platform] || []
+  if (platformDomains.some(d => v.includes(d))) {
+    return v.startsWith('http') ? v : 'https://' + v
+  }
+  const handle = v.replace(/^@/, '')
+  const builders: Record<string, string> = {
+    instagram: `https://instagram.com/${handle}`,
+    facebook:  `https://facebook.com/${handle}`,
+    linkedin:  `https://linkedin.com/in/${handle}`,
+    twitter_x: `https://x.com/${handle}`,
+    youtube:   `https://youtube.com/@${handle}`,
+    tiktok:    `https://tiktok.com/@${handle}`,
+  }
+  return builders[platform] || (v.startsWith('http') ? v : `https://${v}`)
+}
+
 function getContrastColor(hex: string): string {
   if (!hex || hex.length < 7) return '#ffffff'
   const r = parseInt(hex.slice(1, 3), 16)
@@ -822,14 +850,14 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
           <div className="bg-gray-50 rounded-2xl p-5 text-center">
             <p className="text-xs text-gray-400 mb-3 font-semibold uppercase tracking-wide">Follow Us</p>
             <div className="flex flex-wrap gap-2 justify-center">
-              {store.instagram && <a href={`https://instagram.com/${store.instagram.replace('@','')}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-pink-50 text-pink-600 hover:bg-pink-100 transition-colors">📸 Instagram</a>}
-              {store.facebook && <a href={store.facebook.startsWith('http') ? store.facebook : `https://facebook.com/${store.facebook}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">📘 Facebook</a>}
-              {store.linkedin && <a href={store.linkedin.startsWith('http') ? store.linkedin : `https://linkedin.com/in/${store.linkedin}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors">💼 LinkedIn</a>}
-              {store.twitter_x && <a href={`https://x.com/${store.twitter_x.replace('@','')}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">X / Twitter</a>}
-              {store.youtube && <a href={store.youtube.startsWith('http') ? store.youtube : `https://youtube.com/${store.youtube}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors">▶️ YouTube</a>}
-              {store.tiktok && <a href={`https://tiktok.com/${store.tiktok.startsWith('@') ? store.tiktok : '@' + store.tiktok}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-900 text-white hover:bg-black transition-colors">🎵 TikTok</a>}
-              {store.website && <a href={store.website.startsWith('http') ? store.website : `https://${store.website}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-brand-light text-brand-green hover:bg-brand-green hover:text-white transition-colors">🌐 Website</a>}
-              {store.other_link && <a href={store.other_link.startsWith('http') ? store.other_link : `https://${store.other_link}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors">🔗 Follow Us</a>}
+              {store.instagram && <a href={buildSocialLink('instagram', store.instagram || '')} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-pink-50 text-pink-600 hover:bg-pink-100 transition-colors">📸 Instagram</a>}
+              {store.facebook && <a href={buildSocialLink('facebook', store.facebook || '')} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">📘 Facebook</a>}
+              {store.linkedin && <a href={buildSocialLink('linkedin', store.linkedin || '')} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors">💼 LinkedIn</a>}
+              {store.twitter_x && <a href={buildSocialLink('twitter_x', store.twitter_x || '')} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">X / Twitter</a>}
+              {store.youtube && <a href={buildSocialLink('youtube', store.youtube || '')} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors">▶️ YouTube</a>}
+              {store.tiktok && <a href={buildSocialLink('tiktok', store.tiktok || '')} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-900 text-white hover:bg-black transition-colors">🎵 TikTok</a>}
+              {store.website && <a href={buildSocialLink('website', store.website || '')} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-brand-light text-brand-green hover:bg-brand-green hover:text-white transition-colors">🌐 Website</a>}
+              {store.other_link && <a href={buildSocialLink('other_link', store.other_link || '')} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors">🔗 Follow Us</a>}
             </div>
           </div>
         </div>
