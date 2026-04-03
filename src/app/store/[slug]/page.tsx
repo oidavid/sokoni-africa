@@ -8,6 +8,7 @@ import { getCart, saveCart, addToCart as addToLocalCart, clearCart, type CartIte
 import { getThemeById, getThemeStyle } from '@/lib/themes'
 import { getPlaceholderImage } from '@/lib/placeholders'
 import ServiceStorefrontPage from '@/components/ServiceStorefrontPage'
+import StoreJsonLd from '@/components/StoreJsonLd'
 import ConsultationStorefrontPage from '@/components/ConsultationStorefrontPage'
 import ServicesLedStorefrontPage from '@/components/ServicesLedStorefrontPage'
 
@@ -22,6 +23,7 @@ interface Merchant {
   order_mode: string
   theme_color: string
   logo_url: string | null
+  profile_photo_url?: string
   business_type?: string
   address?: string
   holiday_mode?: boolean
@@ -417,6 +419,21 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
         setMeta('name','twitter:card', 'summary_large_image')
         return null
       })()}
+
+      {/* JSON-LD Structured Data */}
+      {store && (
+        <StoreJsonLd
+          businessName={store.business_name}
+          description={store.description}
+          location={store.location}
+          address={store.address}
+          whatsappNumber={store.whatsapp_number}
+          category={store.category}
+          logoUrl={store.logo_url}
+          slug={store.slug}
+          themeColor={store.theme_color}
+        />
+      )}
 
       {/* Share Modal */}
       {shareOpen && store && (
