@@ -1183,30 +1183,42 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
         </a>
       </div>
 
-      {/* Viral Footer */}
+      {/* Viral Footer — adapts to merchant theme */}
       <div className="max-w-6xl mx-auto px-4 mb-6 mt-4">
-        <div className="bg-brand-dark rounded-2xl p-5 text-center">
-          <p className="text-white/40 text-xs mb-1">Powered by</p>
-          <Link href="/" className="font-display font-bold text-white text-lg mb-1 hover:text-brand-accent transition-colors inline-block">
-            earket
-          </Link>
-          <p className="text-white/50 text-xs mb-0.5">Build your own free online store in 5 minutes</p>
-          <p className="text-white/25 text-xs mb-4">
-            A product of{' '}
-            <a href="https://intelsystechnology.com" target="_blank" rel="noopener noreferrer"
-               className="text-white/40 hover:text-white/70 transition-colors font-semibold">
-              IntelSys Technologies
-            </a>
-          </p>
-          <div className="flex gap-2 justify-center flex-wrap">
-            <Link href="/onboarding" className="inline-block font-bold text-sm px-6 py-2.5 rounded-xl transition-colors" style={{ backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') }}>
-              Start Free — earket.com
-            </Link>
-            <button onClick={() => setFeedbackOpen(true)}
-              className="inline-block font-semibold text-sm px-5 py-2.5 rounded-xl bg-white/10 text-white/70 hover:bg-white/20 transition-colors">
-              Leave Feedback
-            </button>
-          </div>
+        <div className="rounded-2xl p-5 text-center" style={{ backgroundColor: store.theme_preset ? (getThemeById(store.theme_preset)?.primary || store.theme_color || '#1A7A4A') : (store.theme_color || '#1A7A4A') }}>
+          {(() => {
+            const bg = store.theme_preset ? (getThemeById(store.theme_preset)?.primary || store.theme_color || '#1A7A4A') : (store.theme_color || '#1A7A4A')
+            const onBg = getContrastColor(bg)
+            const isLight = onBg === '#111827'
+            return (
+              <>
+                <p className="text-xs mb-1" style={{ color: isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.4)' }}>Powered by</p>
+                <Link href="/" className="font-display font-bold text-lg mb-1 inline-block transition-opacity hover:opacity-80" style={{ color: onBg }}>
+                  earket
+                </Link>
+                <p className="text-xs mb-0.5" style={{ color: isLight ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)' }}>Build your own free online store in 5 minutes</p>
+                <p className="text-xs mb-4" style={{ color: isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.3)' }}>
+                  A product of{' '}
+                  <a href="https://intelsystechnology.com" target="_blank" rel="noopener noreferrer"
+                     className="font-semibold transition-opacity hover:opacity-80" style={{ color: isLight ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)' }}>
+                    IntelSys Technologies
+                  </a>
+                </p>
+                <div className="flex gap-2 justify-center flex-wrap">
+                  <Link href="/onboarding"
+                    className="inline-block font-bold text-sm px-6 py-2.5 rounded-xl transition-opacity hover:opacity-90"
+                    style={{ backgroundColor: isLight ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.15)', color: onBg }}>
+                    Start Free — earket.com
+                  </Link>
+                  <button onClick={() => setFeedbackOpen(true)}
+                    className="inline-block font-semibold text-sm px-5 py-2.5 rounded-xl transition-opacity hover:opacity-90"
+                    style={{ backgroundColor: isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.1)', color: isLight ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)' }}>
+                    Leave Feedback
+                  </button>
+                </div>
+              </>
+            )
+          })()}
         </div>
       </div>
     </div>
