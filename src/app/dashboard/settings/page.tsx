@@ -270,7 +270,7 @@ export default function SettingsPage() {
               </div>
               <div>
                 <div className="font-bold text-sm">Changes saved!</div>
-                <div className="text-white/75 text-xs font-normal">Your business &amp; store page have been updated.</div>
+                <div className="text-white/75 text-xs font-normal">Your business page has been updated.</div>
               </div>
             </>
           ) : (

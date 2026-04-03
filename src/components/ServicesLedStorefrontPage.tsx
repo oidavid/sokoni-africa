@@ -848,9 +848,9 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
         </div>
           {/* Social Links */}
           {(store.instagram || store.facebook || store.linkedin || store.twitter_x || store.website || store.youtube || store.tiktok || store.other_link) && (
-            <div className="mt-4 bg-gray-50 rounded-2xl p-4">
-              <p className="text-xs text-gray-400 mb-3 font-semibold uppercase tracking-wide">Follow Us</p>
-              <div className="flex flex-wrap gap-2">
+            <div className="mt-4 bg-gray-50 rounded-2xl p-4 text-center">
+              <p className="text-xs text-gray-400 mb-3 font-semibold uppercase tracking-wide text-center">Follow Us</p>
+              <div className="flex flex-wrap gap-2 justify-center">
                 {store.instagram && <a href={`https://instagram.com/${store.instagram.replace('@','')}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-pink-50 text-pink-600 hover:bg-pink-100 transition-colors">📸 Instagram</a>}
                 {store.facebook && <a href={store.facebook.startsWith('http') ? store.facebook : `https://facebook.com/${store.facebook}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">📘 Facebook</a>}
                 {store.linkedin && <a href={store.linkedin.startsWith('http') ? store.linkedin : `https://linkedin.com/in/${store.linkedin}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors">💼 LinkedIn</a>}
