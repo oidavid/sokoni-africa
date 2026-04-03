@@ -26,6 +26,11 @@ interface Merchant {
   theme_preset?: string
   order_mode: string
   login_pin: string
+  instagram?: string
+  facebook?: string
+  linkedin?: string
+  twitter_x?: string
+  website?: string
 }
 
 const LOCATIONS = [
@@ -85,6 +90,12 @@ export default function SettingsPage() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([
     { name: '', role: '', text: '', rating: 5 },
   ])
+  const [socialInstagram, setSocialInstagram] = useState('')
+  const [socialFacebook, setSocialFacebook] = useState('')
+  const [socialLinkedin, setSocialLinkedin] = useState('')
+  const [socialTwitter, setSocialTwitter] = useState('')
+  const [socialWebsite, setSocialWebsite] = useState('')
+
   const [businessHours, setBusinessHours] = useState<Record<string, {open: string; close: string; closed: boolean}>>({
     Mon: { open: '09:00', close: '17:00', closed: false },
     Tue: { open: '09:00', close: '17:00', closed: false },
@@ -139,6 +150,11 @@ export default function SettingsPage() {
       setHolidayMessage(m.holiday_message || '')
       if (m.business_hours) setBusinessHours(m.business_hours)
       if (m.testimonials) setTestimonials(m.testimonials)
+      setSocialInstagram(m.instagram || '')
+      setSocialFacebook(m.facebook || '')
+      setSocialLinkedin(m.linkedin || '')
+      setSocialTwitter(m.twitter_x || '')
+      setSocialWebsite(m.website || '')
       const wa = m.whatsapp_number || ''
       const country = COUNTRIES.find(c => c.dial && wa.startsWith(c.dial)) || COUNTRIES[0]
       setSelectedCountry(country)
@@ -206,6 +222,11 @@ export default function SettingsPage() {
         holiday_message: holidayMessage,
         business_hours: businessHours,
         testimonials: testimonials.filter(t => t.name.trim() && t.text.trim()),
+        instagram: socialInstagram.trim() || null,
+        facebook: socialFacebook.trim() || null,
+        linkedin: socialLinkedin.trim() || null,
+        twitter_x: socialTwitter.trim() || null,
+        website: socialWebsite.trim() || null,
       })
       .eq('id', merchant.id)
     if (updateError) {
@@ -716,6 +737,52 @@ export default function SettingsPage() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Social Media Links */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-4">
+          <div>
+            <h2 className="font-display font-bold text-brand-dark text-sm">Social Media &amp; Website</h2>
+            <p className="text-xs text-gray-400 mt-0.5">These links appear on your public store page so customers can follow you.</p>
+          </div>
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs font-semibold text-gray-500 block mb-1.5">📸 <span className="text-pink-500">Instagram</span></label>
+              <input value={socialInstagram} onChange={e => setSocialInstagram(e.target.value)}
+                placeholder="@yourbusiness"
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green" />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-500 block mb-1.5">📘 <span className="text-blue-500">Facebook</span></label>
+              <input value={socialFacebook} onChange={e => setSocialFacebook(e.target.value)}
+                placeholder="facebook.com/yourbusiness or username"
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green" />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-500 block mb-1.5">💼 <span className="text-sky-500">LinkedIn</span></label>
+              <input value={socialLinkedin} onChange={e => setSocialLinkedin(e.target.value)}
+                placeholder="linkedin.com/in/yourname or username"
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green" />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-500 block mb-1.5">𝕏 <span className="text-gray-700">X / Twitter</span></label>
+              <input value={socialTwitter} onChange={e => setSocialTwitter(e.target.value)}
+                placeholder="@yourhandle"
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green" />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-500 block mb-1.5">🌐 <span className="text-brand-green">Website</span></label>
+              <input value={socialWebsite} onChange={e => setSocialWebsite(e.target.value)}
+                placeholder="https://yourwebsite.com"
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green" />
+            </div>
+          </div>
+          {(socialInstagram || socialFacebook || socialLinkedin || socialTwitter || socialWebsite) && (
+            <div className="bg-brand-light rounded-xl p-3">
+              <p className="text-xs font-semibold text-brand-green mb-1">✓ These links are live on your store page</p>
+              <p className="text-xs text-gray-500">Customers can see and click them in the Find Us section of your store.</p>
+            </div>
+          )}
         </div>
 
         {error && <div className="bg-red-50 border border-red-200 rounded-xl p-3"><p className="text-red-600 text-xs">{error}</p></div>}
