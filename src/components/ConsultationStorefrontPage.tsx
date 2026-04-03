@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { MapPin, Share2, Phone, Star, Search, X, ChevronRight, MessageCircle, ExternalLink, CheckCircle, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import StoreJsonLd from '@/components/StoreJsonLd'
 import { supabase } from '@/lib/supabase'
 import { getThemeById, getThemeStyle } from '@/lib/themes'
 
@@ -805,6 +806,21 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
           </a>
         </div>
       </div>
+
+      {/* JSON-LD Structured Data */}
+      {store && (
+        <StoreJsonLd
+          businessName={store.business_name}
+          description={store.description}
+          location={store.location}
+          address={store.address}
+          whatsappNumber={store.whatsapp_number}
+          category={store.category}
+          logoUrl={store.logo_url}
+          slug={store.slug}
+          themeColor={store.theme_color}
+        />
+      )}
 
       {/* Feedback Modal */}
       {feedbackOpen && store && (
