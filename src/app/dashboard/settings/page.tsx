@@ -8,6 +8,7 @@ import { COUNTRY_LIST } from '@/lib/countries-cities'
 import { COUNTRIES, normalizeNumber } from '@/lib/countries'
 import { EARKET_THEMES, getThemeStyle, getThemeById, type EarketTheme } from '@/lib/themes'
 import { uploadProductImage } from '@/lib/storage'
+import SubdomainSettings from '@/components/SubdomainSettings'
 
 interface Merchant {
   id: string; business_name: string; slug: string; location: string
@@ -17,6 +18,8 @@ interface Merchant {
   order_mode: string; login_pin: string
   instagram?: string; facebook?: string; linkedin?: string
   twitter_x?: string; website?: string; youtube?: string; tiktok?: string; other_link?: string
+  subdomain?: string | null
+  pro_waitlist?: boolean
 }
 
 interface Testimonial { name: string; role: string; text: string; rating: number }
@@ -676,6 +679,17 @@ export default function SettingsPage() {
               <p className="text-xs font-semibold text-gray-500 mb-1">Account Email</p>
               <p className="text-sm text-gray-700 font-medium">{merchant?.email}</p>
             </div>
+
+            {/* Subdomain — premium feature */}
+            {merchant && (
+              <SubdomainSettings
+                merchantId={merchant.id}
+                merchantSlug={merchant.slug}
+                currentSubdomain={merchant.subdomain}
+                isPremium={false}
+              />
+            )}
+
             <button onClick={async () => { await supabase.auth.signOut(); localStorage.removeItem('earket_merchant_email'); router.push('/') }}
               className="w-full text-sm text-red-500 font-semibold py-3 bg-red-50 rounded-2xl hover:bg-red-100 transition-colors">
               Sign out
