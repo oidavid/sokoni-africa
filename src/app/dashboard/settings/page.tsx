@@ -95,6 +95,9 @@ export default function SettingsPage() {
   const [socialLinkedin, setSocialLinkedin] = useState('')
   const [socialTwitter, setSocialTwitter] = useState('')
   const [socialWebsite, setSocialWebsite] = useState('')
+  const [socialYoutube, setSocialYoutube] = useState('')
+  const [socialTiktok, setSocialTiktok] = useState('')
+  const [socialOther, setSocialOther] = useState('')
 
   const [businessHours, setBusinessHours] = useState<Record<string, {open: string; close: string; closed: boolean}>>({
     Mon: { open: '09:00', close: '17:00', closed: false },
@@ -155,6 +158,9 @@ export default function SettingsPage() {
       setSocialLinkedin(m.linkedin || '')
       setSocialTwitter(m.twitter_x || '')
       setSocialWebsite(m.website || '')
+      setSocialYoutube(m.youtube || '')
+      setSocialTiktok(m.tiktok || '')
+      setSocialOther(m.other_link || '')
       const wa = m.whatsapp_number || ''
       const country = COUNTRIES.find(c => c.dial && wa.startsWith(c.dial)) || COUNTRIES[0]
       setSelectedCountry(country)
@@ -227,13 +233,16 @@ export default function SettingsPage() {
         linkedin: socialLinkedin.trim() || null,
         twitter_x: socialTwitter.trim() || null,
         website: socialWebsite.trim() || null,
+        youtube: socialYoutube.trim() || null,
+        tiktok: socialTiktok.trim() || null,
+        other_link: socialOther.trim() || null,
       })
       .eq('id', merchant.id)
     if (updateError) {
       setError('Failed to save. Please try again.')
     } else {
       setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
+      setTimeout(() => setSaved(false), 4000)
     }
     setSaving(false)
   }
@@ -250,12 +259,40 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 max-w-lg mx-auto pb-10">
+      {/* Toast notification — success or error */}
+      {(saved || error) && (
+        <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl text-white text-sm font-semibold transition-all duration-300 max-w-xs w-full mx-4
+          ${saved ? 'bg-brand-green' : 'bg-red-500'}`}>
+          {saved ? (
+            <>
+              <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                <Check size={13} className="text-white" />
+              </div>
+              <div>
+                <div className="font-bold text-sm">Changes saved!</div>
+                <div className="text-white/75 text-xs font-normal">Your store has been updated.</div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                <span className="text-white text-xs font-bold">!</span>
+              </div>
+              <div>
+                <div className="font-bold text-sm">Save failed</div>
+                <div className="text-white/75 text-xs font-normal">{error || 'Please try again.'}</div>
+              </div>
+              <button onClick={() => setError('')} className="ml-auto text-white/60 hover:text-white text-lg leading-none">×</button>
+            </>
+          )}
+        </div>
+      )}
+
       <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3">
         <Link href="/dashboard" className="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center">
           <ArrowLeft size={16} className="text-gray-600" />
         </Link>
         <h1 className="font-display font-bold text-brand-dark flex-1">Store Settings</h1>
-        {saved && <div className="flex items-center gap-1.5 text-brand-green text-xs font-semibold"><Check size={14} /> Saved!</div>}
       </div>
 
       <div className="p-4 space-y-5">
@@ -287,17 +324,17 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Profile Photo â€” only for service businesses */}
+        {/* Profile Photo \u2014 only for service businesses */}
         {merchant?.business_type === 'services' && (
         <div>
           <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Profile Photo</label>
-          <p className="text-xs text-gray-400 mb-3">Your face/headshot â€” shown on coaching & consultation pages. Makes your page feel personal and trustworthy.</p>
+          <p className="text-xs text-gray-400 mb-3">Your face/headshot \u2014 shown on coaching & consultation pages. Makes your page feel personal and trustworthy.</p>
           <input type="file" id="profile-photo-upload" accept="image/*" className="hidden" onChange={handleProfilePhotoUpload} />
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border-2 border-gray-200 relative shrink-0">
               {(profilePhotoPreview || profilePhotoUrl)
                 ? <img src={profilePhotoPreview || profilePhotoUrl || ''} alt="Profile" className="w-full h-full object-cover" />
-                : <span className="text-2xl">ðŸ‘¤</span>
+                : <span className="text-2xl"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-brand-green opacity-50"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
               }
               {uploadingProfilePhoto && (
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-full">
@@ -500,7 +537,7 @@ export default function SettingsPage() {
           {/* Preview */}
           <div className="rounded-2xl overflow-hidden border border-gray-200">
             <div className="h-14 flex items-center px-4 gap-3" style={getThemeStyle(selectedTheme) as React.CSSProperties}>
-              <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center text-lg">ðŸ’¼</div>
+              <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center text-lg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
               <div>
                 <p className="font-display font-bold text-sm" style={{ color: selectedTheme.textOnPrimary }}>{businessName || merchant?.business_name}</p>
                 <p className="text-xs opacity-70" style={{ color: selectedTheme.textOnPrimary }}>{selectedTheme.name} theme</p>
@@ -641,7 +678,7 @@ export default function SettingsPage() {
           <p className="text-xs text-gray-500 mb-1 font-semibold uppercase tracking-wide">Your Store Link</p>
           <p className="font-display font-bold text-brand-green text-sm">earket.com/store/{merchant?.slug}</p>
           <Link href={`/store/${merchant?.slug}`} target="_blank" className="inline-block mt-2 text-xs text-brand-green font-semibold underline">
-            View store â†’
+            View store \u2192
           </Link>
         </div>
 
@@ -776,16 +813,33 @@ export default function SettingsPage() {
                 placeholder="https://yourwebsite.com"
                 className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green" />
             </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-500 block mb-1.5">▶️ <span className="text-red-500">YouTube</span></label>
+              <input value={socialYoutube} onChange={e => setSocialYoutube(e.target.value)}
+                placeholder="youtube.com/@yourchannel or channel URL"
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green" />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-500 block mb-1.5">🎵 <span className="text-gray-800">TikTok</span></label>
+              <input value={socialTiktok} onChange={e => setSocialTiktok(e.target.value)}
+                placeholder="@yourtiktok"
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green" />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-500 block mb-1.5">🔗 <span className="text-purple-500">Other Link</span></label>
+              <input value={socialOther} onChange={e => setSocialOther(e.target.value)}
+                placeholder="Any other link — Snapchat, Pinterest, WeChat, Telegram, etc."
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green" />
+              <p className="text-xs text-gray-400 mt-1">Use this for any platform not listed above.</p>
+            </div>
           </div>
-          {(socialInstagram || socialFacebook || socialLinkedin || socialTwitter || socialWebsite) && (
+          {(socialInstagram || socialFacebook || socialLinkedin || socialTwitter || socialWebsite || socialYoutube || socialTiktok || socialOther) && (
             <div className="bg-brand-light rounded-xl p-3">
               <p className="text-xs font-semibold text-brand-green mb-1">✓ These links are live on your store page</p>
               <p className="text-xs text-gray-500">Customers can see and click them in the Find Us section of your store.</p>
             </div>
           )}
         </div>
-
-        {error && <div className="bg-red-50 border border-red-200 rounded-xl p-3"><p className="text-red-600 text-xs">{error}</p></div>}
 
         <button onClick={handleSave} disabled={saving}
           className="w-full bg-brand-green text-white font-bold py-4 rounded-2xl hover:bg-brand-dark transition-colors disabled:opacity-50 flex items-center justify-center gap-2">

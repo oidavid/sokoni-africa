@@ -29,6 +29,9 @@ interface Merchant {
   linkedin?: string
   twitter_x?: string
   website?: string
+  youtube?: string
+  tiktok?: string
+  other_link?: string
 }
 
 interface Service {
@@ -770,6 +773,25 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
           </a>
         </div>
       </div>
+
+      {/* Social Links */}
+      {(store.instagram || store.facebook || store.linkedin || store.twitter_x || store.website || store.youtube || store.tiktok || store.other_link) && (
+        <div className="max-w-3xl mx-auto px-4 mb-4">
+          <div className="bg-gray-50 rounded-2xl p-4">
+            <p className="text-xs text-gray-400 mb-3 font-semibold uppercase tracking-wide">Follow Us</p>
+            <div className="flex flex-wrap gap-2">
+              {store.instagram && <a href={`https://instagram.com/${store.instagram.replace('@','')}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-pink-50 text-pink-600">📸 Instagram</a>}
+              {store.facebook && <a href={store.facebook.startsWith('http') ? store.facebook : `https://facebook.com/${store.facebook}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600">📘 Facebook</a>}
+              {store.linkedin && <a href={store.linkedin.startsWith('http') ? store.linkedin : `https://linkedin.com/in/${store.linkedin}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-sky-50 text-sky-600">💼 LinkedIn</a>}
+              {store.twitter_x && <a href={`https://x.com/${store.twitter_x.replace('@','')}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700">X / Twitter</a>}
+              {store.youtube && <a href={store.youtube.startsWith('http') ? store.youtube : `https://youtube.com/${store.youtube}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-50 text-red-600">▶️ YouTube</a>}
+              {store.tiktok && <a href={`https://tiktok.com/${store.tiktok.startsWith('@') ? store.tiktok : '@' + store.tiktok}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-900 text-white">🎵 TikTok</a>}
+              {store.website && <a href={store.website.startsWith('http') ? store.website : `https://${store.website}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-brand-light text-brand-green">🌐 Website</a>}
+              {store.other_link && <a href={store.other_link.startsWith('http') ? store.other_link : `https://${store.other_link}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-purple-50 text-purple-600">🔗 Follow Us</a>}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Feedback Modal */}
       {feedbackOpen && store && (

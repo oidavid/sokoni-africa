@@ -30,6 +30,9 @@ interface Merchant {
   linkedin?: string
   twitter_x?: string
   website?: string
+  youtube?: string
+  tiktok?: string
+  other_link?: string
 }
 
 interface Service {
@@ -843,6 +846,23 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
             </div>
           </a>
         </div>
+          {/* Social Links */}
+          {(store.instagram || store.facebook || store.linkedin || store.twitter_x || store.website || store.youtube || store.tiktok || store.other_link) && (
+            <div className="mt-4 bg-gray-50 rounded-2xl p-4">
+              <p className="text-xs text-gray-400 mb-3 font-semibold uppercase tracking-wide">Follow Us</p>
+              <div className="flex flex-wrap gap-2">
+                {store.instagram && <a href={`https://instagram.com/${store.instagram.replace('@','')}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-pink-50 text-pink-600 hover:bg-pink-100 transition-colors">📸 Instagram</a>}
+                {store.facebook && <a href={store.facebook.startsWith('http') ? store.facebook : `https://facebook.com/${store.facebook}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">📘 Facebook</a>}
+                {store.linkedin && <a href={store.linkedin.startsWith('http') ? store.linkedin : `https://linkedin.com/in/${store.linkedin}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors">💼 LinkedIn</a>}
+                {store.twitter_x && <a href={`https://x.com/${store.twitter_x.replace('@','')}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">X / Twitter</a>}
+                {store.youtube && <a href={store.youtube.startsWith('http') ? store.youtube : `https://youtube.com/${store.youtube}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors">▶️ YouTube</a>}
+                {store.tiktok && <a href={`https://tiktok.com/${store.tiktok.startsWith('@') ? store.tiktok : '@' + store.tiktok}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-900 text-white hover:bg-black transition-colors">🎵 TikTok</a>}
+                {store.website && <a href={store.website.startsWith('http') ? store.website : `https://${store.website}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-brand-light text-brand-green hover:bg-brand-green hover:text-white transition-colors">🌐 Website</a>}
+                {store.other_link && <a href={store.other_link.startsWith('http') ? store.other_link : `https://${store.other_link}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors">🔗 Follow Us</a>}
+              </div>
+            </div>
+          )}
+
       </div>
 
       {/* Feedback Modal */}

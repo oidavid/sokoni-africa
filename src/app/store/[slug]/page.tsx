@@ -34,6 +34,9 @@ interface Merchant {
   linkedin?: string
   twitter_x?: string
   website?: string
+  youtube?: string
+  tiktok?: string
+  other_link?: string
 }
 
 interface Product {
@@ -1118,7 +1121,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
           </div>
 
           {/* Social links — only shown if merchant has filled them in */}
-          {(store.instagram || store.facebook || store.linkedin || store.twitter_x || store.website) && (
+          {(store.instagram || store.facebook || store.linkedin || store.twitter_x || store.website || store.youtube || store.tiktok || store.other_link) && (
             <div className="flex items-start gap-3 mt-1">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-brand-light">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="#1A7A4A" strokeWidth="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
@@ -1154,6 +1157,24 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                     <a href={store.website.startsWith('http') ? store.website : `https://${store.website}`} target="_blank" rel="noreferrer"
                        className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-brand-light text-brand-green hover:bg-brand-green hover:text-white transition-colors">
                       🌐 Website
+                    </a>
+                  )}
+                  {store.youtube && (
+                    <a href={store.youtube.startsWith('http') ? store.youtube : `https://youtube.com/${store.youtube.replace('@','@')}`} target="_blank" rel="noreferrer"
+                       className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors">
+                      ▶️ YouTube
+                    </a>
+                  )}
+                  {store.tiktok && (
+                    <a href={`https://tiktok.com/${store.tiktok.startsWith('@') ? store.tiktok : '@' + store.tiktok}`} target="_blank" rel="noreferrer"
+                       className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-900 text-white hover:bg-black transition-colors">
+                      🎵 TikTok
+                    </a>
+                  )}
+                  {store.other_link && (
+                    <a href={store.other_link.startsWith('http') ? store.other_link : `https://${store.other_link}`} target="_blank" rel="noreferrer"
+                       className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors">
+                      🔗 Follow Us
                     </a>
                   )}
                 </div>
