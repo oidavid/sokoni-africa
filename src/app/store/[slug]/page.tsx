@@ -29,6 +29,11 @@ interface Merchant {
   business_hours?: Record<string, {open: string; close: string; closed: boolean}>
   theme_preset?: string
   country?: string
+  instagram?: string
+  facebook?: string
+  linkedin?: string
+  twitter_x?: string
+  website?: string
 }
 
 interface Product {
@@ -117,6 +122,13 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
   const [showWaCountryPicker, setShowWaCountryPicker] = useState(false)
   const [waName, setWaName] = useState('')
   const [waPhone, setWaPhone] = useState('')
+  const [shareOpen, setShareOpen] = useState(false)
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
+  const [feedbackRating, setFeedbackRating] = useState(0)
+  const [feedbackText, setFeedbackText] = useState('')
+  const [feedbackAnon, setFeedbackAnon] = useState(false)
+  const [feedbackSent, setFeedbackSent] = useState(false)
+  const [feedbackSending, setFeedbackSending] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -231,8 +243,36 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
   }
 
   function shareStore() {
-    if (navigator.share) navigator.share({ title: store?.business_name, url: window.location.href })
-    else { navigator.clipboard.writeText(window.location.href); alert('Link copied!') }
+    if (navigator.share && /Android|iPhone|iPad/i.test(navigator.userAgent)) {
+      navigator.share({ title: store?.business_name, text: `Check out ${store?.business_name} on Earket`, url: window.location.href })
+    } else {
+      setShareOpen(true)
+    }
+  }
+
+  function copyStoreLink() {
+    navigator.clipboard.writeText(window.location.href)
+    const btn = document.getElementById('copy-link-btn')
+    if (btn) { btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = 'Copy Link'; }, 2000) }
+  }
+
+  async function submitFeedback() {
+    if (!feedbackRating) return
+    setFeedbackSending(true)
+    try {
+      await supabase.from('feedback').insert({
+        merchant_id: store?.id,
+        merchant_slug: store?.slug,
+        rating: feedbackRating,
+        message: feedbackText.trim() || null,
+        anonymous: feedbackAnon,
+        customer_name: feedbackAnon ? null : customer?.name || null,
+        page_url: window.location.href,
+      })
+    } catch {}
+    setFeedbackSent(true)
+    setFeedbackSending(false)
+    setTimeout(() => { setFeedbackOpen(false); setFeedbackSent(false); setFeedbackRating(0); setFeedbackText('') }, 2000)
   }
 
   // People-led: warm, personal, profile photo, empathy headline
@@ -244,6 +284,14 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
     if (PEOPLE_LED.includes(store.category)) return <ConsultationStorefrontPage params={params} />
     return <ServicesLedStorefrontPage params={params} />
   }
+
+  // SEO metadata - dynamic per store
+  const pageTitle = store ? `${store.business_name} — Shop on Earket` : 'Earket Store'
+  const pageDesc = store
+    ? `${store.description || `Shop ${store.business_name} online`}. Order via WhatsApp. Based in ${store.location}.`
+    : 'Shop online on Earket'
+  const pageUrl = typeof window !== 'undefined' ? window.location.href : `https://earket.com/store/${params.slug}`
+  const ogImage = store?.logo_url || 'https://earket.com/og-default.jpg'
 
   if (loading) {
     return (
@@ -322,6 +370,109 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* SEO Head tags — injected per store */}
+      {store && typeof document !== 'undefined' && (() => {
+        document.title = pageTitle
+        const setMeta = (attr: string, key: string, val: string) => {
+          let el = document.querySelector(`meta[${attr}="${key}"]`) as HTMLMetaElement | null
+          if (!el) { el = document.createElement('meta'); el.setAttribute(attr, key); document.head.appendChild(el) }
+          el.setAttribute('content', val)
+        }
+        setMeta('name','description', pageDesc)
+        setMeta('property','og:title', pageTitle)
+        setMeta('property','og:description', pageDesc)
+        setMeta('property','og:url', pageUrl)
+        setMeta('property','og:image', ogImage)
+        setMeta('name','twitter:card', 'summary_large_image')
+        return null
+      })()}
+
+      {/* Share Modal */}
+      {shareOpen && store && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={() => setShareOpen(false)}>
+          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h3 className="font-display font-bold text-brand-dark text-base">Share this store</h3>
+                <p className="text-xs text-gray-400 mt-0.5">{typeof window !== 'undefined' ? window.location.href : ''}</p>
+              </div>
+              <button onClick={() => setShareOpen(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200"><X size={14} /></button>
+            </div>
+            <div className="grid grid-cols-4 gap-3 mb-5">
+              {(typeof window !== 'undefined' ? [
+                { label: 'WhatsApp', color: '#25D366', icon: '💬', href: `https://wa.me/?text=${encodeURIComponent(`Check out ${store.business_name} on Earket: ${window.location.href}`)}` },
+                { label: 'Facebook', color: '#1877F2', icon: '📘', href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}` },
+                { label: 'X / Twitter', color: '#111', icon: '𝕏', href: `https://x.com/intent/tweet?text=${encodeURIComponent(`Check out ${store.business_name}`)}&url=${encodeURIComponent(window.location.href)}` },
+                { label: 'LinkedIn', color: '#0A66C2', icon: '💼', href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}` },
+                { label: 'Email', color: '#EA4335', icon: '✉️', href: `mailto:?subject=${encodeURIComponent(`Check out ${store.business_name}`)}&body=${encodeURIComponent(`I found this store on Earket: ${window.location.href}`)}` },
+                { label: 'SMS', color: '#34C759', icon: '📱', href: `sms:?body=${encodeURIComponent(`Check out ${store.business_name}: ${window.location.href}`)}` },
+                { label: 'Instagram', color: '#E1306C', icon: '📸', href: 'https://www.instagram.com/' },
+                { label: 'Telegram', color: '#2AABEE', icon: '✈️', href: `https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(`Check out ${store.business_name}`)}` },
+              ] : []).map((s, i) => (
+                <a key={i} href={s.href} target="_blank" rel="noreferrer" onClick={() => setShareOpen(false)}
+                   className="flex flex-col items-center gap-1.5 group">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl transition-transform group-hover:scale-110"
+                       style={{ backgroundColor: s.color + '18', border: `1.5px solid ${s.color}28` }}>
+                    {s.icon}
+                  </div>
+                  <span className="text-xs text-gray-500 text-center leading-tight">{s.label}</span>
+                </a>
+              ))}
+            </div>
+            <button id="copy-link-btn" onClick={copyStoreLink}
+              className="w-full bg-brand-light text-brand-green font-bold text-sm py-3 rounded-2xl hover:bg-brand-green hover:text-white transition-colors">
+              Copy Link
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Feedback Modal */}
+      {feedbackOpen && store && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={() => setFeedbackOpen(false)}>
+          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+            {feedbackSent ? (
+              <div className="text-center py-6">
+                <div className="text-4xl mb-3">🙏</div>
+                <div className="font-display font-bold text-brand-dark text-lg mb-1">Thank you!</div>
+                <p className="text-sm text-gray-500">Your feedback helps us improve Earket.</p>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="font-display font-bold text-brand-dark text-base">Rate your experience</h3>
+                  <button onClick={() => setFeedbackOpen(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"><X size={14} /></button>
+                </div>
+                <div className="flex justify-center gap-3 mb-5">
+                  {[1,2,3,4,5].map(n => (
+                    <button key={n} onClick={() => setFeedbackRating(n)}
+                      className={`text-3xl transition-transform hover:scale-125 ${feedbackRating >= n ? '' : 'opacity-25'}`}>
+                      ⭐
+                    </button>
+                  ))}
+                </div>
+                <textarea
+                  value={feedbackText}
+                  onChange={e => setFeedbackText(e.target.value)}
+                  placeholder="Tell us more (optional)..."
+                  rows={3}
+                  className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm outline-none focus:border-brand-green resize-none mb-3"
+                />
+                <label className="flex items-center gap-2 mb-5 cursor-pointer">
+                  <input type="checkbox" checked={feedbackAnon} onChange={e => setFeedbackAnon(e.target.checked)}
+                    className="w-4 h-4 rounded" />
+                  <span className="text-xs text-gray-500">Submit anonymously</span>
+                </label>
+                <button onClick={submitFeedback} disabled={!feedbackRating || feedbackSending}
+                  className="w-full bg-brand-green text-white font-bold text-sm py-3 rounded-2xl disabled:opacity-40 hover:bg-brand-dark transition-colors">
+                  {feedbackSending ? 'Sending...' : 'Submit Feedback'}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Holiday / Closure Banner */}
       {store.holiday_mode && (
         <div className="bg-red-500 text-white text-center px-4 py-3 text-sm font-semibold">
@@ -965,6 +1116,50 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
               </div>
             )}
           </div>
+
+          {/* Social links — only shown if merchant has filled them in */}
+          {(store.instagram || store.facebook || store.linkedin || store.twitter_x || store.website) && (
+            <div className="flex items-start gap-3 mt-1">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-brand-light">
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="#1A7A4A" strokeWidth="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-gray-400 mb-2">Follow Us</p>
+                <div className="flex flex-wrap gap-2">
+                  {store.instagram && (
+                    <a href={`https://instagram.com/${store.instagram.replace('@','')}`} target="_blank" rel="noreferrer"
+                       className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-pink-50 text-pink-600 hover:bg-pink-100 transition-colors">
+                      📸 Instagram
+                    </a>
+                  )}
+                  {store.facebook && (
+                    <a href={store.facebook.startsWith('http') ? store.facebook : `https://facebook.com/${store.facebook}`} target="_blank" rel="noreferrer"
+                       className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
+                      📘 Facebook
+                    </a>
+                  )}
+                  {store.linkedin && (
+                    <a href={store.linkedin.startsWith('http') ? store.linkedin : `https://linkedin.com/in/${store.linkedin}`} target="_blank" rel="noreferrer"
+                       className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors">
+                      💼 LinkedIn
+                    </a>
+                  )}
+                  {store.twitter_x && (
+                    <a href={`https://x.com/${store.twitter_x.replace('@','')}`} target="_blank" rel="noreferrer"
+                       className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+                      𝕏 Twitter / X
+                    </a>
+                  )}
+                  {store.website && (
+                    <a href={store.website.startsWith('http') ? store.website : `https://${store.website}`} target="_blank" rel="noreferrer"
+                       className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-brand-light text-brand-green hover:bg-brand-green hover:text-white transition-colors">
+                      🌐 Website
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         <a href={`https://maps.google.com/maps?q=${encodeURIComponent((store.address || store.business_name) + ' ' + store.location)}&output=embed&z=15`}
           target="_blank" rel="noreferrer"
@@ -1003,9 +1198,15 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
               IntelSys Technologies
             </a>
           </p>
-          <Link href="/onboarding" className="inline-block font-bold text-sm px-6 py-2.5 rounded-xl transition-colors" style={{ backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') }}>
-            Start Free — earket.com
-          </Link>
+          <div className="flex gap-2 justify-center flex-wrap">
+            <Link href="/onboarding" className="inline-block font-bold text-sm px-6 py-2.5 rounded-xl transition-colors" style={{ backgroundColor: store.theme_color || '#1A7A4A', color: getContrastColor(store.theme_color || '#1A7A4A') }}>
+              Start Free — earket.com
+            </Link>
+            <button onClick={() => setFeedbackOpen(true)}
+              className="inline-block font-semibold text-sm px-5 py-2.5 rounded-xl bg-white/10 text-white/70 hover:bg-white/20 transition-colors">
+              Leave Feedback
+            </button>
+          </div>
         </div>
       </div>
     </div>
