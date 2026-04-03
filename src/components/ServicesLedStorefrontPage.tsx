@@ -25,6 +25,11 @@ interface Merchant {
   holiday_message?: string
   business_hours?: Record<string, {open: string; close: string; closed: boolean}>
   profile_photo_url?: string
+  instagram?: string
+  facebook?: string
+  linkedin?: string
+  twitter_x?: string
+  website?: string
 }
 
 interface Service {
@@ -370,6 +375,12 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
   const [formSubmitting, setFormSubmitting] = useState(false)
   const [formSubmitted, setFormSubmitted] = useState(false)
   const [formError, setFormError] = useState('')
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
+  const [feedbackRating, setFeedbackRating] = useState(0)
+  const [feedbackText, setFeedbackText] = useState('')
+  const [feedbackAnon, setFeedbackAnon] = useState(false)
+  const [feedbackSent, setFeedbackSent] = useState(false)
+  const [feedbackSending, setFeedbackSending] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -385,6 +396,24 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
     }
     load()
   }, [params.slug])
+
+  async function submitFeedback() {
+    if (!feedbackRating) return
+    setFeedbackSending(true)
+    try {
+      await supabase.from('feedback').insert({
+        merchant_id: store?.id,
+        merchant_slug: store?.slug,
+        rating: feedbackRating,
+        message: feedbackText.trim() || null,
+        anonymous: feedbackAnon,
+        page_url: typeof window !== 'undefined' ? window.location.href : null,
+      })
+    } catch {}
+    setFeedbackSent(true)
+    setFeedbackSending(false)
+    setTimeout(() => { setFeedbackOpen(false); setFeedbackSent(false); setFeedbackRating(0); setFeedbackText('') }, 2000)
+  }
 
   async function handleFormSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -816,6 +845,51 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
         </div>
       </div>
 
+      {/* Feedback Modal */}
+      {feedbackOpen && store && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={() => setFeedbackOpen(false)}>
+          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+            {feedbackSent ? (
+              <div className="text-center py-6">
+                <div className="text-4xl mb-3">🙏</div>
+                <div className="font-bold text-gray-900 text-lg mb-1">Thank you!</div>
+                <p className="text-sm text-gray-500">Your feedback helps us improve Earket.</p>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="font-bold text-gray-900 text-base">Rate your experience</h3>
+                  <button onClick={() => setFeedbackOpen(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"><X size={14} /></button>
+                </div>
+                <div className="flex justify-center gap-3 mb-5">
+                  {[1,2,3,4,5].map(n => (
+                    <button key={n} onClick={() => setFeedbackRating(n)}
+                      className={`text-3xl transition-transform hover:scale-125 ${feedbackRating >= n ? '' : 'opacity-25'}`}>
+                      ⭐
+                    </button>
+                  ))}
+                </div>
+                <textarea
+                  value={feedbackText}
+                  onChange={e => setFeedbackText(e.target.value)}
+                  placeholder="Tell us more (optional)..."
+                  rows={3}
+                  className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm outline-none focus:border-gray-400 resize-none mb-3"
+                />
+                <label className="flex items-center gap-2 mb-5 cursor-pointer">
+                  <input type="checkbox" checked={feedbackAnon} onChange={e => setFeedbackAnon(e.target.checked)} className="w-4 h-4 rounded" />
+                  <span className="text-xs text-gray-500">Submit anonymously</span>
+                </label>
+                <button onClick={submitFeedback} disabled={!feedbackRating || feedbackSending}
+                  className="w-full bg-gray-900 text-white font-bold text-sm py-3 rounded-2xl disabled:opacity-40 hover:bg-gray-800 transition-colors">
+                  {feedbackSending ? 'Sending...' : 'Submit Feedback'}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Sticky footer */}
       <div className="sticky bottom-0 bg-white/95 backdrop-blur border-t border-gray-100 px-4 py-3">
         <div className="max-w-4xl mx-auto">
@@ -830,10 +904,27 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
       {/* Footer */}
       <div className="max-w-4xl mx-auto px-4 py-6 text-center">
         <div className="rounded-2xl p-5 bg-gray-900">
-          <p className="text-gray-500 text-xs mb-1">Powered by</p>
-          <p className="font-display font-bold text-white text-lg mb-1">Earket 🛒</p>
-          <p className="text-gray-500 text-xs mb-4">Build your free business page in 5 minutes</p>
-          <Link href="/onboarding" className="inline-block font-bold text-sm px-6 py-2.5 rounded-xl bg-white/10 text-white">Start Free — earket.com</Link>
+          <p className="text-white/40 text-xs mb-1">Powered by</p>
+          <Link href="/" className="font-display font-bold text-white text-lg mb-1 hover:text-brand-accent transition-colors inline-block">
+            earket
+          </Link>
+          <p className="text-white/50 text-xs mb-0.5">Build your own free online store in 5 minutes</p>
+          <p className="text-white/25 text-xs mb-4">
+            A product of{' '}
+            <a href="https://intelsystechnology.com" target="_blank" rel="noopener noreferrer"
+               className="text-white/40 hover:text-white/70 transition-colors font-semibold">
+              IntelSys Technologies
+            </a>
+          </p>
+          <div className="flex gap-2 justify-center flex-wrap">
+            <Link href="/onboarding" className="inline-block font-bold text-sm px-6 py-2.5 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors">
+              Start Free — earket.com
+            </Link>
+            <button onClick={() => setFeedbackOpen(true)}
+              className="inline-block font-semibold text-sm px-5 py-2.5 rounded-xl bg-white/10 text-white/70 hover:bg-white/20 transition-colors">
+              Leave Feedback
+            </button>
+          </div>
         </div>
       </div>
     </div>
