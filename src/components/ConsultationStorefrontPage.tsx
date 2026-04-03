@@ -252,7 +252,11 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
 
   useEffect(() => {
     async function load() {
-      const { data: merchant } = await supabase.from('merchants').select('*').eq('slug', params.slug).single()
+      const { data: merchant } = await supabase
+        .from('merchants')
+        .select('id,business_name,slug,description,location,whatsapp_number,category,theme_color,logo_url,business_type,theme_preset,address,holiday_mode,holiday_message,business_hours,profile_photo_url,testimonials,updated_at,instagram,facebook,linkedin,twitter_x,website,youtube,tiktok,other_link')
+        .eq('slug', params.slug)
+        .single()
       if (merchant) {
         setStore(merchant)
         const { data: svcs } = await supabase.from('products').select('*')
