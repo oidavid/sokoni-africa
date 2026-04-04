@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+// Note: intentionally NOT using useSearchParams — avoids Suspense requirement in Next.js 14
 import Link from 'next/link'
 import { Check, Loader2, ShoppingBag, Camera, Upload, ExternalLink } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -40,7 +41,6 @@ const section = "bg-white rounded-2xl border border-gray-100 p-4"
 
 export default function SettingsPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [merchant, setMerchant] = useState<Merchant | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -107,14 +107,6 @@ export default function SettingsPage() {
   const [loginPin, setLoginPin] = useState('')
 
   useEffect(() => {
-    const tabFromUrl = searchParams.get('tab')
-    const validTabs: Tab[] = ['brand', 'business', 'social', 'hours', 'account']
-    if (tabFromUrl && validTabs.includes(tabFromUrl as Tab)) {
-      setActiveTab(tabFromUrl as Tab)
-    }
-  }, [searchParams])
-
-  useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
       const fallbackEmail = typeof window !== 'undefined' ? localStorage.getItem('earket_merchant_email') : null
@@ -123,6 +115,15 @@ export default function SettingsPage() {
       const { data: m } = await supabase.from('merchants').select('*').eq('email', merchantEmail).single()
       if (!m) { router.push('/onboarding'); return }
       setMerchant(m)
+      // Read ?tab= from URL and set active tab
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search)
+        const tabFromUrl = params.get('tab')
+        const validTabs: Tab[] = ['brand', 'business', 'social', 'hours', 'account']
+        if (tabFromUrl && validTabs.includes(tabFromUrl as Tab)) {
+          setActiveTab(tabFromUrl as Tab)
+        }
+      }
       setBusinessName(m.business_name || '')
       setDescription(m.description || '')
       setAddress(m.address || '')
