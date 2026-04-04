@@ -484,7 +484,7 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              <Link href="/dashboard/settings"
+              <Link href="/dashboard/settings?tab=social"
                 className="flex items-center justify-center gap-1.5 w-full bg-brand-light text-brand-green text-xs font-bold py-2.5 rounded-xl hover:bg-brand-green hover:text-white transition-colors">
                 {filledSocial.length > 0 ? 'Manage Links' : 'Add Social Links'}
                 <ChevronRight size={12} />
