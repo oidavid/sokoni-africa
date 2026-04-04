@@ -221,7 +221,7 @@ export default function AddProductPage() {
               <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">
                 {merchant?.business_type === 'services' ? 'Service Photo' : 'Product Photo'}
               </p>
-              <input ref={fileRef} type="file" accept="image/*" capture="environment"
+              <input ref={fileRef} type="file" accept="image/*"
                 className="hidden" onChange={handlePhoto} />
 
               {!photo ? (
