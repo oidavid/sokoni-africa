@@ -685,8 +685,10 @@ export default function SettingsPage() {
               <SubdomainSettings
                 merchantId={merchant.id}
                 merchantSlug={merchant.slug}
+                merchantName={merchant.business_name}
+                merchantEmail={merchant.email}
+                merchantWhatsapp={merchant.whatsapp_number}
                 currentSubdomain={merchant.subdomain}
-                isPremium={false}
               />
             )}
 
