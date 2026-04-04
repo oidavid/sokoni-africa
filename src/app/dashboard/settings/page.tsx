@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Check, Loader2, ShoppingBag, Camera, Upload, ExternalLink } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -40,6 +40,7 @@ const section = "bg-white rounded-2xl border border-gray-100 p-4"
 
 export default function SettingsPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [merchant, setMerchant] = useState<Merchant | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -104,6 +105,14 @@ export default function SettingsPage() {
 
   // Account tab
   const [loginPin, setLoginPin] = useState('')
+
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab')
+    const validTabs: Tab[] = ['brand', 'business', 'social', 'hours', 'account']
+    if (tabFromUrl && validTabs.includes(tabFromUrl as Tab)) {
+      setActiveTab(tabFromUrl as Tab)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     async function load() {
