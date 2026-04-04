@@ -455,7 +455,7 @@ export default function DashboardPage() {
             <div className="bg-white rounded-2xl border border-gray-100 p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-display font-bold text-brand-dark text-sm">Social & Web</h3>
-                <Link href="/dashboard/settings"
+                <Link href="/dashboard/settings?tab=social"
                   className="text-xs text-brand-green font-semibold hover:text-brand-dark transition-colors">
                   Edit →
                 </Link>
@@ -484,7 +484,7 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              <Link href="/dashboard/settings?tab=social"
+              <Link href="/dashboard/settings"
                 className="flex items-center justify-center gap-1.5 w-full bg-brand-light text-brand-green text-xs font-bold py-2.5 rounded-xl hover:bg-brand-green hover:text-white transition-colors">
                 {filledSocial.length > 0 ? 'Manage Links' : 'Add Social Links'}
                 <ChevronRight size={12} />
