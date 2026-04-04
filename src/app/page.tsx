@@ -365,7 +365,7 @@ export default function HomePage() {
           {/* Wordmark */}
           <Link href="/" className="flex items-center gap-3 group">
             <span className="font-display font-bold text-brand-dark text-xl tracking-tight group-hover:text-brand-green transition-colors">
-              earket
+              Earket
             </span>
             <span className="hidden sm:inline-flex text-xs font-semibold text-brand-green bg-brand-light border border-brand-green/20 px-2.5 py-0.5 rounded-full">
               Free Forever
@@ -693,7 +693,7 @@ export default function HomePage() {
 
             {/* Brand */}
             <div className="md:col-span-2">
-              <div className="text-2xl font-display font-bold text-white tracking-tight mb-2">earket</div>
+              <div className="text-2xl font-display font-bold text-white tracking-tight mb-2">Earket</div>
               <p className="text-white/45 text-sm leading-relaxed mb-5 max-w-xs">
                 The fastest way for any business, anywhere in the world, to get online. Free forever. AI-powered. Live in minutes.
               </p>
