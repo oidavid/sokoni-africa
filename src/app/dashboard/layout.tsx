@@ -162,6 +162,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <ExternalLink size={12} className="text-brand-green/50" />
           </Link>
         )}
+        <a href="mailto:earket@earket.com"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-brand-light hover:text-brand-green transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          <span>Contact Support</span>
+        </a>
         <button onClick={async () => {
           await supabase.auth.signOut()
           localStorage.removeItem('earket_merchant_email')
@@ -174,7 +179,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="pt-3 mx-1">
           <div className="bg-gray-50 rounded-xl px-3 py-2.5 text-center border border-gray-100">
             <div className="flex items-center justify-center gap-1.5 mb-0.5">
-              <span className="font-display font-bold text-brand-green text-sm">earket</span>
+              <span className="font-display font-bold text-brand-green text-sm">Earket</span>
               <span className="text-gray-300 text-xs">·</span>
               <span className="text-xs text-gray-400 font-medium">Free Forever</span>
             </div>
