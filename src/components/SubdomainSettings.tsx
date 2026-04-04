@@ -76,11 +76,11 @@ export default function SubdomainSettings({
   }
 
   const waPaymentMsg = encodeURIComponent(
-    `Hi, I'd like to claim *${subdomain}.earket.com* for my Earket store (${merchantName}). Please send me the payment link.`
+    `Hi, I'd like to claim *earket.com/go/${subdomain}* for my Earket store (${merchantName}). Please send me the payment link.`
   )
-  const emailSubject = encodeURIComponent(`Subdomain Request — ${subdomain}.earket.com`)
+  const emailSubject = encodeURIComponent(`Branded Link Request — earket.com/go/${subdomain}`)
   const emailBody = encodeURIComponent(
-    `Hi,\n\nI'd like to claim the subdomain ${subdomain}.earket.com for my Earket store (${merchantName}).\n\nPlease send me a Paystack payment link.\n\nMerchant ID: ${merchantId}\nEmail: ${merchantEmail}`
+    `Hi,\n\nI'd like to claim the branded link earket.com/go/${subdomain} for my Earket store (${merchantName}).\n\nPlease send me a Paystack payment link.\n\nMerchant ID: ${merchantId}\nEmail: ${merchantEmail}`
   )
 
   // ── ACTIVE ─────────────────────────────────────────────────────────────
@@ -97,9 +97,9 @@ export default function SubdomainSettings({
       </div>
       <div className="bg-brand-light rounded-xl p-4">
         <p className="text-xs text-gray-500 mb-1 font-semibold uppercase tracking-wide">Your branded link</p>
-        <a href={`https://${currentSubdomain}.earket.com`} target="_blank" rel="noreferrer"
+        <a href={`https://earket.com/go/${currentSubdomain}`} target="_blank" rel="noreferrer"
           className="text-base font-bold text-brand-green hover:underline flex items-center gap-1.5">
-          {currentSubdomain}.earket.com <ExternalLink size={14} />
+          earket.com/go/{currentSubdomain} <ExternalLink size={14} />
         </a>
         <p className="text-xs text-gray-400 mt-2">Your original link earket.com/store/{merchantSlug} still works too</p>
       </div>
@@ -117,7 +117,7 @@ export default function SubdomainSettings({
       <div>
         <p className="font-display font-bold text-brand-dark text-base mb-1">Request submitted!</p>
         <p className="text-sm text-gray-500">
-          Your request for <span className="font-bold text-brand-green">{subdomain}.earket.com</span> is received.
+          Your request for <span className="font-bold text-brand-green">earket.com/go/{subdomain}</span> is received.
         </p>
       </div>
       <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-left space-y-2">
@@ -149,7 +149,7 @@ export default function SubdomainSettings({
       <div>
         <p className="font-display font-bold text-brand-dark text-sm">Complete Your Payment</p>
         <p className="text-xs text-gray-400 mt-0.5">
-          Claiming: <span className="font-bold text-brand-green">{subdomain}.earket.com</span>
+          Claiming: <span className="font-bold text-brand-green">earket.com/go/{subdomain}</span>
         </p>
       </div>
       <div className="bg-brand-light rounded-xl p-4 flex items-center justify-between">
@@ -221,7 +221,7 @@ export default function SubdomainSettings({
                 onChange={e => { setSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')); setAvailability('idle') }}
                 placeholder="yourbrand"
                 className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green pr-28 font-mono" />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">.earket.com</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-mono">→ earket.com/go/</span>
             </div>
             <button onClick={checkAvailability} disabled={!subdomain || checking || !!validationError}
               className="bg-gray-100 text-gray-700 text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-40 shrink-0">
@@ -229,18 +229,18 @@ export default function SubdomainSettings({
             </button>
           </div>
           {validationError && <p className="text-xs text-red-500 mt-1.5">❌ {validationError}</p>}
-          {!validationError && availability === 'available' && <p className="text-xs text-brand-green mt-1.5 flex items-center gap-1"><Check size={12} /> {subdomain}.earket.com is available!</p>}
+          {!validationError && availability === 'available' && <p className="text-xs text-brand-green mt-1.5 flex items-center gap-1"><Check size={12} /> earket.com/go/{subdomain} is available!</p>}
           {availability === 'taken' && <p className="text-xs text-red-500 mt-1.5">❌ Already taken — try a different name</p>}
         </div>
         <div className="text-xs text-gray-400 space-y-1">
-          <p>• Use your business name (e.g. jbmart, nwatransport)</p>
+          <p>• Use your business name (e.g. jbmart, ceocoaching)</p>
           <p>• Lowercase letters, numbers and hyphens only · 3–30 characters</p>
         </div>
         <div className="flex gap-2">
           <button onClick={() => setStep('intro')} className="flex-1 bg-gray-100 text-gray-600 text-sm font-semibold py-3 rounded-xl hover:bg-gray-200 transition-colors">Back</button>
           <button onClick={submitRequest} disabled={availability !== 'available' || submitting}
             className="flex-1 bg-brand-green text-white text-sm font-bold py-3 rounded-xl hover:bg-brand-dark transition-colors disabled:opacity-40 flex items-center justify-center gap-2">
-            {submitting ? <><Loader2 size={16} className="animate-spin" /> Submitting...</> : `Claim for ${PRICE} →`}
+            {submitting ? <><Loader2 size={16} className="animate-spin" /> Submitting...</> : `Claim earket.com/go/${subdomain} →`}
           </button>
         </div>
       </div>
@@ -269,12 +269,12 @@ export default function SubdomainSettings({
         </div>
         <div>
           <p className="text-xs text-gray-400 mb-1">Your own branded link:</p>
-          <p className="text-sm font-mono font-bold text-indigo-700 bg-indigo-50 px-2 py-1.5 rounded-lg">yourbrand.earket.com</p>
+          <p className="text-sm font-mono font-bold text-indigo-700 bg-indigo-50 px-2 py-1.5 rounded-lg">earket.com/go/yourbrand</p>
         </div>
       </div>
       <div className="space-y-2">
         {[
-          { icon: '🔗', text: 'Shorter, professional link to share everywhere' },
+          { icon: '🔗', text: 'Short, professional link — earket.com/go/yourbrand' },
           { icon: '📱', text: 'Easier to remember and type on any device' },
           { icon: '💼', text: 'Builds brand recognition with every customer visit' },
           { icon: '✅', text: 'One-time payment — no monthly fees, yours forever' },

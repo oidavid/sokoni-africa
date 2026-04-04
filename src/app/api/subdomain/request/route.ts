@@ -57,7 +57,7 @@ export async function POST(request: Request) {
       `Business: ${merchant_name}\n` +
       `Email: ${merchant_email}\n` +
       `WhatsApp: ${merchant_whatsapp || 'Not provided'}\n` +
-      `Requested subdomain: *${subdomain}.earket.com*\n` +
+      `Branded link: *earket.com/go/${subdomain}*\n` +
       `Price: ${PRICE_DISPLAY}\n\n` +
       `To activate:\n` +
       `1. Collect payment (${PRICE} via Paystack or bank transfer)\n` +
