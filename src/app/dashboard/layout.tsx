@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Package, ShoppingCart, BarChart2, Settings,
   CreditCard, LogOut, Users, Boxes, Radio, Tag, FileText,
   ExternalLink, ChevronRight, Inbox, Sparkles, TrendingUp,
-  Menu, X, ShoppingBag, Megaphone
+  Menu, X, ShoppingBag, Megaphone, BookOpen, HelpCircle
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import ContactSupportModal from '@/components/ContactSupportModal'
@@ -35,6 +35,7 @@ const PRODUCT_NAV: NavItem[] = [
   { icon: Tag,             label: 'Discounts',   href: '/dashboard/discounts' },
   { icon: FileText,        label: 'Credit Report', href: '/dashboard/credit-report' },
   { icon: Radio,           label: 'Referrals',   href: '/dashboard/referrals' },
+  { icon: BookOpen,        label: 'Help',        href: '/dashboard/help' },
   { icon: Settings,        label: 'Settings',    href: '/dashboard/settings' },
 ]
 
@@ -244,6 +245,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 View Store →
               </Link>
             )}
+            <Link
+              href="/dashboard/help"
+              className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
+                pathname === '/dashboard/help'
+                  ? 'bg-brand-green text-white'
+                  : 'bg-gray-100 text-gray-500 hover:bg-brand-light hover:text-brand-green'
+              }`}
+              title="Help & setup guide"
+            >
+              <HelpCircle size={16} />
+            </Link>
             <button onClick={() => setSidebarOpen(true)}
               className="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center">
               <Menu size={16} className="text-gray-600" />
@@ -253,12 +265,36 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Breadcrumb — desktop only, not on main dashboard */}
         {pathname !== '/dashboard' && (
-          <div className="hidden md:flex items-center gap-2 px-6 py-3 bg-white border-b border-gray-50 text-xs text-gray-400">
-            <Link href="/dashboard" className="hover:text-brand-green transition-colors">Dashboard</Link>
-            <ChevronRight size={12} />
-            <span className="font-semibold text-gray-600 capitalize">
-              {pathname.split('/').pop()?.replace(/-/g, ' ')}
-            </span>
+          <div className="hidden md:flex items-center justify-between px-6 py-3 bg-white border-b border-gray-50 text-xs text-gray-400">
+            <div className="flex items-center gap-2">
+              <Link href="/dashboard" className="hover:text-brand-green transition-colors">Dashboard</Link>
+              <ChevronRight size={12} />
+              <span className="font-semibold text-gray-600 capitalize">
+                {pathname.split('/').pop()?.replace(/-/g, ' ')}
+              </span>
+            </div>
+            <Link
+              href="/dashboard/help"
+              className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${
+                pathname === '/dashboard/help'
+                  ? 'text-brand-green'
+                  : 'text-gray-400 hover:text-brand-green'
+              }`}
+            >
+              <HelpCircle size={13} />
+              Help
+            </Link>
+          </div>
+        )}
+        {pathname === '/dashboard' && (
+          <div className="hidden md:flex items-center justify-end px-6 py-3 bg-white border-b border-gray-50">
+            <Link
+              href="/dashboard/help"
+              className="flex items-center gap-1.5 text-xs font-medium text-gray-400 hover:text-brand-green transition-colors"
+            >
+              <HelpCircle size={13} />
+              Help
+            </Link>
           </div>
         )}
 
@@ -300,6 +336,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           merchantEmail={undefined}
           onClose={() => setShowContact(false)}
         />
+      )}
+
+      {/* ── FLOATING HELP BUTTON ── visible on all dashboard pages except /dashboard/help itself */}
+      {pathname !== '/dashboard/help' && (
+        <Link
+          href="/dashboard/help"
+          className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-40 w-11 h-11 bg-brand-green hover:bg-brand-dark text-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-105 active:scale-95"
+          title="Help & setup guide"
+        >
+          <HelpCircle size={20} />
+        </Link>
       )}
     </div>
   )
