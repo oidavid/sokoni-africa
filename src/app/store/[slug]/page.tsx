@@ -161,6 +161,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
   const [avgRating, setAvgRating] = useState<number | null>(null)
   const [reviewCount, setReviewCount] = useState(0)
   const [feedbackText, setFeedbackText] = useState('')
+  const [feedbackName, setFeedbackName] = useState('')
   const [feedbackAnon, setFeedbackAnon] = useState(false)
   const [feedbackSent, setFeedbackSent] = useState(false)
   const [feedbackSending, setFeedbackSending] = useState(false)
@@ -311,7 +312,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
         rating: feedbackRating,
         message: feedbackText.trim() || null,
         anonymous: feedbackAnon,
-        customer_name: feedbackAnon ? null : customer?.name || null,
+        customer_name: feedbackAnon ? null : (feedbackName.trim() || customer?.name || null),
         page_url: window.location.href,
       })
       // Update local avg rating immediately
@@ -324,7 +325,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
     } catch {}
     setFeedbackSent(true)
     setFeedbackSending(false)
-    setTimeout(() => { setFeedbackOpen(false); setFeedbackSent(false); setFeedbackRating(0); setFeedbackText('') }, 2000)
+    setTimeout(() => { setFeedbackOpen(false); setFeedbackSent(false); setFeedbackRating(0); setFeedbackText(''); setFeedbackName('') }, 2000)
   }
 
   // People-led: warm, personal, profile photo, empathy headline
@@ -518,6 +519,15 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                     </button>
                   ))}
                 </div>
+                {!feedbackAnon && (
+                  <input
+                    type="text"
+                    value={feedbackName || (customer?.name || '')}
+                    onChange={e => setFeedbackName(e.target.value)}
+                    placeholder="Your name (optional)"
+                    className="w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm outline-none focus:border-brand-green mb-3"
+                  />
+                )}
                 <textarea
                   value={feedbackText}
                   onChange={e => setFeedbackText(e.target.value)}
@@ -526,7 +536,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                   className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm outline-none focus:border-brand-green resize-none mb-3"
                 />
                 <label className="flex items-center gap-2 mb-5 cursor-pointer">
-                  <input type="checkbox" checked={feedbackAnon} onChange={e => setFeedbackAnon(e.target.checked)}
+                  <input type="checkbox" checked={feedbackAnon} onChange={e => { setFeedbackAnon(e.target.checked); if (e.target.checked) setFeedbackName('') }}
                     className="w-4 h-4 rounded" />
                   <span className="text-xs text-gray-500">Submit anonymously</span>
                 </label>
