@@ -117,7 +117,7 @@ export default function AdminPage() {
   const [newAnnouncement, setNewAnnouncement] = useState("");
   const [announcementType, setAnnouncementType] = useState<"info"|"warning"|"success"|"promo">("info");
   const [savingAnnouncement, setSavingAnnouncement] = useState(false);
-  const [proWaitlist, setProWaitlist] = useState<{id:string;business_name:string;email:string;created_at:string}[]>([]);
+  const [proWaitlist, setProWaitlist] = useState<{id:string;business_name:string;email:string;whatsapp_number:string|null;created_at:string}[]>([]);
 
   // Broadcast state
   const [showBroadcast, setShowBroadcast] = useState(false);
@@ -795,24 +795,39 @@ export default function AdminPage() {
                   <table className="w-full min-w-[1300px]">
                     <thead>
                       <tr className={`border-b ${th.thead}`}>
-                        {["Business","Email","Joined Waitlist","Action"].map(h => (
+                        {["Business","Email","WhatsApp","Joined Waitlist","Action"].map(h => (
                           <th key={h} className={`text-left px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-mono font-normal ${th.theadText}`}>{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {proWaitlist.length === 0 ? (
-                        <tr><td colSpan={4} className={`px-5 py-12 text-center text-sm font-mono ${th.muted}`}>No waitlist signups yet.</td></tr>
+                        <tr><td colSpan={5} className={`px-5 py-12 text-center text-sm font-mono ${th.muted}`}>No waitlist signups yet.</td></tr>
                       ) : proWaitlist.map((w, i) => (
                         <tr key={w.id} className={`border-b ${th.rowBorder} ${i % 2 === 0 ? th.row0 : th.row1}`}>
                           <td className={`px-3 py-3 font-medium text-sm ${th.bodyText} whitespace-nowrap max-w-[140px] truncate`}>{w.business_name}</td>
                           <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{w.email}</td>
+                          <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>
+                            {w.whatsapp_number
+                              ? <a href={`https://wa.me/${w.whatsapp_number.replace(/\D/g,'')}`} target="_blank" rel="noopener noreferrer"
+                                  className="hover:text-emerald-400 transition-colors">{w.whatsapp_number}</a>
+                              : <span className="italic opacity-40">—</span>}
+                          </td>
                           <td className={`px-5 py-4 font-mono text-sm ${th.muted}`}>{new Date(w.created_at).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" })}</td>
                           <td className="px-5 py-4">
-                            <a href={`mailto:${w.email}?subject=Earket Pro is here!&body=Hi ${w.business_name}, great news — Earket Pro is now available!`}
-                              className="text-xs bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 px-3 py-1.5 rounded-lg font-mono transition-colors">
-                              ✉️ Email
-                            </a>
+                            <div className="flex items-center gap-2">
+                              <a href={`mailto:${w.email}?subject=Earket Pro is here!&body=Hi ${w.business_name}, great news — Earket Pro is now available!`}
+                                className="text-xs bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 px-3 py-1.5 rounded-lg font-mono transition-colors">
+                                ✉️ Email
+                              </a>
+                              {w.whatsapp_number && (
+                                <a href={`https://wa.me/${w.whatsapp_number.replace(/\D/g,'')}?text=${encodeURIComponent(`Hi ${w.business_name}! Great news — Earket Pro is now available. You're on the early access list. Reply here to get started!`)}`}
+                                  target="_blank" rel="noopener noreferrer"
+                                  className="text-xs bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg font-mono transition-colors">
+                                  💬 WhatsApp
+                                </a>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))}

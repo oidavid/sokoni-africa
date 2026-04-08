@@ -212,6 +212,7 @@ export default function DashboardPage() {
                           merchant_id: merchant.id,
                           email: merchant.email,
                           business_name: merchant.business_name,
+                          whatsapp_number: merchant.whatsapp_number || null,
                         })
                         if (!error || error.code === '23505') {
                           // 23505 = unique violation = already on list, both cases = joined
