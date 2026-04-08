@@ -88,9 +88,11 @@ export default function AdminPage() {
   const [email, setEmail] = useState("");
   const [loginError, setLoginError] = useState("");
 
-  const [tab, setTab] = useState<"merchants" | "admins" | "announcements" | "intelligence" | "pro" | "feedback">("merchants");
+  const [tab, setTab] = useState<"merchants" | "admins" | "announcements" | "intelligence" | "pro" | "store-reviews" | "merchant-feedback">("merchants");
   const [feedback, setFeedback] = useState<{id:string;merchant_slug:string;rating:number;message:string;anonymous:boolean;customer_name:string;created_at:string}[]>([]);
   const [platformFeedback, setPlatformFeedback] = useState<{id:string;merchant_slug:string;business_name:string;rating:number;message:string;created_at:string}[]>([]);
+  const [reviewFilter, setReviewFilter] = useState<"all"|"30"|"90"|"365">("all");
+  const [pfFilter, setPfFilter] = useState<"all"|"30"|"90"|"365">("all");
   const [stats, setStats] = useState<Stats | null>(null);
   const [merchants, setMerchants] = useState<Merchant[]>([]);
   const [filtered, setFiltered] = useState<Merchant[]>([]);
@@ -414,7 +416,8 @@ export default function AdminPage() {
                   { key: "announcements", label: "📣 Announcements" },
                   { key: "intelligence", label: "📊 Intelligence" },
                   { key: "pro", label: "⭐ Pro Waitlist" },
-                  { key: "feedback", label: "💬 Feedback" },
+                  { key: "store-reviews", label: "🛍️ Store Reviews" },
+                  { key: "merchant-feedback", label: "💬 Merchant Feedback" },
                 ] as {key:string;label:string}[]).map(t => (
                   <button key={t.key} onClick={() => setTab(t.key as typeof tab)}
                     className={`px-4 py-2 text-sm rounded-md transition-colors ${tab === t.key ? th.tabActive : th.tabInactive}`}>
@@ -820,102 +823,150 @@ export default function AdminPage() {
             )}
 
             {/* ── FEEDBACK TAB ── */}
-            {tab === "feedback" && canDo(auth, "manage_admins") && (
-              <>
-                {/* ── SECTION 1: STORE REVIEWS (customers rating merchant stores) ── */}
-                <div className={`rounded-xl border p-5 mb-4 ${th.surface}`}>
-                  <p className={`text-sm ${th.bodyText} mb-1`}>🛍️ <strong>{feedback.length} store review{feedback.length !== 1 ? 's' : ''}</strong> from customers.</p>
-                  <p className={`text-xs font-mono ${th.muted}`}>Ratings left by shoppers on merchant storefronts.</p>
-                </div>
-                {feedback.length === 0 ? (
-                  <div className={`rounded-xl border p-8 text-center mb-8 ${th.surface}`}>
-                    <p className={`text-sm font-mono ${th.muted}`}>No store reviews yet.</p>
-                  </div>
-                ) : (
-                  <div className={`rounded-xl border overflow-x-auto mb-8 ${th.surface}`}>
-                    <table className="w-full min-w-[900px]">
-                      <thead>
-                        <tr className={`border-b ${th.thead}`}>
-                          {["Store","Rating","Customer","Message","Date"].map(h => (
-                            <th key={h} className={`text-left px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-mono font-normal ${th.theadText}`}>{h}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {feedback.map((f, i) => (
-                          <tr key={f.id} className={`border-b ${th.rowBorder} ${i % 2 === 0 ? th.row0 : th.row1}`}>
-                            <td className={`px-5 py-4 font-mono text-xs ${th.muted}`}>
-                              <a href={`https://earket.com/store/${f.merchant_slug}`} target="_blank" rel="noopener noreferrer"
-                                className="underline underline-offset-4 hover:text-emerald-400 transition-colors">
-                                /{f.merchant_slug}
-                              </a>
-                            </td>
-                            <td className="px-5 py-4">
-                              <span className="text-amber-400 font-mono text-sm">
-                                {"★".repeat(f.rating || 0)}{"☆".repeat(5 - (f.rating || 0))}
-                              </span>
-                            </td>
-                            <td className={`px-5 py-4 text-sm font-mono ${th.muted}`}>
-                              {f.anonymous ? <span className="italic opacity-50">Anonymous</span> : (f.customer_name || "—")}
-                            </td>
-                            <td className={`px-5 py-4 text-sm ${th.bodyText} max-w-xs`}>
-                              {f.message || <span className={`italic text-xs ${th.muted}`}>No message</span>}
-                            </td>
-                            <td className={`px-5 py-4 font-mono text-xs ${th.muted} whitespace-nowrap`}>
-                              {f.created_at ? new Date(f.created_at).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" }) : "—"}
-                            </td>
-                          </tr>
+            {/* ── STORE REVIEWS TAB ── */}
+            {tab === "store-reviews" && canDo(auth, "manage_admins") && (() => {
+              const cutoff = reviewFilter === "all" ? null : new Date(Date.now() - parseInt(reviewFilter) * 86400000);
+              const filtered = cutoff ? feedback.filter(f => new Date(f.created_at) >= cutoff) : feedback;
+              return (
+                <>
+                  <div className={`rounded-xl border p-5 mb-4 ${th.surface}`}>
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className={`text-sm ${th.bodyText} mb-0.5`}>🛍️ <strong>{filtered.length} store review{filtered.length !== 1 ? "s" : ""}</strong>{reviewFilter !== "all" ? ` in last ${reviewFilter} days` : " total"}</p>
+                        <p className={`text-xs font-mono ${th.muted}`}>Ratings left by shoppers on merchant storefronts.</p>
+                      </div>
+                      <div className="flex gap-1.5">
+                        {(["all","30","90","365"] as const).map(v => (
+                          <button key={v} onClick={() => setReviewFilter(v)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${reviewFilter === v ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : `border ${th.border} ${th.muted} hover:text-white`}`}>
+                            {v === "all" ? "All time" : v === "365" ? "1 year" : `${v}d`}
+                          </button>
                         ))}
-                      </tbody>
-                    </table>
+                      </div>
+                    </div>
                   </div>
-                )}
+                  {filtered.length === 0 ? (
+                    <div className={`rounded-xl border p-12 text-center ${th.surface}`}>
+                      <p className={`text-sm font-mono ${th.muted}`}>No store reviews in this period.</p>
+                    </div>
+                  ) : (
+                    <div className={`rounded-xl border overflow-x-auto ${th.surface}`}>
+                      <table className="w-full min-w-[900px]">
+                        <thead>
+                          <tr className={`border-b ${th.thead}`}>
+                            {["Store","Rating","Customer","Message","Date",""].map((h,i) => (
+                              <th key={i} className={`text-left px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-mono font-normal ${th.theadText}`}>{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filtered.map((f, i) => (
+                            <tr key={f.id} className={`border-b ${th.rowBorder} ${i % 2 === 0 ? th.row0 : th.row1}`}>
+                              <td className={`px-5 py-4 font-mono text-xs ${th.muted}`}>
+                                <a href={`https://earket.com/store/${f.merchant_slug}`} target="_blank" rel="noopener noreferrer"
+                                  className="underline underline-offset-4 hover:text-emerald-400 transition-colors">
+                                  /{f.merchant_slug}
+                                </a>
+                              </td>
+                              <td className="px-5 py-4">
+                                <span className="text-amber-400 font-mono text-sm">{"★".repeat(f.rating||0)}{"☆".repeat(5-(f.rating||0))}</span>
+                              </td>
+                              <td className={`px-5 py-4 text-sm font-mono ${th.muted}`}>
+                                {f.anonymous ? <span className="italic opacity-50">Anonymous</span> : (f.customer_name || "—")}
+                              </td>
+                              <td className={`px-5 py-4 text-sm ${th.bodyText} max-w-xs`}>
+                                {f.message || <span className={`italic text-xs ${th.muted}`}>No message</span>}
+                              </td>
+                              <td className={`px-5 py-4 font-mono text-xs ${th.muted} whitespace-nowrap`}>
+                                {f.created_at ? new Date(f.created_at).toLocaleDateString("en-GB", {day:"2-digit",month:"short",year:"numeric"}) : "—"}
+                              </td>
+                              <td className="px-5 py-4">
+                                <button onClick={async () => {
+                                  await supabase.from("feedback").update({hidden: true}).eq("id", f.id);
+                                  setFeedback(prev => prev.filter(r => r.id !== f.id));
+                                }} className="text-xs font-mono text-red-400/60 hover:text-red-400 transition-colors px-2 py-1 rounded hover:bg-red-400/10">
+                                  Remove
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
 
-                {/* ── SECTION 2: PLATFORM FEEDBACK (merchants rating Earket) ── */}
-                <div className={`rounded-xl border p-5 mb-4 ${th.surface}`}>
-                  <p className={`text-sm ${th.bodyText} mb-1`}>💬 <strong>{platformFeedback.length} platform review{platformFeedback.length !== 1 ? 's' : ''}</strong> from merchants.</p>
-                  <p className={`text-xs font-mono ${th.muted}`}>Feedback submitted by merchants about the Earket platform.</p>
-                </div>
-                {platformFeedback.length === 0 ? (
-                  <div className={`rounded-xl border p-8 text-center ${th.surface}`}>
-                    <p className={`text-sm font-mono ${th.muted}`}>No merchant feedback yet.</p>
-                  </div>
-                ) : (
-                  <div className={`rounded-xl border overflow-x-auto ${th.surface}`}>
-                    <table className="w-full min-w-[700px]">
-                      <thead>
-                        <tr className={`border-b ${th.thead}`}>
-                          {["Merchant","Rating","Message","Date"].map(h => (
-                            <th key={h} className={`text-left px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-mono font-normal ${th.theadText}`}>{h}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {platformFeedback.map((f, i) => (
-                          <tr key={f.id} className={`border-b ${th.rowBorder} ${i % 2 === 0 ? th.row0 : th.row1}`}>
-                            <td className={`px-5 py-4 text-sm ${th.bodyText}`}>
-                              <div className="font-medium">{f.business_name || "—"}</div>
-                              <div className={`font-mono text-xs ${th.muted}`}>/{f.merchant_slug}</div>
-                            </td>
-                            <td className="px-5 py-4">
-                              <span className="text-amber-400 font-mono text-sm">
-                                {"★".repeat(f.rating || 0)}{"☆".repeat(5 - (f.rating || 0))}
-                              </span>
-                            </td>
-                            <td className={`px-5 py-4 text-sm ${th.bodyText} max-w-sm`}>
-                              {f.message || <span className={`italic text-xs ${th.muted}`}>No message</span>}
-                            </td>
-                            <td className={`px-5 py-4 font-mono text-xs ${th.muted} whitespace-nowrap`}>
-                              {f.created_at ? new Date(f.created_at).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" }) : "—"}
-                            </td>
-                          </tr>
+            {/* ── MERCHANT FEEDBACK TAB ── */}
+            {tab === "merchant-feedback" && canDo(auth, "manage_admins") && (() => {
+              const cutoff = pfFilter === "all" ? null : new Date(Date.now() - parseInt(pfFilter) * 86400000);
+              const filtered = cutoff ? platformFeedback.filter(f => new Date(f.created_at) >= cutoff) : platformFeedback;
+              return (
+                <>
+                  <div className={`rounded-xl border p-5 mb-4 ${th.surface}`}>
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className={`text-sm ${th.bodyText} mb-0.5`}>💬 <strong>{filtered.length} review{filtered.length !== 1 ? "s" : ""}</strong>{pfFilter !== "all" ? ` in last ${pfFilter} days` : " total"} from merchants</p>
+                        <p className={`text-xs font-mono ${th.muted}`}>Feedback submitted by merchants about the Earket platform.</p>
+                      </div>
+                      <div className="flex gap-1.5">
+                        {(["all","30","90","365"] as const).map(v => (
+                          <button key={v} onClick={() => setPfFilter(v)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${pfFilter === v ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : `border ${th.border} ${th.muted} hover:text-white`}`}>
+                            {v === "all" ? "All time" : v === "365" ? "1 year" : `${v}d`}
+                          </button>
                         ))}
-                      </tbody>
-                    </table>
+                      </div>
+                    </div>
                   </div>
-                )}
-              </>
-            )}
+                  {filtered.length === 0 ? (
+                    <div className={`rounded-xl border p-12 text-center ${th.surface}`}>
+                      <p className={`text-sm font-mono ${th.muted}`}>No merchant feedback in this period.</p>
+                    </div>
+                  ) : (
+                    <div className={`rounded-xl border overflow-x-auto ${th.surface}`}>
+                      <table className="w-full min-w-[700px]">
+                        <thead>
+                          <tr className={`border-b ${th.thead}`}>
+                            {["Merchant","Rating","Message","Date",""].map((h,i) => (
+                              <th key={i} className={`text-left px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-mono font-normal ${th.theadText}`}>{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filtered.map((f, i) => (
+                            <tr key={f.id} className={`border-b ${th.rowBorder} ${i % 2 === 0 ? th.row0 : th.row1}`}>
+                              <td className={`px-5 py-4 text-sm ${th.bodyText}`}>
+                                <div className="font-medium">{f.business_name || "—"}</div>
+                                <div className={`font-mono text-xs ${th.muted}`}>/{f.merchant_slug}</div>
+                              </td>
+                              <td className="px-5 py-4">
+                                <span className="text-amber-400 font-mono text-sm">{"★".repeat(f.rating||0)}{"☆".repeat(5-(f.rating||0))}</span>
+                              </td>
+                              <td className={`px-5 py-4 text-sm ${th.bodyText} max-w-sm`}>
+                                {f.message || <span className={`italic text-xs ${th.muted}`}>No message</span>}
+                              </td>
+                              <td className={`px-5 py-4 font-mono text-xs ${th.muted} whitespace-nowrap`}>
+                                {f.created_at ? new Date(f.created_at).toLocaleDateString("en-GB", {day:"2-digit",month:"short",year:"numeric"}) : "—"}
+                              </td>
+                              <td className="px-5 py-4">
+                                <button onClick={async () => {
+                                  await supabase.from("platform_feedback").update({hidden: true}).eq("id", f.id);
+                                  setPlatformFeedback(prev => prev.filter(r => r.id !== f.id));
+                                }} className="text-xs font-mono text-red-400/60 hover:text-red-400 transition-colors px-2 py-1 rounded hover:bg-red-400/10">
+                                  Remove
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
 
           </>
         )}

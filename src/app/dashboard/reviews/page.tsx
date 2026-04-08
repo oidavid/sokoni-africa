@@ -33,12 +33,16 @@ export default function ReviewsPage() {
       if (!m) return
       setMerchantSlug(m.slug)
 
-      const { data } = await supabase
-        .from('store_reviews')
-        .select('*')
-        .eq('merchant_slug', m.slug)
-        .order('created_at', { ascending: false })
-      setReviews(data || [])
+      // Read from both tables — new reviews in store_reviews, legacy in feedback
+      const [{ data: newReviews }, { data: legacyReviews }] = await Promise.all([
+        supabase.from('store_reviews').select('*').eq('merchant_slug', m.slug).order('created_at', { ascending: false }),
+        supabase.from('feedback').select('*').eq('merchant_slug', m.slug).order('created_at', { ascending: false }),
+      ])
+      const combined = [
+        ...(newReviews || []),
+        ...(legacyReviews || []),
+      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      setReviews(combined)
       setLoading(false)
     }
     load()
