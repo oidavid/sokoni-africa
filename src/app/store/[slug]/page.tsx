@@ -160,6 +160,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
   const [feedbackRating, setFeedbackRating] = useState(0)
   const [avgRating, setAvgRating] = useState<number | null>(null)
   const [reviewCount, setReviewCount] = useState(0)
+  const [storeReviews, setStoreReviews] = useState<{id:string;rating:number;message:string|null;customer_name:string|null;anonymous:boolean;created_at:string}[]>([])
   const [feedbackText, setFeedbackText] = useState('')
   const [feedbackName, setFeedbackName] = useState('')
   const [feedbackAnon, setFeedbackAnon] = useState(false)
@@ -177,15 +178,20 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
         if (merchantCountry) setWaCountry(merchantCountry)
         const { data: prods } = await supabase.from('products').select('*').eq('merchant_id', merchant.id).order('created_at', { ascending: false })
         setProducts(prods || [])
-        // Load average store rating
-        const { data: revData } = await supabase
-          .from('store_reviews')
-          .select('rating')
-          .eq('merchant_slug', merchant.slug)
-        if (revData && revData.length > 0) {
-          const avg = revData.reduce((sum: number, r: {rating: number}) => sum + r.rating, 0) / revData.length
+        // Load average store rating + full review list from both tables
+        const [{ data: newRevs }, { data: legacyRevs }] = await Promise.all([
+          supabase.from('store_reviews').select('id,rating,message,customer_name,anonymous,created_at').eq('merchant_slug', merchant.slug).order('created_at', { ascending: false }),
+          supabase.from('feedback').select('id,rating,message,customer_name,anonymous,created_at').eq('merchant_slug', merchant.slug).order('created_at', { ascending: false }),
+        ])
+        const combined = [
+          ...(newRevs || []),
+          ...(legacyRevs || []),
+        ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        setStoreReviews(combined)
+        if (combined.length > 0) {
+          const avg = combined.reduce((sum, r) => sum + r.rating, 0) / combined.length
           setAvgRating(Math.round(avg * 10) / 10)
-          setReviewCount(revData.length)
+          setReviewCount(combined.length)
         }
         // Load customer session
         const storedCustomer = typeof window !== 'undefined' ? localStorage.getItem(`earket_customer_${params.slug}`) : null
@@ -322,6 +328,14 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
         : feedbackRating
       setAvgRating(newAvg)
       setReviewCount(newCount)
+      setStoreReviews(prev => [{
+        id: Date.now().toString(),
+        rating: feedbackRating,
+        message: feedbackText.trim() || null,
+        customer_name: feedbackAnon ? null : (feedbackName.trim() || customer?.name || null),
+        anonymous: feedbackAnon,
+        created_at: new Date().toISOString(),
+      }, ...prev])
     } catch {}
     setFeedbackSent(true)
     setFeedbackSending(false)
@@ -1130,33 +1144,64 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
         </button>
       )}
 
-      {/* Testimonials */}
-      {(store as any).testimonials?.length > 0 && (
+      {/* Customer Reviews — live from store_reviews + feedback tables */}
+      {storeReviews.length > 0 && (
         <div className="max-w-6xl mx-auto px-4 mb-4">
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <h2 className="font-display font-bold text-brand-dark text-base mb-4">What Our Customers Say</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-display font-bold text-brand-dark text-base">What Our Customers Say</h2>
+              <div className="flex items-center gap-1.5">
+                <div className="flex gap-0.5">
+                  {[1,2,3,4,5].map(n => (
+                    <span key={n} className={`text-sm ${avgRating && n <= Math.round(avgRating) ? 'text-amber-400' : 'text-gray-200'}`}>★</span>
+                  ))}
+                </div>
+                {avgRating && <span className="text-sm font-semibold text-gray-700">{avgRating}</span>}
+                <span className="text-xs text-gray-400">({reviewCount})</span>
+              </div>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {(store as any).testimonials.map((t: any, i: number) => (
-                <div key={i} className="bg-gray-50 rounded-xl p-4">
+              {storeReviews.slice(0, 6).map((r, i) => (
+                <div key={r.id || i} className="bg-gray-50 rounded-xl p-4">
                   <div className="flex gap-0.5 mb-2">
                     {[1,2,3,4,5].map(s => (
-                      <span key={s} className={`text-sm ${s <= (t.rating||5) ? 'text-amber-400' : 'text-gray-200'}`}>★</span>
+                      <span key={s} className={`text-sm ${s <= r.rating ? 'text-amber-400' : 'text-gray-200'}`}>★</span>
                     ))}
                   </div>
-                  <p className="text-sm text-gray-700 leading-relaxed italic mb-3">"{t.text}"</p>
+                  {r.message && (
+                    <p className="text-sm text-gray-700 leading-relaxed italic mb-3">"{r.message}"</p>
+                  )}
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
                       style={{ backgroundColor: store.theme_color || '#1A7A4A' }}>
-                      {t.name[0]}
+                      {r.anonymous || !r.customer_name ? '?' : r.customer_name[0].toUpperCase()}
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-gray-800">{t.name}</p>
-                      {t.role && <p className="text-xs text-gray-400">{t.role}</p>}
+                      <p className="text-xs font-semibold text-gray-800">
+                        {r.anonymous || !r.customer_name ? 'Anonymous customer' : r.customer_name}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {new Date(r.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </p>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
+            {storeReviews.length > 6 && (
+              <button
+                onClick={() => setFeedbackOpen(true)}
+                className="mt-4 w-full text-center text-sm text-brand-green font-medium hover:underline"
+              >
+                See all {storeReviews.length} reviews →
+              </button>
+            )}
+            <button
+              onClick={() => setFeedbackOpen(true)}
+              className="mt-3 w-full text-center text-xs text-gray-400 hover:text-brand-green transition-colors"
+            >
+              + Leave a review
+            </button>
           </div>
         </div>
       )}
