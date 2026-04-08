@@ -158,6 +158,8 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
   const [shareOpen, setShareOpen] = useState(false)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [feedbackRating, setFeedbackRating] = useState(0)
+  const [avgRating, setAvgRating] = useState<number | null>(null)
+  const [reviewCount, setReviewCount] = useState(0)
   const [feedbackText, setFeedbackText] = useState('')
   const [feedbackAnon, setFeedbackAnon] = useState(false)
   const [feedbackSent, setFeedbackSent] = useState(false)
@@ -174,6 +176,16 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
         if (merchantCountry) setWaCountry(merchantCountry)
         const { data: prods } = await supabase.from('products').select('*').eq('merchant_id', merchant.id).order('created_at', { ascending: false })
         setProducts(prods || [])
+        // Load average store rating
+        const { data: revData } = await supabase
+          .from('store_reviews')
+          .select('rating')
+          .eq('merchant_slug', merchant.slug)
+        if (revData && revData.length > 0) {
+          const avg = revData.reduce((sum: number, r: {rating: number}) => sum + r.rating, 0) / revData.length
+          setAvgRating(Math.round(avg * 10) / 10)
+          setReviewCount(revData.length)
+        }
         // Load customer session
         const storedCustomer = typeof window !== 'undefined' ? localStorage.getItem(`earket_customer_${params.slug}`) : null
         if (storedCustomer) {
@@ -293,7 +305,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
     if (!feedbackRating) return
     setFeedbackSending(true)
     try {
-      await supabase.from('feedback').insert({
+      await supabase.from('store_reviews').insert({
         merchant_id: store?.id,
         merchant_slug: store?.slug,
         rating: feedbackRating,
@@ -302,6 +314,13 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
         customer_name: feedbackAnon ? null : customer?.name || null,
         page_url: window.location.href,
       })
+      // Update local avg rating immediately
+      const newCount = reviewCount + 1
+      const newAvg = avgRating
+        ? Math.round(((avgRating * reviewCount) + feedbackRating) / newCount * 10) / 10
+        : feedbackRating
+      setAvgRating(newAvg)
+      setReviewCount(newCount)
     } catch {}
     setFeedbackSent(true)
     setFeedbackSending(false)
@@ -483,12 +502,12 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
               <div className="text-center py-6">
                 <div className="text-4xl mb-3">🙏</div>
                 <div className="font-display font-bold text-brand-dark text-lg mb-1">Thank you!</div>
-                <p className="text-sm text-gray-500">Your feedback helps us improve Earket.</p>
+                <p className="text-sm text-gray-500">Your review helps other customers.</p>
               </div>
             ) : (
               <>
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="font-display font-bold text-brand-dark text-base">Rate your experience</h3>
+                  <h3 className="font-display font-bold text-brand-dark text-base">Rate this store</h3>
                   <button onClick={() => setFeedbackOpen(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"><X size={14} /></button>
                 </div>
                 <div className="flex justify-center gap-3 mb-5">
@@ -830,6 +849,28 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                   <span className="text-xs opacity-75">{store.location}</span>
                 </div>
                 {store.description && <p className="text-xs text-white/70 mt-1 max-w-md">{store.description}</p>}
+                {avgRating && (
+                  <button
+                    onClick={() => setFeedbackOpen(true)}
+                    className="flex items-center gap-1.5 mt-1.5 hover:opacity-80 transition-opacity"
+                  >
+                    <div className="flex">
+                      {[1,2,3,4,5].map(n => (
+                        <span key={n} className={`text-xs ${n <= Math.round(avgRating) ? 'text-amber-300' : 'text-white/20'}`}>★</span>
+                      ))}
+                    </div>
+                    <span className="text-xs text-white/80 font-medium">{avgRating}</span>
+                    <span className="text-xs text-white/50">({reviewCount} review{reviewCount !== 1 ? 's' : ''})</span>
+                  </button>
+                )}
+                {!avgRating && (
+                  <button
+                    onClick={() => setFeedbackOpen(true)}
+                    className="text-xs text-white/40 hover:text-white/70 mt-1 transition-colors"
+                  >
+                    Be the first to review →
+                  </button>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-2">
