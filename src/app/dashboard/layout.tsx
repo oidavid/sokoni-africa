@@ -6,10 +6,11 @@ import {
   LayoutDashboard, Package, ShoppingCart, BarChart2, Settings,
   CreditCard, LogOut, Users, Boxes, Radio, Tag, FileText,
   ExternalLink, ChevronRight, Inbox, Sparkles, TrendingUp,
-  Menu, X, ShoppingBag, Megaphone, BookOpen, HelpCircle
+  Menu, X, ShoppingBag, Megaphone, BookOpen, HelpCircle, Star, MessageSquare
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import ContactSupportModal from '@/components/ContactSupportModal'
+import PlatformFeedbackModal from '@/components/PlatformFeedbackModal'
 
 interface NavItem {
   icon: React.ElementType
@@ -35,6 +36,7 @@ const PRODUCT_NAV: NavItem[] = [
   { icon: Tag,             label: 'Discounts',   href: '/dashboard/discounts' },
   { icon: FileText,        label: 'Credit Report', href: '/dashboard/credit-report' },
   { icon: Radio,           label: 'Referrals',   href: '/dashboard/referrals' },
+  { icon: Star,            label: 'Reviews',     href: '/dashboard/reviews' },
   { icon: BookOpen,        label: 'Help',        href: '/dashboard/help' },
   { icon: Settings,        label: 'Settings',    href: '/dashboard/settings' },
 ]
@@ -43,13 +45,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname()
   const router = useRouter()
   const [merchant, setMerchant] = useState<{
-    business_name: string; slug: string; logo_url?: string
+    id: string; business_name: string; slug: string; logo_url?: string
     business_type?: string; instagram?: string; facebook?: string
     linkedin?: string; twitter_x?: string; website?: string
     youtube?: string; tiktok?: string; other_link?: string
   } | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showContact, setShowContact] = useState(false)
+  const [showPlatformFeedback, setShowPlatformFeedback] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -58,7 +61,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const email = user?.email || fallbackEmail
       if (!email) return
       const { data: m } = await supabase.from('merchants')
-        .select('business_name,slug,logo_url,business_type,instagram,facebook,linkedin,twitter_x,website,youtube,tiktok,other_link')
+        .select('id,business_name,slug,logo_url,business_type,instagram,facebook,linkedin,twitter_x,website,youtube,tiktok,other_link')
         .eq('email', email).single()
       if (m) setMerchant(m)
     }
@@ -170,6 +173,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
           <span>Contact Support</span>
         </button>
+        <button onClick={() => setShowPlatformFeedback(true)}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-amber-50 hover:text-amber-600 transition-colors">
+          <MessageSquare size={17} />
+          <span>Share feedback on Earket</span>
+        </button>
         <button onClick={async () => {
           await supabase.auth.signOut()
           localStorage.removeItem('earket_merchant_email')
@@ -245,15 +253,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 View Store →
               </Link>
             )}
-            <Link
-              href="/dashboard/help"
-              className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
-                pathname === '/dashboard/help'
-                  ? 'bg-brand-green text-white'
-                  : 'bg-gray-100 text-gray-500 hover:bg-brand-light hover:text-brand-green'
-              }`}
-              title="Help & setup guide"
-            >
+            <Link href="/dashboard/help"
+              className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${pathname === '/dashboard/help' ? 'bg-brand-green text-white' : 'bg-gray-100 text-gray-500 hover:bg-brand-light hover:text-brand-green'}`}>
               <HelpCircle size={16} />
             </Link>
             <button onClick={() => setSidebarOpen(true)}
@@ -273,27 +274,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {pathname.split('/').pop()?.replace(/-/g, ' ')}
               </span>
             </div>
-            <Link
-              href="/dashboard/help"
-              className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${
-                pathname === '/dashboard/help'
-                  ? 'text-brand-green'
-                  : 'text-gray-400 hover:text-brand-green'
-              }`}
-            >
-              <HelpCircle size={13} />
-              Help
+            <Link href="/dashboard/help"
+              className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${pathname === '/dashboard/help' ? 'text-brand-green' : 'text-gray-400 hover:text-brand-green'}`}>
+              <HelpCircle size={13} /> Help
             </Link>
           </div>
         )}
         {pathname === '/dashboard' && (
           <div className="hidden md:flex items-center justify-end px-6 py-3 bg-white border-b border-gray-50">
-            <Link
-              href="/dashboard/help"
-              className="flex items-center gap-1.5 text-xs font-medium text-gray-400 hover:text-brand-green transition-colors"
-            >
-              <HelpCircle size={13} />
-              Help
+            <Link href="/dashboard/help"
+              className="flex items-center gap-1.5 text-xs font-medium text-gray-400 hover:text-brand-green transition-colors">
+              <HelpCircle size={13} /> Help
             </Link>
           </div>
         )}
@@ -338,13 +329,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         />
       )}
 
-      {/* ── FLOATING HELP BUTTON ── visible on all dashboard pages except /dashboard/help itself */}
+      {showPlatformFeedback && merchant && (
+        <PlatformFeedbackModal
+          merchantId={(merchant as any).id || ''}
+          merchantSlug={merchant.slug}
+          businessName={merchant.business_name}
+          onClose={() => setShowPlatformFeedback(false)}
+        />
+      )}
+
       {pathname !== '/dashboard/help' && (
-        <Link
-          href="/dashboard/help"
+        <Link href="/dashboard/help"
           className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-40 w-11 h-11 bg-brand-green hover:bg-brand-dark text-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-105 active:scale-95"
-          title="Help & setup guide"
-        >
+          title="Help & setup guide">
           <HelpCircle size={20} />
         </Link>
       )}
