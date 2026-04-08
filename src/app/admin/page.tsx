@@ -838,7 +838,7 @@ export default function AdminPage() {
                       <div className="flex gap-1.5">
                         {(["all","30","90","365"] as const).map(v => (
                           <button key={v} onClick={() => setReviewFilter(v)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${reviewFilter === v ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : `border ${th.border} ${th.muted} hover:text-white`}`}>
+                            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${reviewFilter === v ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : `border ${th.rowBorder} ${th.muted} hover:text-white`}`}>
                             {v === "all" ? "All time" : v === "365" ? "1 year" : `${v}d`}
                           </button>
                         ))}
@@ -913,7 +913,7 @@ export default function AdminPage() {
                       <div className="flex gap-1.5">
                         {(["all","30","90","365"] as const).map(v => (
                           <button key={v} onClick={() => setPfFilter(v)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${pfFilter === v ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : `border ${th.border} ${th.muted} hover:text-white`}`}>
+                            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${pfFilter === v ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : `border ${th.rowBorder} ${th.muted} hover:text-white`}`}>
                             {v === "all" ? "All time" : v === "365" ? "1 year" : `${v}d`}
                           </button>
                         ))}
