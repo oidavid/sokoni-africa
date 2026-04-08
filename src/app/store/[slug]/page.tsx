@@ -161,6 +161,8 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
   const [avgRating, setAvgRating] = useState<number | null>(null)
   const [reviewCount, setReviewCount] = useState(0)
   const [storeReviews, setStoreReviews] = useState<{id:string;rating:number;message:string|null;customer_name:string|null;anonymous:boolean;created_at:string}[]>([])
+  const [reviewsExpanded, setReviewsExpanded] = useState(false)
+  const [reviewStarFilter, setReviewStarFilter] = useState<number | null>(null)
   const [feedbackText, setFeedbackText] = useState('')
   const [feedbackName, setFeedbackName] = useState('')
   const [feedbackAnon, setFeedbackAnon] = useState(false)
@@ -1144,67 +1146,113 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
         </button>
       )}
 
-      {/* Customer Reviews — live from store_reviews + feedback tables */}
-      {storeReviews.length > 0 && (
-        <div className="max-w-6xl mx-auto px-4 mb-4">
-          <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display font-bold text-brand-dark text-base">What Our Customers Say</h2>
-              <div className="flex items-center gap-1.5">
-                <div className="flex gap-0.5">
-                  {[1,2,3,4,5].map(n => (
-                    <span key={n} className={`text-sm ${avgRating && n <= Math.round(avgRating) ? 'text-amber-400' : 'text-gray-200'}`}>★</span>
-                  ))}
-                </div>
-                {avgRating && <span className="text-sm font-semibold text-gray-700">{avgRating}</span>}
-                <span className="text-xs text-gray-400">({reviewCount})</span>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {storeReviews.slice(0, 6).map((r, i) => (
-                <div key={r.id || i} className="bg-gray-50 rounded-xl p-4">
-                  <div className="flex gap-0.5 mb-2">
-                    {[1,2,3,4,5].map(s => (
-                      <span key={s} className={`text-sm ${s <= r.rating ? 'text-amber-400' : 'text-gray-200'}`}>★</span>
+      {/* Customer Reviews */}
+      {storeReviews.length > 0 && (() => {
+        const dist = [5,4,3,2,1].map(star => ({
+          star,
+          count: storeReviews.filter(r => r.rating === star).length,
+          pct: Math.round((storeReviews.filter(r => r.rating === star).length / storeReviews.length) * 100)
+        }))
+        const filtered = reviewStarFilter ? storeReviews.filter(r => r.rating === reviewStarFilter) : storeReviews
+        const displayed = reviewsExpanded ? filtered : filtered.slice(0, 3)
+
+        return (
+          <div className="max-w-6xl mx-auto px-4 mb-4">
+            <div className="bg-white rounded-2xl border border-gray-100 p-5">
+
+              {/* Summary row */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-5">
+                {/* Score */}
+                <div className="flex flex-col items-center justify-center sm:w-28 shrink-0">
+                  <span className="text-4xl font-display font-bold text-brand-dark">{avgRating}</span>
+                  <div className="flex gap-0.5 my-1">
+                    {[1,2,3,4,5].map(n => (
+                      <span key={n} className={`text-base ${avgRating && n <= Math.round(avgRating) ? 'text-amber-400' : 'text-gray-200'}`}>★</span>
                     ))}
                   </div>
-                  {r.message && (
-                    <p className="text-sm text-gray-700 leading-relaxed italic mb-3">"{r.message}"</p>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-                      style={{ backgroundColor: store.theme_color || '#1A7A4A' }}>
-                      {r.anonymous || !r.customer_name ? '?' : r.customer_name[0].toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-gray-800">
-                        {r.anonymous || !r.customer_name ? 'Anonymous customer' : r.customer_name}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {new Date(r.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
-                      </p>
-                    </div>
-                  </div>
+                  <span className="text-xs text-gray-400">{reviewCount} review{reviewCount !== 1 ? 's' : ''}</span>
                 </div>
-              ))}
+
+                {/* Distribution bars */}
+                <div className="flex-1 space-y-1.5">
+                  {dist.map(d => (
+                    <button key={d.star} onClick={() => setReviewStarFilter(reviewStarFilter === d.star ? null : d.star)}
+                      className={`w-full flex items-center gap-2 group transition-opacity ${reviewStarFilter && reviewStarFilter !== d.star ? 'opacity-40' : ''}`}>
+                      <span className="text-xs text-gray-500 w-4 text-right shrink-0">{d.star}</span>
+                      <span className="text-amber-400 text-xs shrink-0">★</span>
+                      <div className="flex-1 bg-gray-100 rounded-full h-2">
+                        <div className="bg-amber-400 h-2 rounded-full transition-all" style={{ width: `${d.pct}%` }} />
+                      </div>
+                      <span className="text-xs text-gray-400 w-4 shrink-0">{d.count}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Active star filter pill */}
+              {reviewStarFilter && (
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-3 py-1 rounded-full font-medium">
+                    {reviewStarFilter}★ only
+                  </span>
+                  <button onClick={() => setReviewStarFilter(null)} className="text-xs text-gray-400 hover:text-gray-600">
+                    Clear filter ×
+                  </button>
+                </div>
+              )}
+
+              {/* Review cards */}
+              <div className="space-y-3">
+                {displayed.length === 0 ? (
+                  <p className="text-sm text-gray-400 text-center py-4">No {reviewStarFilter}★ reviews yet.</p>
+                ) : displayed.map((r, i) => (
+                  <div key={r.id || i} className="border border-gray-100 rounded-xl p-3.5">
+                    <div className="flex items-start justify-between gap-2 mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+                          style={{ backgroundColor: store.theme_color || '#1A7A4A' }}>
+                          {r.anonymous || !r.customer_name ? '?' : r.customer_name[0].toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-gray-800 leading-tight">
+                            {r.anonymous || !r.customer_name ? 'Anonymous customer' : r.customer_name}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            {new Date(r.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-0.5 shrink-0">
+                        {[1,2,3,4,5].map(s => (
+                          <span key={s} className={`text-xs ${s <= r.rating ? 'text-amber-400' : 'text-gray-200'}`}>★</span>
+                        ))}
+                      </div>
+                    </div>
+                    {r.message && (
+                      <p className="text-sm text-gray-600 leading-relaxed pl-9">"{r.message}"</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Expand / collapse + leave review */}
+              <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-50">
+                {filtered.length > 3 ? (
+                  <button onClick={() => setReviewsExpanded(!reviewsExpanded)}
+                    className="text-sm text-brand-green font-medium hover:underline">
+                    {reviewsExpanded ? 'Show less ↑' : `See all ${filtered.length} review${filtered.length !== 1 ? 's' : ''} ↓`}
+                  </button>
+                ) : <span />}
+                <button onClick={() => setFeedbackOpen(true)}
+                  className="text-xs text-gray-400 hover:text-brand-green transition-colors">
+                  + Write a review
+                </button>
+              </div>
+
             </div>
-            {storeReviews.length > 6 && (
-              <button
-                onClick={() => setFeedbackOpen(true)}
-                className="mt-4 w-full text-center text-sm text-brand-green font-medium hover:underline"
-              >
-                See all {storeReviews.length} reviews →
-              </button>
-            )}
-            <button
-              onClick={() => setFeedbackOpen(true)}
-              className="mt-3 w-full text-center text-xs text-gray-400 hover:text-brand-green transition-colors"
-            >
-              + Leave a review
-            </button>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* Find Us */}
       <div className="max-w-6xl mx-auto px-4 mb-4 mt-4">
