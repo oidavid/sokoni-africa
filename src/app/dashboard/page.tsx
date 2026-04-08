@@ -208,8 +208,16 @@ export default function DashboardPage() {
                       <button disabled={joiningPro} onClick={async () => {
                         if (!merchant) return
                         setJoiningPro(true)
-                        await supabase.from('pro_waitlist').upsert({ merchant_id: merchant.id, email: merchant.email, business_name: merchant.business_name }, { onConflict: 'merchant_id' })
-                        setProJoined(true); setJoiningPro(false)
+                        const { error } = await supabase.from('pro_waitlist').insert({
+                          merchant_id: merchant.id,
+                          email: merchant.email,
+                          business_name: merchant.business_name,
+                        })
+                        if (!error || error.code === '23505') {
+                          // 23505 = unique violation = already on list, both cases = joined
+                          setProJoined(true)
+                        }
+                        setJoiningPro(false)
                       }} className="shrink-0 bg-white text-indigo-900 text-[11px] font-bold px-3 py-1.5 rounded-xl hover:bg-indigo-50 disabled:opacity-50 whitespace-nowrap">
                         {joiningPro ? '...' : 'Join Free →'}
                       </button>
