@@ -90,6 +90,7 @@ export default function AdminPage() {
 
   const [tab, setTab] = useState<"merchants" | "admins" | "announcements" | "intelligence" | "pro" | "feedback">("merchants");
   const [feedback, setFeedback] = useState<{id:string;merchant_slug:string;rating:number;message:string;anonymous:boolean;customer_name:string;created_at:string}[]>([]);
+  const [platformFeedback, setPlatformFeedback] = useState<{id:string;merchant_slug:string;business_name:string;rating:number;message:string;created_at:string}[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [merchants, setMerchants] = useState<Merchant[]>([]);
   const [filtered, setFiltered] = useState<Merchant[]>([]);
@@ -160,7 +161,7 @@ export default function AdminPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [merchantsRes, leadsRes, ordersRes, adminsRes, announcementsRes, waitlistRes, feedbackRes] = await Promise.all([
+      const [merchantsRes, leadsRes, ordersRes, adminsRes, announcementsRes, waitlistRes, feedbackRes, platformFeedbackRes] = await Promise.all([
         supabase.from("merchants").select("*").order("created_at", { ascending: false }),
         supabase.from("leads").select("id", { count: "exact" }),
         supabase.from("orders").select("id", { count: "exact" }),
@@ -168,6 +169,7 @@ export default function AdminPage() {
         supabase.from("announcements").select("*").order("created_at", { ascending: false }),
         supabase.from("pro_waitlist").select("*").order("created_at", { ascending: false }),
         supabase.from("feedback").select("*").order("created_at", { ascending: false }),
+        supabase.from("platform_feedback").select("*").order("created_at", { ascending: false }),
       ]);
       const all: Merchant[] = merchantsRes.data || [];
       const now = new Date();
@@ -178,6 +180,7 @@ export default function AdminPage() {
       setAnnouncements(announcementsRes.data || []);
       setProWaitlist(waitlistRes.data || []);
       setFeedback(feedbackRes.data || []);
+      setPlatformFeedback(platformFeedbackRes.data || []);
       setStats({
         totalMerchants: all.length,
         activeStores: all.filter(m => m.is_published && m.status !== "suspended" && m.status !== "terminated").length,
@@ -819,16 +822,17 @@ export default function AdminPage() {
             {/* ── FEEDBACK TAB ── */}
             {tab === "feedback" && canDo(auth, "manage_admins") && (
               <>
-                <div className={`rounded-xl border p-5 mb-6 ${th.surface}`}>
-                  <p className={`text-sm ${th.bodyText} mb-1`}>💬 <strong>{feedback.length} review{feedback.length !== 1 ? 's' : ''}</strong> submitted by customers.</p>
-                  <p className={`text-xs font-mono ${th.muted}`}>These are ratings and messages left on merchant store pages.</p>
+                {/* ── SECTION 1: STORE REVIEWS (customers rating merchant stores) ── */}
+                <div className={`rounded-xl border p-5 mb-4 ${th.surface}`}>
+                  <p className={`text-sm ${th.bodyText} mb-1`}>🛍️ <strong>{feedback.length} store review{feedback.length !== 1 ? 's' : ''}</strong> from customers.</p>
+                  <p className={`text-xs font-mono ${th.muted}`}>Ratings left by shoppers on merchant storefronts.</p>
                 </div>
                 {feedback.length === 0 ? (
-                  <div className={`rounded-xl border p-12 text-center ${th.surface}`}>
-                    <p className={`text-sm font-mono ${th.muted}`}>No feedback submitted yet.</p>
+                  <div className={`rounded-xl border p-8 text-center mb-8 ${th.surface}`}>
+                    <p className={`text-sm font-mono ${th.muted}`}>No store reviews yet.</p>
                   </div>
                 ) : (
-                  <div className={`rounded-xl border overflow-x-auto ${th.surface}`}>
+                  <div className={`rounded-xl border overflow-x-auto mb-8 ${th.surface}`}>
                     <table className="w-full min-w-[900px]">
                       <thead>
                         <tr className={`border-b ${th.thead}`}>
@@ -855,6 +859,50 @@ export default function AdminPage() {
                               {f.anonymous ? <span className="italic opacity-50">Anonymous</span> : (f.customer_name || "—")}
                             </td>
                             <td className={`px-5 py-4 text-sm ${th.bodyText} max-w-xs`}>
+                              {f.message || <span className={`italic text-xs ${th.muted}`}>No message</span>}
+                            </td>
+                            <td className={`px-5 py-4 font-mono text-xs ${th.muted} whitespace-nowrap`}>
+                              {f.created_at ? new Date(f.created_at).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" }) : "—"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* ── SECTION 2: PLATFORM FEEDBACK (merchants rating Earket) ── */}
+                <div className={`rounded-xl border p-5 mb-4 ${th.surface}`}>
+                  <p className={`text-sm ${th.bodyText} mb-1`}>💬 <strong>{platformFeedback.length} platform review{platformFeedback.length !== 1 ? 's' : ''}</strong> from merchants.</p>
+                  <p className={`text-xs font-mono ${th.muted}`}>Feedback submitted by merchants about the Earket platform.</p>
+                </div>
+                {platformFeedback.length === 0 ? (
+                  <div className={`rounded-xl border p-8 text-center ${th.surface}`}>
+                    <p className={`text-sm font-mono ${th.muted}`}>No merchant feedback yet.</p>
+                  </div>
+                ) : (
+                  <div className={`rounded-xl border overflow-x-auto ${th.surface}`}>
+                    <table className="w-full min-w-[700px]">
+                      <thead>
+                        <tr className={`border-b ${th.thead}`}>
+                          {["Merchant","Rating","Message","Date"].map(h => (
+                            <th key={h} className={`text-left px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-mono font-normal ${th.theadText}`}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {platformFeedback.map((f, i) => (
+                          <tr key={f.id} className={`border-b ${th.rowBorder} ${i % 2 === 0 ? th.row0 : th.row1}`}>
+                            <td className={`px-5 py-4 text-sm ${th.bodyText}`}>
+                              <div className="font-medium">{f.business_name || "—"}</div>
+                              <div className={`font-mono text-xs ${th.muted}`}>/{f.merchant_slug}</div>
+                            </td>
+                            <td className="px-5 py-4">
+                              <span className="text-amber-400 font-mono text-sm">
+                                {"★".repeat(f.rating || 0)}{"☆".repeat(5 - (f.rating || 0))}
+                              </span>
+                            </td>
+                            <td className={`px-5 py-4 text-sm ${th.bodyText} max-w-sm`}>
                               {f.message || <span className={`italic text-xs ${th.muted}`}>No message</span>}
                             </td>
                             <td className={`px-5 py-4 font-mono text-xs ${th.muted} whitespace-nowrap`}>
