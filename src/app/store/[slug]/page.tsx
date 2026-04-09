@@ -39,6 +39,8 @@ interface Merchant {
   youtube?: string
   tiktok?: string
   other_link?: string
+  status?: string
+  is_published?: boolean
 }
 
 interface Product {
@@ -377,6 +379,60 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
           <div className="text-5xl mb-4">🔍</div>
           <h1 className="font-display font-bold text-xl text-brand-dark mb-2">Store not found</h1>
           <Link href="/" className="bg-brand-green text-white font-bold px-6 py-3 rounded-xl text-sm inline-block mt-4">Create Your Own Store</Link>
+        </div>
+      </div>
+    )
+  }
+
+  // Store deactivation — show appropriate message based on status
+  if (store.status === "suspended" || store.status === "terminated" || store.status === "deleted" || store.is_published === false) {
+    const isTerminated = store.status === "terminated" || store.status === "deleted"
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 max-w-sm w-full text-center">
+          {/* Earket branding */}
+          <div className="w-12 h-12 bg-brand-light rounded-xl flex items-center justify-center mx-auto mb-4">
+            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="#1A7A4A" strokeWidth="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </div>
+
+          {isTerminated ? (
+            <>
+              <h1 className="font-display font-bold text-lg text-brand-dark mb-2">
+                This store is no longer available
+              </h1>
+              <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+                This store has been removed from Earket. Discover other trusted sellers on our platform.
+              </p>
+              <Link href="/"
+                className="inline-flex items-center justify-center gap-2 w-full bg-brand-green text-white font-semibold text-sm py-3 rounded-xl hover:bg-brand-dark transition-colors mb-3">
+                Browse Earket
+              </Link>
+            </>
+          ) : (
+            <>
+              <h1 className="font-display font-bold text-lg text-brand-dark mb-2">
+                This store is temporarily unavailable
+              </h1>
+              <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+                {store.business_name} is currently unavailable. If you placed a recent order or need assistance, contact Earket support.
+              </p>
+              <a href={`https://wa.me/14793219433?text=${encodeURIComponent(`Hi Earket, I'm trying to access the store "${store.business_name}" (${store.slug}) but it appears unavailable. Can you help?`)}`}
+                target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 w-full bg-[#25D366] text-white font-semibold text-sm py-3 rounded-xl hover:opacity-90 transition-opacity mb-3">
+                <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.534 5.858L.057 23.5l5.797-1.52A11.95 11.95 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 0 1-5.001-1.371l-.36-.214-3.724.977.995-3.63-.234-.374A9.818 9.818 0 1 1 12 21.818z"/></svg>
+                Contact Earket Support
+              </a>
+              <Link href="/"
+                className="inline-flex items-center justify-center gap-2 w-full border border-gray-200 text-gray-500 font-medium text-sm py-3 rounded-xl hover:bg-gray-50 transition-colors">
+                Browse other stores
+              </Link>
+            </>
+          )}
+
+          <p className="text-xs text-gray-300 mt-4">Powered by Earket</p>
         </div>
       </div>
     )
@@ -1253,6 +1309,43 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
           </div>
         )
       })()}
+
+      {/* Need help with your order? */}
+      <div className="max-w-6xl mx-auto px-4 mb-4">
+        <div className="bg-white rounded-2xl border border-gray-100 p-5">
+          <h2 className="font-display font-bold text-brand-dark text-base mb-1">Need help with your order?</h2>
+          <p className="text-xs text-gray-400 mb-4">Resolve issues directly with the seller, or escalate to Earket if needed.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Contact the seller */}
+            <a href={`https://wa.me/${store.whatsapp_number?.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi ${store.business_name}! I have a question about my order from your Earket store.`)}`}
+              target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-3 bg-[#25D366]/5 hover:bg-[#25D366]/10 border border-[#25D366]/20 rounded-xl p-3.5 transition-colors">
+              <div className="w-9 h-9 rounded-xl bg-[#25D366]/10 flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 24 24" className="w-5 h-5 fill-[#25D366]"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.534 5.858L.057 23.5l5.797-1.52A11.95 11.95 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 0 1-5.001-1.371l-.36-.214-3.724.977.995-3.63-.234-.374A9.818 9.818 0 1 1 12 21.818z"/></svg>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Contact {store.business_name}</p>
+                <p className="text-xs text-gray-400">Message the seller directly on WhatsApp</p>
+              </div>
+            </a>
+
+            {/* Escalate to Earket */}
+            <a href={`https://wa.me/14793219433?text=${encodeURIComponent(`Hi Earket, I need help with an order from ${store.business_name} (earket.com/store/${store.slug}). The seller has not resolved my issue.`)}`}
+              target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-3 bg-brand-light/50 hover:bg-brand-light border border-brand-green/20 rounded-xl p-3.5 transition-colors">
+              <div className="w-9 h-9 rounded-xl bg-brand-light flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="#1A7A4A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Escalate to Earket</p>
+                <p className="text-xs text-gray-400">If the seller hasn't resolved your issue</p>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
 
       {/* Find Us */}
       <div className="max-w-6xl mx-auto px-4 mb-4 mt-4">

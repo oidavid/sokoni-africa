@@ -107,6 +107,7 @@ export default function AdminPage() {
 
   const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(null);
   const [modalType, setModalType] = useState<"actions" | "note" | "new_admin" | null>(null);
+  const [editEmail, setEditEmail] = useState("");
   const [noteText, setNoteText] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [actionMessage, setActionMessage] = useState("");
@@ -241,8 +242,13 @@ export default function AdminPage() {
         await supabase.from("merchants").update({ status: "active", is_published: true }).eq("id", merchantId);
         setActionMessage("Account reactivated.");
       } else if (action === "terminate") {
+        const m = merchants.find(x => x.id === merchantId);
         await supabase.from("merchants").update({ status: "terminated", is_published: false }).eq("id", merchantId);
-        setActionMessage("Account terminated.");
+        // Add email to banned list to prevent re-registration
+        if (m?.email) {
+          await supabase.from("banned_emails").upsert({ email: m.email.toLowerCase(), reason: "account_terminated", created_at: new Date().toISOString() }, { onConflict: "email" });
+        }
+        setActionMessage("Account terminated and email banned.");
       } else if (action === "flag") {
         await supabase.from("merchants").update({ status: "flagged" }).eq("id", merchantId);
         setActionMessage("Account flagged for review.");
@@ -262,7 +268,24 @@ export default function AdminPage() {
       } else if (action === "reset_password") {
         const temp = Math.random().toString(36).slice(2, 10).toUpperCase();
         await supabase.from("merchants").update({ temp_password: temp }).eq("id", merchantId);
-        setActionMessage(`Temporary password: ${temp}`);
+        setActionMessage(`Temporary password set: ${temp} — share via WhatsApp only.`);
+      } else if (action === "change_email" && value) {
+        await supabase.from("merchants").update({ email: value.toLowerCase().trim() }).eq("id", merchantId);
+        setActionMessage(`Email updated to ${value.toLowerCase().trim()}`);
+        setEditEmail("");
+      } else if (action === "soft_delete") {
+        const m = merchants.find(x => x.id === merchantId);
+        await supabase.from("merchants").update({
+          status: "deleted",
+          is_published: false,
+          deleted_at: new Date().toISOString(),
+        }).eq("id", merchantId);
+        if (m?.email) {
+          await supabase.from("banned_emails").upsert({ email: m.email.toLowerCase(), reason: "account_deleted", created_at: new Date().toISOString() }, { onConflict: "email" });
+        }
+        setActionMessage("Account deleted. Email added to ban list. Data retained for 30 days.");
+        setSelectedMerchant(null);
+        setModalType(null);
       }
       await loadData();
     } catch { setActionMessage("Something went wrong."); }
@@ -385,24 +408,29 @@ export default function AdminPage() {
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-7 gap-3 mb-8">
               {[
-                { label: "Total Merchants", value: stats?.totalMerchants ?? 0 },
-                { label: "Live Stores", value: stats?.activeStores ?? 0, accent: "emerald" },
-                { label: "New This Month", value: stats?.newThisMonth ?? 0 },
+                { label: "Total Merchants", value: stats?.totalMerchants ?? 0, filter: "all" },
+                { label: "Live Stores", value: stats?.activeStores ?? 0, accent: "emerald", filter: "active" },
+                { label: "New This Month", value: stats?.newThisMonth ?? 0, filter: "all" },
                 ...(canDo(auth, "view_revenue") ? [
-                  { label: "Total Leads", value: stats?.totalLeads ?? 0 },
-                  { label: "Total Orders", value: stats?.totalOrders ?? 0 },
+                  { label: "Total Leads", value: stats?.totalLeads ?? 0, filter: "all" },
+                  { label: "Total Orders", value: stats?.totalOrders ?? 0, filter: "all" },
                 ] : []),
-                { label: "Suspended", value: stats?.suspended ?? 0, accent: "amber" },
-                { label: "Flagged", value: stats?.flagged ?? 0, accent: "orange" },
+                { label: "Suspended", value: stats?.suspended ?? 0, accent: "amber", filter: "suspended" },
+                { label: "Flagged", value: stats?.flagged ?? 0, accent: "orange", filter: "flagged" },
+                { label: "Terminated", value: merchants.filter(m => m.status === "terminated").length, accent: "red", filter: "terminated" },
               ].map(s => (
-                <div key={s.label} className={`rounded-xl border p-4 ${
-                  s.accent === "emerald" ? "border-emerald-500/30 bg-emerald-500/5" :
-                  s.accent === "amber"   ? "border-amber-500/30 bg-amber-500/5" :
-                  s.accent === "orange"  ? "border-orange-500/30 bg-orange-500/5" :
-                  `${th.surface}`
-                }`}>
+                <div key={s.label} onClick={() => { if (s.filter !== "all") { setFilterStatus(s.filter); } }}
+                  className={`rounded-xl border p-4 transition-all ${s.filter !== "all" ? "cursor-pointer hover:scale-105" : ""} ${
+                    filterStatus === s.filter && s.filter !== "all" ? "ring-2 ring-offset-1 ring-current" :
+                    s.accent === "emerald" ? "border-emerald-500/30 bg-emerald-500/5" :
+                    s.accent === "amber"   ? "border-amber-500/30 bg-amber-500/5" :
+                    s.accent === "orange"  ? "border-orange-500/30 bg-orange-500/5" :
+                    s.accent === "red"     ? "border-red-500/30 bg-red-500/5" :
+                    `${th.surface}`
+                  }`}>
                   <p className={`text-3xl font-bold tracking-tight ${th.bodyText}`}>{s.value}</p>
                   <p className={`text-xs ${th.muted} mt-1 font-mono leading-tight`}>{s.label}</p>
+                  {s.filter !== "all" && <p className={`text-xs mt-1 ${th.muted} opacity-60`}>tap to filter</p>}
                 </div>
               ))}
             </div>
@@ -1071,11 +1099,41 @@ export default function AdminPage() {
                   {selectedMerchant.status === "suspended" ? "✓ Unsuspend" : "⏸ Suspend"}
                 </button>
               )}
+
+              {/* Change Email */}
+              {canDo(auth, "reset_password") && (
+                <div className="col-span-2 mt-1">
+                  <p className={`text-xs font-mono uppercase tracking-widest mb-2 ${th.muted}`}>Change Email Address</p>
+                  <div className="flex gap-2">
+                    <input
+                      type="email"
+                      value={editEmail}
+                      onChange={e => setEditEmail(e.target.value)}
+                      placeholder={selectedMerchant.email || "New email address"}
+                      className={`flex-1 text-sm px-3 py-2 rounded-lg border font-mono ${th.modalInput}`}
+                    />
+                    <button
+                      onClick={() => { if (editEmail.includes("@")) handleAction(selectedMerchant.id, "change_email", editEmail); }}
+                      disabled={actionLoading || !editEmail.includes("@")}
+                      className="text-sm bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 px-4 py-2 rounded-lg transition-colors font-mono disabled:opacity-40">
+                      Save
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {canDo(auth, "terminate") && (
                 <button onClick={() => { if (confirm("Terminate this account? This cannot be undone.")) handleAction(selectedMerchant.id, "terminate"); }}
                   disabled={actionLoading || selectedMerchant.status === "terminated"}
-                  className="text-sm bg-red-500/10 hover:bg-red-500/20 text-red-400 px-4 py-3 rounded-lg transition-colors font-mono col-span-2 disabled:opacity-40">
-                  ✕ Terminate Account
+                  className="text-sm bg-red-500/10 hover:bg-red-500/20 text-red-400 px-4 py-3 rounded-lg transition-colors font-mono disabled:opacity-40">
+                  ✕ Terminate
+                </button>
+              )}
+              {canDo(auth, "terminate") && selectedMerchant.status === "terminated" && (
+                <button onClick={() => { if (confirm("Permanently delete this account? Data will be retained for 30 days then purged.")) handleAction(selectedMerchant.id, "soft_delete"); }}
+                  disabled={actionLoading}
+                  className="text-sm bg-red-500/20 hover:bg-red-500/30 text-red-400 px-4 py-3 rounded-lg transition-colors font-mono disabled:opacity-40">
+                  🗑 Delete Account
                 </button>
               )}
               <a href={`https://earket.com/store/${selectedMerchant.slug}`} target="_blank" rel="noopener noreferrer"
