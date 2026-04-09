@@ -108,6 +108,7 @@ export default function AdminPage() {
   const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(null);
   const [modalType, setModalType] = useState<"actions" | "note" | "new_admin" | null>(null);
   const [editEmail, setEditEmail] = useState("");
+  const [editWhatsapp, setEditWhatsapp] = useState("");
   const [noteText, setNoteText] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [actionMessage, setActionMessage] = useState("");
@@ -273,6 +274,11 @@ export default function AdminPage() {
         await supabase.from("merchants").update({ email: value.toLowerCase().trim() }).eq("id", merchantId);
         setActionMessage(`Email updated to ${value.toLowerCase().trim()}`);
         setEditEmail("");
+      } else if (action === "change_whatsapp" && value) {
+        const cleaned = value.replace(/\D/g, '');
+        await supabase.from("merchants").update({ whatsapp_number: cleaned, phone: cleaned }).eq("id", merchantId);
+        setActionMessage(`WhatsApp number updated to +${cleaned}`);
+        setEditWhatsapp("");
       } else if (action === "soft_delete") {
         const m = merchants.find(x => x.id === merchantId);
         await supabase.from("merchants").update({
@@ -1119,6 +1125,29 @@ export default function AdminPage() {
                       Save
                     </button>
                   </div>
+                </div>
+              )}
+
+              {/* Change WhatsApp */}
+              {canDo(auth, "reset_password") && (
+                <div className="col-span-2 mt-1">
+                  <p className={`text-xs font-mono uppercase tracking-widest mb-2 ${th.muted}`}>Change WhatsApp Number</p>
+                  <div className="flex gap-2">
+                    <input
+                      type="tel"
+                      value={editWhatsapp}
+                      onChange={e => setEditWhatsapp(e.target.value)}
+                      placeholder={selectedMerchant.phone || "e.g. 2348012345678"}
+                      className={`flex-1 text-sm px-3 py-2 rounded-lg border font-mono ${th.modalInput}`}
+                    />
+                    <button
+                      onClick={() => { if (editWhatsapp.length >= 7) handleAction(selectedMerchant.id, "change_whatsapp", editWhatsapp); }}
+                      disabled={actionLoading || editWhatsapp.length < 7}
+                      className="text-sm bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 px-4 py-2 rounded-lg transition-colors font-mono disabled:opacity-40">
+                      Save
+                    </button>
+                  </div>
+                  <p className={`text-xs mt-1 ${th.muted}`}>Include country code, no + or spaces. e.g. 2348012345678</p>
                 </div>
               )}
 
