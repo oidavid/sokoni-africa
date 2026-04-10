@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { MapPin, Share2, Phone, Star, Search, X, ChevronRight, ExternalLink, CheckCircle, Loader2, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import StoreJsonLd from '@/components/StoreJsonLd'
 import { supabase } from '@/lib/supabase'
 import { getThemeById, getThemeStyle } from '@/lib/themes'
 
@@ -33,6 +34,8 @@ interface Merchant {
   youtube?: string
   tiktok?: string
   other_link?: string
+  status?: string
+  is_published?: boolean
 }
 
 interface Service {
@@ -476,6 +479,38 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
   if (loading) return <div className="min-h-screen bg-gray-900 flex items-center justify-center"><div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin" /></div>
   if (!store) return <div className="min-h-screen flex items-center justify-center"><p className="text-gray-500">Business not found</p></div>
 
+  if (store.status === 'suspended' || store.status === 'terminated' || store.status === 'deleted' || store.is_published === false) {
+    const isTerminated = store.status === 'terminated' || store.status === 'deleted'
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 max-w-sm w-full text-center">
+          <div className="w-12 h-12 bg-brand-light rounded-xl flex items-center justify-center mx-auto mb-4">
+            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="#1A7A4A" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          {isTerminated ? (
+            <>
+              <h1 className="font-display font-bold text-lg text-brand-dark mb-2">This business is no longer available</h1>
+              <p className="text-sm text-gray-500 mb-6 leading-relaxed">This business has been removed from Earket. Discover other trusted providers on our platform.</p>
+              <Link href="/browse" className="inline-flex items-center justify-center gap-2 w-full bg-brand-green text-white font-semibold text-sm py-3 rounded-xl hover:bg-brand-dark transition-colors mb-3">Browse Earket</Link>
+            </>
+          ) : (
+            <>
+              <h1 className="font-display font-bold text-lg text-brand-dark mb-2">This business is temporarily unavailable</h1>
+              <p className="text-sm text-gray-500 mb-6 leading-relaxed">{store.business_name} is currently unavailable. If you have a booking or enquiry, contact Earket support.</p>
+              <a href={`https://wa.me/14793219433?text=${encodeURIComponent(`Hi Earket, I'm trying to reach "${store.business_name}" (${store.slug}) but the page is unavailable. Can you help?`)}`}
+                target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 w-full bg-[#25D366] text-white font-semibold text-sm py-3 rounded-xl hover:opacity-90 transition-opacity mb-3">
+                💬 Contact Earket Support
+              </a>
+              <Link href="/browse" className="inline-flex items-center justify-center gap-2 w-full border border-gray-200 text-gray-500 font-medium text-sm py-3 rounded-xl hover:bg-gray-50 transition-colors">Browse other businesses</Link>
+            </>
+          )}
+          <p className="text-xs text-gray-300 mt-4">Powered by Earket</p>
+        </div>
+      </div>
+    )
+  }
+
   const theme = store.theme_preset ? getThemeById(store.theme_preset) : null
   const themeStyle = theme ? getThemeStyle(theme) : { backgroundColor: store.theme_color || '#1A7A4A' }
   const color = theme?.primary || store.theme_color || '#1A7A4A'
@@ -893,6 +928,21 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
 
       </div>
 
+      {/* JSON-LD Structured Data */}
+      {store && (
+        <StoreJsonLd
+          businessName={store.business_name}
+          description={store.description}
+          location={store.location}
+          address={store.address}
+          whatsappNumber={store.whatsapp_number}
+          category={store.category}
+          logoUrl={store.logo_url}
+          slug={store.slug}
+          themeColor={store.theme_color}
+        />
+      )}
+
       {/* Feedback Modal */}
       {feedbackOpen && store && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={() => setFeedbackOpen(false)}>
@@ -949,6 +999,43 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
         </div>
       </div>
 
+      {/* Need help with your booking? */}
+      <div className="max-w-4xl mx-auto px-4 mb-4">
+        <div className="bg-white rounded-2xl border border-gray-100 p-5">
+          <h2 className="font-display font-bold text-brand-dark text-base mb-1">Need help with your booking?</h2>
+          <p className="text-xs text-gray-400 mb-4">Start by contacting the provider directly — most issues are resolved quickly on WhatsApp.</p>
+          <div className="space-y-2">
+            <a href={`https://wa.me/${store.whatsapp_number?.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi ${store.business_name}! I have a question about my booking.`)}`}
+              target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-3 bg-[#25D366]/5 hover:bg-[#25D366]/10 border border-[#25D366]/20 rounded-xl p-3.5 transition-colors">
+              <div className="w-9 h-9 rounded-xl bg-[#25D366]/10 flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 24 24" className="w-5 h-5 fill-[#25D366]"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.534 5.858L.057 23.5l5.797-1.52A11.95 11.95 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 0 1-5.001-1.371l-.36-.214-3.724.977.995-3.63-.234-.374A9.818 9.818 0 1 1 12 21.818z"/></svg>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Contact {store.business_name}</p>
+                <p className="text-xs text-gray-400">Message the provider directly on WhatsApp</p>
+              </div>
+            </a>
+            {(() => {
+              const escalateMsg = encodeURIComponent(`Hi Earket, I need help with a booking from ${store.business_name} (earket.com/store/${store.slug}). The provider has not resolved my issue.`)
+              return (
+                <a href={`https://wa.me/14793219433?text=${escalateMsg}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-3 hover:bg-gray-50 rounded-xl p-3 transition-colors">
+                  <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                    <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-gray-400">Still unresolved? <span className="text-brand-green">Escalate to Earket</span></p>
+                    <p className="text-xs text-gray-300">Only if the provider hasn&apos;t responded after 48–72 hrs</p>
+                  </div>
+                </a>
+              )
+            })()}
+          </div>
+        </div>
+      </div>
+
       {/* Footer — adapts to merchant theme */}
       <div className="max-w-4xl mx-auto px-4 py-6 text-center">
         <div className="rounded-2xl p-5" style={{ backgroundColor: color }}>
@@ -980,6 +1067,11 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
                     style={{ backgroundColor: isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.1)', color: isLight ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)' }}>
                     Leave Feedback
                   </button>
+                  <Link href="/browse"
+                    className="inline-block font-medium text-sm px-5 py-2.5 rounded-xl transition-opacity hover:opacity-90"
+                    style={{ backgroundColor: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)', color: isLight ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.5)' }}>
+                    Explore Earket
+                  </Link>
                 </div>
               </>
             )
