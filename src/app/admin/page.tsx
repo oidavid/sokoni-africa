@@ -88,9 +88,10 @@ export default function AdminPage() {
   const [email, setEmail] = useState("");
   const [loginError, setLoginError] = useState("");
 
-  const [tab, setTab] = useState<"merchants" | "admins" | "announcements" | "intelligence" | "pro" | "store-reviews" | "merchant-feedback">("merchants");
+  const [tab, setTab] = useState<"merchants" | "admins" | "announcements" | "intelligence" | "pro" | "store-reviews" | "merchant-feedback" | "contact">("merchants");
   const [feedback, setFeedback] = useState<{id:string;merchant_slug:string;rating:number;message:string;anonymous:boolean;customer_name:string;created_at:string}[]>([]);
   const [platformFeedback, setPlatformFeedback] = useState<{id:string;merchant_slug:string;business_name:string;rating:number;message:string;created_at:string}[]>([]);
+  const [contactMessages, setContactMessages] = useState<{id:string;name:string;email:string|null;message:string;read:boolean;created_at:string}[]>([]);
   const [reviewFilter, setReviewFilter] = useState<"all"|"30"|"90"|"365">("all");
   const [pfFilter, setPfFilter] = useState<"all"|"30"|"90"|"365">("all");
   const [stats, setStats] = useState<Stats | null>(null);
@@ -165,7 +166,7 @@ export default function AdminPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [merchantsRes, leadsRes, ordersRes, adminsRes, announcementsRes, waitlistRes, feedbackRes, platformFeedbackRes] = await Promise.all([
+      const [merchantsRes, leadsRes, ordersRes, adminsRes, announcementsRes, waitlistRes, feedbackRes, platformFeedbackRes, contactRes] = await Promise.all([
         supabase.from("merchants").select("*").order("created_at", { ascending: false }),
         supabase.from("leads").select("id", { count: "exact" }),
         supabase.from("orders").select("id", { count: "exact" }),
@@ -174,6 +175,7 @@ export default function AdminPage() {
         supabase.from("pro_waitlist").select("*").order("created_at", { ascending: false }),
         supabase.from("feedback").select("*").order("created_at", { ascending: false }),
         supabase.from("platform_feedback").select("*").order("created_at", { ascending: false }),
+        supabase.from("contact_messages").select("*").order("created_at", { ascending: false }),
       ]);
       const all: Merchant[] = merchantsRes.data || [];
       const now = new Date();
@@ -185,6 +187,7 @@ export default function AdminPage() {
       setProWaitlist(waitlistRes.data || []);
       setFeedback(feedbackRes.data || []);
       setPlatformFeedback(platformFeedbackRes.data || []);
+      setContactMessages(contactRes.data || []);
       setStats({
         totalMerchants: all.length,
         activeStores: all.filter(m => m.is_published && m.status !== "suspended" && m.status !== "terminated").length,
@@ -452,6 +455,7 @@ export default function AdminPage() {
                   { key: "pro", label: "⭐ Pro Waitlist" },
                   { key: "store-reviews", label: "🛍️ Store Reviews" },
                   { key: "merchant-feedback", label: "💬 Merchant Feedback" },
+                  { key: "contact", label: `📩 Contact${contactMessages.filter(m => !m.read).length > 0 ? ` (${contactMessages.filter(m => !m.read).length})` : ""}` },
                 ] as {key:string;label:string}[]).map(t => (
                   <button key={t.key} onClick={() => setTab(t.key as typeof tab)}
                     className={`px-4 py-2 text-sm rounded-md transition-colors ${tab === t.key ? th.tabActive : th.tabInactive}`}>
@@ -1016,6 +1020,88 @@ export default function AdminPage() {
                 </>
               );
             })()}
+
+            {/* ── CONTACT MESSAGES TAB ── */}
+            {tab === "contact" && canDo(auth, "manage_admins") && (
+              <>
+                <div className={`rounded-xl border p-5 mb-4 ${th.surface}`}>
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    <div>
+                      <p className={`text-sm ${th.bodyText} mb-0.5`}>
+                        📩 <strong>{contactMessages.length} message{contactMessages.length !== 1 ? "s" : ""}</strong> from the contact form
+                        {contactMessages.filter(m => !m.read).length > 0 && (
+                          <span className="ml-2 text-xs bg-red-500/10 text-red-400 px-2 py-0.5 rounded-full font-mono">
+                            {contactMessages.filter(m => !m.read).length} unread
+                          </span>
+                        )}
+                      </p>
+                      <p className={`text-xs font-mono ${th.muted}`}>Messages submitted via earket.com/contact</p>
+                    </div>
+                    {contactMessages.some(m => !m.read) && (
+                      <button onClick={async () => {
+                        await supabase.from("contact_messages").update({ read: true }).eq("read", false);
+                        setContactMessages(prev => prev.map(m => ({ ...m, read: true })));
+                      }} className="text-xs bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg font-mono transition-colors">
+                        ✓ Mark all read
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {contactMessages.length === 0 ? (
+                  <div className={`rounded-xl border p-12 text-center ${th.surface}`}>
+                    <p className={`text-sm font-mono ${th.muted}`}>No contact messages yet.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {contactMessages.map((msg) => (
+                      <div key={msg.id} className={`rounded-xl border p-5 transition-colors ${th.surface} ${!msg.read ? "border-l-4 border-l-blue-400" : ""}`}>
+                        <div className="flex items-start justify-between gap-4 mb-3">
+                          <div>
+                            <p className={`text-sm font-semibold ${th.bodyText}`}>{msg.name}</p>
+                            {msg.email && (
+                              <a href={`mailto:${msg.email}?subject=Re: Your Earket enquiry`}
+                                className="text-xs font-mono text-blue-400 hover:text-blue-300 transition-colors">
+                                {msg.email}
+                              </a>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            {!msg.read && (
+                              <span className="text-xs bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full font-mono">New</span>
+                            )}
+                            <span className={`text-xs font-mono ${th.muted}`}>
+                              {new Date(msg.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+                            </span>
+                            <button onClick={async () => {
+                              await supabase.from("contact_messages").update({ read: true }).eq("id", msg.id);
+                              setContactMessages(prev => prev.map(m => m.id === msg.id ? { ...m, read: true } : m));
+                            }} disabled={msg.read}
+                              className={`text-xs font-mono px-2 py-1 rounded-lg transition-colors ${msg.read ? `${th.muted} opacity-40` : "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"}`}>
+                              {msg.read ? "Read" : "Mark read"}
+                            </button>
+                          </div>
+                        </div>
+                        <p className={`text-sm ${th.bodyText} leading-relaxed whitespace-pre-wrap`}>{msg.message}</p>
+                        {msg.email && (
+                          <div className="flex gap-2 mt-3">
+                            <a href={`mailto:${msg.email}?subject=Re: Your Earket enquiry`}
+                              className="text-xs bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 px-3 py-1.5 rounded-lg font-mono transition-colors">
+                              ✉️ Reply by email
+                            </a>
+                            <a href={`https://wa.me/?text=${encodeURIComponent(`Hi ${msg.name}, thanks for reaching out to Earket!`)}`}
+                              target="_blank" rel="noopener noreferrer"
+                              className="text-xs bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg font-mono transition-colors">
+                              💬 Reply via WhatsApp
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
 
           </>
         )}
