@@ -18,11 +18,17 @@ interface Merchant {
   is_featured?: boolean
 }
 
-const CATEGORIES = [
-  'All', 'Food & Groceries', 'Fashion & Clothing', 'Beauty & Hair',
-  'Electronics', 'Home & Garden', 'Health & Wellness', 'Auto Services',
-  'Cleaning Services', 'Tutoring', 'Events & Catering', 'Delivery & Logistics',
-  'Home Repairs', 'Photography', 'Other'
+const CATEGORIES: { label: string; values: string[] }[] = [
+  { label: 'All', values: [] },
+  { label: 'Food & Groceries', values: ['food', 'groceries', 'food_catering', 'food & groceries', 'food and groceries', 'agriculture'] },
+  { label: 'Fashion & Clothing', values: ['fashion', 'clothing', 'fashion & clothing', 'shoes', 'cosmetics'] },
+  { label: 'Beauty & Hair', values: ['beauty', 'beauty_services', 'hair_salon', 'beauty & hair', 'beauty and hair'] },
+  { label: 'Electronics', values: ['electronics', 'phones', 'gadgets', 'digital_services'] },
+  { label: 'Home & Services', values: ['home_services', 'furniture', 'domestic', 'home', 'home & garden', 'art_crafts'] },
+  { label: 'Health & Wellness', values: ['health', 'health_wellness', 'health & wellness', 'baby_kids'] },
+  { label: 'Auto & Transport', values: ['automobile', 'auto_services', 'auto', 'automotive', 'transport'] },
+  { label: 'Education', values: ['education', 'coaching', 'tutoring', 'stationery'] },
+  { label: 'Other', values: ['other'] },
 ]
 
 export default function BrowsePage() {
@@ -50,9 +56,12 @@ export default function BrowsePage() {
   const filtered = useMemo(() => {
     let result = [...merchants]
     if (category !== 'All') {
-      result = result.filter(m =>
-        m.category?.toLowerCase().includes(category.toLowerCase())
-      )
+      const cat = CATEGORIES.find(c => c.label === category)
+      if (cat && cat.values.length > 0) {
+        result = result.filter(m =>
+          cat.values.some(v => m.category?.toLowerCase() === v.toLowerCase())
+        )
+      }
     }
     if (search.trim()) {
       const q = search.toLowerCase()
@@ -162,13 +171,13 @@ export default function BrowsePage() {
           <div className="max-w-6xl mx-auto px-4 pb-3">
             <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
               {CATEGORIES.map(cat => (
-                <button key={cat} onClick={() => setCategory(cat)}
+                <button key={cat.label} onClick={() => setCategory(cat.label)}
                   className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
-                    category === cat
+                    category === cat.label
                       ? 'bg-brand-green text-white border-brand-green'
                       : 'bg-white border-gray-200 text-gray-500 hover:border-brand-green/50'
                   }`}>
-                  {cat}
+                  {cat.label}
                 </button>
               ))}
             </div>
