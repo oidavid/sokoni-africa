@@ -575,12 +575,12 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
               <div className="text-center py-6">
                 <div className="text-4xl mb-3">🙏</div>
                 <div className="font-display font-bold text-brand-dark text-lg mb-1">Thank you!</div>
-                <p className="text-sm text-gray-500">Your review helps other customers.</p>
+                <p className="text-sm text-gray-500">Thank you — your feedback means a lot to this store.</p>
               </div>
             ) : (
               <>
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="font-display font-bold text-brand-dark text-base">Rate this store</h3>
+                  <h3 className="font-display font-bold text-brand-dark text-base">Leave Feedback</h3>
                   <button onClick={() => setFeedbackOpen(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"><X size={14} /></button>
                 </div>
                 <div className="flex justify-center gap-3 mb-5">
@@ -1475,6 +1475,11 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                     style={{ backgroundColor: isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.1)', color: isLight ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)' }}>
                     Leave Feedback
                   </button>
+                  <Link href="/browse"
+                    className="inline-block font-medium text-sm px-5 py-2.5 rounded-xl transition-opacity hover:opacity-90"
+                    style={{ backgroundColor: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)', color: isLight ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.5)' }}>
+                    Browse Stores
+                  </Link>
                 </div>
               </>
             )
