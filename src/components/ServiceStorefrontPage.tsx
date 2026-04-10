@@ -343,6 +343,9 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
       </div>
     )
   }
+
+  const theme = store.theme_preset ? getThemeById(store.theme_preset) : null
+  const themeStyle = theme ? getThemeStyle(theme) : { backgroundColor: store.theme_color || '#1A7A4A' }
   const color = theme?.primary || store.theme_color || '#1A7A4A'
   const contrast = theme?.textOnPrimary || getContrastColor(color)
   const waNumber = store.whatsapp_number?.replace(/\D/g, '')
