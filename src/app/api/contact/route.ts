@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     await resend.emails.send({
       from: 'Earket Contact <contact@earket.com>',
       to: ['contact@earket.com', 'intelsys2@gmail.com'],
-      reply_to: email,
+      replyTo: email,
       subject: `New Contact Message: ${subject || 'No subject'} — from ${name}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
