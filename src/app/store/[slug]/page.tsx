@@ -1478,7 +1478,7 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                   <Link href="/browse"
                     className="inline-block font-medium text-sm px-5 py-2.5 rounded-xl transition-opacity hover:opacity-90"
                     style={{ backgroundColor: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)', color: isLight ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.5)' }}>
-                    Browse Stores
+                    Explore Earket
                   </Link>
                 </div>
               </>
