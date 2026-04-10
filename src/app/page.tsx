@@ -375,6 +375,7 @@ export default function HomePage() {
           {/* Desktop links */}
           <div className="hidden md:flex items-center gap-6">
             <a href="#how-it-works" className="text-sm font-medium text-gray-500 hover:text-brand-green transition-colors">How It Works</a>
+            <Link href="/browse" className="text-sm font-medium text-gray-500 hover:text-brand-green transition-colors">Browse Stores</Link>
             <a href="#features" className="text-sm font-medium text-gray-500 hover:text-brand-green transition-colors">Features</a>
             <a href="#pricing" className="text-sm font-medium text-gray-500 hover:text-brand-green transition-colors">Pricing</a>
           </div>
@@ -711,6 +712,7 @@ export default function HomePage() {
               <div className="text-xs font-bold text-white/25 uppercase tracking-widest mb-4">Product</div>
               <ul className="space-y-3">
                 <li><Link href="/onboarding" className="text-sm text-white/50 hover:text-white transition-colors">Start Free</Link></li>
+                <li><Link href="/browse" className="text-sm text-white/50 hover:text-white transition-colors">Browse Stores</Link></li>
                 <li><Link href="/login" className="text-sm text-white/50 hover:text-white transition-colors">Login</Link></li>
                 <li><Link href="/dashboard" className="text-sm text-white/50 hover:text-white transition-colors">Dashboard</Link></li>
                 <li><a href="#features" className="text-sm text-white/50 hover:text-white transition-colors">Features</a></li>
@@ -722,13 +724,14 @@ export default function HomePage() {
             <div>
               <div className="text-xs font-bold text-white/25 uppercase tracking-widest mb-4">Company</div>
               <ul className="space-y-3">
+                <li><Link href="/about" className="text-sm text-white/50 hover:text-white transition-colors">About Earket</Link></li>
                 <li>
                   <a href="https://intelsystechnology.com" target="_blank" rel="noopener noreferrer"
                      className="text-sm text-white/50 hover:text-white transition-colors">
                     IntelSys Technologies
                   </a>
                 </li>
-                <li><Link href="/contact" className="text-sm text-white/50 hover:text-white transition-colors">Contact</Link></li>
+                <li><Link href="/contact" className="text-sm text-white/50 hover:text-white transition-colors">Contact Us</Link></li>
                 <li><Link href="/privacy" className="text-sm text-white/50 hover:text-white transition-colors">Privacy Policy</Link></li>
                 <li><Link href="/terms" className="text-sm text-white/50 hover:text-white transition-colors">Terms of Service</Link></li>
               </ul>
