@@ -40,8 +40,8 @@ export async function POST(request: NextRequest) {
 
     // Send notification emails
     await resend.emails.send({
-      from: 'Earket Contact <contact@earket.com>',
-      to: ['contact@earket.com', 'intelsys2@gmail.com'],
+      from: 'Earket Contact <earket@earket.com>',
+      to: ['earket@earket.com', 'intelsys2@gmail.com'],
       replyTo: email,
       subject: `New Contact Message: ${subject || 'No subject'} — from ${name}`,
       html: `
