@@ -1329,17 +1329,22 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
               </div>
             </a>
             {/* Secondary — escalate, visually de-emphasised */}
-            <a href={`https://wa.me/14793219433?text=${encodeURIComponent(`Hi Earket, I need help with an order from ${store.business_name} (earket.com/store/${store.slug}). The seller has not resolved my issue.`)}`}
-              target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-3 hover:bg-gray-50 rounded-xl p-3 transition-colors">
-              <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-gray-400">Still unresolved? <span className="text-brand-green">Escalate to Earket</span></p>
-                <p className="text-xs text-gray-300">Only if the seller hasn't responded after 48–72 hrs</p>
-              </div>
-            </a>
+            {(() => {
+              const escalateMsg = encodeURIComponent(`Hi Earket, I need help with an order from ${store.business_name} (earket.com/store/${store.slug}). The seller has not resolved my issue.`)
+              return (
+                <a href={`https://wa.me/14793219433?text=${escalateMsg}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-3 hover:bg-gray-50 rounded-xl p-3 transition-colors">
+                  <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                    <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-gray-400">Still unresolved? <span className="text-brand-green">Escalate to Earket</span></p>
+                    <p className="text-xs text-gray-300">Only if the seller hasn&apos;t responded after 48–72 hrs</p>
+                  </div>
+                </a>
+              )
+            })()}
           </div>
         </div>
       </div>
