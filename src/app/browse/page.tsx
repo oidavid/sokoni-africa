@@ -37,6 +37,8 @@ export default function BrowsePage() {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('All')
   const [showFilters, setShowFilters] = useState(true)
+  const [page, setPage] = useState(1)
+  const PER_PAGE = 30
 
   useEffect(() => {
     async function load() {
@@ -54,6 +56,7 @@ export default function BrowsePage() {
   }, [])
 
   const filtered = useMemo(() => {
+    setPage(1)
     let result = [...merchants]
     if (category !== 'All') {
       const cat = CATEGORIES.find(c => c.label === category)
@@ -77,6 +80,8 @@ export default function BrowsePage() {
 
   const featured = filtered.filter(m => m.is_featured)
   const regular = filtered.filter(m => !m.is_featured)
+  const totalPages = Math.max(1, Math.ceil(regular.length / PER_PAGE))
+  const paginatedRegular = regular.slice((page - 1) * PER_PAGE, page * PER_PAGE)
 
   function MerchantCard({ m }: { m: Merchant }) {
     const color = m.theme_color || '#1A7A4A'
@@ -267,8 +272,48 @@ export default function BrowsePage() {
                   <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">All Stores</p>
                 )}
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                  {regular.map(m => <MerchantCard key={m.id} m={m} />)}
+                  {paginatedRegular.map(m => <MerchantCard key={m.id} m={m} />)}
                 </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
+                    <button onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                      disabled={page === 1}
+                      className="flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-brand-green disabled:opacity-30 disabled:cursor-not-allowed transition-colors px-4 py-2 rounded-xl border border-gray-200 hover:border-brand-green/50 bg-white">
+                      ← Previous
+                    </button>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1)
+                        .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+                        .reduce<(number | string)[]>((acc, p, i, arr) => {
+                          if (i > 0 && (p as number) - (arr[i - 1] as number) > 1) acc.push('ellipsis-' + p)
+                          acc.push(p)
+                          return acc
+                        }, [])
+                        .map(p =>
+                          typeof p === 'string' ? (
+                            <span key={p} className="text-xs text-gray-400 px-1">…</span>
+                          ) : (
+                            <button key={p} onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                              className={`w-9 h-9 rounded-xl text-sm font-medium transition-colors ${page === p ? 'bg-brand-green text-white' : 'text-gray-500 hover:bg-gray-100 bg-white border border-gray-200'}`}>
+                              {p}
+                            </button>
+                          )
+                        )}
+                    </div>
+                    <button onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                      disabled={page === totalPages}
+                      className="flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-brand-green disabled:opacity-30 disabled:cursor-not-allowed transition-colors px-4 py-2 rounded-xl border border-gray-200 hover:border-brand-green/50 bg-white">
+                      Next →
+                    </button>
+                  </div>
+                )}
+
+                <p className="text-xs text-gray-400 text-center mt-3">
+                  Showing {Math.min((page - 1) * PER_PAGE + 1, regular.length)}–{Math.min(page * PER_PAGE, regular.length)} of {regular.length} stores
+                  {(search || category !== 'All') ? ` (filtered from ${merchants.length} total)` : ''}
+                </p>
               </div>
             )}
           </>
