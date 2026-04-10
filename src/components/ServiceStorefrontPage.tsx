@@ -785,8 +785,8 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
       <div className="max-w-3xl mx-auto px-4 mb-4">
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
           <h2 className="font-display font-bold text-brand-dark text-base mb-1">Need help with your booking?</h2>
-          <p className="text-xs text-gray-400 mb-4">Resolve issues directly with the provider, or escalate to Earket if needed.</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <p className="text-xs text-gray-400 mb-4">Start by contacting the provider directly — most issues are resolved quickly on WhatsApp.</p>
+          <div className="space-y-2">
             <a href={`https://wa.me/${store.whatsapp_number?.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi ${store.business_name}! I have a question about my booking.`)}`}
               target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-3 bg-[#25D366]/5 hover:bg-[#25D366]/10 border border-[#25D366]/20 rounded-xl p-3.5 transition-colors">
@@ -795,20 +795,25 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
               </div>
               <div>
                 <p className="text-sm font-semibold text-gray-800">Contact {store.business_name}</p>
-                <p className="text-xs text-gray-400">Message the provider directly</p>
+                <p className="text-xs text-gray-400">Message the provider directly on WhatsApp</p>
               </div>
             </a>
-            <a href={`https://wa.me/14793219433?text=${encodeURIComponent(`Hi Earket, I need help with a booking from ${store.business_name} (earket.com/store/${store.slug}). The provider has not resolved my issue.`)}`}
-              target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-3 bg-brand-light/50 hover:bg-brand-light border border-brand-green/20 rounded-xl p-3.5 transition-colors">
-              <div className="w-9 h-9 rounded-xl bg-brand-light flex items-center justify-center shrink-0">
-                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="#1A7A4A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-gray-800">Escalate to Earket</p>
-                <p className="text-xs text-gray-400">If the provider hasn't resolved your issue</p>
-              </div>
-            </a>
+            {(() => {
+              const escalateMsg = encodeURIComponent(`Hi Earket, I need help with a booking from ${store.business_name} (earket.com/store/${store.slug}). The provider has not resolved my issue.`)
+              return (
+                <a href={`https://wa.me/14793219433?text=${escalateMsg}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-3 hover:bg-gray-50 rounded-xl p-3 transition-colors">
+                  <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                    <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-gray-400">Still unresolved? <span className="text-brand-green">Escalate to Earket</span></p>
+                    <p className="text-xs text-gray-300">Only if the provider hasn&apos;t responded after 48–72 hrs</p>
+                  </div>
+                </a>
+              )
+            })()}
           </div>
         </div>
       </div>
