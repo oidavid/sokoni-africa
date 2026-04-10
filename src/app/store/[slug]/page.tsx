@@ -1314,9 +1314,9 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
       <div className="max-w-6xl mx-auto px-4 mb-4">
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
           <h2 className="font-display font-bold text-brand-dark text-base mb-1">Need help with your order?</h2>
-          <p className="text-xs text-gray-400 mb-4">Resolve issues directly with the seller, or escalate to Earket if needed.</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Contact the seller */}
+          <p className="text-xs text-gray-400 mb-4">Start by contacting the seller directly — most issues are resolved quickly on WhatsApp.</p>
+          <div className="space-y-2">
+            {/* Primary — contact seller */}
             <a href={`https://wa.me/${store.whatsapp_number?.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi ${store.business_name}! I have a question about my order from your Earket store.`)}`}
               target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-3 bg-[#25D366]/5 hover:bg-[#25D366]/10 border border-[#25D366]/20 rounded-xl p-3.5 transition-colors">
@@ -1328,19 +1328,16 @@ export default function StorefrontPage({ params }: { params: { slug: string } })
                 <p className="text-xs text-gray-400">Message the seller directly on WhatsApp</p>
               </div>
             </a>
-
-            {/* Escalate to Earket */}
+            {/* Secondary — escalate, visually de-emphasised */}
             <a href={`https://wa.me/14793219433?text=${encodeURIComponent(`Hi Earket, I need help with an order from ${store.business_name} (earket.com/store/${store.slug}). The seller has not resolved my issue.`)}`}
               target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-3 bg-brand-light/50 hover:bg-brand-light border border-brand-green/20 rounded-xl p-3.5 transition-colors">
-              <div className="w-9 h-9 rounded-xl bg-brand-light flex items-center justify-center shrink-0">
-                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="#1A7A4A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
+              className="flex items-center gap-3 hover:bg-gray-50 rounded-xl p-3 transition-colors">
+              <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-800">Escalate to Earket</p>
-                <p className="text-xs text-gray-400">If the seller hasn't resolved your issue</p>
+                <p className="text-xs font-medium text-gray-400">Still unresolved? <span className="text-brand-green">Escalate to Earket</span></p>
+                <p className="text-xs text-gray-300">Only if the seller hasn't responded after 48–72 hrs</p>
               </div>
             </a>
           </div>
