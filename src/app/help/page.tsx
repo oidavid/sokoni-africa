@@ -79,13 +79,13 @@ export default function HelpPublicPage() {
               </div>
             </a>
             <a
-              href="mailto:contact@earket.com"
+              href="mailto:earket@earket.com"
               className="flex items-center gap-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-2xl p-4 transition-colors"
             >
               <Mail size={20} className="text-gray-500 shrink-0" />
               <div>
                 <p className="text-sm font-semibold text-gray-700">Email support</p>
-                <p className="text-xs text-gray-400">contact@earket.com</p>
+                <p className="text-xs text-gray-400">earket@earket.com</p>
               </div>
             </a>
           </div>

@@ -8,9 +8,19 @@ interface Props {
   onClose: () => void
 }
 
+const SUBJECT_OPTIONS = [
+  'Order Issue',
+  'Payment Problem',
+  'Merchant Not Responding',
+  'Wrong Item / Description',
+  'General Question',
+  'Other',
+]
+
 export default function ContactSupportModal({ merchantName, merchantEmail, onClose }: Props) {
   const [name, setName] = useState(merchantName || '')
   const [email, setEmail] = useState(merchantEmail || '')
+  const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
@@ -24,7 +34,7 @@ export default function ContactSupportModal({ merchantName, merchantEmail, onClo
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, message, businessName: merchantName }),
+        body: JSON.stringify({ name, email, subject: subject || 'General Question', message, businessName: merchantName }),
       })
       if (!res.ok) throw new Error('Failed')
       setSent(true)
@@ -81,6 +91,16 @@ export default function ContactSupportModal({ merchantName, merchantEmail, onClo
                 <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                   placeholder="your@email.com"
                   className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green transition-colors" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">Subject</label>
+                <select value={subject} onChange={e => setSubject(e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green transition-colors bg-white text-gray-700">
+                  <option value="">Select a topic...</option>
+                  {SUBJECT_OPTIONS.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">Message <span className="text-red-400">*</span></label>
