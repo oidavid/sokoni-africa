@@ -9,10 +9,11 @@ interface Props {
 }
 
 const SUBJECT_OPTIONS = [
-  'Order Issue',
-  'Payment Problem',
-  'Merchant Not Responding',
-  'Wrong Item / Description',
+  'Account Issue',
+  'Payout / Payment Question',
+  'Store Setup Help',
+  'Technical Problem',
+  'Partnership / Business Query',
   'General Question',
   'Other',
 ]
