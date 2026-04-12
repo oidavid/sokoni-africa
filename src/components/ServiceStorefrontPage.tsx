@@ -788,7 +788,6 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
         contrast={contrast}
         isLight={contrast === '#111827'}
         contextType="booking"
-        onFeedback={() => setFeedbackOpen(true)}
       />
     </div>
   )
