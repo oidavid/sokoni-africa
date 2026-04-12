@@ -784,7 +784,7 @@ export default function ServiceStorefrontPage({ params }: { params: { slug: stri
 
       <StorefrontFooter
         store={store}
-        themeColor={themeColor}
+        themeColor={color}
         contrast={contrast}
         isLight={contrast === '#111827'}
         contextType="booking"
