@@ -920,7 +920,7 @@ export default function ConsultationStorefrontPage({ params }: { params: { slug:
 
       <StorefrontFooter
         store={store}
-        themeColor={themeColor}
+        themeColor={color}
         contrast={contrast}
         isLight={contrast === '#111827'}
         contextType="booking"
