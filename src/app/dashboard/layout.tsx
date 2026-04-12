@@ -176,7 +176,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <button onClick={() => setShowPlatformFeedback(true)}
           className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-gray-500 hover:bg-amber-50 hover:text-amber-600 transition-colors">
           <MessageSquare size={17} />
-          <span>Share feedback on Earket</span>
+          <span>Share Feedback</span>
         </button>
         <button onClick={async () => {
           await supabase.auth.signOut()
@@ -187,11 +187,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <LogOut size={17} />
           <span>Sign out</span>
         </button>
-        <div className="pt-2 mx-1">
-          <p className="text-center text-xs text-gray-300 leading-tight">
-            <span className="font-semibold text-brand-green">Earket</span> · Free Forever
-          </p>
-        </div>
+        <p className="text-center text-[10px] text-gray-300 pt-1 pb-1">Earket · Free Forever</p>
       </div>
     </div>
   )
