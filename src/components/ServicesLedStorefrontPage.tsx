@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import StorefrontFooter from '@/components/StorefrontFooter'
 import { MapPin, Share2, Phone, Star, Search, X, ChevronRight, ExternalLink, CheckCircle, Loader2, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import StoreJsonLd from '@/components/StoreJsonLd'
