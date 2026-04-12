@@ -11,6 +11,7 @@ import ServiceStorefrontPage from '@/components/ServiceStorefrontPage'
 import StoreJsonLd from '@/components/StoreJsonLd'
 import ConsultationStorefrontPage from '@/components/ConsultationStorefrontPage'
 import ServicesLedStorefrontPage from '@/components/ServicesLedStorefrontPage'
+import StorefrontFooter from '@/components/StorefrontFooter'
 
 interface Merchant {
   id: string
