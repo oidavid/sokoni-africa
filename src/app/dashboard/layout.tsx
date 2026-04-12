@@ -117,7 +117,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           const active = isActive(item.href)
           return (
             <Link key={item.label} href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${
+              className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all group ${
                 active
                   ? 'bg-brand-green text-white shadow-sm'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
@@ -137,9 +137,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Social links status */}
       {merchant && (
-        <div className="mx-3 mb-3">
+        <div className="mx-3 mb-2">
           <Link href="/dashboard/settings"
-            className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl border transition-all ${
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-xl border transition-all ${
               socialCount > 0
                 ? 'bg-brand-light border-brand-green/20 hover:bg-brand-green/10'
                 : 'bg-amber-50 border-amber-200 hover:bg-amber-100'
@@ -159,22 +159,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       )}
 
       {/* View Store + Logout */}
-      <div className="px-3 pb-4 space-y-1 border-t border-gray-100 pt-3">
+      <div className="px-3 pb-3 space-y-0.5 border-t border-gray-100 pt-2">
         {merchant?.slug && (
           <Link href={`/store/${merchant.slug}`} target="_blank"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-brand-green hover:bg-brand-light transition-colors">
+            className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-brand-green hover:bg-brand-light transition-colors">
             <ExternalLink size={17} className="text-brand-green" />
             <span className="flex-1">View Store</span>
             <ExternalLink size={12} className="text-brand-green/50" />
           </Link>
         )}
         <button onClick={() => setShowContact(true)}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-brand-light hover:text-brand-green transition-colors">
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-gray-500 hover:bg-brand-light hover:text-brand-green transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
           <span>Contact Support</span>
         </button>
         <button onClick={() => setShowPlatformFeedback(true)}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-amber-50 hover:text-amber-600 transition-colors">
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-gray-500 hover:bg-amber-50 hover:text-amber-600 transition-colors">
           <MessageSquare size={17} />
           <span>Share feedback on Earket</span>
         </button>
@@ -183,7 +183,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           localStorage.removeItem('earket_merchant_email')
           router.push('/')
         }}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors">
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors">
           <LogOut size={17} />
           <span>Sign out</span>
         </button>
