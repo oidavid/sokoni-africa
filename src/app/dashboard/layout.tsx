@@ -187,18 +187,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <LogOut size={17} />
           <span>Sign out</span>
         </button>
-        <div className="pt-3 mx-1">
-          <div className="bg-gray-50 rounded-xl px-3 py-2.5 text-center border border-gray-100">
-            <div className="flex items-center justify-center gap-1.5 mb-0.5">
-              <span className="font-display font-bold text-brand-green text-sm">Earket</span>
-              <span className="text-gray-300 text-xs">·</span>
-              <span className="text-xs text-gray-400 font-medium">Free Forever</span>
-            </div>
-            <a href="https://intelsystechnology.com" target="_blank" rel="noreferrer"
-              className="text-xs text-gray-400 hover:text-brand-green transition-colors font-medium">
-              A product of IntelSys Technologies
-            </a>
-          </div>
+        <div className="pt-2 mx-1">
+          <p className="text-center text-xs text-gray-300 leading-tight">
+            <span className="font-semibold text-brand-green">Earket</span> · Free Forever
+          </p>
         </div>
       </div>
     </div>
@@ -224,7 +216,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <X size={14} />
               </button>
             </div>
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 overflow-y-auto">
               <SidebarContent />
             </div>
           </aside>
