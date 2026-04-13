@@ -557,8 +557,8 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setSelectedService(null)} />
           <div className="relative w-full max-w-lg bg-white rounded-3xl overflow-hidden shadow-2xl">
             {selectedService.image_url && (
-              <div className="relative h-52">
-                <img src={selectedService.image_url} alt={selectedService.name} className="w-full h-full object-cover" />
+              <div className="relative h-72 bg-white">
+                <img src={selectedService.image_url} alt={selectedService.name} className="w-full h-full object-contain" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                 <h2 className="absolute bottom-4 left-4 right-12 font-display font-bold text-2xl text-white">{selectedService.name}</h2>
                 <button onClick={() => setSelectedService(null)} className="absolute top-4 right-4 w-9 h-9 bg-black/40 rounded-full flex items-center justify-center text-white"><X size={18} /></button>
@@ -720,11 +720,11 @@ export default function ServicesLedStorefrontPage({ params }: { params: { slug: 
                 className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200 transition-all overflow-hidden cursor-pointer"
                 onClick={() => setSelectedService(service)}>
                 {service.image_url && (
-                  <div className="h-44 overflow-hidden bg-gray-100 relative">
+                  <div className="h-56 overflow-hidden bg-white relative border-b border-gray-100">
                     <img src={service.image_url} alt={service.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    <h3 className="absolute bottom-3 left-4 right-4 font-display font-bold text-white text-base leading-tight">{service.name}</h3>
+                      className="w-full h-full object-contain" loading="lazy" />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent h-16" />
+                    <h3 className="absolute bottom-3 left-4 right-4 font-display font-bold text-white text-base leading-tight drop-shadow">{service.name}</h3>
                   </div>
                 )}
                 <div className="p-4">
